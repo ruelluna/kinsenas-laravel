@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\BillingInterval;
+use App\Enums\SubscriptionFeature;
 use App\Models\PaymentMethodConfig;
 use App\Models\SubscriptionPlan;
 use App\Models\SubscriptionPlanPrice;
@@ -17,7 +18,10 @@ class BillingSeeder extends Seeder
             [
                 'name' => 'Basic',
                 'trial_days' => 14,
-                'features' => ['savings_plan', 'transfers', 'reports'],
+                'features' => array_map(
+                    fn (SubscriptionFeature $feature) => $feature->value,
+                    SubscriptionFeature::cases(),
+                ),
                 'is_active' => true,
                 'sort_order' => 1,
             ],

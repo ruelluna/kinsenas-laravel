@@ -116,6 +116,64 @@ class FundBalanceService
         $this->assertCanDrawFromCategory($plan, $categoryId, $amount, 'spending');
     }
 
+    public function assertCanUpdateSpend(
+        SavingsPlan $plan,
+        FundSpend $spend,
+        string $newCategoryId,
+        string $newAmount,
+    ): void {
+        if (! $plan->allow_editing_spends) {
+            throw ValidationException::withMessages([
+                'amount' => __('Spending edits are disabled for this plan.'),
+            ]);
+        }
+
+        if ($spend->status !== TransferStatus::Confirmed) {
+            return;
+        }
+
+        $oldAmount = $spend->amount_encrypted;
+
+        if ($oldAmount === null) {
+            return;
+        }
+
+        if ($spend->category_id === $newCategoryId) {
+            $remaining = $this->remainingForCategory($plan, $newCategoryId);
+
+            if ($remaining === null) {
+                return;
+            }
+
+            $available = bcadd($remaining, $oldAmount, 2);
+
+            if (bccomp($newAmount, $available, 2) === 1) {
+                $category = $plan->categories()->find($newCategoryId);
+                $categoryName = $category?->name ?? __('this fund');
+
+                throw ValidationException::withMessages([
+                    'amount' => __('Only :amount remaining in :fund.', [
+                        'amount' => $available,
+                        'fund' => $categoryName,
+                    ]),
+                ]);
+            }
+
+            return;
+        }
+
+        $this->assertCanSpend($plan, $newCategoryId, $newAmount);
+    }
+
+    public function assertCanDeleteSpend(SavingsPlan $plan): void
+    {
+        if (! $plan->allow_editing_spends) {
+            throw ValidationException::withMessages([
+                'amount' => __('Spending edits are disabled for this plan.'),
+            ]);
+        }
+    }
+
     public function assertCanTransfer(SavingsPlan $plan, string $categoryId, string $amount): void
     {
         $this->assertCanDrawFromCategory($plan, $categoryId, $amount, 'transfer');

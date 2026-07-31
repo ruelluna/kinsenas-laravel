@@ -20,12 +20,14 @@ class SavingsPlan extends Model
         'name',
         'currency',
         'is_shared_with_team',
+        'allow_editing_spends',
     ];
 
     protected function casts(): array
     {
         return [
             'is_shared_with_team' => 'boolean',
+            'allow_editing_spends' => 'boolean',
         ];
     }
 

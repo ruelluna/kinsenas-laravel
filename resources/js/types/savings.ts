@@ -19,6 +19,7 @@ export type SavingsPlan = {
     name: string;
     currency: string;
     isSharedWithTeam: boolean;
+    allowEditingSpends: boolean;
     categories: SavingsCategory[];
     hasLockedIncome: boolean;
     hasIncome: boolean;
@@ -89,6 +90,7 @@ export type FundSpend = {
     recipientName: string | null;
     categoryName: string | null;
     categoryId: string;
+    recipientId: string | null;
     receiptImageUrl: string | null;
 };
 

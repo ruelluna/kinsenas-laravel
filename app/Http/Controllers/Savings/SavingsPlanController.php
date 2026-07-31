@@ -50,6 +50,7 @@ class SavingsPlanController extends Controller
                 'name' => $plan->name,
                 'currency' => $plan->currency,
                 'isSharedWithTeam' => $plan->is_shared_with_team,
+                'allowEditingSpends' => $plan->allow_editing_spends,
                 'categories' => $plan->categories->map(fn ($c) => [
                     'id' => $c->id,
                     'name' => $c->name,
@@ -113,6 +114,10 @@ class SavingsPlanController extends Controller
 
         if ($request->has('is_shared_with_team')) {
             $this->planService->updateShareSetting($plan, $request->boolean('is_shared_with_team'));
+        }
+
+        if ($request->has('allow_editing_spends')) {
+            $this->planService->updateSpendingEditSetting($plan, $request->boolean('allow_editing_spends'));
         }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Savings plan updated.')]);

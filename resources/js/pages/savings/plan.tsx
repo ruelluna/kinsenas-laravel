@@ -393,7 +393,7 @@ function SavingsPlanEditor({
                             <InputError message={errors.categories} />
                         )}
 
-                        <div className="space-y-4">
+                        <div className="grid gap-4 lg:grid-cols-3">
                     {rows.map((row, index) => {
                         const rowLocked = isPercentageRowLocked(row, plan.percentagesLocked);
                         const canRemove =
@@ -687,6 +687,16 @@ function SavingsPlanEditor({
                                 defaultChecked={plan.isSharedWithTeam}
                             />
                             Share plan with team members
+                        </label>
+
+                        <label className="flex items-center gap-2 text-sm">
+                            <input
+                                type="checkbox"
+                                name="allow_editing_spends"
+                                value="1"
+                                defaultChecked={plan.allowEditingSpends}
+                            />
+                            Allow editing and deleting recorded spending
                         </label>
 
                         <Button type="submit" disabled={processing}>

@@ -118,16 +118,10 @@ export default function IncomeShow({
                     <Badge variant={period.isLocked ? 'default' : 'secondary'}>
                         {period.isLocked ? 'Locked' : 'Preview'}
                     </Badge>
-                    {!period.isLocked ? (
+                    {!period.isLocked && (
                         <Form action={`/${teamSlug}/savings/income/${period.id}/lock`} method="post">
                             <Button type="submit" size="sm">
                                 Lock
-                            </Button>
-                        </Form>
-                    ) : (
-                        <Form action={`/${teamSlug}/savings/income/${period.id}/unlock`} method="post">
-                            <Button type="submit" size="sm" variant="outline">
-                                Unlock
                             </Button>
                         </Form>
                     )}
@@ -275,7 +269,7 @@ IncomeShow.layout = (props: Props & SharedData) => ({
     breadcrumbs: [
         { title: 'Income', href: `/${props.currentTeam?.slug}/savings/income` },
         {
-            title: period.name,
+            title: props.period.name,
             href: `/${props.currentTeam?.slug}/savings/income/${props.period.id}`,
         },
     ],

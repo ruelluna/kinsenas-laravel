@@ -289,3 +289,154 @@ it('includes fund health on reports page', function () {
         ->where('totals.fund_health.0.remaining', '32500.00'),
     );
 });
+
+it('updates spending when allow_editing_spends is enabled', function () {
+    [$user, $plan, $everydayCategory] = createUserWithLockedIncome();
+
+    $plan->update(['allow_editing_spends' => true]);
+
+    $this->actingAs($user)->post(route('savings.spending.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'category_id' => $everydayCategory->id,
+        'amount' => '500.00',
+        'description' => 'Groceries',
+        'spent_on' => '2026-01-15',
+    ]);
+
+    $spend = FundSpend::query()->firstOrFail();
+
+    $response = $this->actingAs($user)->put(route('savings.spending.update', [
+        'current_team' => $user->currentTeam->slug,
+        'fundSpend' => $spend->id,
+    ]), [
+        'category_id' => $everydayCategory->id,
+        'amount' => '750.00',
+        'description' => 'Groceries and supplies',
+        'spent_on' => '2026-01-16',
+    ]);
+
+    $response->assertRedirect();
+
+    $indexResponse = $this->actingAs($user)->get(route('savings.spending.index', [
+        'current_team' => $user->currentTeam->slug,
+    ]));
+
+    $indexResponse->assertInertia(fn (Assert $page) => $page
+        ->where('fundBalances.0.spent', '750.00')
+        ->where('fundBalances.0.remaining', '34250.00')
+        ->where('spends.0.description', 'Groceries and supplies'),
+    );
+});
+
+it('rejects spending update when allow_editing_spends is disabled', function () {
+    [$user, , $everydayCategory] = createUserWithLockedIncome();
+
+    $this->actingAs($user)->post(route('savings.spending.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'category_id' => $everydayCategory->id,
+        'amount' => '500.00',
+        'description' => 'Groceries',
+        'spent_on' => '2026-01-15',
+    ]);
+
+    $spend = FundSpend::query()->firstOrFail();
+
+    $response = $this->actingAs($user)->put(route('savings.spending.update', [
+        'current_team' => $user->currentTeam->slug,
+        'fundSpend' => $spend->id,
+    ]), [
+        'category_id' => $everydayCategory->id,
+        'amount' => '750.00',
+        'description' => 'Updated',
+        'spent_on' => '2026-01-16',
+    ]);
+
+    $response->assertSessionHasErrors('amount');
+});
+
+it('deletes spending when allow_editing_spends is enabled', function () {
+    [$user, $plan, $everydayCategory] = createUserWithLockedIncome();
+
+    $plan->update(['allow_editing_spends' => true]);
+
+    $this->actingAs($user)->post(route('savings.spending.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'category_id' => $everydayCategory->id,
+        'amount' => '500.00',
+        'description' => 'Groceries',
+        'spent_on' => '2026-01-15',
+    ]);
+
+    $spend = FundSpend::query()->firstOrFail();
+
+    $response = $this->actingAs($user)->delete(route('savings.spending.destroy', [
+        'current_team' => $user->currentTeam->slug,
+        'fundSpend' => $spend->id,
+    ]));
+
+    $response->assertRedirect();
+    expect(FundSpend::query()->count())->toBe(0);
+
+    $indexResponse = $this->actingAs($user)->get(route('savings.spending.index', [
+        'current_team' => $user->currentTeam->slug,
+    ]));
+
+    $indexResponse->assertInertia(fn (Assert $page) => $page
+        ->where('fundBalances.0.spent', '0.00')
+        ->where('fundBalances.0.remaining', '35000.00')
+        ->has('spends', 0),
+    );
+});
+
+it('rejects spending update above remaining balance', function () {
+    [$user, $plan, $everydayCategory] = createUserWithLockedIncome();
+
+    $plan->update(['allow_editing_spends' => true]);
+
+    $this->actingAs($user)->post(route('savings.spending.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'category_id' => $everydayCategory->id,
+        'amount' => '500.00',
+        'description' => 'Groceries',
+        'spent_on' => '2026-01-15',
+    ]);
+
+    $spend = FundSpend::query()->firstOrFail();
+
+    $response = $this->actingAs($user)->put(route('savings.spending.update', [
+        'current_team' => $user->currentTeam->slug,
+        'fundSpend' => $spend->id,
+    ]), [
+        'category_id' => $everydayCategory->id,
+        'amount' => '40000.00',
+        'description' => 'Too much',
+        'spent_on' => '2026-01-16',
+    ]);
+
+    $response->assertSessionHasErrors('amount');
+});
+
+it('persists allow_editing_spends from plan settings', function () {
+    [$user, $plan] = createUserWithLockedIncome();
+
+    $this->actingAs($user)->put(route('savings.plan.update', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'categories' => $plan->categories->map(fn ($c) => [
+            'id' => $c->id,
+            'name' => $c->name,
+            'allocation_type' => $c->allocation_type->value,
+            'percentage' => $c->percentage !== null ? (string) $c->percentage : null,
+            'deduction_mode' => $c->deduction_mode?->value,
+            'deduction_value' => $c->deduction_value !== null ? (string) $c->deduction_value : null,
+            'bank_id' => $c->bank_id,
+        ])->all(),
+        'allow_editing_spends' => true,
+    ]);
+
+    expect($plan->fresh()->allow_editing_spends)->toBeTrue();
+});

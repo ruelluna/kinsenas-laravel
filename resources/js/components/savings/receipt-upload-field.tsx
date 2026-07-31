@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 type Props = {
     error?: string;
     resetKey?: number;
+    existingImageUrl?: string | null;
 };
 
 function isMobileDevice(): boolean {
@@ -18,7 +19,7 @@ function isMobileDevice(): boolean {
     return window.matchMedia('(pointer: coarse)').matches;
 }
 
-export default function ReceiptUploadField({ error, resetKey = 0 }: Props) {
+export default function ReceiptUploadField({ error, resetKey = 0, existingImageUrl = null }: Props) {
     const inputId = useId();
     const inputRef = useRef<HTMLInputElement>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -37,6 +38,8 @@ export default function ReceiptUploadField({ error, resetKey = 0 }: Props) {
             inputRef.current.value = '';
         }
     }, [resetKey]);
+
+    const displayUrl = previewUrl ?? existingImageUrl;
 
     useEffect(() => {
         return () => {
@@ -96,24 +99,26 @@ export default function ReceiptUploadField({ error, resetKey = 0 }: Props) {
                 onChange={handleFileChange}
             />
 
-            {previewUrl ? (
+            {displayUrl ? (
                 <div className="space-y-3">
                     <div className="relative overflow-hidden rounded-lg border bg-muted/30">
                         <img
-                            src={previewUrl}
+                            src={displayUrl}
                             alt="Receipt preview"
                             className="max-h-48 w-full object-contain"
                         />
-                        <Button
-                            type="button"
-                            variant="secondary"
-                            size="icon"
-                            className="absolute top-2 right-2 size-8"
-                            onClick={clearReceipt}
-                            aria-label="Remove receipt"
-                        >
-                            <X className="size-4" />
-                        </Button>
+                        {previewUrl && (
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                size="icon"
+                                className="absolute top-2 right-2 size-8"
+                                onClick={clearReceipt}
+                                aria-label="Remove receipt"
+                            >
+                                <X className="size-4" />
+                            </Button>
+                        )}
                     </div>
                     {fileName && (
                         <p className="truncate text-xs text-muted-foreground">{fileName}</p>

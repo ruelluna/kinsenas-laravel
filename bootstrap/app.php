@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsurePlatformAdmin;
 use App\Http\Middleware\EnsureSubscribedOrTrialing;
+use App\Http\Middleware\EnsureSubscriptionFeature;
 use App\Http\Middleware\EnsureVaultUnlocked;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'vault.unlocked' => EnsureVaultUnlocked::class,
             'subscribed' => EnsureSubscribedOrTrialing::class,
+            'subscribed.feature' => EnsureSubscriptionFeature::class,
             'platform.admin' => EnsurePlatformAdmin::class,
         ]);
 

@@ -1,40 +1,32 @@
 <?php
 
-namespace Tests\Feature\Auth;
-
 use App\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
-use Tests\TestCase;
 
-class VerificationNotificationTest extends TestCase
-{
-    use RefreshDatabase;
+uses(RefreshDatabase::class);
 
-    public function test_sends_verification_notification(): void
-    {
-        Notification::fake();
+it('sends verification notification', function () {
+    Notification::fake();
 
-        $user = User::factory()->unverified()->create();
+    $user = User::factory()->unverified()->create();
 
-        $this->actingAs($user)
-            ->post(route('verification.send'))
-            ->assertRedirect(route('home'));
+    $this->actingAs($user)
+        ->post(route('verification.send'))
+        ->assertRedirect(route('home'));
 
-        Notification::assertSentTo($user, VerifyEmail::class);
-    }
+    Notification::assertSentTo($user, VerifyEmail::class);
+});
 
-    public function test_does_not_send_verification_notification_if_email_is_verified(): void
-    {
-        Notification::fake();
+it('does not send verification notification if email is verified', function () {
+    Notification::fake();
 
-        $user = User::factory()->create();
+    $user = User::factory()->create();
 
-        $this->actingAs($user)
-            ->post(route('verification.send'))
-            ->assertRedirect('/dashboard');
+    $this->actingAs($user)
+        ->post(route('verification.send'))
+        ->assertRedirect('/dashboard');
 
-        Notification::assertNothingSent();
-    }
-}
+    Notification::assertNothingSent();
+});

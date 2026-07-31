@@ -134,16 +134,10 @@ function IncomePeriodMobileCard({
             </dl>
 
             <div className="mt-3 flex items-center justify-between gap-2 border-t pt-3">
-                {!period.isLocked ? (
+                {!period.isLocked && (
                     <Form action={`/${teamSlug}/savings/income/${period.id}/lock`} method="post">
                         <Button type="submit" size="sm" className="h-8 px-3 text-xs">
                             Lock
-                        </Button>
-                    </Form>
-                ) : (
-                    <Form action={`/${teamSlug}/savings/income/${period.id}/unlock`} method="post">
-                        <Button type="submit" size="sm" variant="outline" className="h-8 px-3 text-xs">
-                            Unlock
                         </Button>
                     </Form>
                 )}
@@ -375,27 +369,13 @@ export default function IncomeIndex({ plan, planCategories, periods, fundSummary
                                         </td>
                                     ))}
                                     <td className="px-2 py-1.5 text-right">
-                                        {!period.isLocked ? (
+                                        {!period.isLocked && (
                                             <Form
                                                 action={`/${teamSlug}/savings/income/${period.id}/lock`}
                                                 method="post"
                                             >
                                                 <Button type="submit" size="sm" className="h-7 px-2 text-xs">
                                                     Lock
-                                                </Button>
-                                            </Form>
-                                        ) : (
-                                            <Form
-                                                action={`/${teamSlug}/savings/income/${period.id}/unlock`}
-                                                method="post"
-                                            >
-                                                <Button
-                                                    type="submit"
-                                                    size="sm"
-                                                    variant="outline"
-                                                    className="h-7 px-2 text-xs"
-                                                >
-                                                    Unlock
                                                 </Button>
                                             </Form>
                                         )}

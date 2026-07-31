@@ -7,6 +7,7 @@ use App\Models\FundSpend;
 use App\Models\SavingsPlan;
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class FundSpendService
 {
@@ -72,6 +73,56 @@ class FundSpendService
         ]);
 
         return $spend->fresh(['bank', 'recipient', 'category']);
+    }
+
+    public function update(
+        FundSpend $spend,
+        SavingsPlan $plan,
+        string $categoryId,
+        string $amount,
+        string $description,
+        string $spentOn,
+        ?string $recipientId = null,
+        ?string $receiptImagePath = null,
+        bool $removeReceipt = false,
+    ): FundSpend {
+        $spend->loadMissing('plan');
+
+        $this->balanceService->assertCanUpdateSpend($plan, $spend, $categoryId, $amount);
+
+        $updates = [
+            'category_id' => $categoryId,
+            'amount_encrypted' => $amount,
+            'description' => $description,
+            'spent_on' => $spentOn,
+            'recipient_id' => $recipientId,
+        ];
+
+        if ($receiptImagePath !== null) {
+            if ($spend->receipt_image_path !== null) {
+                Storage::disk('public')->delete($spend->receipt_image_path);
+            }
+
+            $updates['receipt_image_path'] = $receiptImagePath;
+        } elseif ($removeReceipt && $spend->receipt_image_path !== null) {
+            Storage::disk('public')->delete($spend->receipt_image_path);
+            $updates['receipt_image_path'] = null;
+        }
+
+        $spend->update($updates);
+
+        return $spend->fresh(['bank', 'recipient', 'category']);
+    }
+
+    public function delete(FundSpend $spend, SavingsPlan $plan): void
+    {
+        $this->balanceService->assertCanDeleteSpend($plan);
+
+        if ($spend->receipt_image_path !== null) {
+            Storage::disk('public')->delete($spend->receipt_image_path);
+        }
+
+        $spend->delete();
     }
 
     /**

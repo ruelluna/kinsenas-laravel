@@ -212,7 +212,7 @@ it('rejects transfer to the same category', function () {
     expect(FundTransfer::query()->count())->toBe(0);
 });
 
-it('shows zero bank category balances before any transfers', function () {
+it('shows assigned category remaining balances before any transfers', function () {
     [$user, , $everydayCategory, , $bank] = createTransferFixture();
 
     $everydayCategory->update(['bank_id' => $bank->id]);
@@ -222,12 +222,12 @@ it('shows zero bank category balances before any transfers', function () {
     ]));
 
     $response->assertInertia(fn (Assert $page) => $page
-        ->where('bankBalances.0.total', '0.00')
-        ->where('bankBalances.0.byCategory.0.total', '0.00'),
+        ->where('bankBalances.0.total', '35000.00')
+        ->where('bankBalances.0.byCategory.0.total', '35000.00'),
     );
 });
 
-it('shifts bank balances for confirmed category transfers', function () {
+it('reflects category remaining balances after confirmed transfers', function () {
     [$user, , $everydayCategory, $savingsCategory, $bank] = createTransferFixture();
 
     $everydayCategory->update(['bank_id' => $bank->id]);
@@ -254,7 +254,7 @@ it('shifts bank balances for confirmed category transfers', function () {
     $everydayRow = $byCategory->firstWhere('categoryId', $everydayCategory->id);
     $savingsRow = $byCategory->firstWhere('categoryId', $savingsCategory->id);
 
-    expect($bankBalance['total'])->toBe('0.00')
-        ->and($everydayRow['total'])->toBe('-8000.00')
-        ->and($savingsRow['total'])->toBe('8000.00');
+    expect($bankBalance['total'])->toBe('45000.00')
+        ->and($everydayRow['total'])->toBe('27000.00')
+        ->and($savingsRow['total'])->toBe('18000.00');
 });

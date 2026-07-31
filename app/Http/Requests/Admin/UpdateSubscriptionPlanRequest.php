@@ -1,0 +1,43 @@
+<?php
+
+namespace App\Http\Requests\Admin;
+
+use App\Enums\SubscriptionFeature;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class UpdateSubscriptionPlanRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return $this->user()?->isPlatformAdmin() ?? false;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function rules(): array
+    {
+        $plan = $this->route('plan');
+
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'slug' => [
+                'required',
+                'string',
+                'max:255',
+                'alpha_dash',
+                Rule::unique('subscription_plans', 'slug')->ignore($plan?->id),
+            ],
+            'trial_days' => ['required', 'integer', 'min:0', 'max:365'],
+            'features' => ['nullable', 'array'],
+            'features.*' => ['string', Rule::enum(SubscriptionFeature::class)],
+            'sort_order' => ['required', 'integer', 'min:0', 'max:999'],
+            'is_active' => ['sometimes', 'boolean'],
+            'prices.monthly.amount' => ['required', 'integer', 'min:0'],
+            'prices.monthly.is_active' => ['sometimes', 'boolean'],
+            'prices.yearly.amount' => ['required', 'integer', 'min:0'],
+            'prices.yearly.is_active' => ['sometimes', 'boolean'],
+        ];
+    }
+}

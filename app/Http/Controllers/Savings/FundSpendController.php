@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Savings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Savings\SaveFundSpendRequest;
+use App\Http\Requests\Savings\UpdateFundSpendRequest;
 use App\Models\FundSpend;
 use App\Models\SavingsCategory;
 use App\Models\Team;
@@ -37,7 +38,12 @@ class FundSpendController extends Controller
         $categories = $this->balanceService->categoriesWithDefaultFirst($plan);
 
         return Inertia::render('savings/spending/index', [
-            'plan' => ['id' => $plan->id, 'name' => $plan->name, 'hasLockedIncome' => $plan->hasLockedIncomePeriod()],
+            'plan' => [
+                'id' => $plan->id,
+                'name' => $plan->name,
+                'hasLockedIncome' => $plan->hasLockedIncomePeriod(),
+                'allowEditingSpends' => $plan->allow_editing_spends,
+            ],
             'fundBalances' => $this->balanceService->balancesWithDefaultFirst($plan),
             'defaultCategoryId' => $defaultCategoryId,
             'recipients' => $current_team->recipients()->get(['id', 'name']),
@@ -86,6 +92,47 @@ class FundSpendController extends Controller
         return back();
     }
 
+    public function update(UpdateFundSpendRequest $request, Team $current_team, FundSpend $fundSpend): RedirectResponse
+    {
+        $plan = $this->planService->forTeam($current_team, $request->user());
+        abort_if($plan === null, 404);
+        abort_if($fundSpend->savings_plan_id !== $plan->id, 404);
+
+        $categoryId = $request->validated('category_id');
+        $this->assertCategoryBelongsToPlan($plan->id, $categoryId);
+
+        $receiptImagePath = $request->file('receipt_image')?->store('spending-receipts', 'public');
+
+        $this->fundSpendService->update(
+            $fundSpend,
+            $plan,
+            $categoryId,
+            $request->validated('amount'),
+            $request->validated('description'),
+            $request->validated('spent_on'),
+            $request->validated('recipient_id'),
+            $receiptImagePath,
+            $request->boolean('remove_receipt'),
+        );
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Spending updated.')]);
+
+        return back();
+    }
+
+    public function destroy(Request $request, Team $current_team, FundSpend $fundSpend): RedirectResponse
+    {
+        $plan = $this->planService->forTeam($current_team, $request->user());
+        abort_if($plan === null, 404);
+        abort_if($fundSpend->savings_plan_id !== $plan->id, 404);
+
+        $this->fundSpendService->delete($fundSpend, $plan);
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Spending deleted.')]);
+
+        return back();
+    }
+
     public function confirm(Request $request, Team $current_team, FundSpend $fundSpend): RedirectResponse
     {
         $plan = $this->planService->forTeam($current_team, $request->user());
@@ -114,6 +161,7 @@ class FundSpendController extends Controller
             'recipientName' => $spend->recipient?->name,
             'categoryName' => $spend->category?->name,
             'categoryId' => $spend->category_id,
+            'recipientId' => $spend->recipient_id,
             'receiptImageUrl' => $spend->receiptImageUrl(),
         ];
     }

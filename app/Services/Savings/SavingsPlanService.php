@@ -398,4 +398,11 @@ class SavingsPlanService
 
         return $plan->fresh(['categories.deductFromCategory']);
     }
+
+    public function updateSpendingEditSetting(SavingsPlan $plan, bool $allowEditing): SavingsPlan
+    {
+        $plan->update(['allow_editing_spends' => $allowEditing]);
+
+        return $plan->fresh(['categories.deductFromCategory']);
+    }
 }

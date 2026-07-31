@@ -1,7 +1,8 @@
 import { Form, Head, usePage } from '@inertiajs/react';
-import { Plus } from 'lucide-react';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import AddSpendingModal from '@/components/savings/add-spending-modal';
+import EditSpendingModal from '@/components/savings/edit-spending-modal';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,7 @@ import type { FundBalance, FundSpend } from '@/types/savings';
 import type { SharedData } from '@/types';
 
 type Props = {
-    plan: { id: string; name: string; hasLockedIncome: boolean };
+    plan: { id: string; name: string; hasLockedIncome: boolean; allowEditingSpends: boolean };
     fundBalances: FundBalance[];
     defaultCategoryId: string | null;
     recipients: Array<{ id: string; name: string }>;
@@ -45,11 +46,18 @@ export default function SpendingIndex({
     const { currentTeam } = usePage<SharedData>().props;
     const teamSlug = currentTeam?.slug ?? '';
     const [addModalOpen, setAddModalOpen] = useState(false);
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [editingSpend, setEditingSpend] = useState<FundSpend | null>(null);
     const [presetCategoryId, setPresetCategoryId] = useState<string | null>(null);
 
     function openAddModal(categoryId: string | null = null) {
         setPresetCategoryId(categoryId);
         setAddModalOpen(true);
+    }
+
+    function openEditModal(spend: FundSpend) {
+        setEditingSpend(spend);
+        setEditModalOpen(true);
     }
 
     return (
@@ -76,15 +84,25 @@ export default function SpendingIndex({
             )}
 
             {plan.hasLockedIncome && (
-                <AddSpendingModal
-                    open={addModalOpen}
-                    onOpenChange={setAddModalOpen}
-                    presetCategoryId={presetCategoryId}
-                    defaultCategoryId={defaultCategoryId}
-                    categories={categories}
-                    fundBalances={fundBalances}
-                    recipients={recipients}
-                />
+                <>
+                    <AddSpendingModal
+                        open={addModalOpen}
+                        onOpenChange={setAddModalOpen}
+                        presetCategoryId={presetCategoryId}
+                        defaultCategoryId={defaultCategoryId}
+                        categories={categories}
+                        fundBalances={fundBalances}
+                        recipients={recipients}
+                    />
+                    <EditSpendingModal
+                        open={editModalOpen}
+                        onOpenChange={setEditModalOpen}
+                        spend={editingSpend}
+                        categories={categories}
+                        fundBalances={fundBalances}
+                        recipients={recipients}
+                    />
+                </>
             )}
 
             {fundBalances.length > 0 && (
@@ -174,16 +192,40 @@ export default function SpendingIndex({
                                         </a>
                                     )}
                                 </div>
-                                {spend.status === 'pending' && (
-                                    <Form
-                                        action={`/${teamSlug}/savings/spending/${spend.id}/confirm`}
-                                        method="post"
-                                    >
-                                        <Button type="submit" size="sm" variant="outline">
-                                            Confirm
-                                        </Button>
-                                    </Form>
-                                )}
+                                <div className="flex shrink-0 items-center gap-2">
+                                    {spend.status === 'pending' && (
+                                        <Form
+                                            action={`/${teamSlug}/savings/spending/${spend.id}/confirm`}
+                                            method="post"
+                                        >
+                                            <Button type="submit" size="sm" variant="outline">
+                                                Confirm
+                                            </Button>
+                                        </Form>
+                                    )}
+                                    {plan.allowEditingSpends && (
+                                        <>
+                                            <Button
+                                                type="button"
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => openEditModal(spend)}
+                                            >
+                                                <Pencil className="size-4" />
+                                                Edit
+                                            </Button>
+                                            <Form
+                                                action={`/${teamSlug}/savings/spending/${spend.id}`}
+                                                method="delete"
+                                            >
+                                                <Button type="submit" size="sm" variant="outline">
+                                                    <Trash2 className="size-4" />
+                                                    Delete
+                                                </Button>
+                                            </Form>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         ))
                     )}

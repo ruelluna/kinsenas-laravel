@@ -31,6 +31,7 @@ class SaveSavingsPlanRequest extends FormRequest
             'categories.*.deduct_from_index' => ['nullable', 'integer', 'min:0'],
             'categories.*.bank_id' => ['nullable', 'uuid', 'exists:banks,id'],
             'is_shared_with_team' => ['sometimes', 'boolean'],
+            'allow_editing_spends' => ['sometimes', 'boolean'],
         ];
     }
 

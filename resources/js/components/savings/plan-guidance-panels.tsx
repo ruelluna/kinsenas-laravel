@@ -16,6 +16,10 @@ const editRulesRows = [
         categoryType: 'Share with team',
         afterFirstIncome: 'Still editable',
     },
+    {
+        categoryType: 'Allow editing spends',
+        afterFirstIncome: 'Toggle on plan — enables Edit and Delete on Spending',
+    },
 ] as const;
 
 export function PlanEditRulesPanel({

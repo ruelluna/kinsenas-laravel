@@ -3,13 +3,16 @@
 namespace App\Models;
 
 use App\Enums\PaymentSubmissionStatus;
+use Database\Factories\PaymentSubmissionFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PaymentSubmission extends Model
 {
-    use HasUuids;
+    /** @use HasFactory<PaymentSubmissionFactory> */
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'user_id',

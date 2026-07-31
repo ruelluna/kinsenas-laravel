@@ -22,6 +22,7 @@ class SavingsPlanFactory extends Factory
             'name' => fake()->words(3, true),
             'currency' => 'PHP',
             'is_shared_with_team' => false,
+            'allow_editing_spends' => false,
         ];
     }
 }

@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { BookOpen, FolderGit2, Landmark, LayoutGrid, PiggyBank, ArrowRightLeft, ShoppingBag, Users, Wallet } from 'lucide-react';
+import { AdminSidebarNav } from '@/components/admin/admin-sidebar-nav';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -20,6 +21,9 @@ import type { NavItem } from '@/types';
 export function AppSidebar() {
     const page = usePage();
     const teamSlug = page.props.currentTeam?.slug;
+    const isPlatformAdmin = Boolean(
+        (page.props.auth as { user?: { isPlatformAdmin?: boolean } })?.user?.isPlatformAdmin,
+    );
     const dashboardUrl = teamSlug ? dashboard(teamSlug) : '/';
     const savingsBase = teamSlug ? `/${teamSlug}/savings` : '/';
 
@@ -95,6 +99,7 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
+                {isPlatformAdmin && <AdminSidebarNav />}
             </SidebarContent>
 
             <SidebarFooter>

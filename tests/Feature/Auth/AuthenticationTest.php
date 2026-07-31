@@ -1,7 +1,5 @@
 <?php
 
-namespace Tests\Feature\Auth;
-
 use App\Enums\TeamRole;
 use App\Models\Team;
 use App\Models\TeamInvitation;
@@ -14,130 +12,117 @@ use Laravel\Fortify\Features;
 /* @chisel-passkeys */
 use Laravel\Passkeys\Contracts\PasskeyLoginResponse;
 /* @end-chisel-passkeys */
-use Tests\TestCase;
 
-class AuthenticationTest extends TestCase
-{
-    use RefreshDatabase;
+uses(RefreshDatabase::class);
 
-    public function test_login_screen_can_be_rendered()
-    {
-        $response = $this->get(route('login'));
+it('login screen can be rendered', function () {
+    $response = $this->get(route('login'));
 
-        $response->assertOk();
+    $response->assertOk();
+});
+
+it('login screen includes team invitation context', function () {
+    $owner = User::factory()->create();
+    $team = Team::factory()->create(['name' => 'Laravel Team']);
+    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
+
+    $invitation = TeamInvitation::factory()->create([
+        'team_id' => $team->id,
+        'email' => 'invited@example.com',
+        'invited_by' => $owner->id,
+    ]);
+
+    $response = $this->get(route('login', ['invitation' => $invitation->code]));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('auth/login')
+        ->where('teamInvitation.code', $invitation->code)
+        ->where('teamInvitation.teamName', 'Laravel Team'),
+    );
+});
+
+it('users can authenticate using the login screen', function () {
+    $user = User::factory()->create();
+
+    $response = $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'password',
+    ]);
+
+    $this->assertAuthenticated();
+    $response->assertRedirect(route('dashboard'));
+});
+
+/* @chisel-passkeys */
+it('passkey login response redirects to the current team dashboard', function () {
+    $user = User::factory()->create();
+
+    $request = Request::create(route('login', absolute: false), 'GET', server: [
+        'HTTP_ACCEPT' => 'application/json',
+    ]);
+    $request->setLaravelSession($this->app['session.store']);
+    $request->setUserResolver(fn () => $user);
+
+    $jsonResponse = app(PasskeyLoginResponse::class)->toResponse($request);
+
+    expect($jsonResponse->getData()->redirect)->toBe(
+        route('dashboard', ['current_team' => $user->personalTeam()->slug]),
+    );
+});
+/* @end-chisel-passkeys */
+
+it('users with two factor enabled are redirected to two factor challenge', function () {
+    if (! Features::canManageTwoFactorAuthentication()) {
+        test()->markTestSkipped('Two-factor authentication is not enabled.');
     }
 
-    public function test_login_screen_includes_team_invitation_context()
-    {
-        $owner = User::factory()->create();
-        $team = Team::factory()->create(['name' => 'Laravel Team']);
-        $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
+    Features::twoFactorAuthentication([
+        'confirm' => true,
+        'confirmPassword' => true,
+    ]);
 
-        $invitation = TeamInvitation::factory()->create([
-            'team_id' => $team->id,
-            'email' => 'invited@example.com',
-            'invited_by' => $owner->id,
-        ]);
+    $user = User::factory()->withTwoFactor()->create();
 
-        $response = $this->get(route('login', ['invitation' => $invitation->code]));
+    $response = $this->post(route('login'), [
+        'email' => $user->email,
+        'password' => 'password',
+    ]);
 
-        $response->assertOk();
-        $response->assertInertia(fn (Assert $page) => $page
-            ->component('auth/login')
-            ->where('teamInvitation.code', $invitation->code)
-            ->where('teamInvitation.teamName', 'Laravel Team'),
-        );
-    }
+    $response->assertRedirect(route('two-factor.login'));
+    $response->assertSessionHas('login.id', $user->id);
+    $this->assertGuest();
+});
 
-    public function test_users_can_authenticate_using_the_login_screen()
-    {
-        $user = User::factory()->create();
+it('users can not authenticate with invalid password', function () {
+    $user = User::factory()->create();
 
-        $response = $this->post(route('login.store'), [
-            'email' => $user->email,
-            'password' => 'password',
-        ]);
+    $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'wrong-password',
+    ]);
 
-        $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard'));
-    }
+    $this->assertGuest();
+});
 
-    /* @chisel-passkeys */
-    public function test_passkey_login_response_redirects_to_the_current_team_dashboard(): void
-    {
-        $user = User::factory()->create();
+it('users can logout', function () {
+    $user = User::factory()->create();
 
-        $request = Request::create(route('login', absolute: false), 'GET', server: [
-            'HTTP_ACCEPT' => 'application/json',
-        ]);
-        $request->setLaravelSession($this->app['session.store']);
-        $request->setUserResolver(fn () => $user);
+    $response = $this->actingAs($user)->post(route('logout'));
 
-        $jsonResponse = app(PasskeyLoginResponse::class)->toResponse($request);
+    $this->assertGuest();
+    $response->assertRedirect(route('home'));
+});
 
-        $this->assertSame(
-            route('dashboard', ['current_team' => $user->personalTeam()->slug]),
-            $jsonResponse->getData()->redirect,
-        );
-    }
-    /* @end-chisel-passkeys */
+it('users are rate limited', function () {
+    $user = User::factory()->create();
 
-    public function test_users_with_two_factor_enabled_are_redirected_to_two_factor_challenge()
-    {
-        if (! Features::canManageTwoFactorAuthentication()) {
-            $this->markTestSkipped('Two-factor authentication is not enabled.');
-        }
+    RateLimiter::increment(md5('login'.implode('|', [$user->email, '127.0.0.1'])), amount: 5);
 
-        Features::twoFactorAuthentication([
-            'confirm' => true,
-            'confirmPassword' => true,
-        ]);
+    $response = $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'wrong-password',
+    ]);
 
-        $user = User::factory()->withTwoFactor()->create();
-
-        $response = $this->post(route('login'), [
-            'email' => $user->email,
-            'password' => 'password',
-        ]);
-
-        $response->assertRedirect(route('two-factor.login'));
-        $response->assertSessionHas('login.id', $user->id);
-        $this->assertGuest();
-    }
-
-    public function test_users_can_not_authenticate_with_invalid_password()
-    {
-        $user = User::factory()->create();
-
-        $this->post(route('login.store'), [
-            'email' => $user->email,
-            'password' => 'wrong-password',
-        ]);
-
-        $this->assertGuest();
-    }
-
-    public function test_users_can_logout()
-    {
-        $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->post(route('logout'));
-
-        $this->assertGuest();
-        $response->assertRedirect(route('home'));
-    }
-
-    public function test_users_are_rate_limited()
-    {
-        $user = User::factory()->create();
-
-        RateLimiter::increment(md5('login'.implode('|', [$user->email, '127.0.0.1'])), amount: 5);
-
-        $response = $this->post(route('login.store'), [
-            'email' => $user->email,
-            'password' => 'wrong-password',
-        ]);
-
-        $response->assertTooManyRequests();
-    }
-}
+    $response->assertTooManyRequests();
+});
