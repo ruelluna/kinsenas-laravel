@@ -1,8 +1,23 @@
 import { Form, Head, usePage } from '@inertiajs/react';
-import { Plus, Trash2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { AlertTriangle, Plus, Trash2 } from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
 import Heading from '@/components/heading';
+import {
+    BeforeChooseAlert,
+    PlanEditRulesPanel,
+} from '@/components/savings/plan-guidance-panels';
+import SavingsPlanTemplatePicker from '@/components/savings/plan-template-picker';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type {
@@ -11,12 +26,15 @@ import type {
     FormulaTemplate,
     SavingsCategory,
     SavingsPlan,
+    SavingsPlanPageGuidance,
 } from '@/types/savings';
+
 import type { SharedData } from '@/types';
 
 type Props = {
     plan: SavingsPlan | null;
     templates: FormulaTemplate[];
+    pageGuidance: SavingsPlanPageGuidance;
 };
 
 type CategoryRow = {
@@ -94,11 +112,60 @@ function selectClassName(disabled: boolean): string {
     ].join(' ');
 }
 
-function isExistingRow(row: CategoryRow, percentagesLocked: boolean): boolean {
-    return percentagesLocked && row.id !== undefined;
+function isPercentageRowLocked(row: CategoryRow, percentagesLocked: boolean): boolean {
+    return percentagesLocked && row.allocationType === 'percentage' && row.id !== undefined;
 }
 
-export default function SavingsPlanPage({ plan, templates }: Props) {
+function resolveDeductFromCategoryId(
+    row: CategoryRow,
+    rows: CategoryRow[],
+): string | null {
+    if (row.deductFromIndex === '') {
+        return null;
+    }
+
+    const sourceRow = rows[Number(row.deductFromIndex)];
+
+    return sourceRow?.id ?? null;
+}
+
+function hasCustomCategoryChanges(
+    rows: CategoryRow[],
+    initialCategories: SavingsCategory[],
+): boolean {
+    const initialCustom = initialCategories.filter(
+        (category) => category.allocationType === 'deduction',
+    );
+    const currentCustom = rows.filter((row) => row.allocationType === 'deduction');
+
+    if (currentCustom.some((row) => row.id === undefined)) {
+        return true;
+    }
+
+    if (initialCustom.some(
+        (category) => !currentCustom.some((row) => row.id === category.id),
+    )) {
+        return true;
+    }
+
+    return currentCustom.some((row) => {
+        const initial = initialCategories.find((category) => category.id === row.id);
+
+        if (!initial) {
+            return false;
+        }
+
+        return (
+            initial.name !== row.name
+            || (initial.deductionMode ?? '') !== row.deductionMode
+            || (initial.deductionValue ?? '') !== row.deductionValue
+            || (initial.deductFromCategoryId ?? null)
+                !== resolveDeductFromCategoryId(row, rows)
+        );
+    });
+}
+
+export default function SavingsPlanPage({ plan, templates, pageGuidance }: Props) {
     const { currentTeam } = usePage<SharedData>().props;
     const teamSlug = currentTeam?.slug ?? '';
 
@@ -109,48 +176,39 @@ export default function SavingsPlanPage({ plan, templates }: Props) {
                 <Heading
                     variant="small"
                     title="Choose a savings formula"
-                    description="Start with a preset or customize categories later."
+                    description="Compare each plan below and pick the split that fits how you manage money."
                 />
-                <div className="mt-6 grid gap-4">
-                    {templates.map((template) => (
-                        <Form
-                            key={template.id}
-                            action={`/${teamSlug}/savings/plan/from-template/${template.id}`}
-                            method="post"
-                            className="rounded-lg border p-4"
-                        >
-                            <h3 className="font-medium">{template.name}</h3>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                {template.description}
-                            </p>
-                            <ul className="mt-3 space-y-1 text-sm">
-                                {template.categories.map((c) => (
-                                    <li key={c.name}>
-                                        {c.name} — {c.percentage}%
-                                    </li>
-                                ))}
-                            </ul>
-                            <Button type="submit" className="mt-4">
-                                Use this formula
-                            </Button>
-                        </Form>
-                    ))}
-                </div>
+                <SavingsPlanTemplatePicker
+                    templates={templates}
+                    pageGuidance={pageGuidance}
+                    teamSlug={teamSlug}
+                />
             </>
         );
     }
 
-    return <SavingsPlanEditor plan={plan} teamSlug={teamSlug} />;
+    return (
+        <SavingsPlanEditor
+            plan={plan}
+            teamSlug={teamSlug}
+            pageGuidance={pageGuidance}
+        />
+    );
 }
 
 function SavingsPlanEditor({
     plan,
     teamSlug,
+    pageGuidance,
 }: {
     plan: SavingsPlan;
     teamSlug: string;
+    pageGuidance: SavingsPlanPageGuidance;
 }) {
     const [rows, setRows] = useState<CategoryRow[]>(() => rowsFromPlan(plan.categories));
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const submitButtonRef = useRef<HTMLButtonElement>(null);
+    const skipCustomConfirmRef = useRef(false);
 
     const percentageTotal = useMemo(
         () =>
@@ -176,6 +234,11 @@ function SavingsPlanEditor({
 
     const percentageTotalValid = Math.abs(percentageTotal - 100) < 0.01;
 
+    const customChangesPending = useMemo(
+        () => hasCustomCategoryChanges(rows, plan.categories),
+        [rows, plan.categories],
+    );
+
     const updateRow = (index: number, patch: Partial<CategoryRow>) => {
         setRows((current) =>
             current.map((row, rowIndex) =>
@@ -193,17 +256,21 @@ function SavingsPlanEditor({
 
     const removeRow = (index: number) => {
         setRows((current) => {
-            if (current.length <= 1) {
-                return current;
-            }
-
             const row = current[index];
 
-            if (isExistingRow(row, plan.percentagesLocked)) {
+            if (isPercentageRowLocked(row, plan.percentagesLocked)) {
                 return current;
             }
 
             const next = current.filter((_, rowIndex) => rowIndex !== index);
+
+            if (plan.percentagesLocked && next.every((item) => item.allocationType === 'percentage')) {
+                return current;
+            }
+
+            if (!plan.percentagesLocked && next.length === 0) {
+                return current;
+            }
 
             return next.map((item) => {
                 if (item.allocationType !== 'deduction' || item.deductFromIndex === '') {
@@ -225,8 +292,27 @@ function SavingsPlanEditor({
         });
     };
 
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        if (
+            plan.hasIncome
+            && customChangesPending
+            && !skipCustomConfirmRef.current
+        ) {
+            event.preventDefault();
+            setConfirmOpen(true);
+        } else {
+            skipCustomConfirmRef.current = false;
+        }
+    };
+
+    const confirmSave = () => {
+        skipCustomConfirmRef.current = true;
+        setConfirmOpen(false);
+        submitButtonRef.current?.click();
+    };
+
     const planDescription = plan.percentagesLocked
-        ? 'Percentages are locked after your first income entry. You can still add custom categories.'
+        ? 'Percentages are locked after your first income entry. You can add, edit, or remove custom categories anytime.'
         : 'Percentage categories must total 100%. Custom categories can use optional defaults or amounts set per income.';
 
     return (
@@ -234,18 +320,44 @@ function SavingsPlanEditor({
             <Head title="Savings Plan" />
             <Heading variant="small" title={plan.name} description={planDescription} />
 
+            {!plan.hasIncome && (
+                <BeforeChooseAlert note={pageGuidance.beforeChooseNote} />
+            )}
+
+            {plan.hasIncome && <PlanEditRulesPanel pageGuidance={pageGuidance} />}
+
+            {plan.hasIncome && (
+                <Alert className="mt-6">
+                    <AlertTriangle className="text-amber-600" />
+                    <AlertTitle>Custom category changes affect all income</AlertTitle>
+                    <AlertDescription>
+                        Adding, editing, or removing a custom category updates this plan for
+                        every income period — including locked periods. Past breakdowns and
+                        spending tied to a removed category may no longer match.
+                    </AlertDescription>
+                </Alert>
+            )}
+
             <Form
                 action={`/${teamSlug}/savings/plan`}
                 method="put"
                 className="mt-6 space-y-6"
+                onSubmit={handleSubmit}
             >
-                <div className="space-y-4">
+                {({ errors, processing }) => (
+                    <>
+                        {typeof errors.categories === 'string' && (
+                            <InputError message={errors.categories} />
+                        )}
+
+                        <div className="space-y-4">
                     {rows.map((row, index) => {
-                        const rowLocked = isExistingRow(row, plan.percentagesLocked);
+                        const rowLocked = isPercentageRowLocked(row, plan.percentagesLocked);
                         const canRemove =
-                            rows.length > 1 &&
-                            (!plan.percentagesLocked ||
-                                (row.allocationType === 'deduction' && row.id === undefined));
+                            !rowLocked
+                            && (plan.percentagesLocked
+                                ? row.allocationType === 'deduction'
+                                : rows.length > 1);
 
                         return (
                             <div key={row.key} className="rounded-lg border p-4">
@@ -279,19 +391,42 @@ function SavingsPlanEditor({
                                     />
                                 )}
 
+                                {rowLocked && (
+                                    <>
+                                        <input
+                                            type="hidden"
+                                            name={`categories[${index}][name]`}
+                                            value={row.name}
+                                        />
+                                        {row.allocationType === 'percentage' && (
+                                            <input
+                                                type="hidden"
+                                                name={`categories[${index}][percentage]`}
+                                                value={row.percentage}
+                                            />
+                                        )}
+                                    </>
+                                )}
+
                                 <div className="grid gap-4 sm:grid-cols-2">
                                     <div className="sm:col-span-2">
                                         <Label htmlFor={`category-name-${index}`}>Name</Label>
                                         <Input
                                             id={`category-name-${index}`}
-                                            name={`categories[${index}][name]`}
+                                            name={
+                                                rowLocked
+                                                    ? undefined
+                                                    : `categories[${index}][name]`
+                                            }
                                             value={row.name}
                                             onChange={(event) =>
                                                 updateRow(index, { name: event.target.value })
                                             }
                                             disabled={rowLocked}
+                                            readOnly={rowLocked}
                                             required
                                         />
+                                        <InputError message={errors[`categories.${index}.name`]} />
                                     </div>
 
                                     {!plan.percentagesLocked || row.id === undefined ? (
@@ -347,7 +482,11 @@ function SavingsPlanEditor({
                                             </Label>
                                             <Input
                                                 id={`category-percentage-${index}`}
-                                                name={`categories[${index}][percentage]`}
+                                                name={
+                                                    rowLocked
+                                                        ? undefined
+                                                        : `categories[${index}][percentage]`
+                                                }
                                                 type="number"
                                                 step="0.01"
                                                 min="0.01"
@@ -359,7 +498,11 @@ function SavingsPlanEditor({
                                                     })
                                                 }
                                                 disabled={rowLocked}
+                                                readOnly={rowLocked}
                                                 required
+                                            />
+                                            <InputError
+                                                message={errors[`categories.${index}.percentage`]}
                                             />
                                         </div>
                                     ) : (
@@ -458,44 +601,80 @@ function SavingsPlanEditor({
                             </div>
                         );
                     })}
-                </div>
+                        </div>
 
-                <Button type="button" variant="outline" onClick={addRow}>
-                    <Plus className="size-4" />
-                    {plan.percentagesLocked ? 'Add custom category' : 'Add category'}
-                </Button>
+                        <Button type="button" variant="outline" onClick={addRow}>
+                            <Plus className="size-4" />
+                            {plan.percentagesLocked ? 'Add custom category' : 'Add category'}
+                        </Button>
 
-                {!plan.percentagesLocked && (
-                    <div
-                        className={`rounded-lg border px-4 py-3 text-sm ${
-                            percentageTotalValid
-                                ? 'border-border bg-muted/30'
-                                : 'border-destructive/50 bg-destructive/5 text-destructive'
-                        }`}
-                    >
-                        Percentage total: {percentageTotal.toFixed(2)}%
-                        {!percentageTotalValid && ' — must equal 100%'}
-                    </div>
+                        {!plan.percentagesLocked && (
+                            <div
+                                className={`rounded-lg border px-4 py-3 text-sm ${
+                                    percentageTotalValid
+                                        ? 'border-border bg-muted/30'
+                                        : 'border-destructive/50 bg-destructive/5 text-destructive'
+                                }`}
+                            >
+                                Percentage total: {percentageTotal.toFixed(2)}%
+                                {!percentageTotalValid && ' — must equal 100%'}
+                            </div>
+                        )}
+
+                        {plan.percentagesLocked && (
+                            <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm">
+                                Percentage total: {percentageTotal.toFixed(2)}% (locked)
+                            </div>
+                        )}
+
+                        <label className="flex items-center gap-2 text-sm">
+                            <input
+                                type="checkbox"
+                                name="is_shared_with_team"
+                                value="1"
+                                defaultChecked={plan.isSharedWithTeam}
+                            />
+                            Share plan with team members
+                        </label>
+
+                        <Button type="submit" disabled={processing}>
+                            Save plan
+                        </Button>
+                        <button
+                            ref={submitButtonRef}
+                            type="submit"
+                            className="hidden"
+                            tabIndex={-1}
+                            aria-hidden="true"
+                        />
+                    </>
                 )}
-
-                {plan.percentagesLocked && (
-                    <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm">
-                        Percentage total: {percentageTotal.toFixed(2)}% (locked)
-                    </div>
-                )}
-
-                <label className="flex items-center gap-2 text-sm">
-                    <input
-                        type="checkbox"
-                        name="is_shared_with_team"
-                        value="1"
-                        defaultChecked={plan.isSharedWithTeam}
-                    />
-                    Share plan with team members
-                </label>
-
-                <Button type="submit">Save plan</Button>
             </Form>
+
+            <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Save custom category changes?</DialogTitle>
+                        <DialogDescription>
+                            These changes apply to this savings plan for all income periods.
+                            Locked periods, breakdowns, and spending linked to a removed custom
+                            category may no longer match historical records.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setConfirmOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button type="button" onClick={confirmSave}>
+                            Save anyway
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

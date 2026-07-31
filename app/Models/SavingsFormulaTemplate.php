@@ -17,6 +17,8 @@ class SavingsFormulaTemplate extends Model
         'name',
         'slug',
         'description',
+        'best_for',
+        'video_embed_url',
         'is_system',
     ];
 

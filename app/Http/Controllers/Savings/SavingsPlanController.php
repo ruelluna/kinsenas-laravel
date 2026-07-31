@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Savings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Savings\SaveSavingsPlanRequest;
 use App\Models\SavingsFormulaTemplate;
+use App\Models\SavingsPlanPageGuidance;
 use App\Models\Team;
 use App\Services\Savings\SavingsPlanService;
 use Illuminate\Http\RedirectResponse;
@@ -23,8 +24,16 @@ class SavingsPlanController extends Controller
         $user = $request->user();
         $plan = $this->planService->forTeam($current_team, $user);
         $templates = SavingsFormulaTemplate::query()->with('categories')->orderBy('name')->get();
+        $pageGuidance = SavingsPlanPageGuidance::instance();
 
         return Inertia::render('savings/plan', [
+            'pageGuidance' => [
+                'chooserIntro' => $pageGuidance->chooser_intro,
+                'chooserVideoUrl' => $pageGuidance->chooser_video_url,
+                'beforeChooseNote' => $pageGuidance->before_choose_note,
+                'afterIncomeRules' => $pageGuidance->after_income_rules,
+                'afterIncomeVideoUrl' => $pageGuidance->after_income_video_url,
+            ],
             'plan' => $plan ? [
                 'id' => $plan->id,
                 'name' => $plan->name,
@@ -49,9 +58,12 @@ class SavingsPlanController extends Controller
                 'name' => $t->name,
                 'slug' => $t->slug,
                 'description' => $t->description,
+                'bestFor' => $t->best_for,
+                'videoEmbedUrl' => $t->video_embed_url,
                 'categories' => $t->categories->map(fn ($c) => [
                     'name' => $c->name,
                     'percentage' => (string) $c->percentage,
+                    'description' => $c->description,
                 ]),
             ]),
         ]);

@@ -14,6 +14,7 @@ class SavingsFormulaTemplateCategory extends Model
         'template_id',
         'name',
         'percentage',
+        'description',
         'sort_order',
     ];
 
