@@ -1,7 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import AppLogoIcon from '@/components/app-logo-icon';
 import { Button } from '@/components/ui/button';
-import { dashboard, login } from '@/routes';
+import { KINSENAS_HORIZONTAL_LOGO } from '@/lib/brand';
+import { dashboard, home, login } from '@/routes';
 /* @chisel-registration */
 import { register } from '@/routes';
 /* @end-chisel-registration */
@@ -15,12 +15,13 @@ export default function Welcome() {
             <Head title="Welcome" />
             <div className="flex min-h-screen flex-col bg-background">
                 <header className="flex items-center justify-between px-6 py-4 lg:px-10">
-                    <div className="flex items-center gap-2">
-                        <div className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                            <AppLogoIcon className="size-5 fill-current" />
-                        </div>
-                        <span className="text-sm font-semibold">{name}</span>
-                    </div>
+                    <Link href={home()} className="flex items-center">
+                        <img
+                            src={KINSENAS_HORIZONTAL_LOGO}
+                            alt={name}
+                            className="h-9 w-auto max-w-[min(100%,10rem)] object-contain sm:h-10"
+                        />
+                    </Link>
                     <nav className="flex items-center gap-2">
                         {auth.user ? (
                             <Button asChild>
@@ -47,7 +48,7 @@ export default function Welcome() {
                             Plan, track, and grow your savings
                         </h1>
                         <p className="text-lg text-muted-foreground">
-                            FutureSave helps you allocate income across funds, record transfers and spending, and stay on top of your financial goals.
+                            {name} helps you allocate income across funds, record transfers and spending, and stay on top of your financial goals.
                         </p>
                         {!auth.user && (
                             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">

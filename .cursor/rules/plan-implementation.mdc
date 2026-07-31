@@ -1,9 +1,9 @@
 ---
-description: FutureSave plan implementation — breakdowns, visual QA, test suggestions, optional docs, commits, summary
+description: Kinsenas plan implementation — breakdowns, visual QA, test suggestions, optional docs, commits, summary
 alwaysApply: true
 ---
 
-# Plan Implementation (FutureSave)
+# Plan Implementation (Kinsenas)
 
 When executing an approved plan (or a plan attached to the conversation), follow this order **before** marking work complete.
 
@@ -49,7 +49,7 @@ If no doc exists for the feature, extend the closest sibling rather than inventi
 - Never link to or mention `.cursor/` paths in published markdown
 - CLI audit/deploy/test commands belong in `.cursor/breakdowns/` and implementation replies for engineers
 
-**FutureSave terminology:**
+**Kinsenas terminology:**
 
 - **Admin** — Inertia/React app with `AppSidebar`, pages under `resources/js/pages/`
 - **Member** — end-user flows (when added; today mostly dashboard and settings)
@@ -62,7 +62,7 @@ If the plan has a docs todo, complete it in the same pass as code — not as a f
 
 When updating the plan file todos, mark the docs item done only after markdown reflects the shipped behavior.
 
-## 3. Testing (FutureSave)
+## 3. Testing (Kinsenas)
 
 - Do **not** run `php artisan test` unless the user asks.
 - In breakdowns and replies, list **suggested** commands only.
@@ -78,7 +78,7 @@ When updating the plan file todos, mark the docs item done only after markdown r
 | New admin workflow            | Required               | Flow test if critical  |
 | CSS-only tweak                | Required               | Optional               |
 
-## 4. FutureSave verify checklist
+## 4. Kinsenas verify checklist
 
 Include applicable items in breakdowns and Linear comments:
 
@@ -144,7 +144,7 @@ YYYYMMDD-HHMM-<task-slug>-breakdown.md
 - Summary (what changed and why)
 - Bullet changelog of user-visible/admin changes
 - Files touched (grouped by area)
-- Deploy/migration steps if any (see FutureSave verify checklist)
+- Deploy/migration steps if any (see Kinsenas verify checklist)
 - **Suggested test commands** (do not run unless user asks)
 - **Visual QA** — when UI or Inertia pages changed (see template below)
 - Suggested application commit (summary + body)

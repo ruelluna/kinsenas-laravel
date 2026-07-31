@@ -70,7 +70,7 @@ export default function AddTransferModal({
     categoryBankMap,
     fundBalances,
 }: Props) {
-    const { currentTeam, errors } = usePage<SharedData & { errors: Record<string, string> }>().props;
+    const { currentTeam, errors, name } = usePage<SharedData & { errors: Record<string, string> }>().props;
     const teamSlug = currentTeam?.slug ?? '';
     const submitRef = useRef<HTMLButtonElement>(null);
     const skipBankReminderRef = useRef(false);
@@ -305,7 +305,7 @@ export default function AddTransferModal({
                     <DialogHeader>
                         <DialogTitle>Move funds between banks</DialogTitle>
                         <DialogDescription>
-                            Before confirming in FutureSave, transfer{' '}
+                            Before confirming in {name}, transfer{' '}
                             {amount ? formatMoney(amount) : 'this amount'} from{' '}
                             <strong>{bankLabel(fromCategory)}</strong> to{' '}
                             <strong>{bankLabel(toCategory)}</strong> in your banking app. This

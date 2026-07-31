@@ -1,20 +1,32 @@
-import { usePage } from '@inertiajs/react';
+import {
+    KINSENAS_HORIZONTAL_LOGO,
+    KINSENAS_SQUARE_LOGO,
+} from '@/lib/brand';
+import { cn } from '@/lib/utils';
 
-import AppLogoIcon from '@/components/app-logo-icon';
+type AppLogoProps = {
+    className?: string;
+};
 
-export default function AppLogo() {
-    const { name } = usePage().props;
-
+export default function AppLogo({ className }: AppLogoProps) {
     return (
         <>
-            <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-                <AppLogoIcon className="size-5 fill-current text-sidebar-primary-foreground" />
-            </div>
-            <div className="ml-1 grid flex-1 text-left text-sm">
-                <span className="mb-0.5 truncate leading-tight font-semibold">
-                    {name}
-                </span>
-            </div>
+            <img
+                src={KINSENAS_SQUARE_LOGO}
+                alt="Kinsenas"
+                className={cn(
+                    'hidden size-8 shrink-0 object-contain group-data-[collapsible=icon]:block',
+                    className,
+                )}
+            />
+            <img
+                src={KINSENAS_HORIZONTAL_LOGO}
+                alt="Kinsenas"
+                className={cn(
+                    'h-auto w-full max-h-11 object-contain object-left group-data-[collapsible=icon]:hidden',
+                    className,
+                )}
+            />
         </>
     );
 }

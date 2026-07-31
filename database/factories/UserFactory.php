@@ -2,8 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Enums\TeamRole;
-use App\Models\Team;
+use App\Actions\Teams\CreateTeam;
 use App\Models\User;
 use App\Services\Billing\SubscriptionService;
 use App\Services\Vault\FinancialEncryptionService;
@@ -46,15 +45,7 @@ class UserFactory extends Factory
     public function configure(): static
     {
         return $this->afterCreating(function ($user) {
-            $team = Team::factory()->personal()->create([
-                'name' => 'Personal',
-            ]);
-
-            $team->members()->attach($user, [
-                'role' => TeamRole::Owner->value,
-            ]);
-
-            $user->switchTeam($team);
+            app(CreateTeam::class)->handle($user, isPersonal: true);
 
             app(FinancialEncryptionService::class)->createUserVault($user, 'password');
             app(SubscriptionService::class)->startTrial($user->fresh());

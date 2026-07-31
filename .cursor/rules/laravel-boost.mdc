@@ -10,7 +10,7 @@ The Laravel Boost guidelines are specifically curated by Laravel maintainers for
 
 ## Application identity
 
-- **Product name:** FutureSave
+- **Product name:** Kinsenas
 - **Local URL (Herd):** `http://financial-literacy.test` (repo folder `financial-literacy`)
 - **Admin UI:** Inertia/React with `AppSidebar`, pages under `resources/js/pages/`
 

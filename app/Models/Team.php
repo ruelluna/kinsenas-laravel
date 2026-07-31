@@ -135,4 +135,9 @@ class Team extends Model
     {
         return 'slug';
     }
+
+    public static function uniqueSlugFor(string $name, ?int $excludeId = null): string
+    {
+        return static::generateUniqueTeamSlug($name, $excludeId);
+    }
 }

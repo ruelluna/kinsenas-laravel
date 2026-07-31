@@ -1,11 +1,11 @@
 ---
-description: Documentation placement, audience, and FutureSave conventions
+description: Documentation placement, audience, and Kinsenas conventions
 alwaysApply: true
 ---
 
 # Documentation
 
-FutureSave uses **plain markdown in the main repo** — no Docusaurus sites, no nested doc repos, no published URLs yet.
+Kinsenas uses **plain markdown in the main repo** — no Docusaurus sites, no nested doc repos, no published URLs yet.
 
 When the user asks to create or update documentation, route by audience.
 

@@ -49,3 +49,42 @@ it('new users can register', function () {
     $user = User::where('email', 'test@example.com')->first();
     $response->assertRedirect(route('dashboard'));
 });
+
+it('registration creates a user named default workspace', function () {
+    $this->post(route('register.store'), [
+        'name' => 'Ruel Luna',
+        'email' => 'ruel@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ]);
+
+    $user = User::where('email', 'ruel@example.com')->firstOrFail();
+    $team = $user->personalTeam();
+
+    expect($team)->not->toBeNull()
+        ->and($team->name)->toBe("Ruel Luna's finances")
+        ->and($team->slug)->toBe('ruel-luna')
+        ->and($team->is_personal)->toBeTrue();
+});
+
+it('registration assigns distinct slugs when display names collide', function () {
+    $this->post(route('register.store'), [
+        'name' => 'Juan Dela Cruz',
+        'email' => 'juan1@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ]);
+
+    $this->post(route('register.store'), [
+        'name' => 'Juan Dela Cruz',
+        'email' => 'juan2@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ]);
+
+    $firstTeam = User::where('email', 'juan1@example.com')->firstOrFail()->personalTeam();
+    $secondTeam = User::where('email', 'juan2@example.com')->firstOrFail()->personalTeam();
+
+    expect($firstTeam->slug)->toBe('juan-dela-cruz')
+        ->and($secondTeam->slug)->toBe('juan-dela-cruz-1');
+});

@@ -1,41 +1,9 @@
 import { Form } from '@inertiajs/react';
 import VideoEmbed from '@/components/savings/video-embed';
+import TemplateAllocationPieChart from '@/components/savings/template-allocation-pie-chart';
 import { BeforeChooseAlert } from '@/components/savings/plan-guidance-panels';
 import { Button } from '@/components/ui/button';
 import type { FormulaTemplate, SavingsPlanPageGuidance } from '@/types/savings';
-
-function TemplatePercentageBar({ categories }: { categories: FormulaTemplate['categories'] }) {
-    const colors = [
-        'bg-primary/80',
-        'bg-primary/60',
-        'bg-primary/45',
-        'bg-primary/35',
-        'bg-primary/25',
-        'bg-muted-foreground/40',
-        'bg-muted-foreground/25',
-    ];
-
-    return (
-        <div className="flex h-2 overflow-hidden rounded-full bg-muted">
-            {categories.map((category, index) => {
-                const width = parseFloat(category.percentage);
-
-                if (!Number.isFinite(width) || width <= 0) {
-                    return null;
-                }
-
-                return (
-                    <div
-                        key={`${category.name}-${index}`}
-                        className={colors[index % colors.length]}
-                        style={{ width: `${width}%` }}
-                        title={`${category.name} ${category.percentage}%`}
-                    />
-                );
-            })}
-        </div>
-    );
-}
 
 function TemplatePickerCard({
     template,
@@ -67,28 +35,18 @@ function TemplatePickerCard({
                 className="mt-4"
             />
 
-            <div className="mt-4 space-y-3">
-                <TemplatePercentageBar categories={template.categories} />
-                <ul className="space-y-2 text-sm">
-                    {template.categories.map((category) => (
-                        <li key={category.name} className="flex gap-2">
-                            <span className="shrink-0 font-medium tabular-nums">
-                                {category.percentage}%
-                            </span>
-                            <div className="min-w-0">
-                                <p className="font-medium">{category.name}</p>
-                                {category.description && (
-                                    <p className="text-muted-foreground">{category.description}</p>
-                                )}
-                            </div>
-                        </li>
-                    ))}
-                </ul>
+            <div className="mt-4">
+                <p className="mb-3 text-xs text-muted-foreground">
+                    Hover a slice to read each fund&apos;s description.
+                </p>
+                <TemplateAllocationPieChart categories={template.categories} />
             </div>
 
-            <Button type="submit" className="mt-auto pt-4">
-                Use this formula
-            </Button>
+            <div className="mt-6 flex justify-center">
+                <Button type="submit" className="w-fit">
+                    Use this formula
+                </Button>
+            </div>
         </Form>
     );
 }

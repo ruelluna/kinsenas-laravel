@@ -22,7 +22,7 @@ class BankInstitutionLogoService
         $response = Http::timeout(15)
             ->retry(2, 1000, throw: false)
             ->withHeaders([
-                'User-Agent' => 'Mozilla/5.0 (compatible; FutureSave/1.0; +https://financial-literacy.test)',
+                'User-Agent' => 'Mozilla/5.0 (compatible; '.config('app.name').'/1.0; +'.config('app.url').')',
                 'Accept' => 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
             ])
             ->get($logoUrl);

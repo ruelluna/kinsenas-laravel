@@ -1,11 +1,11 @@
 ---
-description: PHP peso display formatting for FutureSave UI and server-rendered amounts
+description: PHP peso display formatting for Kinsenas UI and server-rendered amounts
 alwaysApply: true
 ---
 
-# Money formatting (FutureSave)
+# Money formatting (Kinsenas)
 
-FutureSave uses **Philippine Peso (PHP)**. Every **displayed** monetary value must use the shared formatter — never raw numbers or manual `₱` concatenation.
+Kinsenas uses **Philippine Peso (PHP)**. Every **displayed** monetary value must use the shared formatter — never raw numbers or manual `₱` concatenation.
 
 ## Frontend (Inertia / React)
 
