@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Team;
 use App\Models\TeamInvitation;
+use App\Services\Dashboard\DashboardSummaryService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request): Response
+    public function __construct(private DashboardSummaryService $dashboardSummary) {}
+
+    public function __invoke(Request $request, Team $current_team): Response
     {
-        $email = strtolower($request->user()->email);
+        $user = $request->user();
+        $email = strtolower($user->email);
 
         $pendingInvitations = TeamInvitation::query()
             ->with(['inviter', 'team'])
@@ -32,6 +37,7 @@ class DashboardController extends Controller
             ]);
 
         return Inertia::render('dashboard', [
+            ...$this->dashboardSummary->forTeam($current_team, $user),
             'pendingInvitations' => $pendingInvitations,
         ]);
     }

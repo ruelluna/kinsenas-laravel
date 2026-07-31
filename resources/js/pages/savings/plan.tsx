@@ -2,6 +2,7 @@ import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { AlertTriangle, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import CategoryBankSelect from '@/components/savings/category-bank-select';
+import FundBalanceGrid from '@/components/savings/fund-balance-grid';
 import Heading from '@/components/heading';
 import {
     BeforeChooseAlert,
@@ -355,23 +356,15 @@ function SavingsPlanEditor({
                             <Link href={`/${teamSlug}/savings/spending`}>Record spending</Link>
                         </Button>
                     </div>
-                    <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                        {fundBalances.slice(0, 6).map((balance) => (
-                            <li
-                                key={balance.categoryId}
-                                className="flex items-center justify-between gap-2 rounded-md bg-muted/40 px-3 py-2 text-sm"
-                            >
-                                <span>{balance.name}</span>
-                                <span className="font-medium">{formatMoney(balance.remaining)}</span>
-                            </li>
-                        ))}
-                    </ul>
+                    <div className="mt-4">
+                        <FundBalanceGrid fundBalances={fundBalances} variant="compact" limit={6} />
+                    </div>
                 </div>
             )}
 
             {plan.hasIncome && (
                 <Alert className="mt-6">
-                    <AlertTriangle className="text-amber-600" />
+                    <AlertTriangle className="text-warning" />
                     <AlertTitle>Custom category changes affect all income</AlertTitle>
                     <AlertDescription>
                         Adding, editing, or removing a custom category updates this plan for

@@ -3,8 +3,8 @@ import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import AddSpendingModal from '@/components/savings/add-spending-modal';
 import EditSpendingModal from '@/components/savings/edit-spending-modal';
+import FundBalanceGrid from '@/components/savings/fund-balance-grid';
 import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatMoney } from '@/lib/format-money';
 import type { FundBalance, FundSpend } from '@/types/savings';
@@ -18,22 +18,6 @@ type Props = {
     categories: Array<{ id: string; name: string; bankId: string | null }>;
     spends: FundSpend[];
 };
-
-function remainingTone(percentUsed: number | null): string {
-    if (percentUsed === null) {
-        return 'text-muted-foreground';
-    }
-
-    if (percentUsed >= 90) {
-        return 'text-destructive';
-    }
-
-    if (percentUsed >= 70) {
-        return 'text-amber-600 dark:text-amber-400';
-    }
-
-    return 'text-emerald-600 dark:text-emerald-400';
-}
 
 export default function SpendingIndex({
     plan,
@@ -106,54 +90,13 @@ export default function SpendingIndex({
             )}
 
             {fundBalances.length > 0 && (
-                <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    {fundBalances.map((balance) => (
-                        <div
-                            key={balance.categoryId}
-                            className={`rounded-lg border p-4 ${balance.isDefault ? 'ring-2 ring-primary/20' : ''}`}
-                        >
-                            <div className="flex items-start justify-between gap-2">
-                                <div>
-                                    <p className="font-medium">{balance.name}</p>
-                                    {balance.hint && (
-                                        <p className="mt-0.5 text-xs text-muted-foreground">{balance.hint}</p>
-                                    )}
-                                </div>
-                                {balance.isDefault && <Badge variant="secondary">Default</Badge>}
-                            </div>
-                            <dl className="mt-4 space-y-1 text-sm">
-                                <div className="flex justify-between gap-2">
-                                    <dt className="text-muted-foreground">Allocated</dt>
-                                    <dd>{formatMoney(balance.allocated)}</dd>
-                                </div>
-                                <div className="flex justify-between gap-2">
-                                    <dt className="text-muted-foreground">Transferred</dt>
-                                    <dd>{formatMoney(balance.transferred)}</dd>
-                                </div>
-                                <div className="flex justify-between gap-2">
-                                    <dt className="text-muted-foreground">Spent</dt>
-                                    <dd>{formatMoney(balance.spent)}</dd>
-                                </div>
-                                <div className="flex justify-between gap-2 font-medium">
-                                    <dt>Remaining</dt>
-                                    <dd className={remainingTone(balance.percentUsed)}>
-                                        {formatMoney(balance.remaining)}
-                                    </dd>
-                                </div>
-                            </dl>
-                            {plan.hasLockedIncome && (
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    className="mt-4 w-full"
-                                    onClick={() => openAddModal(balance.categoryId)}
-                                >
-                                    Spend from {balance.name}
-                                </Button>
-                            )}
-                        </div>
-                    ))}
+                <div className="mt-6">
+                    <FundBalanceGrid
+                        fundBalances={fundBalances}
+                        variant="detailed"
+                        hasLockedIncome={plan.hasLockedIncome}
+                        onSpendFrom={openAddModal}
+                    />
                 </div>
             )}
 

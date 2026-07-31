@@ -6,6 +6,7 @@ import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatMoney } from '@/lib/format-money';
+import { remainingTone } from '@/lib/fund-balance-tone';
 import type { CategoryBankMap, FundBalance, FundTransfer } from '@/types/savings';
 import type { SharedData } from '@/types';
 
@@ -25,22 +26,6 @@ type Props = {
     categoryBankMap: CategoryBankMap;
     transfers: FundTransfer[];
 };
-
-function remainingTone(percentUsed: number | null): string {
-    if (percentUsed === null) {
-        return 'text-muted-foreground';
-    }
-
-    if (percentUsed >= 90) {
-        return 'text-destructive';
-    }
-
-    if (percentUsed >= 70) {
-        return 'text-amber-600 dark:text-amber-400';
-    }
-
-    return 'text-emerald-600 dark:text-emerald-400';
-}
 
 export default function TransfersIndex({
     plan,
