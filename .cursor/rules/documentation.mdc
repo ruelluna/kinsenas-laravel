@@ -1,0 +1,98 @@
+---
+description: Documentation placement, audience, and FutureSave conventions
+alwaysApply: true
+---
+
+# Documentation
+
+FutureSave uses **plain markdown in the main repo** — no Docusaurus sites, no nested doc repos, no published URLs yet.
+
+When the user asks to create or update documentation, route by audience.
+
+## Where to put markdown
+
+| Audience | Path | Primary reader |
+|----------|------|----------------|
+| Admin / operators | `docs/admin/<kebab-case>.md` | Staff using the **Inertia/React admin UI** |
+| Members / end users | `docs/members/<kebab-case>.md` | App members (when needed) |
+| Index / setup | `docs/README.md` | Anyone cloning or browsing docs locally |
+
+Most guides are **admin-heavy**. Default to `docs/admin/` unless the content is clearly member-facing.
+
+Use **kebab-case** filenames. Cross-link siblings with relative paths: `[Title](./sibling-page.md)`.
+
+## Audience
+
+- **Mixed content** → split into `docs/admin/` and `docs/members/` files; never one doc for both audiences
+- **Technical** (APIs, algorithms, internal systems) → admin unless explicitly member-facing
+- **Engineering-only** (migrations, artisan, deploy, SSH, test commands) → `.cursor/breakdowns/` only — not `docs/`
+
+## Admin docs (`docs/admin/`)
+
+Admin guides are for **operators using the Inertia admin UI** — not engineers on the server.
+
+**Do not include in admin markdown:**
+
+- `php artisan …` commands, shell blocks, or deploy/SSH instructions
+- References to `.cursor/` paths (breakdowns, plans, rules)
+- Links or paths to `.cursor/breakdowns/`, `.cursor/plans/`, or `.cursor/rules/`
+
+**Use instead:**
+
+- In-app navigation paths (**Dashboard → Teams → Edit**, **Settings → Users**, sidebar labels, page titles, buttons, tabs)
+- What the operator sees and clicks — not Laravel/Filament/server internals
+- Sibling doc links: `[Title](./sibling-page.md)`
+- For engineering steps, say to coordinate with engineering or refer to internal breakdowns — do not paste CLI into admin docs
+
+## Member docs (`docs/members/`)
+
+- No "For administrators:" sections or admin-doc cross-references
+- Passing mentions OK (e.g. "admins are notified")
+- Same bans as admin docs: no `php artisan`, shell blocks, or `.cursor/` references
+
+## After adding a doc
+
+1. Place the file under the correct audience folder (`docs/admin/` or `docs/members/`)
+2. Update `docs/README.md` with a link if it helps discovery
+3. Keep titles and tone consistent with sibling pages
+
+There is no Docusaurus build step. Preview by reading the markdown locally.
+
+## Git and agents
+
+### Agents must not commit unless asked
+
+- **NEVER** run `git commit` or `git push` for documentation unless the user **explicitly** asks
+- Editing markdown does **not** imply permission to commit
+
+### When documentation changes
+
+At the end of work that touched `docs/`, provide a **suggested commit** the user can copy (do not commit unless asked):
+
+```
+Summary: <imperative verb> <what changed in docs>
+
+<body — 1–2 sentences on what readers will find updated>
+```
+
+If app code and docs both changed, suggest **separate** commit messages (one for code, one for docs) unless the user prefers a single commit.
+
+### When the user asks to commit
+
+Follow the repo's normal git commit rules. Do not use bot/agent author metadata.
+
+## Do not
+
+- Docusaurus sites, `sidebars.ts`, or nested git repos under `docs/`
+- Filament navigation examples or ELU-specific paths/URLs
+- `ADMIN_DOCS_URL`, `USER_DOCS_URL`, or `config/docs.php` (not used in this project)
+- Markdown guides at repo root outside `docs/` (except project README if appropriate)
+- `php artisan`, shell deploy blocks, or `.cursor/` references inside `docs/admin/` or `docs/members/`
+
+## Examples
+
+✅ `docs/admin/managing-teams.md` — "Open **Teams** in the sidebar, then **Create team**…"
+✅ `docs/members/your-profile.md` — member how-to with no admin cross-links
+✅ `.cursor/breakdowns/20260801-1230-teams-admin-breakdown.md` — migrate, test commands, deploy
+❌ `docs/managing-teams.md` at the root of `docs/` (use audience subfolders)
+❌ `php artisan migrate` inside `docs/admin/managing-teams.md`

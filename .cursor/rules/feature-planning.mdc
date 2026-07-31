@@ -1,0 +1,62 @@
+---
+description: When planning a feature, identify cross-cutting impacts so the plan covers seeders, tests, roles, and adjacent flows — not just the primary file change.
+alwaysApply: true
+---
+
+# Feature planning — impact analysis
+
+When creating or updating a **plan** (before implementation), do not stop at the primary feature file. Scan the application for **affected surfaces** and include them as explicit plan sections or todos.
+
+## Required impact checklist
+
+For every feature plan, walk through this list. Mark **N/A** only when genuinely not applicable — do not skip silently.
+
+| Area | Ask |
+|------|-----|
+| **Database** | New tables/columns? FK changes? Data migration from old columns? |
+| **Models & relationships** | New models? Renamed relations? Factory states? |
+| **Seeders & demo data** | Does `migrate:fresh --seed` still produce a usable demo? Seeder **order**? Idempotent `firstOrCreate`? |
+| **Factories** | Do factories match the new schema? Do tests still compose realistic data? |
+| **Enums & permissions** | Roles, permissions, policies — add, remove, or repurpose? |
+| **Routes & Wayfinder** | New routes? Changed route names → TS regen? |
+| **Form requests & validation** | New/changed input fields? Authorization rules? |
+| **Services & events** | Business logic moves? Broadcast payloads? Queued jobs? |
+| **Inertia props & TS types** | Prop shape changes? Shared types in `resources/js/types/`? |
+| **UI components** | Which pages/components consume the changed props? |
+| **Settings / admin CRUD** | Does the feature belong in Settings, Teams, or both? |
+| **Print / export / reports** | Slips, PDFs, labels that display the same data? |
+| **Change logs / audit text** | Human-readable summaries that reference old field names? |
+| **Tests** | Feature, unit, browser — which existing tests break? What new coverage? |
+| **Docs** | Operator guide needed? (Only if user requested or plan includes docs todo.) |
+
+## Seeders are not optional for domain changes
+
+If a feature introduces or replaces a **domain entity** (e.g. teams, memberships, invitations):
+
+- Plan a **TeamSeeder** (or equivalent) and **DatabaseSeeder call order**
+- Plan updates to **existing seeders** that reference the old model (e.g. membership seeder assigning `team_id`)
+- Plan **factory** updates in the same pass
+- Include a **fresh-seed regression checklist** in the plan (login role, page path, what should be visible)
+
+Broken demo seed data causes more regression pain than missing unit tests.
+
+## Plan structure expectations
+
+A complete plan should include, when applicable:
+
+1. **Problem / target model** — what is wrong today and what replaces it
+2. **Data model & migration** — including data backfill
+3. **Backend** — services, requests, policies, props
+4. **Frontend** — types, components, settings pages
+5. **Seeders & factories** — order, idempotency, demo scenario
+6. **Role / permission cleanup** — deprecations and hidden enums
+7. **Tests** — files to update + new tests + suggested commands (do not run unless asked)
+8. **Out of scope** — explicit boundaries
+
+Use mermaid or tables when the change touches multiple layers.
+
+## Relationship to plan implementation
+
+After a plan is **approved and executed**, follow [plan-implementation.mdc](./plan-implementation.mdc) for breakdowns, visual QA, commit suggestions, and test command wording.
+
+Planning catches **what** to change; implementation rules catch **how** to ship it.

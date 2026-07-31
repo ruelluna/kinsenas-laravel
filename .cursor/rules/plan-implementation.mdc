@@ -1,0 +1,267 @@
+---
+description: FutureSave plan implementation — breakdowns, visual QA, test suggestions, optional docs, commits, summary
+alwaysApply: true
+---
+
+# Plan Implementation (FutureSave)
+
+When executing an approved plan (or a plan attached to the conversation), follow this order **before** marking work complete.
+
+**Before implementation:** plans must follow [feature-planning.mdc](./feature-planning.mdc) — seeders, factories, tests, permissions, and adjacent UI should already be listed in the plan todos.
+
+## When this rule applies
+
+### Full workflow
+
+Breakdown file, implementation summary, and commit suggestions:
+
+- Approved plans
+- Feature rollouts
+- Bug fixes that change behavior
+- Migrations, auth, or deploy-impacting changes
+- Inertia/React UI or admin workflow changes
+
+### Lightweight workflow
+
+Implementation summary only — **no breakdown file**:
+
+- Cursor rules or agent config only
+- Copy or styling with no behavior change
+- Dependency bumps with no app logic change
+
+## 1. Documentation (optional)
+
+**Default:** do **not** create or update `docs/` unless the user explicitly asks for documentation or the plan includes a docs todo.
+
+When docs **are** requested, follow `documentation.mdc`:
+
+| Change type                            | Typical path                   |
+| -------------------------------------- | ------------------------------ |
+| Admin UI workflows, ops, internal APIs | `docs/admin/<kebab-case>.md`   |
+| Member/end-user how-to                 | `docs/members/<kebab-case>.md` |
+| Both audiences                         | Split into two files           |
+
+If no doc exists for the feature, extend the closest sibling rather than inventing a new file unless the plan specifies one.
+
+**Admin doc content rules** (strict — see `documentation.mdc`):
+
+- Inertia admin UI paths only; no `php artisan` or shell commands in `docs/admin/` or `docs/members/`
+- Never link to or mention `.cursor/` paths in published markdown
+- CLI audit/deploy/test commands belong in `.cursor/breakdowns/` and implementation replies for engineers
+
+**FutureSave terminology:**
+
+- **Admin** — Inertia/React app with `AppSidebar`, pages under `resources/js/pages/`
+- **Member** — end-user flows (when added; today mostly dashboard and settings)
+
+There are **no published doc URLs** yet. Reference local paths only (e.g. `docs/admin/feature-name.md`).
+
+## 2. Plan todo alignment
+
+If the plan has a docs todo, complete it in the same pass as code — not as a follow-up.
+
+When updating the plan file todos, mark the docs item done only after markdown reflects the shipped behavior.
+
+## 3. Testing (FutureSave)
+
+- Do **not** run `php artisan test` unless the user asks.
+- In breakdowns and replies, list **suggested** commands only.
+- Prefer **Pest 5 browser tests** (`pestphp/pest-plugin-browser`, `tests/Browser/`) for automated E2E — **do not add Laravel Dusk**.
+- Use Pest Feature tests for auth, validation, redirects, and server-side behavior (existing pattern in `tests/Feature/`).
+
+### When to suggest automated browser tests
+
+| Change type                   | Visual QA in breakdown | Suggest browser test   |
+| ----------------------------- | ---------------------- | ---------------------- |
+| Backend-only                  | Skip                   | Feature test only      |
+| New Inertia page or component | Required               | Smoke test if new page |
+| New admin workflow            | Required               | Flow test if critical  |
+| CSS-only tweak                | Required               | Optional               |
+
+## 4. FutureSave verify checklist
+
+Include applicable items in breakdowns and Linear comments:
+
+- `php artisan migrate` — if migrations changed
+- `php artisan wayfinder:generate --no-interaction` — if routes or controllers changed (or confirm Vite Wayfinder plugin regen on dev)
+- `vendor/bin/pint --dirty` — if PHP changed
+- `npm run dev` or `npm run build` — if `resources/js/` changed
+- Manual check in Herd: `http://financial-literacy.test`
+
+## 5. Commit messages (suggest only)
+
+Do **not** commit unless the user asks. At the end of plan implementation, provide suggested commits the user can copy.
+
+### A. Application code (always when code changed)
+
+```
+Summary: <imperative verb> <what changed> (<scope if helpful>)
+
+<body — 1–3 sentences on why, not a file list>
+```
+
+Match existing repo style: concise summary, body explains **why** and any deploy/admin action.
+
+### B. Documentation (only if `docs/` was edited)
+
+```
+Summary: <same theme as app change, doc angle>
+
+<body — what operators or members will find updated>
+```
+
+Remind the user they can commit code and docs separately or together.
+
+## 6. Breakdown file (required for full workflow)
+
+Every plan implementation, bug fix resolution, or feature rollout under the **full workflow** must create or update a breakdown in `.cursor/breakdowns/`. Breakdowns are **tracked in git** for engineering handoff.
+
+**Breakdowns are internal.** Do not link to `.cursor/breakdowns/` from `docs/admin/` or `docs/members/`. Artisan, deploy, and test commands belong in breakdowns (and Linear deploy comments for engineers), not in operator guides.
+
+### File location and naming
+
+Save to `.cursor/breakdowns/` using this exact pattern:
+
+```
+YYYYMMDD-HHMM-<task-slug>-breakdown.md
+```
+
+| Part          | Rule                                                                     |
+| ------------- | ------------------------------------------------------------------------ |
+| `YYYYMMDD`    | Local date when the breakdown is written                                 |
+| `HHMM`        | Local 24-hour time (no colon), e.g. `1652`                               |
+| `<task-slug>` | Short kebab-case label for the task (e.g. `teams-admin`, `sidebar-nav`) |
+| Suffix        | Always `-breakdown.md`                                                   |
+
+| Rule   | Detail                                                                                                                                                |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Create | On every full-workflow completion                                                                                                                     |
+| Update | Same topic later → append a dated changelog section to the latest breakdown for that `<task-slug>`; do not create duplicate files in the same session |
+
+### Required content
+
+- Title and date
+- Summary (what changed and why)
+- Bullet changelog of user-visible/admin changes
+- Files touched (grouped by area)
+- Deploy/migration steps if any (see FutureSave verify checklist)
+- **Suggested test commands** (do not run unless user asks)
+- **Visual QA** — when UI or Inertia pages changed (see template below)
+- Suggested application commit (summary + body)
+- Suggested doc commit if `docs/` was edited
+- Linear paste block (Title, Description, Comment/instructions, Documentation paths when applicable)
+
+### Visual QA template (UI or Inertia changes)
+
+Use sidebar labels, page titles, and button text — not file paths.
+
+```markdown
+## Visual QA (manual)
+
+**URL:** http://financial-literacy.test
+**Prereqs:** `npm run dev` (or `npm run build`) if frontend changed
+
+### Happy path
+
+1. Log in as `<role>` (e.g. factory user from `User::factory()`)
+2. Open **<Sidebar label>** → **<Page title>**
+3. …specific clicks for this feature…
+4. Confirm success message / updated data visible
+
+### Checks
+
+- [ ] No console errors (DevTools → Console)
+- [ ] Sidebar active state matches current page
+- [ ] Light and dark mode (if page uses `dark:`)
+- [ ] Mobile width (~375px): sidebar collapses / layout usable
+- [ ] Form validation errors show inline (if forms changed)
+
+### Regression
+
+- [ ] Login/logout still works
+- [ ] …one adjacent flow…
+```
+
+### Suggested test commands template
+
+```markdown
+## Suggested tests (run manually)
+
+# Feature tests
+
+php artisan test --compact tests/Feature/<RelevantTest>.php
+
+# Browser tests (when pest-plugin-browser is installed)
+
+php artisan test --compact tests/Browser/<RelevantTest>.php
+
+# Lint / format
+
+vendor/bin/pint --dirty
+```
+
+Note whether a new browser test **should** be added for critical flows not yet covered.
+
+## 7. Implementation summary (required)
+
+End every plan implementation reply with a **changelog** the user can scan or paste elsewhere (mirror the breakdown changelog; link to the breakdown file when helpful):
+
+```markdown
+## <Short title — same theme as commit summary>
+
+- <User-visible or admin-visible change>
+- <Another concrete change>
+- <Migration, config, or deploy note if any>
+```
+
+Use bullet points, not file lists. Cover behavior, admin workflow, and member UX — skip refactors that change nothing observable.
+
+For UI changes, include one line pointing to the Visual QA steps in the breakdown.
+
+## 8. Linear paste block (optional)
+
+Include when the user mentions Linear, a ticket ID, or an approved plan. Omit for trivial or lightweight work.
+
+```
+Title: <same as summary title>
+
+Description:
+<2–5 sentences or bullets — what shipped and why>
+
+Comment / instructions:
+<Deploy steps, migrations, Visual QA summary, suggested test commands>
+
+Documentation:
+<Only when docs were updated — local paths>
+docs/admin/<slug>.md
+docs/members/<slug>.md
+```
+
+### Example
+
+```
+Title: Add team member role filter to admin teams list
+
+Description:
+Admins can filter team members by owner, admin, and member from the Teams index. Filter state persists while navigating within the admin area.
+
+Comment / instructions:
+Run `php artisan migrate` after deploy. Visual QA: Teams sidebar → filter dropdown → confirm list updates. Suggested: `php artisan test --compact tests/Feature/TeamsIndexTest.php`.
+
+Documentation:
+docs/admin/managing-teams.md
+```
+
+## 9. Response checklist
+
+Before finishing, confirm in the reply:
+
+- [ ] Breakdown file created or updated (or N/A — lightweight workflow)
+- [ ] Visual QA steps included (or N/A — no UI change)
+- [ ] Test commands suggested, not run (unless user asked)
+- [ ] Docs updated (or N/A — not requested / no user-facing guide needed)
+- [ ] Docs: no `php artisan`, shell blocks, or `.cursor/` references (per `documentation.mdc`)
+- [ ] Suggested application commit summary + body
+- [ ] Suggested doc commit if applicable
+- [ ] Implementation summary (title + bullets)
+- [ ] Linear paste block (when useful or requested)
