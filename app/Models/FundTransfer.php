@@ -17,8 +17,10 @@ class FundTransfer extends Model
 
     protected $fillable = [
         'savings_plan_id',
-        'category_id',
-        'bank_id',
+        'from_category_id',
+        'to_category_id',
+        'from_bank_id',
+        'to_bank_id',
         'amount_encrypted',
         'description',
         'transferred_on',
@@ -42,14 +44,24 @@ class FundTransfer extends Model
         return $this->belongsTo(SavingsPlan::class, 'savings_plan_id');
     }
 
-    public function category(): BelongsTo
+    public function fromCategory(): BelongsTo
     {
-        return $this->belongsTo(SavingsCategory::class, 'category_id');
+        return $this->belongsTo(SavingsCategory::class, 'from_category_id');
     }
 
-    public function bank(): BelongsTo
+    public function toCategory(): BelongsTo
     {
-        return $this->belongsTo(Bank::class);
+        return $this->belongsTo(SavingsCategory::class, 'to_category_id');
+    }
+
+    public function fromBank(): BelongsTo
+    {
+        return $this->belongsTo(Bank::class, 'from_bank_id');
+    }
+
+    public function toBank(): BelongsTo
+    {
+        return $this->belongsTo(Bank::class, 'to_bank_id');
     }
 
     public function confirmedBy(): BelongsTo
@@ -60,5 +72,10 @@ class FundTransfer extends Model
     public function isConfirmed(): bool
     {
         return $this->status === TransferStatus::Confirmed;
+    }
+
+    public function crossesBanks(): bool
+    {
+        return $this->from_bank_id !== $this->to_bank_id;
     }
 }

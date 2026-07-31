@@ -20,8 +20,7 @@ class FundBalanceService
     public function __construct(
         private VaultKeyManager $vaultKeyManager,
         private FinancialEncryptionService $encryption,
-    ) {
-    }
+    ) {}
 
     /**
      * @return list<array{
@@ -31,6 +30,7 @@ class FundBalanceService
      *     isDefault: bool,
      *     allocated: string|null,
      *     transferred: string|null,
+     *     received: string|null,
      *     spent: string|null,
      *     remaining: string|null,
      *     percentUsed: float|null
@@ -41,7 +41,8 @@ class FundBalanceService
         $plan->loadMissing('categories');
         $dek = $this->vaultKeyManager->userDek();
         $allocatedByCategory = $this->allocatedTotalsByCategory($plan, $dek);
-        $transferredByCategory = $this->transferredTotalsByCategory($plan, $dek);
+        $transferredOutByCategory = $this->transferredOutTotalsByCategory($plan, $dek);
+        $receivedInByCategory = $this->receivedInTotalsByCategory($plan, $dek);
         $spentByCategory = $this->spentTotalsByCategory($plan, $dek);
         $defaultCategoryId = $this->defaultCategoryId($plan);
 
@@ -50,21 +51,27 @@ class FundBalanceService
             ->values()
             ->map(function (SavingsCategory $category) use (
                 $allocatedByCategory,
-                $transferredByCategory,
+                $transferredOutByCategory,
+                $receivedInByCategory,
                 $spentByCategory,
                 $defaultCategoryId,
                 $dek,
             ) {
                 $allocated = $allocatedByCategory[$category->id] ?? '0.00';
-                $transferred = $transferredByCategory[$category->id] ?? '0.00';
+                $transferredOut = $transferredOutByCategory[$category->id] ?? '0.00';
+                $receivedIn = $receivedInByCategory[$category->id] ?? '0.00';
                 $spent = $spentByCategory[$category->id] ?? '0.00';
                 $remaining = $dek === null
                     ? null
-                    : bcsub(bcsub($allocated, $transferred, 2), $spent, 2);
+                    : bcsub(
+                        bcadd(bcsub($allocated, $transferredOut, 2), $receivedIn, 2),
+                        $spent,
+                        2,
+                    );
                 $percentUsed = null;
 
                 if ($dek !== null && bccomp($allocated, '0', 2) === 1) {
-                    $drawn = bcadd($transferred, $spent, 2);
+                    $drawn = bcsub(bcadd($transferredOut, $spent, 2), $receivedIn, 2);
                     $percentUsed = round((float) bcdiv(bcmul($drawn, '100', 4), $allocated, 2), 1);
                 }
 
@@ -74,7 +81,8 @@ class FundBalanceService
                     'hint' => $this->hintForCategory($category->name),
                     'isDefault' => $category->id === $defaultCategoryId,
                     'allocated' => $dek === null ? null : $allocated,
-                    'transferred' => $dek === null ? null : $transferred,
+                    'transferred' => $dek === null ? null : $transferredOut,
+                    'received' => $dek === null ? null : $receivedIn,
                     'spent' => $dek === null ? null : $spent,
                     'remaining' => $remaining,
                     'percentUsed' => $percentUsed,
@@ -92,10 +100,15 @@ class FundBalanceService
         }
 
         $allocated = $this->allocatedTotalsByCategory($plan, $dek)[$categoryId] ?? '0.00';
-        $transferred = $this->transferredTotalsByCategory($plan, $dek)[$categoryId] ?? '0.00';
+        $transferredOut = $this->transferredOutTotalsByCategory($plan, $dek)[$categoryId] ?? '0.00';
+        $receivedIn = $this->receivedInTotalsByCategory($plan, $dek)[$categoryId] ?? '0.00';
         $spent = $this->spentTotalsByCategory($plan, $dek)[$categoryId] ?? '0.00';
 
-        return bcsub(bcsub($allocated, $transferred, 2), $spent, 2);
+        return bcsub(
+            bcadd(bcsub($allocated, $transferredOut, 2), $receivedIn, 2),
+            $spent,
+            2,
+        );
     }
 
     public function assertCanSpend(SavingsPlan $plan, string $categoryId, string $amount): void
@@ -119,7 +132,8 @@ class FundBalanceService
         }
 
         $allocatedByCategory = $this->allocatedTotalsByCategory($plan, $dek);
-        $transferredByCategory = $this->transferredTotalsByCategory($plan, $dek);
+        $transferredOutByCategory = $this->transferredOutTotalsByCategory($plan, $dek);
+        $receivedInByCategory = $this->receivedInTotalsByCategory($plan, $dek);
         $spentByCategory = $this->spentTotalsByCategory($plan, $dek);
 
         foreach ($period->allocations as $allocation) {
@@ -127,9 +141,10 @@ class FundBalanceService
             $periodAmount = $this->decryptAmount($dek, $allocation->getRawOriginal('amount_encrypted')) ?? '0.00';
             $currentAllocated = $allocatedByCategory[$categoryId] ?? '0.00';
             $allocatedAfterUnlock = bcsub($currentAllocated, $periodAmount, 2);
-            $transferred = $transferredByCategory[$categoryId] ?? '0.00';
+            $transferredOut = $transferredOutByCategory[$categoryId] ?? '0.00';
+            $receivedIn = $receivedInByCategory[$categoryId] ?? '0.00';
             $spent = $spentByCategory[$categoryId] ?? '0.00';
-            $drawn = bcadd($transferred, $spent, 2);
+            $drawn = bcsub(bcadd($transferredOut, $spent, 2), $receivedIn, 2);
 
             if (bccomp($drawn, $allocatedAfterUnlock, 2) === 1) {
                 $categoryName = $allocation->category?->name ?? __('a fund');
@@ -160,6 +175,8 @@ class FundBalanceService
             return [];
         }
 
+        $plan->loadMissing('categories');
+
         $banks = $team->banks()
             ->where('is_active', true)
             ->with('institution')
@@ -169,7 +186,7 @@ class FundBalanceService
         $transfers = FundTransfer::query()
             ->where('savings_plan_id', $plan->id)
             ->where('status', TransferStatus::Confirmed)
-            ->with(['category', 'bank'])
+            ->with(['fromCategory', 'toCategory', 'fromBank', 'toBank'])
             ->get();
 
         $spends = FundSpend::query()
@@ -179,39 +196,45 @@ class FundBalanceService
             ->with(['category', 'bank'])
             ->get();
 
-        return $banks->map(function ($bank) use ($dek, $transfers, $spends) {
+        return $banks->map(function ($bank) use ($dek, $transfers, $spends, $plan) {
             $byCategory = [];
             $total = '0.00';
 
-            $bankTransfers = $transfers->where('bank_id', $bank->id);
             $bankSpends = $spends->where('bank_id', $bank->id);
 
-            $categoryIds = $bankTransfers->pluck('category_id')
-                ->merge($bankSpends->pluck('category_id'))
-                ->unique();
+            $assignedCategories = $plan->categories
+                ->where('bank_id', $bank->id)
+                ->sortBy('sort_order')
+                ->values();
 
-            foreach ($categoryIds as $categoryId) {
-                $categoryName = $bankTransfers->firstWhere('category_id', $categoryId)?->category?->name
+            $activityCategoryIds = $transfers->flatMap(fn (FundTransfer $transfer) => [
+                $transfer->from_bank_id === $bank->id ? $transfer->from_category_id : null,
+                $transfer->to_bank_id === $bank->id ? $transfer->to_category_id : null,
+            ])
+                ->merge($bankSpends->pluck('category_id'))
+                ->filter()
+                ->unique()
+                ->reject(fn (string $categoryId) => $assignedCategories->contains('id', $categoryId));
+
+            foreach ($assignedCategories as $category) {
+                $categoryTotal = $this->remainingForCategory($plan, $category->id) ?? '0.00';
+
+                $byCategory[] = [
+                    'categoryId' => $category->id,
+                    'categoryName' => $category->name,
+                    'total' => $categoryTotal,
+                ];
+
+                $total = bcadd($total, $categoryTotal, 2);
+            }
+
+            foreach ($activityCategoryIds as $categoryId) {
+                $categoryName = $transfers->firstWhere('from_category_id', $categoryId)?->fromCategory?->name
+                    ?? $transfers->firstWhere('to_category_id', $categoryId)?->toCategory?->name
                     ?? $bankSpends->firstWhere('category_id', $categoryId)?->category?->name
                     ?? __('Unknown');
 
-                $categoryTotal = '0.00';
-
-                foreach ($bankTransfers->where('category_id', $categoryId) as $transfer) {
-                    $plain = $this->decryptAmount($dek, $transfer->getRawOriginal('amount_encrypted'));
-
-                    if ($plain !== null) {
-                        $categoryTotal = bcadd($categoryTotal, $plain, 2);
-                    }
-                }
-
-                foreach ($bankSpends->where('category_id', $categoryId) as $spend) {
-                    $plain = $this->decryptAmount($dek, $spend->getRawOriginal('amount_encrypted'));
-
-                    if ($plain !== null) {
-                        $categoryTotal = bcsub($categoryTotal, $plain, 2);
-                    }
-                }
+                $categoryTotal = $this->netBalanceForBankCategory($dek, $transfers, $bankSpends, $bank->id, $categoryId);
 
                 $byCategory[] = [
                     'categoryId' => $categoryId,
@@ -305,22 +328,105 @@ class FundBalanceService
 
     public function defaultCategoryId(SavingsPlan $plan): ?string
     {
+        $plan->loadMissing('categories');
+
         $everyday = $plan->categories->firstWhere('name', 'Everyday Fund');
 
         return $everyday?->id ?? $plan->categories->sortBy('sort_order')->first()?->id;
     }
 
     /**
-     * @return array<string, list<string>>
+     * @return list<array{
+     *     categoryId: string,
+     *     name: string,
+     *     hint: string|null,
+     *     isDefault: bool,
+     *     allocated: string|null,
+     *     transferred: string|null,
+     *     received: string|null,
+     *     spent: string|null,
+     *     remaining: string|null,
+     *     percentUsed: float|null
+     * }>
+     */
+    public function balancesWithDefaultFirst(SavingsPlan $plan): array
+    {
+        return $this->orderRowsWithDefaultFirst(
+            $this->balancesForPlan($plan),
+            $this->defaultCategoryId($plan),
+            fn (array $row) => $row['categoryId'],
+        );
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, SavingsCategory>
+     */
+    public function categoriesWithDefaultFirst(SavingsPlan $plan): \Illuminate\Support\Collection
+    {
+        $plan->loadMissing('categories');
+        $defaultId = $this->defaultCategoryId($plan);
+        $sorted = $plan->categories->sortBy('sort_order')->values();
+
+        if ($defaultId === null) {
+            return $sorted;
+        }
+
+        $default = $sorted->firstWhere('id', $defaultId);
+
+        if ($default === null) {
+            return $sorted;
+        }
+
+        return collect([$default])->merge($sorted->where('id', '!=', $defaultId))->values();
+    }
+
+    /**
+     * @template T
+     *
+     * @param  list<T>  $rows
+     * @param  callable(T): string  $categoryIdResolver
+     * @return list<T>
+     */
+    private function orderRowsWithDefaultFirst(array $rows, ?string $defaultId, callable $categoryIdResolver): array
+    {
+        if ($defaultId === null || $rows === []) {
+            return $rows;
+        }
+
+        $defaultIndex = null;
+
+        foreach ($rows as $index => $row) {
+            if ($categoryIdResolver($row) === $defaultId) {
+                $defaultIndex = $index;
+
+                break;
+            }
+        }
+
+        if ($defaultIndex === null || $defaultIndex === 0) {
+            return $rows;
+        }
+
+        $default = $rows[$defaultIndex];
+        $rest = array_values(array_filter(
+            $rows,
+            fn ($row) => $categoryIdResolver($row) !== $defaultId,
+        ));
+
+        return array_merge([$default], $rest);
+    }
+
+    /**
+     * @return array<string, string|null>
      */
     public function categoryBankMap(SavingsPlan $plan): array
     {
-        $plan->loadMissing('categories.banks');
+        $plan->loadMissing('categories.bank');
 
         $map = [];
 
         foreach ($plan->categories as $category) {
-            $map[$category->id] = $category->banks->pluck('id')->all();
+            $map[$category->id] = $category->bank_id;
         }
 
         return $map;
@@ -359,7 +465,7 @@ class FundBalanceService
     /**
      * @return array<string, string>
      */
-    private function transferredTotalsByCategory(SavingsPlan $plan, ?string $dek): array
+    private function transferredOutTotalsByCategory(SavingsPlan $plan, ?string $dek): array
     {
         if ($dek === null) {
             return [];
@@ -379,7 +485,36 @@ class FundBalanceService
                 continue;
             }
 
-            $totals[$transfer->category_id] = bcadd($totals[$transfer->category_id] ?? '0.00', $plain, 2);
+            $totals[$transfer->from_category_id] = bcadd($totals[$transfer->from_category_id] ?? '0.00', $plain, 2);
+        }
+
+        return $totals;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function receivedInTotalsByCategory(SavingsPlan $plan, ?string $dek): array
+    {
+        if ($dek === null) {
+            return [];
+        }
+
+        $totals = [];
+
+        $transfers = FundTransfer::query()
+            ->where('savings_plan_id', $plan->id)
+            ->where('status', TransferStatus::Confirmed)
+            ->get();
+
+        foreach ($transfers as $transfer) {
+            $plain = $this->decryptAmount($dek, $transfer->getRawOriginal('amount_encrypted'));
+
+            if ($plain === null) {
+                continue;
+            }
+
+            $totals[$transfer->to_category_id] = bcadd($totals[$transfer->to_category_id] ?? '0.00', $plain, 2);
         }
 
         return $totals;
@@ -445,6 +580,46 @@ class FundBalanceService
                 ]),
             ]);
         }
+    }
+
+    /**
+     * @param  Collection<int, FundTransfer>  $transfers
+     * @param  Collection<int, FundSpend>  $bankSpends
+     */
+    private function netBalanceForBankCategory(
+        string $dek,
+        Collection $transfers,
+        Collection $bankSpends,
+        string $bankId,
+        string $categoryId,
+    ): string {
+        $categoryTotal = '0.00';
+
+        foreach ($transfers as $transfer) {
+            $plain = $this->decryptAmount($dek, $transfer->getRawOriginal('amount_encrypted'));
+
+            if ($plain === null) {
+                continue;
+            }
+
+            if ($transfer->to_category_id === $categoryId && $transfer->to_bank_id === $bankId) {
+                $categoryTotal = bcadd($categoryTotal, $plain, 2);
+            }
+
+            if ($transfer->from_category_id === $categoryId && $transfer->from_bank_id === $bankId) {
+                $categoryTotal = bcsub($categoryTotal, $plain, 2);
+            }
+        }
+
+        foreach ($bankSpends->where('category_id', $categoryId) as $spend) {
+            $plain = $this->decryptAmount($dek, $spend->getRawOriginal('amount_encrypted'));
+
+            if ($plain !== null) {
+                $categoryTotal = bcsub($categoryTotal, $plain, 2);
+            }
+        }
+
+        return $categoryTotal;
     }
 
     private function decryptAmount(string $dek, mixed $encrypted): ?string

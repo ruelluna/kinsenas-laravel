@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Enums\TransferStatus;
-use App\Models\Bank;
 use App\Models\FundTransfer;
 use App\Models\SavingsCategory;
 use App\Models\SavingsPlan;
@@ -23,8 +22,10 @@ class FundTransferFactory extends Factory
     {
         return [
             'savings_plan_id' => SavingsPlan::factory(),
-            'category_id' => SavingsCategory::factory(),
-            'bank_id' => Bank::factory(),
+            'from_category_id' => SavingsCategory::factory(),
+            'to_category_id' => SavingsCategory::factory(),
+            'from_bank_id' => null,
+            'to_bank_id' => null,
             'amount_encrypted' => fake()->randomFloat(2, 100, 5000),
             'description' => fake()->sentence(3),
             'transferred_on' => fake()->date(),

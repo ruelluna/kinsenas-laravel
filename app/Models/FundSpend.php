@@ -23,6 +23,7 @@ class FundSpend extends Model
         'spent_on',
         'bank_id',
         'recipient_id',
+        'receipt_image_path',
         'status',
         'confirmed_at',
         'confirmed_by_user_id',
@@ -66,5 +67,14 @@ class FundSpend extends Model
     public function isConfirmed(): bool
     {
         return $this->status === TransferStatus::Confirmed;
+    }
+
+    public function receiptImageUrl(): ?string
+    {
+        if ($this->receipt_image_path === null) {
+            return null;
+        }
+
+        return asset('storage/'.$this->receipt_image_path);
     }
 }

@@ -18,26 +18,43 @@ beforeEach(function () {
     ]);
 });
 
-function createUserWithPlanAndIncome(string $amount = '50000.00', string $periodStart = '2026-01-01'): array
+function createUserWithPlan(string $templateSlug = 'abundant-formula'): User
 {
     $user = User::factory()->create();
     test()->unlockVaultFor($user);
 
-    $template = SavingsFormulaTemplate::query()->where('slug', 'abundant-formula')->firstOrFail();
+    $template = SavingsFormulaTemplate::query()->where('slug', $templateSlug)->firstOrFail();
 
     test()->actingAs($user)->post(route('savings.plan.from-template', [
         'current_team' => $user->currentTeam->slug,
         'template' => $template->id,
     ]));
 
+    return $user;
+}
+
+function createIncomePeriodFor(
+    User $user,
+    string $amount = '50000.00',
+    string $periodStart = '2026-01-01',
+    string $name = 'January salary',
+): IncomePeriod {
     test()->actingAs($user)->post(route('savings.income.store', [
         'current_team' => $user->currentTeam->slug,
     ]), [
+        'name' => $name,
         'amount' => $amount,
         'period_start' => $periodStart,
     ]);
 
-    $period = IncomePeriod::query()->firstOrFail();
+    return IncomePeriod::query()->firstOrFail();
+}
+
+function createUserWithPlanAndIncome(string $amount = '50000.00', string $periodStart = '2026-01-01'): array
+{
+    $user = createUserWithPlan();
+
+    $period = createIncomePeriodFor($user, $amount, $periodStart);
 
     return [$user, $period];
 }
@@ -113,7 +130,7 @@ it('returns not found when viewing another teams income period', function () {
     $response->assertNotFound();
 });
 
-it('does not include allocations on the income index payload', function () {
+it('does not include raw allocations on the income index payload', function () {
     [$user, $period] = createUserWithPlanAndIncome();
 
     $response = $this->actingAs($user)->get(route('savings.income.index', [
@@ -123,10 +140,63 @@ it('does not include allocations on the income index payload', function () {
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
         ->component('savings/income/index')
+        ->has('planCategories', 3)
+        ->where('planCategories.0.name', 'Everyday Fund')
+        ->where('planCategories.0.percentage', '70.00')
         ->has('periods', 1)
         ->where('periods.0.id', $period->id)
-        ->missing('periods.0.allocations'),
+        ->where('periods.0.name', 'January salary')
+        ->where('periods.0.categoryAmounts', fn ($amounts) => count($amounts) === 3)
+        ->missing('periods.0.allocations')
+        ->where('fundSummary', null),
     );
+});
+
+it('includes spent and remaining summary on income index when income is locked', function () {
+    [$user, $period] = createUserWithPlanAndIncome();
+
+    $this->actingAs($user)->post(route('savings.income.lock', [
+        'current_team' => $user->currentTeam->slug,
+        'incomePeriod' => $period->id,
+    ]));
+
+    $plan = \App\Models\SavingsPlan::query()->firstOrFail();
+    $everydayCategory = $plan->categories()->where('name', 'Everyday Fund')->firstOrFail();
+
+    $this->actingAs($user)->post(route('savings.spending.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'category_id' => $everydayCategory->id,
+        'amount' => '5000.00',
+        'description' => 'Groceries',
+        'spent_on' => '2026-01-15',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('savings.income.index', [
+        'current_team' => $user->currentTeam->slug,
+    ]));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('savings/income/index')
+        ->has('fundSummary.categorySpent')
+        ->has('fundSummary.categoryRemaining')
+        ->where("fundSummary.categorySpent.{$everydayCategory->id}", '5000.00')
+        ->where("fundSummary.categoryRemaining.{$everydayCategory->id}", '30000.00'),
+    );
+});
+
+it('requires a name when storing income', function () {
+    $user = createUserWithPlan();
+
+    $response = $this->actingAs($user)->post(route('savings.income.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'amount' => '50000.00',
+        'period_start' => '2026-01-01',
+    ]);
+
+    $response->assertSessionHasErrors('name');
 });
 
 function savePlanWithDeduction(User $user): void
@@ -150,8 +220,9 @@ function savePlanWithDeduction(User $user): void
 }
 
 it('locks income with fixed deduction applied to source category', function () {
-    [$user, $period] = createUserWithPlanAndIncome('50000.00');
+    $user = createUserWithPlan();
     savePlanWithDeduction($user);
+    $period = createIncomePeriodFor($user, '50000.00');
 
     $response = $this->actingAs($user)->post(route('savings.income.lock', [
         'current_team' => $user->currentTeam->slug,
@@ -177,7 +248,7 @@ it('locks income with fixed deduction applied to source category', function () {
 });
 
 it('fails to lock when deduction exceeds source allocation', function () {
-    [$user, $period] = createUserWithPlanAndIncome('50000.00');
+    $user = createUserWithPlan();
 
     test()->actingAs($user)->put(route('savings.plan.update', [
         'current_team' => $user->currentTeam->slug,
@@ -195,6 +266,8 @@ it('fails to lock when deduction exceeds source allocation', function () {
         ],
     ]);
 
+    $period = createIncomePeriodFor($user, '50000.00');
+
     $response = $this->actingAs($user)->post(route('savings.income.lock', [
         'current_team' => $user->currentTeam->slug,
         'incomePeriod' => $period->id,
@@ -204,7 +277,7 @@ it('fails to lock when deduction exceeds source allocation', function () {
 });
 
 it('locks income with percent of income deduction', function () {
-    [$user, $period] = createUserWithPlanAndIncome('50000.00');
+    $user = createUserWithPlan();
 
     test()->actingAs($user)->put(route('savings.plan.update', [
         'current_team' => $user->currentTeam->slug,
@@ -221,6 +294,8 @@ it('locks income with percent of income deduction', function () {
             ],
         ],
     ]);
+
+    $period = createIncomePeriodFor($user, '50000.00');
 
     $response = $this->actingAs($user)->post(route('savings.income.lock', [
         'current_team' => $user->currentTeam->slug,
@@ -241,7 +316,7 @@ it('locks income with percent of income deduction', function () {
 });
 
 it('allows clearing a custom amount for an income period while keeping the category', function () {
-    [$user, $period] = createUserWithPlanAndIncome('50000.00');
+    $user = createUserWithPlan();
 
     test()->actingAs($user)->put(route('savings.plan.update', [
         'current_team' => $user->currentTeam->slug,
@@ -258,6 +333,8 @@ it('allows clearing a custom amount for an income period while keeping the categ
             ],
         ],
     ]);
+
+    $period = createIncomePeriodFor($user, '50000.00');
 
     $plan = \App\Models\SavingsPlan::query()->firstOrFail();
     $collegeCategory = $plan->categories()->where('name', 'College Fund')->firstOrFail();

@@ -17,6 +17,7 @@ class SaveIncomePeriodRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'name' => ['required', 'string', 'max:255'],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'period_start' => ['required', 'date'],
         ];

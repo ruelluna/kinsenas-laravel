@@ -11,7 +11,7 @@ export type SavingsCategory = {
     deductionValue?: string | null;
     deductFromCategoryId?: string | null;
     deductFromCategoryName?: string | null;
-    bankIds?: string[];
+    bankId?: string | null;
 };
 
 export type SavingsPlan = {
@@ -56,6 +56,7 @@ export type FundBalance = {
     isDefault: boolean;
     allocated: string | null;
     transferred: string | null;
+    received: string | null;
     spent: string | null;
     remaining: string | null;
     percentUsed: number | null;
@@ -67,10 +68,15 @@ export type FundTransfer = {
     description: string | null;
     status: string;
     transferredOn: string;
-    bankName: string | null;
-    bankLogoUrl: string | null;
-    categoryName: string | null;
-    categoryId: string;
+    fromCategoryName: string | null;
+    toCategoryName: string | null;
+    fromCategoryId: string;
+    toCategoryId: string;
+    fromBankName: string | null;
+    toBankName: string | null;
+    fromBankLogoUrl: string | null;
+    toBankLogoUrl: string | null;
+    crossesBanks: boolean;
 };
 
 export type FundSpend = {
@@ -83,6 +89,7 @@ export type FundSpend = {
     recipientName: string | null;
     categoryName: string | null;
     categoryId: string;
+    receiptImageUrl: string | null;
 };
 
 export type IncomeCustomCategory = {
@@ -109,9 +116,28 @@ export type IncomeBreakdownRow = {
 
 export type IncomePeriodSummary = {
     id: string;
+    name: string;
     periodStart: string;
     amount: string | null;
     isLocked: boolean;
+};
+
+export type IncomePlanCategory = {
+    id: string;
+    name: string;
+    allocationType: CategoryAllocationType;
+    percentage: string | null;
+    deductionMode?: DeductionMode | null;
+    deductionValue?: string | null;
+};
+
+export type IncomePeriodTableRow = IncomePeriodSummary & {
+    categoryAmounts: Record<string, string | null>;
+};
+
+export type IncomeFundSummary = {
+    categorySpent: Record<string, string | null>;
+    categoryRemaining: Record<string, string | null>;
 };
 
 export type IncomePeriod = IncomePeriodSummary;
@@ -120,9 +146,19 @@ export type Bank = {
     id: string;
     name: string;
     accountLabel: string | null;
+    displayName: string;
     isActive: boolean;
     logoUrl?: string | null;
     institutionId?: string | null;
+    institutionSlug?: string | null;
+    bankAccountGroupId?: string | null;
+    spaceRole?: 'main' | 'savings_space' | null;
+};
+
+export type BankInstitutionSavingsSpaces = {
+    max: number;
+    mainLabel: string;
+    spaceLabelPrefix: string;
 };
 
 export type BankInstitution = {
@@ -130,6 +166,8 @@ export type BankInstitution = {
     name: string;
     logoUrl: string | null;
     type: 'bank' | 'e_wallet';
+    features?: Record<string, unknown> | null;
+    savingsSpaces?: BankInstitutionSavingsSpaces | null;
 };
 
 export type BankBalance = {
@@ -143,10 +181,15 @@ export type BankBalance = {
 export type BankOption = {
     id: string;
     name: string;
+    accountLabel?: string | null;
+    displayName?: string;
     logoUrl?: string | null;
+    institutionSlug?: string | null;
+    bankAccountGroupId?: string | null;
+    spaceRole?: 'main' | 'savings_space' | null;
 };
 
-export type CategoryBankMap = Record<string, string[]>;
+export type CategoryBankMap = Record<string, string | null>;
 
 export type Recipient = {
     id: string;

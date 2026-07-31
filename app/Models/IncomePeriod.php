@@ -17,6 +17,7 @@ class IncomePeriod extends Model
 
     protected $fillable = [
         'plan_id',
+        'name',
         'amount_encrypted',
         'period_start',
         'is_locked',

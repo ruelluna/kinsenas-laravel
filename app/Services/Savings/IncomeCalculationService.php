@@ -19,10 +19,11 @@ class IncomeCalculationService
     ) {
     }
 
-    public function create(SavingsPlan $plan, string $amount, string $periodStart): IncomePeriod
+    public function create(SavingsPlan $plan, string $name, string $amount, string $periodStart): IncomePeriod
     {
         $period = IncomePeriod::query()->create([
             'plan_id' => $plan->id,
+            'name' => $name,
             'amount_encrypted' => $amount,
             'period_start' => $periodStart,
         ]);

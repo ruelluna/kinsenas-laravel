@@ -1,43 +1,30 @@
 import { Form, Head, usePage } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
-import BankSelect, { banksForCategory } from '@/components/savings/bank-select';
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
+import AddTransferModal from '@/components/savings/add-transfer-modal';
 import Heading from '@/components/heading';
-import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { formatMoney } from '@/lib/format-money';
-import type { BankOption, CategoryBankMap, FundBalance, FundTransfer } from '@/types/savings';
+import type { CategoryBankMap, FundBalance, FundTransfer } from '@/types/savings';
 import type { SharedData } from '@/types';
+
+type CategoryOption = {
+    id: string;
+    name: string;
+    bankId: string | null;
+    bankName: string | null;
+    bankLogoUrl: string | null;
+};
 
 type Props = {
     plan: { id: string; name: string; hasLockedIncome: boolean };
     fundBalances: FundBalance[];
     defaultCategoryId: string | null;
-    banks: BankOption[];
-    categories: Array<{ id: string; name: string; bankIds: string[] }>;
+    categories: CategoryOption[];
     categoryBankMap: CategoryBankMap;
     transfers: FundTransfer[];
 };
-
-function todayString(): string {
-    return new Date().toISOString().slice(0, 10);
-}
-
-function remainingAfterAmount(remaining: string | null, amount: string): string | null {
-    if (remaining === null || amount === '') {
-        return remaining;
-    }
-
-    const parsed = parseFloat(amount);
-
-    if (!Number.isFinite(parsed)) {
-        return remaining;
-    }
-
-    return (parseFloat(remaining) - parsed).toFixed(2);
-}
 
 function remainingTone(percentUsed: number | null): string {
     if (percentUsed === null) {
@@ -59,42 +46,52 @@ export default function TransfersIndex({
     plan,
     fundBalances,
     defaultCategoryId,
-    banks,
     categories,
     categoryBankMap,
     transfers,
 }: Props) {
-    const { currentTeam, errors } = usePage<SharedData & { errors: Record<string, string> }>().props;
+    const { currentTeam } = usePage<SharedData>().props;
     const teamSlug = currentTeam?.slug ?? '';
-    const [selectedCategoryId, setSelectedCategoryId] = useState(defaultCategoryId ?? categories[0]?.id ?? '');
-    const [selectedBankId, setSelectedBankId] = useState('');
-    const [amount, setAmount] = useState('');
+    const [addModalOpen, setAddModalOpen] = useState(false);
+    const [presetFromCategoryId, setPresetFromCategoryId] = useState<string | null>(null);
 
-    const selectedBalance = useMemo(
-        () => fundBalances.find((balance) => balance.categoryId === selectedCategoryId) ?? null,
-        [fundBalances, selectedCategoryId],
-    );
-
-    const availableBanks = useMemo(
-        () => banksForCategory(banks, categoryBankMap, selectedCategoryId),
-        [banks, categoryBankMap, selectedCategoryId],
-    );
-
-    const projectedRemaining = remainingAfterAmount(selectedBalance?.remaining ?? null, amount);
+    function openAddModal(fromCategoryId: string | null = null) {
+        setPresetFromCategoryId(fromCategoryId);
+        setAddModalOpen(true);
+    }
 
     return (
         <>
             <Head title="Transfers" />
-            <Heading
-                variant="small"
-                title="Transfers"
-                description={`Move allocated savings into bank accounts for ${plan.name}.`}
-            />
+            <div className="flex items-center justify-between">
+                <Heading
+                    variant="small"
+                    title="Transfers"
+                    description={`Move savings between funds in ${plan.name}.`}
+                />
+                {plan.hasLockedIncome && (
+                    <Button onClick={() => openAddModal()}>
+                        <Plus /> Add transfer
+                    </Button>
+                )}
+            </div>
 
             {!plan.hasLockedIncome && (
                 <p className="mt-4 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
                     Lock at least one income period before recording transfers.
                 </p>
+            )}
+
+            {plan.hasLockedIncome && (
+                <AddTransferModal
+                    open={addModalOpen}
+                    onOpenChange={setAddModalOpen}
+                    presetFromCategoryId={presetFromCategoryId}
+                    defaultCategoryId={defaultCategoryId}
+                    categories={categories}
+                    categoryBankMap={categoryBankMap}
+                    fundBalances={fundBalances}
+                />
             )}
 
             {fundBalances.length > 0 && (
@@ -119,8 +116,12 @@ export default function TransfersIndex({
                                     <dd>{formatMoney(balance.allocated)}</dd>
                                 </div>
                                 <div className="flex justify-between gap-2">
-                                    <dt className="text-muted-foreground">Transferred</dt>
+                                    <dt className="text-muted-foreground">Transferred out</dt>
                                     <dd>{formatMoney(balance.transferred)}</dd>
+                                </div>
+                                <div className="flex justify-between gap-2">
+                                    <dt className="text-muted-foreground">Received</dt>
+                                    <dd>{formatMoney(balance.received)}</dd>
                                 </div>
                                 <div className="flex justify-between gap-2">
                                     <dt className="text-muted-foreground">Spent</dt>
@@ -133,115 +134,20 @@ export default function TransfersIndex({
                                     </dd>
                                 </div>
                             </dl>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="mt-4 w-full"
-                                onClick={() => setSelectedCategoryId(balance.categoryId)}
-                            >
-                                Transfer to {balance.name}
-                            </Button>
+                            {plan.hasLockedIncome && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-4 w-full"
+                                    onClick={() => openAddModal(balance.categoryId)}
+                                >
+                                    Transfer from {balance.name}
+                                </Button>
+                            )}
                         </div>
                     ))}
                 </div>
-            )}
-
-            {plan.hasLockedIncome && (
-                <Form
-                    action={`/${teamSlug}/savings/transfers`}
-                    method="post"
-                    className="mt-8 max-w-lg space-y-4 rounded-lg border p-4"
-                >
-                    <div>
-                        <h3 className="font-medium">Record transfer</h3>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                            Log money moved from income into a fund&apos;s bank account. Confirm when it arrives.
-                        </p>
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="category_id">Fund</Label>
-                        <select
-                            id="category_id"
-                            name="category_id"
-                            className="border-input h-9 rounded-md border px-3 text-sm"
-                            value={selectedCategoryId}
-                            onChange={(event) => {
-                                setSelectedCategoryId(event.target.value);
-                                setSelectedBankId('');
-                            }}
-                            required
-                        >
-                            {categories.map((category) => (
-                                <option key={category.id} value={category.id}>
-                                    {category.name}
-                                </option>
-                            ))}
-                        </select>
-                        <InputError message={errors.category_id} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="bank_id">Bank</Label>
-                        <BankSelect
-                            id="bank_id"
-                            banks={banks}
-                            categoryBankMap={categoryBankMap}
-                            categoryId={selectedCategoryId}
-                            required
-                            value={selectedBankId || availableBanks[0]?.id || ''}
-                            onChange={setSelectedBankId}
-                        />
-                        <InputError message={errors.bank_id} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="amount">Amount</Label>
-                        <Input
-                            id="amount"
-                            name="amount"
-                            type="number"
-                            step="0.01"
-                            min="0.01"
-                            value={amount}
-                            onChange={(event) => setAmount(event.target.value)}
-                            required
-                        />
-                        {selectedBalance?.remaining !== null && amount !== '' && (
-                            <p className="text-xs text-muted-foreground">
-                                After this transfer: {formatMoney(projectedRemaining)} remaining in{' '}
-                                {selectedBalance?.name}
-                            </p>
-                        )}
-                        <InputError message={errors.amount} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="description">What was this for?</Label>
-                        <Input
-                            id="description"
-                            name="description"
-                            placeholder="Payroll allocation, emergency fund deposit…"
-                            required
-                        />
-                        <InputError message={errors.description} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="transferred_on">Date</Label>
-                        <Input
-                            id="transferred_on"
-                            name="transferred_on"
-                            type="date"
-                            defaultValue={todayString()}
-                            required
-                        />
-                        <InputError message={errors.transferred_on} />
-                    </div>
-
-                    <Button type="submit">Record transfer</Button>
-                </Form>
             )}
 
             <div className="mt-8">
@@ -260,9 +166,15 @@ export default function TransfersIndex({
                                         {formatMoney(transfer.amount)} · {transfer.description}
                                     </p>
                                     <p className="text-muted-foreground">
-                                        {transfer.categoryName} · {transfer.transferredOn}
-                                        {transfer.bankName ? ` · ${transfer.bankName}` : ''}
+                                        {transfer.fromCategoryName} → {transfer.toCategoryName} ·{' '}
+                                        {transfer.transferredOn}
                                     </p>
+                                    {transfer.crossesBanks && (
+                                        <p className="text-xs text-muted-foreground">
+                                            {transfer.fromBankName ?? 'No bank'} →{' '}
+                                            {transfer.toBankName ?? 'No bank'}
+                                        </p>
+                                    )}
                                 </div>
                                 {transfer.status === 'pending' && (
                                     <Form

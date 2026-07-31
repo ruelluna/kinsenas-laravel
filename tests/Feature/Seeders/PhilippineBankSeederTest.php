@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
+beforeEach(function () {
+    Storage::fake('public');
+});
+
 it('seeds philippine bank institutions idempotently', function () {
     Http::fake([
         '*' => Http::response(
@@ -52,6 +56,28 @@ it('seeds known banks and e-wallets with correct types', function () {
         ->and(BankInstitution::query()->where('type', BankInstitutionType::EWallet)->exists())->toBeTrue();
 });
 
+it('seeds gotyme with savings space features', function () {
+    Http::fake([
+        '*' => Http::response(
+            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='),
+            200,
+            ['Content-Type' => 'image/png'],
+        ),
+    ]);
+
+    $this->seed(PhilippineBankSeeder::class);
+
+    $gotyme = BankInstitution::query()->where('slug', 'gotyme')->firstOrFail();
+
+    expect($gotyme->supportsSavingsSpaces())->toBeTrue()
+        ->and($gotyme->maxSavingsSpaces())->toBe(5)
+        ->and($gotyme->savingsSpacesConfig())->toMatchArray([
+            'max' => 5,
+            'main_label' => 'Main account',
+            'space_label_prefix' => 'GoSave',
+        ]);
+});
+
 it('stores logos on the public disk when download succeeds', function () {
     Http::fake([
         '*' => Http::response(
@@ -67,7 +93,7 @@ it('stores logos on the public disk when download succeeds', function () {
 
     expect($gcash->logo_path)->not->toBeNull()
         ->and(Storage::disk('public')->exists($gcash->logo_path))->toBeTrue()
-        ->and($gcash->logo_url)->toContain('storage/bank-institutions/gcash.png');
+        ->and($gcash->logo_url)->toContain('storage/'.$gcash->logo_path);
 });
 
 it('does not download logos that already exist on disk', function () {

@@ -9,6 +9,8 @@ use App\Models\User;
 use Database\Seeders\BillingSeeder;
 use Database\Seeders\SavingsFormulaTemplateSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Concerns\UnlocksVault;
 
@@ -36,6 +38,7 @@ function createUserWithLockedIncome(string $amount = '50000.00'): array
     test()->actingAs($user)->post(route('savings.income.store', [
         'current_team' => $user->currentTeam->slug,
     ]), [
+        'name' => 'January salary',
         'amount' => $amount,
         'period_start' => '2026-01-01',
     ]);
@@ -64,6 +67,7 @@ it('shows spending page with fund balances', function () {
     $response->assertInertia(fn (Assert $page) => $page
         ->component('savings/spending/index')
         ->where('defaultCategoryId', $everydayCategory->id)
+        ->where('categories.0.id', $everydayCategory->id)
         ->has('fundBalances', 3)
         ->where('fundBalances.0.name', 'Everyday Fund')
         ->where('fundBalances.0.allocated', '35000.00')
@@ -172,6 +176,37 @@ it('creates pending spending when bank is provided', function () {
     $indexAfterConfirm->assertInertia(fn (Assert $page) => $page
         ->where('fundBalances.0.spent', '5000.00')
         ->where('fundBalances.0.remaining', '30000.00'),
+    );
+});
+
+it('records spending with an optional receipt image', function () {
+    [$user, , $everydayCategory] = createUserWithLockedIncome();
+
+    Storage::fake('public');
+
+    $response = $this->actingAs($user)->post(route('savings.spending.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'category_id' => $everydayCategory->id,
+        'amount' => '250.00',
+        'description' => 'Coffee shop',
+        'spent_on' => '2026-01-16',
+        'receipt_image' => UploadedFile::fake()->image('receipt.jpg'),
+    ]);
+
+    $response->assertRedirect();
+
+    $spend = FundSpend::query()->firstOrFail();
+    expect($spend->receipt_image_path)->not->toBeNull();
+    Storage::disk('public')->assertExists($spend->receipt_image_path);
+
+    $indexResponse = $this->actingAs($user)->get(route('savings.spending.index', [
+        'current_team' => $user->currentTeam->slug,
+    ]));
+
+    $indexResponse->assertInertia(fn (Assert $page) => $page
+        ->where('spends.0.description', 'Coffee shop')
+        ->where('spends.0.receiptImageUrl', fn ($url) => is_string($url) && $url !== ''),
     );
 });
 

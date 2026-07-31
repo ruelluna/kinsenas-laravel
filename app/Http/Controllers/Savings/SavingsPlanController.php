@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Savings;
 
+use App\Enums\TeamPermission;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Savings\SaveSavingsPlanRequest;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlanPageGuidance;
 use App\Models\Team;
+use App\Services\Savings\BankPayloadMapper;
 use App\Services\Savings\FundBalanceService;
 use App\Services\Savings\SavingsPlanService;
 use Illuminate\Http\RedirectResponse;
@@ -19,8 +21,7 @@ class SavingsPlanController extends Controller
     public function __construct(
         private SavingsPlanService $planService,
         private FundBalanceService $fundBalanceService,
-    ) {
-    }
+    ) {}
 
     public function show(Request $request, Team $current_team): Response
     {
@@ -34,11 +35,7 @@ class SavingsPlanController extends Controller
             ->with('institution')
             ->orderBy('sort_order')
             ->get()
-            ->map(fn ($bank) => [
-                'id' => $bank->id,
-                'name' => $bank->name,
-                'logoUrl' => $bank->institution?->logo_url,
-            ]);
+            ->map(fn ($bank) => BankPayloadMapper::toOption($bank));
 
         return Inertia::render('savings/plan', [
             'pageGuidance' => [
@@ -62,7 +59,7 @@ class SavingsPlanController extends Controller
                     'deductionValue' => $c->deduction_value !== null ? (string) $c->deduction_value : null,
                     'deductFromCategoryId' => $c->deduct_from_category_id,
                     'deductFromCategoryName' => $c->deductFromCategory?->name,
-                    'bankIds' => $c->banks->pluck('id')->all(),
+                    'bankId' => $c->bank_id,
                 ]),
                 'hasLockedIncome' => $plan->hasLockedIncomePeriod(),
                 'hasIncome' => $plan->hasIncomePeriod(),
@@ -108,7 +105,7 @@ class SavingsPlanController extends Controller
 
         abort_if($plan === null, 404);
 
-        if ($plan->created_by_user_id !== $request->user()->id && ! ($plan->is_shared_with_team && $request->user()->hasTeamPermission($current_team, \App\Enums\TeamPermission::UpdateTeam))) {
+        if ($plan->created_by_user_id !== $request->user()->id && ! ($plan->is_shared_with_team && $request->user()->hasTeamPermission($current_team, TeamPermission::UpdateTeam))) {
             abort(403);
         }
 

@@ -11,7 +11,7 @@ class PhilippineBankSeeder extends Seeder
 {
     public function run(): void
     {
-        /** @var list<array{slug: string, name: string, type: \App\Enums\BankInstitutionType, logo_url: string}> $institutions */
+        /** @var list<array{slug: string, name: string, type: BankInstitutionType, logo_url: string, features?: array<string, mixed>}> $institutions */
         $institutions = require database_path('data/philippine-bank-institutions.php');
 
         $logoService = app(BankInstitutionLogoService::class);
@@ -31,8 +31,19 @@ class PhilippineBankSeeder extends Seeder
                     'type' => $row['type'],
                     'sort_order' => $sortOrder,
                     'is_active' => true,
+                    'features' => $row['features'] ?? null,
                 ],
             );
+
+            $attributesToSync = array_filter([
+                'name' => $row['name'],
+                'type' => $row['type'],
+                'features' => $row['features'] ?? null,
+            ], fn ($value) => $value !== null);
+
+            if ($attributesToSync !== []) {
+                $institution->update($attributesToSync);
+            }
 
             $existingLogoPath = $logoService->resolveExistingLogoPath(
                 $row['slug'],

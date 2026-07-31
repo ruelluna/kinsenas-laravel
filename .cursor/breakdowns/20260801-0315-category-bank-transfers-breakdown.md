@@ -61,3 +61,12 @@ Summary: Add category–bank assignments and fund transfers
 Transfers are separate from spending with remaining = allocated − transferred − spent.
 Categories assign banks on the plan page; Banks and Reports show per-bank balances.
 ```
+
+## Changelog (2026-08-01 follow-up)
+
+- `FundBalanceService::bankBalancesForTeam()` now seeds per-bank breakdown from **assigned categories** (`savings_categories.bank_id`), not only categories with transfer/spend activity
+- Assigned categories appear at `₱0.00` before any confirmed activity; net per category remains transfers in minus spends out on that bank
+- **Fix:** assigned categories now show each fund's **remaining allocation** (`allocated − transferred + received − spent`), not transfer/spend net on the bank
+- Legacy activity on unassigned categories still included at end of breakdown
+
+**Tests:** `FundBalanceServiceTest` (assigned categories at zero), `FundTransferTest` (bank assignment in balance test)

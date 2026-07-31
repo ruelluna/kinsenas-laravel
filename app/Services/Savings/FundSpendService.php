@@ -23,6 +23,7 @@ class FundSpendService
         ?string $bankId = null,
         ?string $recipientId = null,
         ?User $user = null,
+        ?string $receiptImagePath = null,
     ): FundSpend {
         $needsConfirmation = $bankId !== null;
 
@@ -39,6 +40,7 @@ class FundSpendService
             'spent_on' => $spentOn,
             'bank_id' => $bankId,
             'recipient_id' => $recipientId,
+            'receipt_image_path' => $receiptImagePath,
             'status' => $needsConfirmation ? TransferStatus::Pending : TransferStatus::Confirmed,
             'confirmed_at' => $needsConfirmation ? null : $now,
             'confirmed_by_user_id' => $needsConfirmation ? null : $user?->id,

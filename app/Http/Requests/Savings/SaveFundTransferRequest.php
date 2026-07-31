@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Savings;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SaveFundTransferRequest extends FormRequest
 {
@@ -17,8 +18,13 @@ class SaveFundTransferRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_id' => ['required', 'uuid', 'exists:savings_categories,id'],
-            'bank_id' => ['required', 'uuid', 'exists:banks,id'],
+            'from_category_id' => ['required', 'uuid', 'exists:savings_categories,id'],
+            'to_category_id' => [
+                'required',
+                'uuid',
+                'exists:savings_categories,id',
+                'different:from_category_id',
+            ],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'description' => ['required', 'string', 'max:255'],
             'transferred_on' => ['required', 'date'],
@@ -32,7 +38,7 @@ class SaveFundTransferRequest extends FormRequest
     {
         return [
             'description.required' => __('Describe what this transfer was for.'),
-            'bank_id.required' => __('Select the bank you transferred to.'),
+            'to_category_id.different' => __('Choose a different fund to transfer to.'),
         ];
     }
 }

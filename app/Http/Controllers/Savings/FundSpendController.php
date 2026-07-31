@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Savings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Savings\SaveFundSpendRequest;
 use App\Models\FundSpend;
+use App\Models\SavingsCategory;
 use App\Models\Team;
 use App\Services\Savings\FundBalanceService;
 use App\Services\Savings\FundSpendService;
@@ -23,39 +24,28 @@ class FundSpendController extends Controller
         private FundBalanceService $balanceService,
         private FundSpendService $fundSpendService,
         private FundTransferService $fundTransferService,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request, Team $current_team): Response
     {
         $plan = $this->planService->forTeam($current_team, $request->user());
         abort_if($plan === null, 404);
 
-        $plan->load('categories.banks');
+        $plan->load('categories.bank');
         $spends = $this->fundSpendService->recentForPlan($plan);
         $defaultCategoryId = $this->balanceService->defaultCategoryId($plan);
-        $banks = $current_team->banks()
-            ->where('is_active', true)
-            ->with('institution')
-            ->orderBy('sort_order')
-            ->get();
+        $categories = $this->balanceService->categoriesWithDefaultFirst($plan);
 
         return Inertia::render('savings/spending/index', [
             'plan' => ['id' => $plan->id, 'name' => $plan->name, 'hasLockedIncome' => $plan->hasLockedIncomePeriod()],
-            'fundBalances' => $this->balanceService->balancesForPlan($plan),
+            'fundBalances' => $this->balanceService->balancesWithDefaultFirst($plan),
             'defaultCategoryId' => $defaultCategoryId,
-            'banks' => $banks->map(fn ($bank) => [
-                'id' => $bank->id,
-                'name' => $bank->name,
-                'logoUrl' => $bank->institution?->logo_url,
-            ]),
             'recipients' => $current_team->recipients()->get(['id', 'name']),
-            'categories' => $plan->categories->map(fn ($category) => [
+            'categories' => $categories->map(fn ($category) => [
                 'id' => $category->id,
                 'name' => $category->name,
-                'bankIds' => $category->banks->pluck('id')->all(),
+                'bankId' => $category->bank_id,
             ]),
-            'categoryBankMap' => $this->balanceService->categoryBankMap($plan),
             'spends' => $spends->map(fn (FundSpend $spend) => $this->spendPayload($spend)),
         ]);
     }
@@ -77,6 +67,8 @@ class FundSpendController extends Controller
             $this->fundTransferService->assertBankAllowedForCategory($plan, $categoryId, $bankId);
         }
 
+        $receiptImagePath = $request->file('receipt_image')?->store('spending-receipts', 'public');
+
         $this->fundSpendService->create(
             $plan,
             $categoryId,
@@ -86,6 +78,7 @@ class FundSpendController extends Controller
             $request->validated('bank_id'),
             $request->validated('recipient_id'),
             $request->user(),
+            $receiptImagePath,
         );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Spending recorded.')]);
@@ -121,12 +114,13 @@ class FundSpendController extends Controller
             'recipientName' => $spend->recipient?->name,
             'categoryName' => $spend->category?->name,
             'categoryId' => $spend->category_id,
+            'receiptImageUrl' => $spend->receiptImageUrl(),
         ];
     }
 
     private function assertCategoryBelongsToPlan(string $planId, string $categoryId): void
     {
-        $exists = \App\Models\SavingsCategory::query()
+        $exists = SavingsCategory::query()
             ->where('plan_id', $planId)
             ->where('id', $categoryId)
             ->exists();

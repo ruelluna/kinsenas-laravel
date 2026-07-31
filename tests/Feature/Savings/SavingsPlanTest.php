@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Savings;
 
+use App\Models\Bank;
+use App\Models\SavingsCategory;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlan;
 use App\Models\User;
@@ -191,6 +193,7 @@ class SavingsPlanTest extends TestCase
         $this->actingAs($user)->post(route('savings.income.store', [
             'current_team' => $user->currentTeam->slug,
         ]), [
+            'name' => 'January salary',
             'amount' => '50000.00',
             'period_start' => '2026-01-01',
         ]);
@@ -377,15 +380,14 @@ class SavingsPlanTest extends TestCase
         ]));
 
         $plan = SavingsPlan::query()->with('categories')->firstOrFail();
-        $everydayCategory = $plan->categories->firstWhere('name', 'Everyday Fund');
 
-        $bank = \App\Models\Bank::factory()->create([
+        $bank = Bank::factory()->create([
             'team_id' => $user->currentTeam->id,
             'name' => 'BDO',
         ]);
 
         $payload = $this->categoriesPayload($plan);
-        $payload[0]['bank_ids'] = [$bank->id];
+        $payload[0]['bank_id'] = $bank->id;
 
         $response = $this->actingAs($user)->put(route('savings.plan.update', [
             'current_team' => $user->currentTeam->slug,
@@ -395,10 +397,43 @@ class SavingsPlanTest extends TestCase
 
         $response->assertRedirect();
 
-        $this->assertDatabaseHas('bank_savings_category', [
+        $this->assertDatabaseHas('savings_categories', [
+            'plan_id' => $plan->id,
+            'name' => 'Everyday Fund',
             'bank_id' => $bank->id,
-            'savings_category_id' => $everydayCategory->id,
         ]);
+    }
+
+    public function test_allows_same_bank_on_multiple_categories(): void
+    {
+        $user = User::factory()->create();
+        $this->unlockVaultFor($user);
+        $template = SavingsFormulaTemplate::query()->where('slug', 'abundant-formula')->firstOrFail();
+
+        $this->actingAs($user)->post(route('savings.plan.from-template', [
+            'current_team' => $user->currentTeam->slug,
+            'template' => $template->id,
+        ]));
+
+        $plan = SavingsPlan::query()->with('categories')->firstOrFail();
+        $bank = Bank::factory()->create([
+            'team_id' => $user->currentTeam->id,
+            'name' => 'BDO',
+        ]);
+
+        $payload = $this->categoriesPayload($plan);
+        $payload[0]['bank_id'] = $bank->id;
+        $payload[1]['bank_id'] = $bank->id;
+
+        $response = $this->actingAs($user)->put(route('savings.plan.update', [
+            'current_team' => $user->currentTeam->slug,
+        ]), [
+            'categories' => $payload,
+        ]);
+
+        $response->assertRedirect();
+
+        $this->assertEquals(2, SavingsCategory::query()->where('bank_id', $bank->id)->count());
     }
 
     /**
@@ -418,6 +453,7 @@ class SavingsPlanTest extends TestCase
         $this->actingAs($user)->post(route('savings.income.store', [
             'current_team' => $user->currentTeam->slug,
         ]), [
+            'name' => 'January salary',
             'amount' => '50000.00',
             'period_start' => '2026-01-01',
         ]);

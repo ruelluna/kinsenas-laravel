@@ -1,13 +1,12 @@
-import { Form, Head, usePage } from '@inertiajs/react';
-import { useState } from 'react';
-import BankInstitutionPicker from '@/components/savings/bank-institution-picker';
+import { Head } from '@inertiajs/react';
+import { Plus } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import AddBankModal from '@/components/savings/add-bank-modal';
 import { BankLogo } from '@/components/savings/bank-select';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { formatMoney } from '@/lib/format-money';
+import { formatBankOptionLabel } from '@/lib/format-bank-label';
 import type { Bank, BankBalance, BankInstitution } from '@/types/savings';
 import type { SharedData } from '@/types';
 
@@ -17,87 +16,196 @@ type Props = {
     bankBalances: BankBalance[];
 };
 
+type BankGroup = {
+    key: string;
+    label: string;
+    banks: Bank[];
+    total: string | null;
+};
+
 export default function BanksIndex({ banks, institutions, bankBalances }: Props) {
-    const { currentTeam } = usePage<SharedData>().props;
-    const teamSlug = currentTeam?.slug ?? '';
-    const [institutionSelection, setInstitutionSelection] = useState<{
-        institutionId: string;
-        name: string;
-    } | null>(null);
+    const [addModalOpen, setAddModalOpen] = useState(false);
 
     const balanceForBank = (bankId: string) => bankBalances.find((balance) => balance.bankId === bankId);
+
+    const bankGroups = useMemo(() => {
+        const groups = new Map<string, BankGroup>();
+        const ungrouped: Bank[] = [];
+
+        for (const bank of banks) {
+            if (bank.bankAccountGroupId) {
+                const existing = groups.get(bank.bankAccountGroupId);
+
+                if (existing) {
+                    existing.banks.push(bank);
+                    continue;
+                }
+
+                groups.set(bank.bankAccountGroupId, {
+                    key: bank.bankAccountGroupId,
+                    label: bank.name,
+                    banks: [bank],
+                    total: null,
+                });
+
+                continue;
+            }
+
+            ungrouped.push(bank);
+        }
+
+        const grouped = [...groups.values()].map((group) => {
+            const totals = group.banks
+                .map((bank) => balanceForBank(bank.id)?.total)
+                .filter((total): total is string => total !== undefined);
+
+            const combinedTotal =
+                totals.length > 0
+                    ? totals
+                          .reduce((sum, total) => sum + Number.parseFloat(total), 0)
+                          .toFixed(2)
+                    : null;
+
+            return {
+                ...group,
+                banks: [...group.banks].sort((left, right) => {
+                    if (left.spaceRole === 'main') {
+                        return -1;
+                    }
+
+                    if (right.spaceRole === 'main') {
+                        return 1;
+                    }
+
+                    return (left.accountLabel ?? '').localeCompare(right.accountLabel ?? '');
+                }),
+                total: combinedTotal,
+            };
+        });
+
+        return [
+            ...grouped,
+            ...ungrouped.map((bank) => ({
+                key: bank.id,
+                label: '',
+                banks: [bank],
+                total: balanceForBank(bank.id)?.total ?? null,
+            })),
+        ];
+    }, [banks, bankBalances]);
 
     return (
         <>
             <Head title="Banks" />
-            <Heading
-                variant="small"
-                title="Banks"
-                description="Accounts where you transfer savings. Balances reflect confirmed transfers minus spending."
+            <div className="flex items-center justify-between">
+                <Heading
+                    variant="small"
+                    title="Banks"
+                    description="Accounts where you transfer savings. Balances show each assigned fund's remaining allocation."
+                />
+                <Button onClick={() => setAddModalOpen(true)}>
+                    <Plus /> Add bank
+                </Button>
+            </div>
+
+            <AddBankModal
+                open={addModalOpen}
+                onOpenChange={setAddModalOpen}
+                institutions={institutions}
             />
 
-            <Form action={`/${teamSlug}/savings/banks`} method="post" className="mt-6 max-w-md space-y-4 rounded-lg border p-4">
-                <BankInstitutionPicker
-                    institutions={institutions}
-                    onChange={setInstitutionSelection}
-                />
-                <div className="grid gap-2">
-                    <Label htmlFor="account_label">Account label (optional)</Label>
-                    <Input id="account_label" name="account_label" placeholder="Savings, Payroll, Main…" />
-                </div>
-                <Button type="submit" disabled={institutionSelection === null}>
-                    Add bank
-                </Button>
-            </Form>
-
-            <ul className="mt-8 space-y-4">
+            <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {banks.length === 0 ? (
-                    <li className="text-sm text-muted-foreground">No banks added yet.</li>
+                    <li className="col-span-full text-sm text-muted-foreground">No banks added yet.</li>
                 ) : (
-                    banks.map((bank) => {
-                        const balance = balanceForBank(bank.id);
+                    bankGroups.map((group) => {
+                        if (group.banks.length === 1 && !group.banks[0].bankAccountGroupId) {
+                            const bank = group.banks[0];
+                            const balance = balanceForBank(bank.id);
+
+                            return (
+                                <li key={group.key} className="h-full rounded-lg border p-4">
+                                    <BankListItem bank={bank} balance={balance} />
+                                </li>
+                            );
+                        }
 
                         return (
-                            <li key={bank.id} className="rounded-lg border p-4">
+                            <li key={group.key} className="h-full rounded-lg border p-4">
                                 <div className="flex items-start gap-3">
-                                    <BankLogo logoUrl={bank.logoUrl} name={bank.name} />
+                                    <BankLogo logoUrl={group.banks[0]?.logoUrl} name={group.label} />
                                     <div className="min-w-0 flex-1">
-                                        <p className="font-medium">{bank.name}</p>
-                                        {bank.accountLabel && (
-                                            <p className="text-sm text-muted-foreground">{bank.accountLabel}</p>
-                                        )}
-                                        {balance && (
-                                            <p className="mt-2 text-sm font-medium">
-                                                Balance: {formatMoney(balance.total)}
+                                        <p className="font-medium">{group.label}</p>
+                                        {group.total !== null && (
+                                            <p className="mt-1 text-sm font-medium">
+                                                Combined balance: {formatMoney(group.total)}
                                             </p>
                                         )}
                                     </div>
                                 </div>
-                                {balance && balance.byCategory.length > 0 && (
-                                    <Collapsible className="mt-3">
-                                        <CollapsibleTrigger asChild>
-                                            <Button type="button" variant="ghost" size="sm" className="px-0">
-                                                By fund
-                                            </Button>
-                                        </CollapsibleTrigger>
-                                        <CollapsibleContent>
-                                            <ul className="mt-2 space-y-1 text-sm">
-                                                {balance.byCategory.map((row) => (
-                                                    <li key={row.categoryId} className="flex justify-between gap-2">
-                                                        <span className="text-muted-foreground">{row.categoryName}</span>
-                                                        <span>{formatMoney(row.total)}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </CollapsibleContent>
-                                    </Collapsible>
-                                )}
+                                <ul className="mt-4 space-y-3 border-l pl-4">
+                                    {group.banks.map((bank) => (
+                                        <li key={bank.id}>
+                                            <BankListItem
+                                                bank={bank}
+                                                balance={balanceForBank(bank.id)}
+                                                compact
+                                            />
+                                        </li>
+                                    ))}
+                                </ul>
                             </li>
                         );
                     })
                 )}
             </ul>
         </>
+    );
+}
+
+function BankListItem({
+    bank,
+    balance,
+    compact = false,
+}: {
+    bank: Bank;
+    balance?: BankBalance;
+    compact?: boolean;
+}) {
+    return (
+        <div>
+            <div className={compact ? '' : 'flex items-start gap-3'}>
+                {!compact && <BankLogo logoUrl={bank.logoUrl} name={bank.name} />}
+                <div className="min-w-0 flex-1">
+                    <p className={compact ? 'text-sm font-medium' : 'font-medium'}>
+                        {formatBankOptionLabel(bank)}
+                    </p>
+                    {balance && (
+                        <p className="mt-1 text-sm font-medium">Balance: {formatMoney(balance.total)}</p>
+                    )}
+                </div>
+            </div>
+            {balance && balance.byCategory.length > 0 && (
+                <div className="mt-3 overflow-hidden rounded-lg border">
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="border-b bg-muted/50 text-left">
+                                <th className="px-3 py-2 font-medium">Fund</th>
+                                <th className="px-3 py-2 text-right font-medium">Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {balance.byCategory.map((row) => (
+                                <tr key={row.categoryId} className="border-b last:border-b-0">
+                                    <td className="px-3 py-2 text-muted-foreground">{row.categoryName}</td>
+                                    <td className="px-3 py-2 text-right">{formatMoney(row.total)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+        </div>
     );
 }
 

@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\BankSpaceRole;
 use Database\Factories\BankFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Bank extends Model
@@ -18,8 +18,10 @@ class Bank extends Model
     protected $fillable = [
         'team_id',
         'bank_institution_id',
+        'bank_account_group_id',
         'name',
         'account_label',
+        'space_role',
         'is_active',
         'sort_order',
     ];
@@ -28,7 +30,17 @@ class Bank extends Model
     {
         return [
             'is_active' => 'boolean',
+            'space_role' => BankSpaceRole::class,
         ];
+    }
+
+    public function displayLabel(): string
+    {
+        if ($this->account_label !== null && $this->account_label !== '') {
+            return $this->name.' — '.$this->account_label;
+        }
+
+        return $this->name;
     }
 
     public function team(): BelongsTo
@@ -41,9 +53,9 @@ class Bank extends Model
         return $this->belongsTo(BankInstitution::class, 'bank_institution_id');
     }
 
-    public function categories(): BelongsToMany
+    public function assignedCategories(): HasMany
     {
-        return $this->belongsToMany(SavingsCategory::class, 'bank_savings_category');
+        return $this->hasMany(SavingsCategory::class, 'bank_id');
     }
 
     public function fundSpends(): HasMany
@@ -51,8 +63,13 @@ class Bank extends Model
         return $this->hasMany(FundSpend::class);
     }
 
-    public function fundTransfers(): HasMany
+    public function outgoingFundTransfers(): HasMany
     {
-        return $this->hasMany(FundTransfer::class);
+        return $this->hasMany(FundTransfer::class, 'from_bank_id');
+    }
+
+    public function incomingFundTransfers(): HasMany
+    {
+        return $this->hasMany(FundTransfer::class, 'to_bank_id');
     }
 }

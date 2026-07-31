@@ -4,6 +4,7 @@ namespace App\Services\Savings;
 
 use App\Enums\CategoryAllocationType;
 use App\Enums\DeductionMode;
+use App\Models\Bank;
 use App\Models\SavingsCategory;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlan;
@@ -22,7 +23,7 @@ class SavingsPlanService
                 $query->where('created_by_user_id', $user->id)
                     ->orWhere('is_shared_with_team', true);
             })
-            ->with(['categories.deductFromCategory', 'categories.banks'])
+            ->with(['categories.deductFromCategory', 'categories.bank'])
             ->first();
     }
 
@@ -117,7 +118,7 @@ class SavingsPlanService
             $this->resolveDeductionSources($categories, $created);
             $this->syncCategoryBanks($plan, $categories, $created);
 
-            return $plan->fresh(['categories.deductFromCategory', 'categories.banks']);
+            return $plan->fresh(['categories.deductFromCategory', 'categories.bank']);
         });
     }
 
@@ -249,7 +250,7 @@ class SavingsPlanService
             $this->resolveDeductionSources($categories, $indexedCategories);
             $this->syncCategoryBanks($plan, $categories, $indexedCategories);
 
-            return $plan->fresh(['categories.deductFromCategory', 'categories.banks']);
+            return $plan->fresh(['categories.deductFromCategory', 'categories.bank']);
         });
     }
 
@@ -371,7 +372,7 @@ class SavingsPlanService
      */
     private function syncCategoryBanks(SavingsPlan $plan, array $categories, array $indexedCategories): void
     {
-        $teamBankIds = \App\Models\Bank::query()
+        $teamBankIds = Bank::query()
             ->where('team_id', $plan->team_id)
             ->pluck('id');
 
@@ -380,13 +381,14 @@ class SavingsPlanService
                 continue;
             }
 
-            $bankIds = collect($category['bank_ids'] ?? [])
-                ->filter(fn ($id) => is_string($id) && $id !== '')
-                ->intersect($teamBankIds)
-                ->values()
-                ->all();
+            $bankId = $category['bank_id'] ?? null;
+            $bankId = is_string($bankId) && $bankId !== '' ? $bankId : null;
 
-            $indexedCategories[$index]->banks()->sync($bankIds);
+            if ($bankId !== null && ! $teamBankIds->contains($bankId)) {
+                $bankId = null;
+            }
+
+            $indexedCategories[$index]->update(['bank_id' => $bankId]);
         }
     }
 

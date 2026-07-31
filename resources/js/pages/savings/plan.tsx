@@ -52,7 +52,7 @@ type CategoryRow = {
     deductionMode: DeductionMode | '';
     deductionValue: string;
     deductFromIndex: string;
-    bankIds: string[];
+    bankId: string;
 };
 
 let nextRowKey = 0;
@@ -72,7 +72,7 @@ function createEmptyRow(): CategoryRow {
         deductionMode: 'fixed',
         deductionValue: '',
         deductFromIndex: '',
-        bankIds: [],
+        bankId: '',
     };
 }
 
@@ -85,7 +85,7 @@ function createEmptyCustomRow(): CategoryRow {
         deductionMode: '',
         deductionValue: '',
         deductFromIndex: '',
-        bankIds: [],
+        bankId: '',
     };
 }
 
@@ -110,7 +110,7 @@ function rowsFromPlan(categories: SavingsCategory[]): CategoryRow[] {
             deductionMode: category.deductionMode ?? '',
             deductionValue: category.deductionValue ?? '',
             deductFromIndex: sourceIndex >= 0 ? String(sourceIndex) : '',
-            bankIds: category.bankIds ?? [],
+            bankId: category.bankId ?? '',
         };
     });
 }
@@ -645,8 +645,8 @@ function SavingsPlanEditor({
                                 <div className="mt-4">
                                     <CategoryBankSelect
                                         banks={teamBanks}
-                                        selectedIds={row.bankIds}
-                                        onChange={(bankIds) => updateRow(index, { bankIds })}
+                                        selectedId={row.bankId}
+                                        onChange={(bankId) => updateRow(index, { bankId })}
                                         namePrefix={`categories[${index}]`}
                                     />
                                 </div>

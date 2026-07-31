@@ -97,7 +97,7 @@ export default function IncomeShow({
 
     return (
         <>
-            <Head title={`Income — ${period.periodStart}`} />
+            <Head title={`Income — ${period.name}`} />
 
             <div className="mb-6">
                 <Button variant="ghost" size="sm" asChild>
@@ -111,8 +111,8 @@ export default function IncomeShow({
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <Heading
                     variant="small"
-                    title={period.periodStart}
-                    description={`${plan.name} breakdown`}
+                    title={period.name}
+                    description={`${period.periodStart} · ${plan.name} breakdown`}
                 />
                 <div className="flex items-center gap-2">
                     <Badge variant={period.isLocked ? 'default' : 'secondary'}>
@@ -275,7 +275,7 @@ IncomeShow.layout = (props: Props & SharedData) => ({
     breadcrumbs: [
         { title: 'Income', href: `/${props.currentTeam?.slug}/savings/income` },
         {
-            title: props.period.periodStart,
+            title: period.name,
             href: `/${props.currentTeam?.slug}/savings/income/${props.period.id}`,
         },
     ],

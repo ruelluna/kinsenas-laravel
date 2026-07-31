@@ -12,32 +12,49 @@ use Illuminate\Validation\ValidationException;
 
 class FundTransferService
 {
-    public function __construct(private FundBalanceService $balanceService)
-    {
-    }
+    public function __construct(private FundBalanceService $balanceService) {}
 
     public function create(
         SavingsPlan $plan,
-        string $categoryId,
-        string $bankId,
+        string $fromCategoryId,
+        string $toCategoryId,
         string $amount,
         string $description,
         string $transferredOn,
         ?User $user = null,
     ): FundTransfer {
-        $this->assertBankAllowedForCategory($plan, $categoryId, $bankId);
+        if ($fromCategoryId === $toCategoryId) {
+            throw ValidationException::withMessages([
+                'to_category_id' => __('Choose a different fund to transfer to.'),
+            ]);
+        }
 
-        return FundTransfer::query()->create([
+        $fromCategory = $this->categoryForPlan($plan, $fromCategoryId, 'from_category_id');
+        $toCategory = $this->categoryForPlan($plan, $toCategoryId, 'to_category_id');
+
+        $fromBankId = $fromCategory->bank_id;
+        $toBankId = $toCategory->bank_id;
+        $sameBank = $fromBankId === $toBankId;
+
+        if ($sameBank && $user !== null) {
+            $this->balanceService->assertCanTransfer($plan, $fromCategoryId, $amount);
+        }
+
+        $transfer = FundTransfer::query()->create([
             'savings_plan_id' => $plan->id,
-            'category_id' => $categoryId,
-            'bank_id' => $bankId,
+            'from_category_id' => $fromCategoryId,
+            'to_category_id' => $toCategoryId,
+            'from_bank_id' => $fromBankId,
+            'to_bank_id' => $toBankId,
             'amount_encrypted' => $amount,
             'description' => $description,
             'transferred_on' => $transferredOn,
-            'status' => TransferStatus::Pending,
-            'confirmed_at' => null,
-            'confirmed_by_user_id' => null,
+            'status' => $sameBank ? TransferStatus::Confirmed : TransferStatus::Pending,
+            'confirmed_at' => $sameBank ? now() : null,
+            'confirmed_by_user_id' => $sameBank ? $user?->id : null,
         ]);
+
+        return $transfer->fresh(['fromBank.institution', 'toBank.institution', 'fromCategory', 'toCategory']);
     }
 
     public function confirm(FundTransfer $transfer, User $user): FundTransfer
@@ -56,7 +73,7 @@ class FundTransferService
             ]);
         }
 
-        $this->balanceService->assertCanTransfer($transfer->plan, $transfer->category_id, $amount);
+        $this->balanceService->assertCanTransfer($transfer->plan, $transfer->from_category_id, $amount);
 
         $transfer->update([
             'status' => TransferStatus::Confirmed,
@@ -64,7 +81,7 @@ class FundTransferService
             'confirmed_by_user_id' => $user->id,
         ]);
 
-        return $transfer->fresh(['bank', 'category']);
+        return $transfer->fresh(['fromBank.institution', 'toBank.institution', 'fromCategory', 'toCategory']);
     }
 
     /**
@@ -74,7 +91,12 @@ class FundTransferService
     {
         return FundTransfer::query()
             ->where('savings_plan_id', $plan->id)
-            ->with(['bank.institution', 'category'])
+            ->with([
+                'fromBank.institution',
+                'toBank.institution',
+                'fromCategory',
+                'toCategory',
+            ])
             ->latest('transferred_on')
             ->latest()
             ->limit($limit)
@@ -90,7 +112,6 @@ class FundTransferService
         $category = SavingsCategory::query()
             ->where('plan_id', $plan->id)
             ->where('id', $categoryId)
-            ->with('banks')
             ->first();
 
         if ($category === null) {
@@ -99,14 +120,30 @@ class FundTransferService
             ]);
         }
 
-        if ($category->banks->isEmpty()) {
+        if ($category->bank_id === null) {
             return;
         }
 
-        if (! $category->banks->contains('id', $bankId)) {
+        if ($category->bank_id !== $bankId) {
             throw ValidationException::withMessages([
                 'bank_id' => __('This bank is not assigned to the selected fund.'),
             ]);
         }
+    }
+
+    private function categoryForPlan(SavingsPlan $plan, string $categoryId, string $field): SavingsCategory
+    {
+        $category = SavingsCategory::query()
+            ->where('plan_id', $plan->id)
+            ->where('id', $categoryId)
+            ->first();
+
+        if ($category === null) {
+            throw ValidationException::withMessages([
+                $field => __('The selected fund is not part of your savings plan.'),
+            ]);
+        }
+
+        return $category;
     }
 }

@@ -134,6 +134,13 @@ return [
         'name' => 'GoTyme Bank',
         'type' => BankInstitutionType::Bank,
         'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/d/d5/GoTyme_Bank_logo.svg',
+        'features' => [
+            'savings_spaces' => [
+                'max' => 5,
+                'main_label' => 'Main account',
+                'space_label_prefix' => 'GoSave',
+            ],
+        ],
     ],
     [
         'slug' => 'maya-bank',

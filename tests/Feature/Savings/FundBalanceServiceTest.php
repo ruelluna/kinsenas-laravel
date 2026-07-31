@@ -34,6 +34,7 @@ function setupLockedPlan(User $user, string $amount = '100000.00'): SavingsPlan
     test()->actingAs($user)->post(route('savings.income.store', [
         'current_team' => $user->currentTeam->slug,
     ]), [
+        'name' => 'January salary',
         'amount' => $amount,
         'period_start' => '2026-02-01',
     ]);
@@ -71,6 +72,7 @@ it('aggregates spending across multiple income periods', function () {
     test()->actingAs($user)->post(route('savings.income.store', [
         'current_team' => $user->currentTeam->slug,
     ]), [
+        'name' => 'March salary',
         'amount' => '50000.00',
         'period_start' => '2026-03-01',
     ]);
@@ -110,8 +112,10 @@ it('subtracts confirmed transfers from remaining balance', function () {
 
     \App\Models\FundTransfer::factory()->confirmed()->create([
         'savings_plan_id' => $plan->id,
-        'category_id' => $everydayCategory->id,
-        'bank_id' => $bank->id,
+        'from_category_id' => $everydayCategory->id,
+        'to_category_id' => $plan->categories->firstWhere('name', 'Empower Fund')->id,
+        'from_bank_id' => $bank->id,
+        'to_bank_id' => $bank->id,
         'amount_encrypted' => '4000.00',
     ]);
 
@@ -119,8 +123,37 @@ it('subtracts confirmed transfers from remaining balance', function () {
     $balances = $service->balancesForPlan($plan->fresh('categories'));
     $everyday = collect($balances)->firstWhere('name', 'Everyday Fund');
 
-    expect($everyday['transferred'])->toBe('4000.00')
-        ->and($everyday['remaining'])->toBe('46000.00');
+    expect($everyday['allocated'])->toBe('25000.00')
+        ->and($everyday['transferred'])->toBe('4000.00')
+        ->and($everyday['remaining'])->toBe('21000.00');
+});
+
+it('includes assigned categories in bank balance breakdown before any activity', function () {
+    $user = User::factory()->create();
+    $plan = setupLockedPlan($user, '50000.00');
+    $everydayCategory = $plan->categories->firstWhere('name', 'Everyday Fund');
+    $empowerCategory = $plan->categories->firstWhere('name', 'Empower Fund');
+    $bank = \App\Models\Bank::factory()->create(['team_id' => $user->currentTeam->id]);
+
+    $everydayCategory->update(['bank_id' => $bank->id]);
+    $empowerCategory->update(['bank_id' => $bank->id]);
+
+    $service = app(FundBalanceService::class);
+    $bankBalances = $service->bankBalancesForTeam($user->currentTeam, $plan->fresh('categories'));
+
+    $bankBalance = collect($bankBalances)->firstWhere('bankId', $bank->id);
+
+    expect($bankBalance)->not->toBeNull()
+        ->and($bankBalance['total'])->toBe('27500.00')
+        ->and($bankBalance['byCategory'])->toHaveCount(2)
+        ->and(collect($bankBalance['byCategory'])->pluck('categoryName')->all())->toBe([
+            'Empower Fund',
+            'Everyday Fund',
+        ])
+        ->and(collect($bankBalance['byCategory'])->pluck('total')->all())->toBe([
+            '2500.00',
+            '25000.00',
+        ]);
 });
 
 it('defaults everyday fund as the quick spend category', function () {
@@ -131,4 +164,18 @@ it('defaults everyday fund as the quick spend category', function () {
     $everyday = $plan->categories->firstWhere('name', 'Everyday Fund');
 
     expect($defaultId)->toBe($everyday->id);
+});
+
+it('lists everyday fund first on transfer and spending views for trc plans', function () {
+    $user = User::factory()->create();
+    $plan = setupLockedPlan($user);
+    $service = app(FundBalanceService::class);
+
+    $everyday = $plan->categories->firstWhere('name', 'Everyday Fund');
+    $orderedCategories = $service->categoriesWithDefaultFirst($plan);
+    $orderedBalances = $service->balancesWithDefaultFirst($plan);
+
+    expect($orderedCategories->first()?->id)->toBe($everyday->id)
+        ->and($orderedBalances[0]['categoryId'])->toBe($everyday->id)
+        ->and($orderedCategories->first()?->name)->toBe('Everyday Fund');
 });

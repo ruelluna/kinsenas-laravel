@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Savings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Savings\SaveFundTransferRequest;
 use App\Models\FundTransfer;
+use App\Models\SavingsCategory;
 use App\Models\Team;
 use App\Services\Savings\FundBalanceService;
 use App\Services\Savings\FundTransferService;
@@ -21,36 +22,28 @@ class FundTransferController extends Controller
         private SavingsPlanService $planService,
         private FundBalanceService $balanceService,
         private FundTransferService $fundTransferService,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request, Team $current_team): Response
     {
         $plan = $this->planService->forTeam($current_team, $request->user());
         abort_if($plan === null, 404);
 
-        $plan->load('categories.banks');
+        $plan->load('categories.bank.institution');
         $transfers = $this->fundTransferService->recentForPlan($plan);
         $defaultCategoryId = $this->balanceService->defaultCategoryId($plan);
-        $banks = $current_team->banks()
-            ->where('is_active', true)
-            ->with('institution')
-            ->orderBy('sort_order')
-            ->get();
+        $categories = $this->balanceService->categoriesWithDefaultFirst($plan);
 
         return Inertia::render('savings/transfers/index', [
             'plan' => ['id' => $plan->id, 'name' => $plan->name, 'hasLockedIncome' => $plan->hasLockedIncomePeriod()],
-            'fundBalances' => $this->balanceService->balancesForPlan($plan),
+            'fundBalances' => $this->balanceService->balancesWithDefaultFirst($plan),
             'defaultCategoryId' => $defaultCategoryId,
-            'banks' => $banks->map(fn ($bank) => [
-                'id' => $bank->id,
-                'name' => $bank->name,
-                'logoUrl' => $bank->institution?->logo_url,
-            ]),
-            'categories' => $plan->categories->map(fn ($category) => [
+            'categories' => $categories->map(fn ($category) => [
                 'id' => $category->id,
                 'name' => $category->name,
-                'bankIds' => $category->banks->pluck('id')->all(),
+                'bankId' => $category->bank_id,
+                'bankName' => $category->bank?->name,
+                'bankLogoUrl' => $category->bank?->institution?->logo_url,
             ]),
             'categoryBankMap' => $this->balanceService->categoryBankMap($plan),
             'transfers' => $transfers->map(fn (FundTransfer $transfer) => $this->transferPayload($transfer)),
@@ -62,26 +55,26 @@ class FundTransferController extends Controller
         $plan = $this->planService->forTeam($current_team, $request->user());
         abort_if($plan === null, 404);
 
-        $categoryId = $request->validated('category_id');
-        $this->assertCategoryBelongsToPlan($plan->id, $categoryId);
+        $fromCategoryId = $request->validated('from_category_id');
+        $toCategoryId = $request->validated('to_category_id');
+        $this->assertCategoryBelongsToPlan($plan->id, $fromCategoryId, 'from_category_id');
+        $this->assertCategoryBelongsToPlan($plan->id, $toCategoryId, 'to_category_id');
 
-        $bankId = $request->validated('bank_id');
-        abort_if(
-            ! $current_team->banks()->where('id', $bankId)->exists(),
-            404,
-        );
-
-        $this->fundTransferService->create(
+        $transfer = $this->fundTransferService->create(
             $plan,
-            $categoryId,
-            $bankId,
+            $fromCategoryId,
+            $toCategoryId,
             $request->validated('amount'),
             $request->validated('description'),
             $request->validated('transferred_on'),
             $request->user(),
         );
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Transfer recorded — confirm when funds arrive.')]);
+        $message = $transfer->isConfirmed()
+            ? __('Transfer recorded.')
+            : __('Transfer recorded — move the funds between banks, then confirm.');
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => $message]);
 
         return back();
     }
@@ -110,23 +103,28 @@ class FundTransferController extends Controller
             'description' => $transfer->description,
             'status' => $transfer->status->value,
             'transferredOn' => $transfer->transferred_on->toDateString(),
-            'bankName' => $transfer->bank?->name,
-            'bankLogoUrl' => $transfer->bank?->institution?->logo_url,
-            'categoryName' => $transfer->category?->name,
-            'categoryId' => $transfer->category_id,
+            'fromCategoryName' => $transfer->fromCategory?->name,
+            'toCategoryName' => $transfer->toCategory?->name,
+            'fromCategoryId' => $transfer->from_category_id,
+            'toCategoryId' => $transfer->to_category_id,
+            'fromBankName' => $transfer->fromBank?->name,
+            'toBankName' => $transfer->toBank?->name,
+            'fromBankLogoUrl' => $transfer->fromBank?->institution?->logo_url,
+            'toBankLogoUrl' => $transfer->toBank?->institution?->logo_url,
+            'crossesBanks' => $transfer->crossesBanks(),
         ];
     }
 
-    private function assertCategoryBelongsToPlan(string $planId, string $categoryId): void
+    private function assertCategoryBelongsToPlan(string $planId, string $categoryId, string $field): void
     {
-        $exists = \App\Models\SavingsCategory::query()
+        $exists = SavingsCategory::query()
             ->where('plan_id', $planId)
             ->where('id', $categoryId)
             ->exists();
 
         if (! $exists) {
             throw ValidationException::withMessages([
-                'category_id' => __('The selected fund is not part of your savings plan.'),
+                $field => __('The selected fund is not part of your savings plan.'),
             ]);
         }
     }

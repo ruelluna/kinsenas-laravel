@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Savings\SaveIncomePeriodDeductionsRequest;
 use App\Http\Requests\Savings\SaveIncomePeriodRequest;
 use App\Models\IncomePeriod;
+use App\Models\SavingsCategory;
 use App\Models\Team;
 use App\Services\Savings\FundBalanceService;
 use App\Services\Savings\IncomeCalculationService;
@@ -30,11 +31,53 @@ class IncomePeriodController extends Controller
 
         abort_if($plan === null, 404);
 
-        $periods = $plan->incomePeriods()->get();
+        $plan->load(['categories.deductFromCategory']);
+
+        $periods = $plan->incomePeriods()
+            ->with(['allocations', 'periodDeductions'])
+            ->orderByDesc('period_start')
+            ->get();
+
+        $planCategories = $plan->categories
+            ->sortBy('sort_order')
+            ->values()
+            ->map(fn (SavingsCategory $category) => $this->planCategorySummary($category))
+            ->all();
+
+        $periodRows = $periods->map(function (IncomePeriod $period) use ($planCategories) {
+            $breakdown = $this->incomeService->breakdownForPeriod($period);
+            $amountsByCategory = collect($breakdown)->keyBy('categoryId');
+
+            return [
+                ...$this->periodSummary($period),
+                'categoryAmounts' => collect($planCategories)
+                    ->mapWithKeys(fn (array $category) => [
+                        $category['id'] => $amountsByCategory->get($category['id'])['amount'] ?? null,
+                    ])
+                    ->all(),
+            ];
+        });
+
+        $fundSummary = null;
+
+        if ($plan->hasLockedIncomePeriod()) {
+            $balances = $this->fundBalanceService->balancesForPlan($plan);
+
+            $fundSummary = [
+                'categorySpent' => collect($balances)
+                    ->mapWithKeys(fn (array $balance) => [$balance['categoryId'] => $balance['spent']])
+                    ->all(),
+                'categoryRemaining' => collect($balances)
+                    ->mapWithKeys(fn (array $balance) => [$balance['categoryId'] => $balance['remaining']])
+                    ->all(),
+            ];
+        }
 
         return Inertia::render('savings/income/index', [
             'plan' => ['id' => $plan->id, 'name' => $plan->name],
-            'periods' => $periods->map(fn (IncomePeriod $period) => $this->periodSummary($period)),
+            'planCategories' => $planCategories,
+            'periods' => $periodRows,
+            'fundSummary' => $fundSummary,
         ]);
     }
 
@@ -79,6 +122,7 @@ class IncomePeriodController extends Controller
 
         $this->incomeService->create(
             $plan,
+            $request->validated('name'),
             $request->validated('amount'),
             $request->validated('period_start'),
         );
@@ -111,12 +155,35 @@ class IncomePeriodController extends Controller
     }
 
     /**
-     * @return array{id: string, periodStart: string, amount: string|null, isLocked: bool}
+     * @return array{
+     *     id: string,
+     *     name: string,
+     *     allocationType: string,
+     *     percentage: string|null,
+     *     deductionMode: string|null,
+     *     deductionValue: string|null
+     * }
+     */
+    private function planCategorySummary(SavingsCategory $category): array
+    {
+        return [
+            'id' => $category->id,
+            'name' => $category->name,
+            'allocationType' => $category->allocation_type->value,
+            'percentage' => $category->percentage !== null ? (string) $category->percentage : null,
+            'deductionMode' => $category->deduction_mode?->value,
+            'deductionValue' => $category->deduction_value !== null ? (string) $category->deduction_value : null,
+        ];
+    }
+
+    /**
+     * @return array{id: string, name: string, periodStart: string, amount: string|null, isLocked: bool}
      */
     private function periodSummary(IncomePeriod $period): array
     {
         return [
             'id' => $period->id,
+            'name' => $period->name,
             'periodStart' => $period->period_start->toDateString(),
             'amount' => $period->amount_encrypted,
             'isLocked' => $period->is_locked,

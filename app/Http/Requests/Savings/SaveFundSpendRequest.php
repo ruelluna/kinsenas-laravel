@@ -24,6 +24,7 @@ class SaveFundSpendRequest extends FormRequest
             'spent_on' => ['required', 'date'],
             'bank_id' => ['nullable', 'uuid', 'exists:banks,id'],
             'recipient_id' => ['nullable', 'uuid', 'exists:recipients,id'],
+            'receipt_image' => ['nullable', 'image', 'max:5120'],
         ];
     }
 

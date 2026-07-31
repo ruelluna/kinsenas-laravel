@@ -1,3 +1,4 @@
+import BankOptionSelect, { BankOptionLogo } from '@/components/savings/bank-option-select';
 import type { BankOption, CategoryBankMap } from '@/types/savings';
 
 type Props = {
@@ -16,13 +17,13 @@ export function banksForCategory(
     categoryBankMap: CategoryBankMap,
     categoryId: string,
 ): BankOption[] {
-    const assigned = categoryBankMap[categoryId] ?? [];
+    const assigned = categoryBankMap[categoryId] ?? null;
 
-    if (assigned.length === 0) {
+    if (assigned === null || assigned === '') {
         return banks;
     }
 
-    return banks.filter((bank) => assigned.includes(bank.id));
+    return banks.filter((bank) => bank.id === assigned);
 }
 
 export default function BankSelect({
@@ -32,39 +33,43 @@ export default function BankSelect({
     name = 'bank_id',
     id = 'bank_id',
     required = false,
-    value,
+    value = '',
     onChange,
 }: Props) {
     const options = banksForCategory(banks, categoryBankMap, categoryId);
 
+    if (required && options.length === 0) {
+        return (
+            <select
+                id={id}
+                name={name}
+                className="border-input h-9 w-full rounded-md border px-3 text-sm"
+                disabled
+            >
+                <option value="">No bank assigned</option>
+            </select>
+        );
+    }
+
     return (
-        <select
+        <BankOptionSelect
             id={id}
             name={name}
-            className="border-input h-9 w-full rounded-md border px-3 text-sm"
+            banks={options}
             value={value}
-            onChange={onChange ? (event) => onChange(event.target.value) : undefined}
+            onChange={onChange}
             required={required}
-        >
-            {!required && <option value="">None</option>}
-            {required && options.length === 0 && <option value="">No banks assigned</option>}
-            {options.map((bank) => (
-                <option key={bank.id} value={bank.id}>
-                    {bank.name}
-                </option>
-            ))}
-        </select>
+            allowEmpty={!required}
+            placeholder={required ? 'Select a bank' : 'None'}
+        />
     );
 }
 
 export function BankLogo({ logoUrl, name }: { logoUrl?: string | null; name: string }) {
-    if (!logoUrl) {
-        return (
-            <span className="flex size-8 shrink-0 items-center justify-center rounded bg-muted text-xs font-medium">
-                {name.charAt(0)}
-            </span>
-        );
-    }
-
-    return <img src={logoUrl} alt="" className="size-8 shrink-0 object-contain" />;
+    return (
+        <BankOptionLogo
+            bank={{ id: name, name, logoUrl: logoUrl ?? null }}
+            className="size-8 text-xs"
+        />
+    );
 }

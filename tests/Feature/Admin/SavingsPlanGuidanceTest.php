@@ -9,11 +9,12 @@ use Database\Seeders\BillingSeeder;
 use Database\Seeders\SavingsFormulaTemplateSeeder;
 use Database\Seeders\SavingsPlanPageGuidanceSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\UnlocksVault;
 use Tests\TestCase;
 
 class SavingsPlanGuidanceTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, UnlocksVault;
 
     protected function setUp(): void
     {
@@ -99,6 +100,7 @@ class SavingsPlanGuidanceTest extends TestCase
     public function test_savings_plan_page_includes_guidance_props(): void
     {
         $user = User::factory()->create();
+        $this->unlockVaultFor($user);
 
         $response = $this->actingAs($user)->get(route('savings.plan.show', [
             'current_team' => $user->currentTeam->slug,

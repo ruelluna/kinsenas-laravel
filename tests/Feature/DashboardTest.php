@@ -8,11 +8,12 @@ use App\Models\TeamInvitation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
+use Tests\Concerns\UnlocksVault;
 use Tests\TestCase;
 
 class DashboardTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, UnlocksVault;
 
     public function test_guests_are_redirected_to_the_login_page()
     {
@@ -26,7 +27,7 @@ class DashboardTest extends TestCase
     public function test_authenticated_users_can_visit_the_dashboard()
     {
         $user = User::factory()->create();
-        $team = $user->currentTeam;
+        $this->unlockVaultFor($user);
 
         $response = $this
             ->actingAs($user)
@@ -48,6 +49,8 @@ class DashboardTest extends TestCase
             'email' => 'invited@example.com',
             'invited_by' => $owner->id,
         ]);
+
+        $this->unlockVaultFor($invitedUser);
 
         $response = $this
             ->actingAs($invitedUser)
@@ -79,6 +82,8 @@ class DashboardTest extends TestCase
             'invited_by' => $owner->id,
         ]);
 
+        $this->unlockVaultFor($invitedUser);
+
         $response = $this
             ->actingAs($invitedUser)
             ->get(route('dashboard'));
@@ -103,6 +108,8 @@ class DashboardTest extends TestCase
             'email' => 'invited@example.com',
             'invited_by' => $owner->id,
         ]);
+
+        $this->unlockVaultFor($invitedUser);
 
         $response = $this
             ->actingAs($invitedUser)
@@ -132,6 +139,8 @@ class DashboardTest extends TestCase
             'email' => 'someone@example.com',
             'invited_by' => $owner->id,
         ]);
+
+        $this->unlockVaultFor($invitedUser);
 
         $response = $this
             ->actingAs($invitedUser)
