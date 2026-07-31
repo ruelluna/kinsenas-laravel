@@ -53,4 +53,9 @@ class SavingsPlan extends Model
     {
         return $this->incomePeriods()->where('is_locked', true)->exists();
     }
+
+    public function hasIncomePeriod(): bool
+    {
+        return $this->incomePeriods()->exists();
+    }
 }

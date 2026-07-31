@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Savings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Savings\SaveIncomePeriodDeductionsRequest;
 use App\Http\Requests\Savings\SaveIncomePeriodRequest;
 use App\Models\IncomePeriod;
 use App\Models\Team;
@@ -48,7 +49,22 @@ class IncomePeriodController extends Controller
             'plan' => ['id' => $plan->id, 'name' => $plan->name],
             'period' => $this->periodSummary($incomePeriod),
             'breakdown' => $this->incomeService->breakdownForPeriod($incomePeriod),
+            'customCategories' => $this->incomeService->customCategoriesForPeriod($incomePeriod),
         ]);
+    }
+
+    public function updateCustomAmounts(
+        SaveIncomePeriodDeductionsRequest $request,
+        Team $current_team,
+        IncomePeriod $incomePeriod,
+    ): RedirectResponse {
+        abort_if($incomePeriod->plan_id !== $this->planService->forTeam($current_team, $request->user())?->id, 404);
+
+        $this->incomeService->syncCustomAmounts($incomePeriod, $request->validated('custom_amounts'));
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Custom amounts updated.')]);
+
+        return back();
     }
 
     public function store(SaveIncomePeriodRequest $request, Team $current_team): RedirectResponse

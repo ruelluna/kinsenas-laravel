@@ -1,7 +1,16 @@
+export type CategoryAllocationType = 'percentage' | 'deduction';
+
+export type DeductionMode = 'fixed' | 'percent_of_income';
+
 export type SavingsCategory = {
     id?: string;
     name: string;
-    percentage: string;
+    allocationType?: CategoryAllocationType;
+    percentage?: string | null;
+    deductionMode?: DeductionMode | null;
+    deductionValue?: string | null;
+    deductFromCategoryId?: string | null;
+    deductFromCategoryName?: string | null;
 };
 
 export type SavingsPlan = {
@@ -11,6 +20,8 @@ export type SavingsPlan = {
     isSharedWithTeam: boolean;
     categories: SavingsCategory[];
     hasLockedIncome: boolean;
+    hasIncome: boolean;
+    percentagesLocked: boolean;
 };
 
 export type FormulaTemplate = {
@@ -21,11 +32,26 @@ export type FormulaTemplate = {
     categories: SavingsCategory[];
 };
 
+export type IncomeCustomCategory = {
+    categoryId: string;
+    name: string;
+    deductFromCategoryName: string | null;
+    planDefaultAmount: string | null;
+    periodAmount: string | null;
+    hasPeriodOverride: boolean;
+};
+
 export type IncomeBreakdownRow = {
     categoryId: string;
     name: string;
-    percentage: string;
+    allocationType?: CategoryAllocationType;
+    percentage: string | null;
     amount: string | null;
+    deductionMode?: DeductionMode | null;
+    deductionValue?: string | null;
+    deductFromCategoryId?: string | null;
+    deductFromCategoryName?: string | null;
+    deductionNote?: string | null;
 };
 
 export type IncomePeriodSummary = {

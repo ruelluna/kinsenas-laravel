@@ -33,9 +33,16 @@ class SavingsPlanController extends Controller
                 'categories' => $plan->categories->map(fn ($c) => [
                     'id' => $c->id,
                     'name' => $c->name,
-                    'percentage' => (string) $c->percentage,
+                    'allocationType' => $c->allocation_type->value,
+                    'percentage' => $c->percentage !== null ? (string) $c->percentage : null,
+                    'deductionMode' => $c->deduction_mode?->value,
+                    'deductionValue' => $c->deduction_value !== null ? (string) $c->deduction_value : null,
+                    'deductFromCategoryId' => $c->deduct_from_category_id,
+                    'deductFromCategoryName' => $c->deductFromCategory?->name,
                 ]),
                 'hasLockedIncome' => $plan->hasLockedIncomePeriod(),
+                'hasIncome' => $plan->hasIncomePeriod(),
+                'percentagesLocked' => $plan->hasIncomePeriod(),
             ] : null,
             'templates' => $templates->map(fn ($t) => [
                 'id' => $t->id,

@@ -1,0 +1,55 @@
+---
+description: PHP peso display formatting for FutureSave UI and server-rendered amounts
+alwaysApply: true
+---
+
+# Money formatting (FutureSave)
+
+FutureSave uses **Philippine Peso (PHP)**. Every **displayed** monetary value must use the shared formatter — never raw numbers or manual `₱` concatenation.
+
+## Frontend (Inertia / React)
+
+Import from [`resources/js/lib/format-money.ts`](resources/js/lib/format-money.ts):
+
+| Helper | Use when |
+|--------|----------|
+| `formatMoney(amount)` | Decrypted savings amounts, report totals, transfer amounts (string or number, major units e.g. `50000.00`) |
+| `formatMoneyFromCents(cents)` | Billing / subscription prices stored as centavos (e.g. `29900` → `₱299.00`) |
+
+**Output shape:** `₱50,000.00` — peso sign prefix, comma thousands separators, two decimal places.
+
+**Null / missing:** `formatMoney` returns `—` (em dash). Do not show `₱—` or bare `null`.
+
+### Do
+
+```tsx
+import { formatMoney, formatMoneyFromCents } from '@/lib/format-money';
+
+<span>{formatMoney(period.amount)}</span>
+<span>{formatMoneyFromCents(price.amount)}</span>
+```
+
+### Don't
+
+```tsx
+<span>₱{amount}</span>
+<span>₱{(price.amount / 100).toFixed(2)}</span>
+<span>{amount ?? '—'}</span>  // when amount is money
+<span>PHP {amount}</span>
+```
+
+### Form inputs
+
+- Keep `<input type="number">` **without** a peso prefix in the field value.
+- Labels may say "Income amount" or "Amount (PHP)"; **displayed** values elsewhere must use `formatMoney`.
+
+## Backend (PHP)
+
+When formatting money for Inertia props, emails, exports, or logs shown to users:
+
+- Prefer passing **raw numeric strings** to the frontend and formatting with `formatMoney` in React.
+- If PHP must format, use `NumberFormatter` with locale `en_PH` and prefix `₱`, or add a shared helper — do not duplicate one-off `number_format` calls.
+
+## New pages
+
+Any new UI that shows income, transfers, allocations, billing prices, or report totals must import and use `formatMoney` / `formatMoneyFromCents`. Do not introduce alternate currency formatting.

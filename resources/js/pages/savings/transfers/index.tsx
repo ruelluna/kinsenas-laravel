@@ -3,6 +3,7 @@ import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { formatMoney } from '@/lib/format-money';
 import type { Transfer } from '@/types/savings';
 import type { SharedData } from '@/types';
 
@@ -29,7 +30,7 @@ export default function TransfersIndex({ lockedPeriods, banks, recipients, categ
                         <Label>Income period</Label>
                         <select name="income_period_id" className="border-input h-9 rounded-md border px-3 text-sm" required>
                             {lockedPeriods.map((p) => (
-                                <option key={p.id} value={p.id}>{p.periodStart} — {p.amount ?? '—'}</option>
+                                <option key={p.id} value={p.id}>{p.periodStart} — {formatMoney(p.amount)}</option>
                             ))}
                         </select>
                     </div>
@@ -73,7 +74,7 @@ export default function TransfersIndex({ lockedPeriods, banks, recipients, categ
                 {transfers.map((t) => (
                     <div key={t.id} className="flex items-center justify-between rounded-lg border p-3 text-sm">
                         <div>
-                            <p className="font-medium">{t.amount ?? '—'} → {t.recipientName}</p>
+                            <p className="font-medium">{formatMoney(t.amount)} → {t.recipientName}</p>
                             <p className="text-muted-foreground">{t.categoryName} · {t.bankName} · {t.transferredOn}</p>
                         </div>
                         {t.status === 'pending' && (

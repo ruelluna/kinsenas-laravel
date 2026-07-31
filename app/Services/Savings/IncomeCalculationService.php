@@ -4,6 +4,8 @@ namespace App\Services\Savings;
 
 use App\Models\IncomeAllocation;
 use App\Models\IncomePeriod;
+use App\Models\IncomePeriodDeduction;
+use App\Models\SavingsCategory;
 use App\Models\SavingsPlan;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -11,6 +13,10 @@ use Illuminate\Validation\ValidationException;
 
 class IncomeCalculationService
 {
+    public function __construct(private CategoryAllocationCalculator $calculator)
+    {
+    }
+
     public function create(SavingsPlan $plan, string $amount, string $periodStart): IncomePeriod
     {
         $period = IncomePeriod::query()->create([
@@ -19,42 +25,47 @@ class IncomeCalculationService
             'period_start' => $periodStart,
         ]);
 
-        return $period->load('plan.categories');
+        return $period->load(['plan.categories.deductFromCategory']);
     }
 
     /**
-     * @return array<int, array{category_id: string, name: string, percentage: string, amount: string}>
+     * @return list<array<string, mixed>>
      */
     public function preview(SavingsPlan $plan, string $amount): array
     {
-        $plan->loadMissing('categories');
-
-        return $plan->categories->map(function ($category) use ($amount) {
-            $computed = bcmul($amount, bcdiv((string) $category->percentage, '100', 6), 2);
-
-            return [
-                'category_id' => $category->id,
-                'name' => $category->name,
-                'percentage' => (string) $category->percentage,
-                'amount' => $computed,
-            ];
-        })->all();
+        return $this->calculator->breakdown($plan, $amount);
     }
 
     /**
-     * @return array<int, array{categoryId: string, name: string, percentage: string, amount: string|null}>
+     * @return list<array<string, mixed>>
      */
     public function breakdownForPeriod(IncomePeriod $period): array
     {
-        $period->loadMissing(['allocations.category', 'plan.categories']);
+        $period->loadMissing(['allocations.category.deductFromCategory', 'plan.categories.deductFromCategory']);
 
         if ($period->is_locked && $period->allocations->isNotEmpty()) {
-            return $period->allocations->map(fn (IncomeAllocation $allocation) => [
-                'categoryId' => $allocation->category_id,
-                'name' => $allocation->category?->name ?? '',
-                'percentage' => (string) ($allocation->category?->percentage ?? '0'),
-                'amount' => $allocation->amount_encrypted,
-            ])->all();
+            $allocationsByCategory = $period->allocations->keyBy('category_id');
+
+            return $period->allocations
+                ->sortBy(fn (IncomeAllocation $allocation) => $allocation->category?->sort_order ?? 0)
+                ->map(function (IncomeAllocation $allocation) use ($allocationsByCategory) {
+                    $category = $allocation->category;
+
+                    return [
+                        'categoryId' => $allocation->category_id,
+                        'name' => $category?->name ?? '',
+                        'allocationType' => $category?->allocation_type->value ?? 'percentage',
+                        'percentage' => $category?->percentage !== null ? (string) $category->percentage : null,
+                        'amount' => $allocation->amount_encrypted,
+                        'deductionMode' => $category?->deduction_mode?->value,
+                        'deductionValue' => $category?->deduction_value !== null ? (string) $category->deduction_value : null,
+                        'deductFromCategoryId' => $category?->deduct_from_category_id,
+                        'deductFromCategoryName' => $category?->deductFromCategory?->name,
+                        'deductionNote' => $this->deductionNoteForLocked($category, $allocation, $allocationsByCategory),
+                    ];
+                })
+                ->values()
+                ->all();
         }
 
         $amount = $period->amount_encrypted;
@@ -63,14 +74,88 @@ class IncomeCalculationService
             return [];
         }
 
-        return collect($this->preview($period->plan, $amount))
-            ->map(fn (array $row) => [
-                'categoryId' => $row['category_id'],
-                'name' => $row['name'],
-                'percentage' => $row['percentage'],
-                'amount' => $row['amount'],
-            ])
+        return $this->calculator->breakdown($period->plan, $amount, $this->periodDeductionOverrides($period));
+    }
+
+    /**
+     * @return list<array{
+     *     categoryId: string,
+     *     name: string,
+     *     deductFromCategoryName: string|null,
+     *     planDefaultAmount: string|null,
+     *     periodAmount: string|null,
+     *     hasPeriodOverride: bool
+     * }>
+     */
+    public function customCategoriesForPeriod(IncomePeriod $period): array
+    {
+        $period->loadMissing(['plan.categories.deductFromCategory', 'periodDeductions']);
+
+        $overrides = $period->periodDeductions->keyBy('category_id');
+
+        return $period->plan->categories
+            ->filter(fn (SavingsCategory $category) => $category->isDeduction())
+            ->sortBy('sort_order')
+            ->values()
+            ->map(function (SavingsCategory $category) use ($overrides) {
+                $override = $overrides->get($category->id);
+
+                return [
+                    'categoryId' => $category->id,
+                    'name' => $category->name,
+                    'deductFromCategoryName' => $category->deductFromCategory?->name,
+                    'planDefaultAmount' => $this->planDefaultDeductionAmount($category),
+                    'periodAmount' => $override?->amount_encrypted,
+                    'hasPeriodOverride' => $override !== null,
+                ];
+            })
             ->all();
+    }
+
+    /**
+     * @param  list<array{category_id: string, amount: float|int|string|null}>  $customAmounts
+     */
+    public function syncCustomAmounts(IncomePeriod $period, array $customAmounts): IncomePeriod
+    {
+        if ($period->is_locked) {
+            throw ValidationException::withMessages([
+                'period' => __('Cannot edit custom amounts on a locked income period.'),
+            ]);
+        }
+
+        $period->loadMissing('plan.categories');
+
+        $customCategoryIds = $period->plan->categories
+            ->filter(fn (SavingsCategory $category) => $category->isDeduction())
+            ->pluck('id')
+            ->all();
+
+        return DB::transaction(function () use ($period, $customAmounts, $customCategoryIds) {
+            foreach ($customAmounts as $row) {
+                $categoryId = $row['category_id'];
+
+                if (! in_array($categoryId, $customCategoryIds, true)) {
+                    continue;
+                }
+
+                $amount = $row['amount'] ?? null;
+                $normalizedAmount = ($amount === null || $amount === '')
+                    ? '0.00'
+                    : number_format((float) $amount, 2, '.', '');
+
+                IncomePeriodDeduction::query()->updateOrCreate(
+                    [
+                        'income_period_id' => $period->id,
+                        'category_id' => $categoryId,
+                    ],
+                    [
+                        'amount_encrypted' => $normalizedAmount,
+                    ],
+                );
+            }
+
+            return $period->fresh(['plan.categories.deductFromCategory', 'periodDeductions']);
+        });
     }
 
     public function lock(IncomePeriod $period, User $user): IncomePeriod
@@ -80,7 +165,7 @@ class IncomeCalculationService
         }
 
         return DB::transaction(function () use ($period, $user) {
-            $period->load('plan.categories');
+            $period->load(['plan.categories.deductFromCategory', 'periodDeductions']);
             $amount = $period->amount_encrypted;
 
             if ($amount === null) {
@@ -89,11 +174,17 @@ class IncomeCalculationService
                 ]);
             }
 
+            $allocations = $this->calculator->calculate(
+                $period->plan,
+                $amount,
+                $this->periodDeductionOverrides($period),
+            );
+
             foreach ($period->plan->categories as $category) {
                 IncomeAllocation::query()->create([
                     'income_period_id' => $period->id,
                     'category_id' => $category->id,
-                    'amount_encrypted' => bcmul($amount, bcdiv((string) $category->percentage, '100', 6), 2),
+                    'amount_encrypted' => $allocations[$category->id] ?? '0.00',
                 ]);
             }
 
@@ -125,7 +216,68 @@ class IncomeCalculationService
                 'locked_by_user_id' => null,
             ]);
 
-            return $period->fresh(['plan.categories']);
+            return $period->fresh(['plan.categories.deductFromCategory']);
         });
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<string, IncomeAllocation>  $allocationsByCategory
+     */
+    private function deductionNoteForLocked(
+        ?SavingsCategory $category,
+        IncomeAllocation $allocation,
+        \Illuminate\Support\Collection $allocationsByCategory,
+    ): ?string {
+        if ($category === null) {
+            return null;
+        }
+
+        if ($category->isDeduction() && $category->deductFromCategory !== null) {
+            return __('from :source', ['source' => $category->deductFromCategory->name]);
+        }
+
+        if ($category->isPercentage()) {
+            $category->loadMissing('deductionsFromThis');
+            $totalDeducted = '0.00';
+
+            foreach ($category->deductionsFromThis as $deduction) {
+                $deductionAllocation = $allocationsByCategory->get($deduction->id);
+                $deductionAmount = $deductionAllocation?->amount_encrypted ?? '0.00';
+                $totalDeducted = bcadd($totalDeducted, $deductionAmount, 2);
+            }
+
+            if (bccomp($totalDeducted, '0', 2) === 1) {
+                return __('− :amount deduction', ['amount' => $totalDeducted]);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array<string, string>|null
+     */
+    private function periodDeductionOverrides(IncomePeriod $period): ?array
+    {
+        $period->loadMissing('periodDeductions');
+
+        if ($period->periodDeductions->isEmpty()) {
+            return null;
+        }
+
+        return $period->periodDeductions
+            ->mapWithKeys(fn (IncomePeriodDeduction $deduction) => [
+                $deduction->category_id => $deduction->amount_encrypted ?? '0.00',
+            ])
+            ->all();
+    }
+
+    private function planDefaultDeductionAmount(SavingsCategory $category): ?string
+    {
+        if ($category->deduction_value === null) {
+            return null;
+        }
+
+        return number_format((float) $category->deduction_value, 2, '.', '');
     }
 }

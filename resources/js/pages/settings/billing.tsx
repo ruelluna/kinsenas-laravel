@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
+import { formatMoneyFromCents } from '@/lib/format-money';
 
 type Props = {
     subscription: {
@@ -60,7 +61,7 @@ export default function BillingSettings({ subscription, plans, paymentMethod }: 
                             {plan.prices.map((price) => (
                                 <Button key={price.id} asChild variant="outline" size="sm">
                                     <Link href={`/billing/pay?plan_price_id=${price.id}`}>
-                                        {price.intervalLabel} — ₱{(price.amount / 100).toFixed(2)}
+                                        {price.intervalLabel} — {formatMoneyFromCents(price.amount)}
                                     </Link>
                                 </Button>
                             ))}

@@ -1,5 +1,6 @@
 import { Head, usePage } from '@inertiajs/react';
 import Heading from '@/components/heading';
+import { formatMoney } from '@/lib/format-money';
 import type { ReportTotals } from '@/types/savings';
 import type { SharedData } from '@/types';
 
@@ -31,7 +32,7 @@ function ReportSection({ title, items }: { title: string; items: Array<{ label: 
                     items.map((item) => (
                         <li key={item.label} className="flex justify-between gap-2">
                             <span>{item.label}</span>
-                            <span className="font-medium">₱{item.total}</span>
+                            <span className="font-medium">{formatMoney(item.total)}</span>
                         </li>
                     ))
                 )}

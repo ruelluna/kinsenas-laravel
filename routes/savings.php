@@ -18,6 +18,7 @@ Route::prefix('savings')
         Route::get('income', [IncomePeriodController::class, 'index'])->name('income.index');
         Route::get('income/{incomePeriod}', [IncomePeriodController::class, 'show'])->name('income.show');
         Route::post('income', [IncomePeriodController::class, 'store'])->name('income.store');
+        Route::put('income/{incomePeriod}/custom-amounts', [IncomePeriodController::class, 'updateCustomAmounts'])->name('income.custom-amounts');
         Route::post('income/{incomePeriod}/lock', [IncomePeriodController::class, 'lock'])->name('income.lock');
         Route::post('income/{incomePeriod}/unlock', [IncomePeriodController::class, 'unlock'])->name('income.unlock');
 

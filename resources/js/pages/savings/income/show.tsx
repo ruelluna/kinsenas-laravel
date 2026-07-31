@@ -1,20 +1,91 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import type { IncomeBreakdownRow, IncomePeriodSummary } from '@/types/savings';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { formatMoney } from '@/lib/format-money';
+import type {
+    IncomeBreakdownRow,
+    IncomeCustomCategory,
+    IncomePeriodSummary,
+} from '@/types/savings';
 import type { SharedData } from '@/types';
 
 type Props = {
     plan: { id: string; name: string };
     period: IncomePeriodSummary;
     breakdown: IncomeBreakdownRow[];
+    customCategories: IncomeCustomCategory[];
 };
 
-export default function IncomeShow({ plan, period, breakdown }: Props) {
+function formatPercentage(row: IncomeBreakdownRow): string {
+    if (row.allocationType === 'deduction') {
+        if (row.deductionMode === 'percent_of_income' && row.deductionValue) {
+            return `${row.deductionValue}% income`;
+        }
+
+        return 'Custom';
+    }
+
+    return row.percentage !== null ? `${row.percentage}%` : '—';
+}
+
+function formatCategoryLabel(row: IncomeBreakdownRow): string {
+    if (row.deductionNote) {
+        return `${row.name} (${row.deductionNote})`;
+    }
+
+    return row.name;
+}
+
+function customAmountInputValue(category: IncomeCustomCategory): string {
+    if (category.hasPeriodOverride) {
+        if (category.periodAmount === null || category.periodAmount === '0.00') {
+            return '';
+        }
+
+        return category.periodAmount;
+    }
+
+    return category.planDefaultAmount ?? '';
+}
+
+export default function IncomeShow({
+    plan,
+    period,
+    breakdown,
+    customCategories,
+}: Props) {
     const { currentTeam } = usePage<SharedData>().props;
     const teamSlug = currentTeam?.slug ?? '';
+
+    const [customAmounts, setCustomAmounts] = useState<Record<string, string>>(() =>
+        Object.fromEntries(
+            customCategories.map((category) => [
+                category.categoryId,
+                customAmountInputValue(category),
+            ]),
+        ),
+    );
+
+    const percentageTotal = useMemo(
+        () =>
+            breakdown.reduce((total, row) => {
+                if (row.allocationType === 'deduction' || row.percentage === null) {
+                    return total;
+                }
+
+                const value = parseFloat(row.percentage);
+
+                return total + (Number.isFinite(value) ? value : 0);
+            }, 0),
+        [breakdown],
+    );
+
+    const hasDeductions = breakdown.some((row) => row.allocationType === 'deduction');
 
     return (
         <>
@@ -55,12 +126,73 @@ export default function IncomeShow({ plan, period, breakdown }: Props) {
                 </div>
             </div>
 
+            {!period.isLocked && customCategories.length > 0 && (
+                <Form
+                    action={`/${teamSlug}/savings/income/${period.id}/custom-amounts`}
+                    method="put"
+                    className="mt-6 space-y-4 rounded-lg border p-4"
+                >
+                    <div>
+                        <h3 className="font-medium">Custom categories</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            Optional amounts for this income period. Clear a field to skip the
+                            deduction — the category stays on your plan.
+                        </p>
+                    </div>
+
+                    {customCategories.map((category, index) => (
+                        <div key={category.categoryId} className="grid gap-2 sm:grid-cols-2">
+                            <input
+                                type="hidden"
+                                name={`custom_amounts[${index}][category_id]`}
+                                value={category.categoryId}
+                            />
+                            <div>
+                                <Label htmlFor={`custom-amount-${category.categoryId}`}>
+                                    {category.name}
+                                </Label>
+                                <p className="text-xs text-muted-foreground">
+                                    From {category.deductFromCategoryName ?? 'source category'}
+                                    {category.planDefaultAmount
+                                        ? ` · plan default ${formatMoney(category.planDefaultAmount)}`
+                                        : ''}
+                                </p>
+                            </div>
+                            <div>
+                                <Label htmlFor={`custom-amount-${category.categoryId}`}>
+                                    Amount this period (₱)
+                                </Label>
+                                <Input
+                                    id={`custom-amount-${category.categoryId}`}
+                                    name={`custom_amounts[${index}][amount]`}
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={customAmounts[category.categoryId] ?? ''}
+                                    onChange={(event) =>
+                                        setCustomAmounts((current) => ({
+                                            ...current,
+                                            [category.categoryId]: event.target.value,
+                                        }))
+                                    }
+                                    placeholder="Leave blank for no deduction"
+                                />
+                            </div>
+                        </div>
+                    ))}
+
+                    <Button type="submit" size="sm">
+                        Save custom amounts
+                    </Button>
+                </Form>
+            )}
+
             <div className="mt-6 overflow-hidden rounded-lg border">
                 <table className="w-full text-sm">
                     <thead>
                         <tr className="border-b bg-muted/50 text-left">
                             <th className="px-4 py-3 font-medium">Category</th>
-                            <th className="px-4 py-3 font-medium text-right">%</th>
+                            <th className="px-4 py-3 font-medium text-right">Allocation</th>
                             <th className="px-4 py-3 font-medium text-right">Amount</th>
                         </tr>
                     </thead>
@@ -74,10 +206,10 @@ export default function IncomeShow({ plan, period, breakdown }: Props) {
                         ) : (
                             breakdown.map((row) => (
                                 <tr key={row.categoryId} className="border-b last:border-b-0">
-                                    <td className="px-4 py-3">{row.name}</td>
-                                    <td className="px-4 py-3 text-right">{row.percentage}%</td>
+                                    <td className="px-4 py-3">{formatCategoryLabel(row)}</td>
+                                    <td className="px-4 py-3 text-right">{formatPercentage(row)}</td>
                                     <td className="px-4 py-3 text-right font-medium">
-                                        {row.amount !== null ? `₱${row.amount}` : '—'}
+                                        {formatMoney(row.amount)}
                                     </td>
                                 </tr>
                             ))
@@ -87,9 +219,13 @@ export default function IncomeShow({ plan, period, breakdown }: Props) {
                         <tfoot>
                             <tr className="bg-muted/30 font-medium">
                                 <td className="px-4 py-3">Total</td>
-                                <td className="px-4 py-3 text-right">100%</td>
                                 <td className="px-4 py-3 text-right">
-                                    {period.amount !== null ? `₱${period.amount}` : '—'}
+                                    {hasDeductions
+                                        ? `${percentageTotal.toFixed(2)}% + custom`
+                                        : '100%'}
+                                </td>
+                                <td className="px-4 py-3 text-right">
+                                    {formatMoney(period.amount)}
                                 </td>
                             </tr>
                         </tfoot>

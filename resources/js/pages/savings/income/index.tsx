@@ -4,6 +4,7 @@ import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { formatMoney } from '@/lib/format-money';
 import type { IncomePeriodSummary } from '@/types/savings';
 import type { SharedData } from '@/types';
 
@@ -51,7 +52,7 @@ export default function IncomeIndex({ plan, periods }: Props) {
                             <div className="min-w-0 flex-1">
                                 <p className="font-medium">{period.periodStart}</p>
                                 <p className="text-sm text-muted-foreground">
-                                    Amount: {period.amount ?? '—'} {period.isLocked ? '(locked)' : ''}
+                                    Amount: {formatMoney(period.amount)} {period.isLocked ? '(locked)' : ''}
                                 </p>
                             </div>
                             <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
