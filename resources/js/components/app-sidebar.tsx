@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-react';
+import { BookOpen, FolderGit2, Landmark, LayoutGrid, PiggyBank, Receipt, Users, Wallet } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -19,15 +19,45 @@ import type { NavItem } from '@/types';
 
 export function AppSidebar() {
     const page = usePage();
-    const dashboardUrl = page.props.currentTeam
-        ? dashboard(page.props.currentTeam.slug)
-        : '/';
+    const teamSlug = page.props.currentTeam?.slug;
+    const dashboardUrl = teamSlug ? dashboard(teamSlug) : '/';
+    const savingsBase = teamSlug ? `/${teamSlug}/savings` : '/';
 
     const mainNavItems: NavItem[] = [
         {
             title: 'Dashboard',
             href: dashboardUrl,
             icon: LayoutGrid,
+        },
+        {
+            title: 'Savings Plan',
+            href: `${savingsBase}/plan`,
+            icon: PiggyBank,
+        },
+        {
+            title: 'Income',
+            href: `${savingsBase}/income`,
+            icon: Wallet,
+        },
+        {
+            title: 'Transfers',
+            href: `${savingsBase}/transfers`,
+            icon: Receipt,
+        },
+        {
+            title: 'Banks',
+            href: `${savingsBase}/banks`,
+            icon: Landmark,
+        },
+        {
+            title: 'Recipients',
+            href: `${savingsBase}/recipients`,
+            icon: Users,
+        },
+        {
+            title: 'Reports',
+            href: `${savingsBase}/reports`,
+            icon: BookOpen,
         },
     ];
 
@@ -36,11 +66,6 @@ export function AppSidebar() {
             title: 'Repository',
             href: 'https://github.com/laravel/react-starter-kit',
             icon: FolderGit2,
-        },
-        {
-            title: 'Documentation',
-            href: 'https://laravel.com/docs/starter-kits#react',
-            icon: BookOpen,
         },
     ];
 

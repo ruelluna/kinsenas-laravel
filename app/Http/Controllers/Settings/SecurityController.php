@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\PasswordUpdateRequest;
 use App\Http\Requests\Settings\TwoFactorAuthenticationRequest;
+use App\Services\Vault\FinancialEncryptionService;
+use App\Services\Vault\VaultKeyManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
@@ -13,6 +15,12 @@ use Laravel\Fortify\Features;
 
 class SecurityController extends Controller
 {
+    public function __construct(
+        private FinancialEncryptionService $encryption,
+        private VaultKeyManager $vaultKeyManager,
+    ) {
+    }
+
     /**
      * Show the user's security settings page.
      */
@@ -61,7 +69,20 @@ class SecurityController extends Controller
      */
     public function update(PasswordUpdateRequest $request): RedirectResponse
     {
-        $request->user()->update([
+        $user = $request->user();
+
+        if ($user->vault !== null) {
+            $this->encryption->rewrapWithPassword(
+                $user->vault,
+                $request->input('current_password'),
+                $request->password,
+            );
+
+            $dek = $this->encryption->unlockWithPassword($user->vault->fresh(), $request->password);
+            $this->vaultKeyManager->storeUserDek($dek);
+        }
+
+        $user->update([
             'password' => $request->password,
         ]);
 

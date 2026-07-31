@@ -5,6 +5,8 @@ namespace Database\Factories;
 use App\Enums\TeamRole;
 use App\Models\Team;
 use App\Models\User;
+use App\Services\Billing\SubscriptionService;
+use App\Services\Vault\FinancialEncryptionService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -53,6 +55,9 @@ class UserFactory extends Factory
             ]);
 
             $user->switchTeam($team);
+
+            app(FinancialEncryptionService::class)->createUserVault($user, 'password');
+            app(SubscriptionService::class)->startTrial($user->fresh());
         });
     }
 

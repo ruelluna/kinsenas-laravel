@@ -46,6 +46,12 @@ class HandleInertiaRequests extends Middleware
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'currentTeam' => fn () => $user?->currentTeam ? $user->toUserTeam($user->currentTeam) : null,
             'teams' => fn () => $user?->toUserTeams(includeCurrent: true) ?? [],
+            'vaultLocked' => fn () => $user !== null && $user->vault !== null && ! session()->has(\App\Services\Vault\VaultKeyManager::SESSION_USER_DEK),
+            'subscription' => fn () => $user?->subscription ? [
+                'status' => $user->subscription->status->value,
+                'trialEndsAt' => $user->subscription->trial_ends_at?->toISOString(),
+            ] : null,
+            'registrationRecoveryKey' => fn () => session('registration.recovery_key'),
         ];
     }
 }

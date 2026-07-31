@@ -1,9 +1,9 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import PendingInvitationsModal from '@/components/pending-invitations-modal';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import { dashboard } from '@/routes';
-import type { DashboardInvitation } from '@/types';
+import type { DashboardInvitation, SharedData } from '@/types';
 
 type Props = {
     pendingInvitations?: DashboardInvitation[];
@@ -13,10 +13,18 @@ export default function Dashboard({ pendingInvitations = [] }: Props) {
     const [showInvitations, setShowInvitations] = useState(
         pendingInvitations.length > 0,
     );
+    const recoveryKey = usePage<SharedData & { registrationRecoveryKey?: string | null }>().props.registrationRecoveryKey;
 
     return (
         <>
             <Head title="Dashboard" />
+            {recoveryKey && (
+                <div className="mx-4 mt-4 rounded-lg border border-amber-500/50 bg-amber-500/10 p-4 text-sm">
+                    <p className="font-medium">Save your recovery key</p>
+                    <p className="mt-1 text-muted-foreground">Store this somewhere safe. You need it if you reset your password.</p>
+                    <code className="mt-2 block break-all rounded bg-muted p-2 text-xs">{recoveryKey}</code>
+                </div>
+            )}
             <PendingInvitationsModal
                 invitations={pendingInvitations}
                 open={pendingInvitations.length > 0 && showInvitations}

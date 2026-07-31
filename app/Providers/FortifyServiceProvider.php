@@ -4,6 +4,7 @@ namespace App\Providers;
 
 /* @chisel-registration */
 use App\Actions\Fortify\CreateNewUser;
+use App\Actions\Fortify\UnlockUserVault;
 /* @end-chisel-registration */
 use App\Actions\Fortify\ResetUserPassword;
 use App\Http\Responses\LoginResponse;
@@ -84,6 +85,12 @@ class FortifyServiceProvider extends ServiceProvider
         /* @chisel-registration */
         Fortify::createUsersUsing(CreateNewUser::class);
         /* @end-chisel-registration */
+
+        Fortify::loginThrough(function () {
+            return array_merge(Fortify::defaultLoginPipeline(), [
+                UnlockUserVault::class,
+            ]);
+        });
     }
 
     /**

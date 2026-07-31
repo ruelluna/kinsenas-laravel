@@ -1,0 +1,38 @@
+<?php
+
+use App\Http\Controllers\Savings\BankController;
+use App\Http\Controllers\Savings\IncomePeriodController;
+use App\Http\Controllers\Savings\RecipientController;
+use App\Http\Controllers\Savings\SavingsPlanController;
+use App\Http\Controllers\Savings\SavingsReportController;
+use App\Http\Controllers\Savings\TransferController;
+use Illuminate\Support\Facades\Route;
+
+Route::prefix('savings')
+    ->name('savings.')
+    ->group(function () {
+        Route::get('plan', [SavingsPlanController::class, 'show'])->name('plan.show');
+        Route::post('plan/from-template/{template}', [SavingsPlanController::class, 'storeFromTemplate'])->name('plan.from-template');
+        Route::put('plan', [SavingsPlanController::class, 'update'])->name('plan.update');
+
+        Route::get('income', [IncomePeriodController::class, 'index'])->name('income.index');
+        Route::post('income', [IncomePeriodController::class, 'store'])->name('income.store');
+        Route::post('income/{incomePeriod}/lock', [IncomePeriodController::class, 'lock'])->name('income.lock');
+        Route::post('income/{incomePeriod}/unlock', [IncomePeriodController::class, 'unlock'])->name('income.unlock');
+
+        Route::get('banks', [BankController::class, 'index'])->name('banks.index');
+        Route::post('banks', [BankController::class, 'store'])->name('banks.store');
+        Route::put('banks/{bank}', [BankController::class, 'update'])->name('banks.update');
+        Route::delete('banks/{bank}', [BankController::class, 'destroy'])->name('banks.destroy');
+
+        Route::get('recipients', [RecipientController::class, 'index'])->name('recipients.index');
+        Route::post('recipients', [RecipientController::class, 'store'])->name('recipients.store');
+        Route::put('recipients/{recipient}', [RecipientController::class, 'update'])->name('recipients.update');
+        Route::delete('recipients/{recipient}', [RecipientController::class, 'destroy'])->name('recipients.destroy');
+
+        Route::get('transfers', [TransferController::class, 'index'])->name('transfers.index');
+        Route::post('transfers', [TransferController::class, 'store'])->name('transfers.store');
+        Route::post('transfers/{transfer}/confirm', [TransferController::class, 'confirm'])->name('transfers.confirm');
+
+        Route::get('reports', SavingsReportController::class)->name('reports');
+    });

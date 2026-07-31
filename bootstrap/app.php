@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\EnsurePlatformAdmin;
+use App\Http\Middleware\EnsureSubscribedOrTrialing;
+use App\Http\Middleware\EnsureVaultUnlocked;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SetTeamUrlDefaults;
@@ -17,6 +20,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+
+        $middleware->alias([
+            'vault.unlocked' => EnsureVaultUnlocked::class,
+            'subscribed' => EnsureSubscribedOrTrialing::class,
+            'platform.admin' => EnsurePlatformAdmin::class,
+        ]);
 
         $middleware->web(append: [
             HandleAppearance::class,

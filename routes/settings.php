@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Billing\PaymentSubmissionController;
+use App\Http\Controllers\Settings\BillingController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
 use App\Http\Controllers\Teams\TeamController;
@@ -32,6 +34,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('user-password.update');
 
     Route::inertia('settings/appearance', 'settings/appearance')->name('appearance.edit');
+
+    Route::get('settings/billing', [BillingController::class, 'show'])->name('settings.billing');
+    Route::get('billing/pay', [PaymentSubmissionController::class, 'create'])->name('billing.pay');
+    Route::post('billing/pay', [PaymentSubmissionController::class, 'store'])->name('billing.pay.store');
 
     Route::get('settings/teams', [TeamController::class, 'index'])->name('teams.index');
     Route::post('settings/teams', [TeamController::class, 'store'])->name('teams.store');

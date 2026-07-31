@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -93,6 +94,26 @@ class Team extends Model
     public function invitations(): HasMany
     {
         return $this->hasMany(TeamInvitation::class);
+    }
+
+    public function vault(): HasOne
+    {
+        return $this->hasOne(TeamVault::class);
+    }
+
+    public function savingsPlans(): HasMany
+    {
+        return $this->hasMany(SavingsPlan::class);
+    }
+
+    public function banks(): HasMany
+    {
+        return $this->hasMany(Bank::class);
+    }
+
+    public function recipients(): HasMany
+    {
+        return $this->hasMany(Recipient::class);
     }
 
     /**
