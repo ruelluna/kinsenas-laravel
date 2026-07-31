@@ -57,6 +57,11 @@ class SavingsCategory extends Model
         return $this->hasMany(IncomeAllocation::class, 'category_id');
     }
 
+    public function fundSpends(): HasMany
+    {
+        return $this->hasMany(FundSpend::class, 'category_id');
+    }
+
     public function isPercentage(): bool
     {
         return $this->allocation_type === CategoryAllocationType::Percentage;

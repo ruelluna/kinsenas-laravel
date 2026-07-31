@@ -13,8 +13,10 @@ use Illuminate\Validation\ValidationException;
 
 class IncomeCalculationService
 {
-    public function __construct(private CategoryAllocationCalculator $calculator)
-    {
+    public function __construct(
+        private CategoryAllocationCalculator $calculator,
+        private FundBalanceService $fundBalanceService,
+    ) {
     }
 
     public function create(SavingsPlan $plan, string $amount, string $periodStart): IncomePeriod
@@ -200,14 +202,9 @@ class IncomeCalculationService
 
     public function unlock(IncomePeriod $period): IncomePeriod
     {
-        if ($period->transfers()->where('status', 'confirmed')->exists()) {
-            throw ValidationException::withMessages([
-                'period' => __('Cannot unlock income with confirmed transfers.'),
-            ]);
-        }
+        $this->fundBalanceService->assertCanUnlockPeriod($period);
 
         return DB::transaction(function () use ($period) {
-            $period->transfers()->delete();
             $period->allocations()->delete();
 
             $period->update([

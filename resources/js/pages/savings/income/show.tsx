@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { formatMoney } from '@/lib/format-money';
 import type {
+    FundBalance,
     IncomeBreakdownRow,
     IncomeCustomCategory,
     IncomePeriodSummary,
@@ -19,6 +20,7 @@ type Props = {
     period: IncomePeriodSummary;
     breakdown: IncomeBreakdownRow[];
     customCategories: IncomeCustomCategory[];
+    fundBalances: FundBalance[];
 };
 
 function formatPercentage(row: IncomeBreakdownRow): string {
@@ -58,9 +60,15 @@ export default function IncomeShow({
     period,
     breakdown,
     customCategories,
+    fundBalances,
 }: Props) {
     const { currentTeam } = usePage<SharedData>().props;
     const teamSlug = currentTeam?.slug ?? '';
+
+    const balanceByCategory = useMemo(
+        () => Object.fromEntries(fundBalances.map((balance) => [balance.categoryId, balance])),
+        [fundBalances],
+    );
 
     const [customAmounts, setCustomAmounts] = useState<Record<string, string>>(() =>
         Object.fromEntries(
@@ -194,12 +202,18 @@ export default function IncomeShow({
                             <th className="px-4 py-3 font-medium">Category</th>
                             <th className="px-4 py-3 font-medium text-right">Allocation</th>
                             <th className="px-4 py-3 font-medium text-right">Amount</th>
+                            {fundBalances.length > 0 && (
+                                <th className="px-4 py-3 font-medium text-right">Remaining</th>
+                            )}
                         </tr>
                     </thead>
                     <tbody>
                         {breakdown.length === 0 ? (
                             <tr>
-                                <td colSpan={3} className="px-4 py-6 text-center text-muted-foreground">
+                                <td
+                                    colSpan={fundBalances.length > 0 ? 4 : 3}
+                                    className="px-4 py-6 text-center text-muted-foreground"
+                                >
                                     No income amount set for this period.
                                 </td>
                             </tr>
@@ -211,6 +225,11 @@ export default function IncomeShow({
                                     <td className="px-4 py-3 text-right font-medium">
                                         {formatMoney(row.amount)}
                                     </td>
+                                    {fundBalances.length > 0 && (
+                                        <td className="px-4 py-3 text-right">
+                                            {formatMoney(balanceByCategory[row.categoryId]?.remaining ?? null)}
+                                        </td>
+                                    )}
                                 </tr>
                             ))
                         )}
@@ -227,11 +246,21 @@ export default function IncomeShow({
                                 <td className="px-4 py-3 text-right">
                                     {formatMoney(period.amount)}
                                 </td>
+                                {fundBalances.length > 0 && <td className="px-4 py-3" />}
                             </tr>
                         </tfoot>
                     )}
                 </table>
             </div>
+
+            {fundBalances.length > 0 && (
+                <p className="mt-3 text-sm text-muted-foreground">
+                    Remaining balances reflect all locked income minus confirmed spending.{' '}
+                    <Link href={`/${teamSlug}/savings/spending`} className="text-primary underline-offset-4 hover:underline">
+                        Record spending →
+                    </Link>
+                </p>
+            )}
 
             {!period.isLocked && breakdown.length > 0 && (
                 <p className="mt-3 text-sm text-muted-foreground">

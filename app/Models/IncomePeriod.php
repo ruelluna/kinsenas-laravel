@@ -49,11 +49,6 @@ class IncomePeriod extends Model
         return $this->hasMany(IncomeAllocation::class);
     }
 
-    public function transfers(): HasMany
-    {
-        return $this->hasMany(Transfer::class);
-    }
-
     public function periodDeductions(): HasMany
     {
         return $this->hasMany(IncomePeriodDeduction::class);

@@ -18,7 +18,7 @@ export default function RecipientsIndex({ recipients, recipientTypes }: Props) {
     return (
         <>
             <Head title="Recipients" />
-            <Heading variant="small" title="Recipients" description="People and organizations receiving transfers." />
+            <Heading variant="small" title="Recipients" description="People and organizations receiving payments." />
 
             <Form action={`/${teamSlug}/savings/recipients`} method="post" className="mt-6 grid max-w-md gap-4 rounded-lg border p-4">
                 <div className="grid gap-2">

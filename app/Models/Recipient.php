@@ -34,8 +34,8 @@ class Recipient extends Model
         return $this->belongsTo(Team::class);
     }
 
-    public function transfers(): HasMany
+    public function fundSpends(): HasMany
     {
-        return $this->hasMany(Transfer::class);
+        return $this->hasMany(FundSpend::class);
     }
 }

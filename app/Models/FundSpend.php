@@ -4,28 +4,28 @@ namespace App\Models;
 
 use App\Casts\UserEncryptedMoney;
 use App\Enums\TransferStatus;
-use Database\Factories\TransferFactory;
+use Database\Factories\FundSpendFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Transfer extends Model
+class FundSpend extends Model
 {
-    /** @use HasFactory<TransferFactory> */
+    /** @use HasFactory<FundSpendFactory> */
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'income_period_id',
+        'savings_plan_id',
         'category_id',
+        'amount_encrypted',
+        'description',
+        'spent_on',
         'bank_id',
         'recipient_id',
-        'amount_encrypted',
         'status',
-        'transferred_on',
         'confirmed_at',
         'confirmed_by_user_id',
-        'notes',
     ];
 
     protected function casts(): array
@@ -33,14 +33,14 @@ class Transfer extends Model
         return [
             'amount_encrypted' => UserEncryptedMoney::class.':true',
             'status' => TransferStatus::class,
-            'transferred_on' => 'date',
+            'spent_on' => 'date',
             'confirmed_at' => 'datetime',
         ];
     }
 
-    public function incomePeriod(): BelongsTo
+    public function plan(): BelongsTo
     {
-        return $this->belongsTo(IncomePeriod::class);
+        return $this->belongsTo(SavingsPlan::class, 'savings_plan_id');
     }
 
     public function category(): BelongsTo
@@ -61,5 +61,10 @@ class Transfer extends Model
     public function confirmedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'confirmed_by_user_id');
+    }
+
+    public function isConfirmed(): bool
+    {
+        return $this->status === TransferStatus::Confirmed;
     }
 }

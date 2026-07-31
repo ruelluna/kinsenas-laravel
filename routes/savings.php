@@ -1,11 +1,11 @@
 <?php
 
 use App\Http\Controllers\Savings\BankController;
+use App\Http\Controllers\Savings\FundSpendController;
 use App\Http\Controllers\Savings\IncomePeriodController;
 use App\Http\Controllers\Savings\RecipientController;
 use App\Http\Controllers\Savings\SavingsPlanController;
 use App\Http\Controllers\Savings\SavingsReportController;
-use App\Http\Controllers\Savings\TransferController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('savings')
@@ -32,9 +32,11 @@ Route::prefix('savings')
         Route::put('recipients/{recipient}', [RecipientController::class, 'update'])->name('recipients.update');
         Route::delete('recipients/{recipient}', [RecipientController::class, 'destroy'])->name('recipients.destroy');
 
-        Route::get('transfers', [TransferController::class, 'index'])->name('transfers.index');
-        Route::post('transfers', [TransferController::class, 'store'])->name('transfers.store');
-        Route::post('transfers/{transfer}/confirm', [TransferController::class, 'confirm'])->name('transfers.confirm');
+        Route::get('spending', [FundSpendController::class, 'index'])->name('spending.index');
+        Route::post('spending', [FundSpendController::class, 'store'])->name('spending.store');
+        Route::post('spending/{fundSpend}/confirm', [FundSpendController::class, 'confirm'])->name('spending.confirm');
+
+        Route::redirect('transfers', 'spending')->name('transfers.index');
 
         Route::get('reports', SavingsReportController::class)->name('reports');
     });

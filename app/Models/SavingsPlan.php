@@ -49,6 +49,11 @@ class SavingsPlan extends Model
         return $this->hasMany(IncomePeriod::class, 'plan_id')->latest('period_start');
     }
 
+    public function fundSpends(): HasMany
+    {
+        return $this->hasMany(FundSpend::class, 'savings_plan_id');
+    }
+
     public function hasLockedIncomePeriod(): bool
     {
         return $this->incomePeriods()->where('is_locked', true)->exists();

@@ -7,6 +7,7 @@ use App\Http\Requests\Savings\SaveIncomePeriodDeductionsRequest;
 use App\Http\Requests\Savings\SaveIncomePeriodRequest;
 use App\Models\IncomePeriod;
 use App\Models\Team;
+use App\Services\Savings\FundBalanceService;
 use App\Services\Savings\IncomeCalculationService;
 use App\Services\Savings\SavingsPlanService;
 use Illuminate\Http\RedirectResponse;
@@ -19,6 +20,7 @@ class IncomePeriodController extends Controller
     public function __construct(
         private SavingsPlanService $planService,
         private IncomeCalculationService $incomeService,
+        private FundBalanceService $fundBalanceService,
     ) {
     }
 
@@ -50,6 +52,9 @@ class IncomePeriodController extends Controller
             'period' => $this->periodSummary($incomePeriod),
             'breakdown' => $this->incomeService->breakdownForPeriod($incomePeriod),
             'customCategories' => $this->incomeService->customCategoriesForPeriod($incomePeriod),
+            'fundBalances' => $plan->hasLockedIncomePeriod()
+                ? $this->fundBalanceService->balancesForPlan($plan)
+                : [],
         ]);
     }
 

@@ -23,7 +23,7 @@ export default function IncomeIndex({ plan, periods }: Props) {
             <Heading
                 variant="small"
                 title="Income"
-                description={`Enter monthly income for ${plan.name}. Lock to enable transfers.`}
+                description={`Enter monthly income for ${plan.name}. Lock to enable spending.`}
             />
 
             <Form
