@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             SavingsFormulaTemplateSeeder::class,
             SavingsPlanPageGuidanceSeeder::class,
             BillingSeeder::class,
+            PhilippineBankSeeder::class,
         ]);
 
         $user = User::factory()->create([

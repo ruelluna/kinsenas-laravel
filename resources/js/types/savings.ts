@@ -48,6 +48,29 @@ export type SavingsPlanPageGuidance = {
     afterIncomeVideoUrl: string | null;
 };
 
+export type FundBalance = {
+    categoryId: string;
+    name: string;
+    hint: string | null;
+    isDefault: boolean;
+    allocated: string | null;
+    spent: string | null;
+    remaining: string | null;
+    percentUsed: number | null;
+};
+
+export type FundSpend = {
+    id: string;
+    amount: string | null;
+    description: string | null;
+    status: string;
+    spentOn: string;
+    bankName: string | null;
+    recipientName: string | null;
+    categoryName: string | null;
+    categoryId: string;
+};
+
 export type IncomeCustomCategory = {
     categoryId: string;
     name: string;
@@ -94,19 +117,15 @@ export type Recipient = {
     notes: string | null;
 };
 
-export type Transfer = {
-    id: string;
-    amount: string | null;
-    status: string;
-    transferredOn: string;
-    bankName: string | null;
-    recipientName: string | null;
-    categoryName: string | null;
-    periodStart: string | null;
-};
-
 export type ReportTotals = {
     by_bank: Array<{ bank_id: string; bank_name: string; total: string }>;
     by_recipient: Array<{ recipient_id: string; recipient_name: string; total: string }>;
-    by_category: Array<{ category_id: string; category_name: string; total: string }>;
+    fund_health: Array<{
+        category_id: string;
+        category_name: string;
+        allocated: string;
+        spent: string;
+        remaining: string;
+        percent_used: number;
+    }>;
 };

@@ -138,10 +138,10 @@ class SavingsPlanService
             ->filter(fn ($id) => $id !== null && $id !== '')
             ->values();
 
-        foreach ($existing->keys() as $existingId) {
-            if (! $submittedIds->contains($existingId)) {
+        foreach ($existing as $existingCategory) {
+            if ($existingCategory->isPercentage() && ! $submittedIds->contains($existingCategory->id)) {
                 throw ValidationException::withMessages([
-                    'categories' => __('Cannot remove categories after income has been entered.'),
+                    'categories' => __('Percentage categories cannot be removed after income has been entered.'),
                 ]);
             }
         }
@@ -161,8 +161,20 @@ class SavingsPlanService
                     ]);
                 }
 
-                $this->assertCategoryUnchanged($existingCategory, $category, $index, $categories);
-                $indexedCategories[$index] = $existingCategory;
+                if ($existingCategory->isPercentage()) {
+                    $this->assertPercentageUnchanged($existingCategory, $category, $index);
+                    $indexedCategories[$index] = $existingCategory;
+
+                    continue;
+                }
+
+                if (($category['allocation_type'] ?? '') !== CategoryAllocationType::Deduction->value) {
+                    throw ValidationException::withMessages([
+                        "categories.{$index}.allocation_type" => __('Custom categories cannot become percentage categories.'),
+                    ]);
+                }
+
+                $this->validateCustomCategory($category, $index, $categories);
 
                 continue;
             }
@@ -173,14 +185,39 @@ class SavingsPlanService
                 ]);
             }
 
-            $this->validateNewCustomCategory($category, $index, $categories);
+            $this->validateCustomCategory($category, $index, $categories);
         }
 
-        return DB::transaction(function () use ($plan, $categories, $existing, &$indexedCategories) {
-            $nextSortOrder = (int) $existing->max('sort_order') + 1;
+        return DB::transaction(function () use ($plan, $categories, $existing, $submittedIds, &$indexedCategories) {
+            foreach ($existing as $existingCategory) {
+                if ($existingCategory->isDeduction() && ! $submittedIds->contains($existingCategory->id)) {
+                    $existingCategory->delete();
+                }
+            }
 
             foreach ($categories as $index => $category) {
-                if (! empty($category['id'])) {
+                $categoryId = $category['id'] ?? null;
+
+                if ($categoryId !== null && $categoryId !== '') {
+                    $existingCategory = $existing->get($categoryId);
+
+                    if ($existingCategory === null || $existingCategory->isPercentage()) {
+                        continue;
+                    }
+
+                    $existingCategory->update([
+                        'name' => $category['name'],
+                        'deduction_mode' => ! empty($category['deduction_mode'])
+                            ? DeductionMode::from($category['deduction_mode'])
+                            : null,
+                        'deduction_value' => isset($category['deduction_value']) && $category['deduction_value'] !== ''
+                            ? $category['deduction_value']
+                            : null,
+                        'sort_order' => $index,
+                    ]);
+
+                    $indexedCategories[$index] = $existingCategory->fresh();
+
                     continue;
                 }
 
@@ -194,10 +231,18 @@ class SavingsPlanService
                     'deduction_value' => isset($category['deduction_value']) && $category['deduction_value'] !== ''
                         ? $category['deduction_value']
                         : null,
-                    'sort_order' => $nextSortOrder,
+                    'sort_order' => $index,
                 ]);
+            }
 
-                $nextSortOrder++;
+            foreach ($categories as $index => $category) {
+                if (($category['allocation_type'] ?? '') === CategoryAllocationType::Percentage->value) {
+                    $categoryId = $category['id'] ?? null;
+
+                    if ($categoryId !== null && isset($indexedCategories[$index])) {
+                        $indexedCategories[$index]->update(['sort_order' => $index]);
+                    }
+                }
             }
 
             $this->resolveDeductionSources($categories, $indexedCategories);
@@ -229,59 +274,26 @@ class SavingsPlanService
         }
     }
 
-    /**
-     * @param  list<array<string, mixed>>  $categories
-     */
-    private function assertCategoryUnchanged(
+    private function assertPercentageUnchanged(
         SavingsCategory $existing,
         array $category,
         int $index,
-        array $categories,
     ): void {
-        $allocationType = CategoryAllocationType::from($category['allocation_type']);
-
-        if ($existing->allocation_type !== $allocationType) {
+        if (($category['allocation_type'] ?? '') !== CategoryAllocationType::Percentage->value) {
             throw ValidationException::withMessages([
-                "categories.{$index}.allocation_type" => __('Existing categories cannot be changed after income has been entered.'),
+                "categories.{$index}.allocation_type" => __('Percentage categories cannot be changed after income has been entered.'),
             ]);
         }
 
         if ($existing->name !== $category['name']) {
             throw ValidationException::withMessages([
-                "categories.{$index}.name" => __('Existing categories cannot be changed after income has been entered.'),
+                "categories.{$index}.name" => __('Percentage category names cannot be changed after income has been entered.'),
             ]);
         }
 
-        if ($allocationType === CategoryAllocationType::Percentage) {
-            if ($this->normalizeDecimal($existing->percentage) !== $this->normalizeDecimal($category['percentage'] ?? null)) {
-                throw ValidationException::withMessages([
-                    "categories.{$index}.percentage" => __('Percentages cannot be changed after income has been entered.'),
-                ]);
-            }
-
-            return;
-        }
-
-        $existingMode = $existing->deduction_mode?->value;
-        $submittedMode = $category['deduction_mode'] ?? null;
-
-        if ($existingMode !== $submittedMode) {
+        if ($this->normalizeDecimal($existing->percentage) !== $this->normalizeDecimal($category['percentage'] ?? null)) {
             throw ValidationException::withMessages([
-                "categories.{$index}.deduction_mode" => __('Existing custom categories cannot be changed after income has been entered.'),
-            ]);
-        }
-
-        if ($this->normalizeDecimal($existing->deduction_value) !== $this->normalizeDecimal($category['deduction_value'] ?? null)) {
-            throw ValidationException::withMessages([
-                "categories.{$index}.deduction_value" => __('Existing custom categories cannot be changed after income has been entered.'),
-            ]);
-        }
-
-        $sourceCategoryId = $this->resolveSourceCategoryId($category, $index, $categories);
-
-        if ($existing->deduct_from_category_id !== $sourceCategoryId) {
-            throw ValidationException::withMessages([
-                "categories.{$index}.deduct_from_index" => __('Existing custom categories cannot be changed after income has been entered.'),
+                "categories.{$index}.percentage" => __('Percentages cannot be changed after income has been entered.'),
             ]);
         }
     }
@@ -289,7 +301,7 @@ class SavingsPlanService
     /**
      * @param  list<array<string, mixed>>  $categories
      */
-    private function validateNewCustomCategory(array $category, int $index, array $categories): void
+    private function validateCustomCategory(array $category, int $index, array $categories): void
     {
         if (($category['allocation_type'] ?? '') !== CategoryAllocationType::Deduction->value) {
             return;
@@ -321,36 +333,6 @@ class SavingsPlanService
     /**
      * @param  list<array<string, mixed>>  $categories
      */
-    private function resolveSourceCategoryId(array $category, int $index, array $categories): ?string
-    {
-        $sourceIndex = $category['deduct_from_index'] ?? null;
-
-        if ($sourceIndex === null) {
-            return null;
-        }
-
-        $source = $categories[$sourceIndex] ?? null;
-
-        if ($source === null) {
-            throw ValidationException::withMessages([
-                "categories.{$index}.deduct_from_index" => __('Select a source category for this custom category.'),
-            ]);
-        }
-
-        $sourceId = $source['id'] ?? null;
-
-        if ($sourceId === null || $sourceId === '') {
-            throw ValidationException::withMessages([
-                "categories.{$index}.deduct_from_index" => __('Custom categories must deduct from a percentage category.'),
-            ]);
-        }
-
-        return $sourceId;
-    }
-
-    /**
-     * @param  list<array<string, mixed>>  $categories
-     */
     private function validateCategories(array $categories): void
     {
         $percentageTotal = collect($categories)
@@ -368,7 +350,7 @@ class SavingsPlanService
                 continue;
             }
 
-            $this->validateNewCustomCategory($category, $index, $categories);
+            $this->validateCustomCategory($category, $index, $categories);
         }
     }
 

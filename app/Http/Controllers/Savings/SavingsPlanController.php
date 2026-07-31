@@ -7,6 +7,7 @@ use App\Http\Requests\Savings\SaveSavingsPlanRequest;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlanPageGuidance;
 use App\Models\Team;
+use App\Services\Savings\FundBalanceService;
 use App\Services\Savings\SavingsPlanService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,8 +16,10 @@ use Inertia\Response;
 
 class SavingsPlanController extends Controller
 {
-    public function __construct(private SavingsPlanService $planService)
-    {
+    public function __construct(
+        private SavingsPlanService $planService,
+        private FundBalanceService $fundBalanceService,
+    ) {
     }
 
     public function show(Request $request, Team $current_team): Response
@@ -53,6 +56,9 @@ class SavingsPlanController extends Controller
                 'hasIncome' => $plan->hasIncomePeriod(),
                 'percentagesLocked' => $plan->hasIncomePeriod(),
             ] : null,
+            'fundBalances' => $plan && $plan->hasLockedIncomePeriod()
+                ? $this->fundBalanceService->balancesForPlan($plan)
+                : [],
             'templates' => $templates->map(fn ($t) => [
                 'id' => $t->id,
                 'name' => $t->name,

@@ -218,7 +218,7 @@ class SavingsPlanTest extends TestCase
         $response->assertSessionHasErrors('categories.0.percentage');
     }
 
-    public function test_cannot_remove_categories_after_income_exists(): void
+    public function test_cannot_remove_percentage_category_after_income_exists(): void
     {
         [$user, $plan] = $this->createUserWithPlanAndIncome();
         $payload = $this->categoriesPayload($plan);
@@ -232,6 +232,91 @@ class SavingsPlanTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('categories');
+    }
+
+    public function test_can_remove_custom_category_after_income_exists(): void
+    {
+        [$user, $plan] = $this->createUserWithPlanAndIncome();
+        $payload = $this->categoriesPayload($plan);
+
+        $payload[] = [
+            'name' => 'College Fund',
+            'allocation_type' => 'deduction',
+            'deduct_from_index' => 0,
+        ];
+
+        $this->actingAs($user)->put(route('savings.plan.update', [
+            'current_team' => $user->currentTeam->slug,
+        ]), [
+            'categories' => $payload,
+        ]);
+
+        $plan->refresh()->load('categories');
+        $collegeFund = $plan->categories->firstWhere('name', 'College Fund');
+        $this->assertNotNull($collegeFund);
+
+        $payload = array_values(array_filter(
+            $this->categoriesPayload($plan),
+            fn (array $category) => ($category['id'] ?? null) !== $collegeFund->id,
+        ));
+
+        $response = $this->actingAs($user)->put(route('savings.plan.update', [
+            'current_team' => $user->currentTeam->slug,
+        ]), [
+            'categories' => $payload,
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseMissing('savings_categories', [
+            'id' => $collegeFund->id,
+        ]);
+        $this->assertDatabaseCount('savings_categories', 3);
+    }
+
+    public function test_can_edit_custom_category_after_income_exists(): void
+    {
+        [$user, $plan] = $this->createUserWithPlanAndIncome();
+        $payload = $this->categoriesPayload($plan);
+
+        $payload[] = [
+            'name' => 'College Fund',
+            'allocation_type' => 'deduction',
+            'deduction_mode' => 'fixed',
+            'deduction_value' => 1000,
+            'deduct_from_index' => 0,
+        ];
+
+        $this->actingAs($user)->put(route('savings.plan.update', [
+            'current_team' => $user->currentTeam->slug,
+        ]), [
+            'categories' => $payload,
+        ]);
+
+        $plan->refresh()->load('categories');
+        $collegeFund = $plan->categories->firstWhere('name', 'College Fund');
+        $this->assertNotNull($collegeFund);
+
+        $payload = $this->categoriesPayload($plan);
+
+        foreach ($payload as $index => $category) {
+            if (($category['id'] ?? null) === $collegeFund->id) {
+                $payload[$index]['name'] = 'Updated College Fund';
+                $payload[$index]['deduction_value'] = '1500';
+            }
+        }
+
+        $response = $this->actingAs($user)->put(route('savings.plan.update', [
+            'current_team' => $user->currentTeam->slug,
+        ]), [
+            'categories' => $payload,
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('savings_categories', [
+            'id' => $collegeFund->id,
+            'name' => 'Updated College Fund',
+            'deduction_value' => '1500.00',
+        ]);
     }
 
     public function test_can_append_custom_category_after_income_exists(): void

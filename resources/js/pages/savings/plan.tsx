@@ -1,4 +1,4 @@
-import { Form, Head, usePage } from '@inertiajs/react';
+import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { AlertTriangle, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import Heading from '@/components/heading';
@@ -20,10 +20,12 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { formatMoney } from '@/lib/format-money';
 import type {
     CategoryAllocationType,
     DeductionMode,
     FormulaTemplate,
+    FundBalance,
     SavingsCategory,
     SavingsPlan,
     SavingsPlanPageGuidance,
@@ -34,6 +36,7 @@ import type { SharedData } from '@/types';
 type Props = {
     plan: SavingsPlan | null;
     templates: FormulaTemplate[];
+    fundBalances: FundBalance[];
     pageGuidance: SavingsPlanPageGuidance;
 };
 
@@ -165,7 +168,7 @@ function hasCustomCategoryChanges(
     });
 }
 
-export default function SavingsPlanPage({ plan, templates, pageGuidance }: Props) {
+export default function SavingsPlanPage({ plan, templates, fundBalances, pageGuidance }: Props) {
     const { currentTeam } = usePage<SharedData>().props;
     const teamSlug = currentTeam?.slug ?? '';
 
@@ -191,6 +194,7 @@ export default function SavingsPlanPage({ plan, templates, pageGuidance }: Props
         <SavingsPlanEditor
             plan={plan}
             teamSlug={teamSlug}
+            fundBalances={fundBalances}
             pageGuidance={pageGuidance}
         />
     );
@@ -199,10 +203,12 @@ export default function SavingsPlanPage({ plan, templates, pageGuidance }: Props
 function SavingsPlanEditor({
     plan,
     teamSlug,
+    fundBalances,
     pageGuidance,
 }: {
     plan: SavingsPlan;
     teamSlug: string;
+    fundBalances: FundBalance[];
     pageGuidance: SavingsPlanPageGuidance;
 }) {
     const [rows, setRows] = useState<CategoryRow[]>(() => rowsFromPlan(plan.categories));
@@ -325,6 +331,33 @@ function SavingsPlanEditor({
             )}
 
             {plan.hasIncome && <PlanEditRulesPanel pageGuidance={pageGuidance} />}
+
+            {fundBalances.length > 0 && (
+                <div className="mt-6 rounded-lg border p-4">
+                    <div className="flex items-center justify-between gap-4">
+                        <div>
+                            <h3 className="font-medium">Fund balances</h3>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                Running totals from all locked income minus confirmed spending.
+                            </p>
+                        </div>
+                        <Button variant="outline" size="sm" asChild>
+                            <Link href={`/${teamSlug}/savings/spending`}>Record spending</Link>
+                        </Button>
+                    </div>
+                    <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                        {fundBalances.slice(0, 6).map((balance) => (
+                            <li
+                                key={balance.categoryId}
+                                className="flex items-center justify-between gap-2 rounded-md bg-muted/40 px-3 py-2 text-sm"
+                            >
+                                <span>{balance.name}</span>
+                                <span className="font-medium">{formatMoney(balance.remaining)}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
 
             {plan.hasIncome && (
                 <Alert className="mt-6">
