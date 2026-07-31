@@ -21,16 +21,21 @@ export type FormulaTemplate = {
     categories: SavingsCategory[];
 };
 
-export type IncomePeriod = {
+export type IncomeBreakdownRow = {
+    categoryId: string;
+    name: string;
+    percentage: string;
+    amount: string | null;
+};
+
+export type IncomePeriodSummary = {
     id: string;
     periodStart: string;
     amount: string | null;
     isLocked: boolean;
-    allocations: Array<{
-        categoryName: string | null;
-        amount: string | null;
-    }>;
 };
+
+export type IncomePeriod = IncomePeriodSummary;
 
 export type Bank = {
     id: string;

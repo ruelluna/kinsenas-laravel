@@ -41,6 +41,38 @@ class IncomeCalculationService
         })->all();
     }
 
+    /**
+     * @return array<int, array{categoryId: string, name: string, percentage: string, amount: string|null}>
+     */
+    public function breakdownForPeriod(IncomePeriod $period): array
+    {
+        $period->loadMissing(['allocations.category', 'plan.categories']);
+
+        if ($period->is_locked && $period->allocations->isNotEmpty()) {
+            return $period->allocations->map(fn (IncomeAllocation $allocation) => [
+                'categoryId' => $allocation->category_id,
+                'name' => $allocation->category?->name ?? '',
+                'percentage' => (string) ($allocation->category?->percentage ?? '0'),
+                'amount' => $allocation->amount_encrypted,
+            ])->all();
+        }
+
+        $amount = $period->amount_encrypted;
+
+        if ($amount === null) {
+            return [];
+        }
+
+        return collect($this->preview($period->plan, $amount))
+            ->map(fn (array $row) => [
+                'categoryId' => $row['category_id'],
+                'name' => $row['name'],
+                'percentage' => $row['percentage'],
+                'amount' => $row['amount'],
+            ])
+            ->all();
+    }
+
     public function lock(IncomePeriod $period, User $user): IncomePeriod
     {
         if ($period->is_locked) {

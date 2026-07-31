@@ -9,7 +9,7 @@ export default function VaultUnlock({ isLocked }: Props) {
     return (
         <>
             <Head title="Unlock vault" />
-            <div className="mx-auto flex max-w-md flex-col gap-6 p-6">
+            <div className="mx-auto flex max-w-md flex-col gap-6">
                 <div>
                     <h1 className="text-xl font-semibold">Unlock your financial vault</h1>
                     <p className="mt-2 text-sm text-muted-foreground">

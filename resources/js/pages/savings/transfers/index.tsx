@@ -88,6 +88,6 @@ export default function TransfersIndex({ lockedPeriods, banks, recipients, categ
     );
 }
 
-TransfersIndex.layout = (page: { props: SharedData }) => ({
-    breadcrumbs: [{ title: 'Transfers', href: `/${page.props.currentTeam?.slug}/savings/transfers` }],
+TransfersIndex.layout = (props: SharedData) => ({
+    breadcrumbs: [{ title: 'Transfers', href: `/${props.currentTeam?.slug}/savings/transfers` }],
 });

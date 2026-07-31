@@ -52,6 +52,6 @@ export default function RecipientsIndex({ recipients, recipientTypes }: Props) {
     );
 }
 
-RecipientsIndex.layout = (page: { props: SharedData }) => ({
-    breadcrumbs: [{ title: 'Recipients', href: `/${page.props.currentTeam?.slug}/savings/recipients` }],
+RecipientsIndex.layout = (props: SharedData) => ({
+    breadcrumbs: [{ title: 'Recipients', href: `/${props.currentTeam?.slug}/savings/recipients` }],
 });

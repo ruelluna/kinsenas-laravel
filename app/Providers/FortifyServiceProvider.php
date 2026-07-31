@@ -4,9 +4,8 @@ namespace App\Providers;
 
 /* @chisel-registration */
 use App\Actions\Fortify\CreateNewUser;
-use App\Actions\Fortify\UnlockUserVault;
-/* @end-chisel-registration */
 use App\Actions\Fortify\ResetUserPassword;
+use App\Actions\Fortify\UnlockUserVault;
 use App\Http\Responses\LoginResponse;
 /* @chisel-passkeys */
 use App\Http\Responses\PasskeyLoginResponse;
@@ -27,16 +26,20 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
-use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
+use Laravel\Fortify\Actions\AttemptToAuthenticate;
 /* @chisel-registration */
-use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
+use Laravel\Fortify\Actions\CanonicalizeUsername;
 /* @end-chisel-registration */
 /* @chisel-2fa */
-use Laravel\Fortify\Contracts\TwoFactorLoginResponse as TwoFactorLoginResponseContract;
+use Laravel\Fortify\Actions\PrepareAuthenticatedSession;
 /* @end-chisel-2fa */
 /* @chisel-email-verification */
-use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract;
+use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 /* @end-chisel-email-verification */
+use Laravel\Fortify\Contracts\RedirectsIfTwoFactorAuthenticatable;
+use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
+use Laravel\Fortify\Contracts\TwoFactorLoginResponse as TwoFactorLoginResponseContract;
+use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 /* @chisel-passkeys */
@@ -86,8 +89,12 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::createUsersUsing(CreateNewUser::class);
         /* @end-chisel-registration */
 
-        Fortify::loginThrough(function () {
-            return array_merge(Fortify::defaultLoginPipeline(), [
+        Fortify::loginThrough(function (Request $request) {
+            return array_filter([
+                config('fortify.lowercase_usernames') ? CanonicalizeUsername::class : null,
+                Features::enabled(Features::twoFactorAuthentication()) ? RedirectsIfTwoFactorAuthenticatable::class : null,
+                AttemptToAuthenticate::class,
+                PrepareAuthenticatedSession::class,
                 UnlockUserVault::class,
             ]);
         });

@@ -10,7 +10,7 @@ export default function BillingPay({ planPriceId }: Props) {
     return (
         <>
             <Head title="Submit payment" />
-            <div className="mx-auto max-w-md p-6">
+            <div className="mx-auto max-w-md">
                 <Heading variant="small" title="Submit payment" description="Upload proof after PayMaya transfer." />
                 <Form action="/billing/pay" method="post" encType="multipart/form-data" className="mt-6 space-y-4">
                     <input type="hidden" name="plan_price_id" value={planPriceId ?? ''} />

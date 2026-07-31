@@ -40,6 +40,6 @@ function ReportSection({ title, items }: { title: string; items: Array<{ label: 
     );
 }
 
-SavingsReports.layout = (page: { props: SharedData }) => ({
-    breadcrumbs: [{ title: 'Reports', href: `/${page.props.currentTeam?.slug}/savings/reports` }],
+SavingsReports.layout = (props: SharedData) => ({
+    breadcrumbs: [{ title: 'Reports', href: `/${props.currentTeam?.slug}/savings/reports` }],
 });

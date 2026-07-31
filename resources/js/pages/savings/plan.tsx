@@ -107,8 +107,8 @@ export default function SavingsPlanPage({ plan, templates }: Props) {
     );
 }
 
-SavingsPlanPage.layout = (page: { props: SharedData }) => ({
+SavingsPlanPage.layout = (props: SharedData) => ({
     breadcrumbs: [
-        { title: 'Savings Plan', href: `/${page.props.currentTeam?.slug}/savings/plan` },
+        { title: 'Savings Plan', href: `/${props.currentTeam?.slug}/savings/plan` },
     ],
 });

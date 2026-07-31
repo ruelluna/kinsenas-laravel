@@ -19,7 +19,7 @@ export default function Dashboard({ pendingInvitations = [] }: Props) {
         <>
             <Head title="Dashboard" />
             {recoveryKey && (
-                <div className="mx-4 mt-4 rounded-lg border border-amber-500/50 bg-amber-500/10 p-4 text-sm">
+                <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 p-4 text-sm">
                     <p className="font-medium">Save your recovery key</p>
                     <p className="mt-1 text-muted-foreground">Store this somewhere safe. You need it if you reset your password.</p>
                     <code className="mt-2 block break-all rounded bg-muted p-2 text-xs">{recoveryKey}</code>
@@ -30,7 +30,7 @@ export default function Dashboard({ pendingInvitations = [] }: Props) {
                 open={pendingInvitations.length > 0 && showInvitations}
                 onOpenChange={setShowInvitations}
             />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl">
                 <div className="grid auto-rows-min gap-4 md:grid-cols-3">
                     <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
                         <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />

@@ -28,7 +28,7 @@ Implemented Phase 1 savings core (formulas, income, banks, recipients, transfers
 php artisan migrate
 php artisan db:seed
 php artisan storage:link
-php artisan wayfinder:generate --no-interaction
+php artisan wayfinder:generate --with-form --no-interaction
 npm run dev
 vendor/bin/pint --dirty
 ```

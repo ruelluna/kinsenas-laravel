@@ -27,20 +27,27 @@ class IncomePeriodController extends Controller
 
         abort_if($plan === null, 404);
 
-        $periods = $plan->incomePeriods()->with('allocations.category')->get();
+        $periods = $plan->incomePeriods()->get();
 
         return Inertia::render('savings/income/index', [
             'plan' => ['id' => $plan->id, 'name' => $plan->name],
-            'periods' => $periods->map(fn (IncomePeriod $period) => [
-                'id' => $period->id,
-                'periodStart' => $period->period_start->toDateString(),
-                'amount' => $period->amount_encrypted,
-                'isLocked' => $period->is_locked,
-                'allocations' => $period->allocations->map(fn ($a) => [
-                    'categoryName' => $a->category?->name,
-                    'amount' => $a->amount_encrypted,
-                ]),
-            ]),
+            'periods' => $periods->map(fn (IncomePeriod $period) => $this->periodSummary($period)),
+        ]);
+    }
+
+    public function show(Request $request, Team $current_team, IncomePeriod $incomePeriod): Response
+    {
+        $plan = $this->planService->forTeam($current_team, $request->user());
+
+        abort_if($plan === null, 404);
+        abort_if($incomePeriod->plan_id !== $plan->id, 404);
+
+        $incomePeriod->load(['plan', 'allocations.category']);
+
+        return Inertia::render('savings/income/show', [
+            'plan' => ['id' => $plan->id, 'name' => $plan->name],
+            'period' => $this->periodSummary($incomePeriod),
+            'breakdown' => $this->incomeService->breakdownForPeriod($incomePeriod),
         ]);
     }
 
@@ -80,5 +87,18 @@ class IncomePeriodController extends Controller
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Income unlocked.')]);
 
         return back();
+    }
+
+    /**
+     * @return array{id: string, periodStart: string, amount: string|null, isLocked: bool}
+     */
+    private function periodSummary(IncomePeriod $period): array
+    {
+        return [
+            'id' => $period->id,
+            'periodStart' => $period->period_start->toDateString(),
+            'amount' => $period->amount_encrypted,
+            'isLocked' => $period->is_locked,
+        ];
     }
 }

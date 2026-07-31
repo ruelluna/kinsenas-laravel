@@ -41,6 +41,6 @@ export default function BanksIndex({ banks }: Props) {
     );
 }
 
-BanksIndex.layout = (page: { props: SharedData }) => ({
-    breadcrumbs: [{ title: 'Banks', href: `/${page.props.currentTeam?.slug}/savings/banks` }],
+BanksIndex.layout = (props: SharedData) => ({
+    breadcrumbs: [{ title: 'Banks', href: `/${props.currentTeam?.slug}/savings/banks` }],
 });
