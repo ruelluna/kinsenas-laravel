@@ -29,6 +29,17 @@ class SavingsPlanController extends Controller
         $templates = SavingsFormulaTemplate::query()->with('categories')->orderBy('name')->get();
         $pageGuidance = SavingsPlanPageGuidance::instance();
 
+        $teamBanks = $current_team->banks()
+            ->where('is_active', true)
+            ->with('institution')
+            ->orderBy('sort_order')
+            ->get()
+            ->map(fn ($bank) => [
+                'id' => $bank->id,
+                'name' => $bank->name,
+                'logoUrl' => $bank->institution?->logo_url,
+            ]);
+
         return Inertia::render('savings/plan', [
             'pageGuidance' => [
                 'chooserIntro' => $pageGuidance->chooser_intro,
@@ -51,6 +62,7 @@ class SavingsPlanController extends Controller
                     'deductionValue' => $c->deduction_value !== null ? (string) $c->deduction_value : null,
                     'deductFromCategoryId' => $c->deduct_from_category_id,
                     'deductFromCategoryName' => $c->deductFromCategory?->name,
+                    'bankIds' => $c->banks->pluck('id')->all(),
                 ]),
                 'hasLockedIncome' => $plan->hasLockedIncomePeriod(),
                 'hasIncome' => $plan->hasIncomePeriod(),
@@ -72,6 +84,7 @@ class SavingsPlanController extends Controller
                     'description' => $c->description,
                 ]),
             ]),
+            'teamBanks' => $teamBanks,
         ]);
     }
 

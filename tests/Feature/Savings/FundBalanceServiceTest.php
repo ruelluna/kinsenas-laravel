@@ -97,8 +97,30 @@ it('aggregates spending across multiple income periods', function () {
     $everyday = collect($balances)->firstWhere('name', 'Everyday Fund');
 
     expect($everyday['allocated'])->toBe('50000.00')
+        ->and($everyday['transferred'])->toBe('0.00')
         ->and($everyday['spent'])->toBe('3000.00')
         ->and($everyday['remaining'])->toBe('47000.00');
+});
+
+it('subtracts confirmed transfers from remaining balance', function () {
+    $user = User::factory()->create();
+    $plan = setupLockedPlan($user, '50000.00');
+    $everydayCategory = $plan->categories->firstWhere('name', 'Everyday Fund');
+    $bank = \App\Models\Bank::factory()->create(['team_id' => $user->currentTeam->id]);
+
+    \App\Models\FundTransfer::factory()->confirmed()->create([
+        'savings_plan_id' => $plan->id,
+        'category_id' => $everydayCategory->id,
+        'bank_id' => $bank->id,
+        'amount_encrypted' => '4000.00',
+    ]);
+
+    $service = app(FundBalanceService::class);
+    $balances = $service->balancesForPlan($plan->fresh('categories'));
+    $everyday = collect($balances)->firstWhere('name', 'Everyday Fund');
+
+    expect($everyday['transferred'])->toBe('4000.00')
+        ->and($everyday['remaining'])->toBe('46000.00');
 });
 
 it('defaults everyday fund as the quick spend category', function () {

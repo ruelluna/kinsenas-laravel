@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Savings;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Savings\SaveFundSpendRequest;
-use App\Models\FundSpend;
+use App\Http\Requests\Savings\SaveFundTransferRequest;
+use App\Models\FundTransfer;
 use App\Models\Team;
 use App\Services\Savings\FundBalanceService;
-use App\Services\Savings\FundSpendService;
 use App\Services\Savings\FundTransferService;
 use App\Services\Savings\SavingsPlanService;
 use Illuminate\Http\RedirectResponse;
@@ -16,12 +15,11 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class FundSpendController extends Controller
+class FundTransferController extends Controller
 {
     public function __construct(
         private SavingsPlanService $planService,
         private FundBalanceService $balanceService,
-        private FundSpendService $fundSpendService,
         private FundTransferService $fundTransferService,
     ) {
     }
@@ -32,7 +30,7 @@ class FundSpendController extends Controller
         abort_if($plan === null, 404);
 
         $plan->load('categories.banks');
-        $spends = $this->fundSpendService->recentForPlan($plan);
+        $transfers = $this->fundTransferService->recentForPlan($plan);
         $defaultCategoryId = $this->balanceService->defaultCategoryId($plan);
         $banks = $current_team->banks()
             ->where('is_active', true)
@@ -40,7 +38,7 @@ class FundSpendController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        return Inertia::render('savings/spending/index', [
+        return Inertia::render('savings/transfers/index', [
             'plan' => ['id' => $plan->id, 'name' => $plan->name, 'hasLockedIncome' => $plan->hasLockedIncomePeriod()],
             'fundBalances' => $this->balanceService->balancesForPlan($plan),
             'defaultCategoryId' => $defaultCategoryId,
@@ -49,18 +47,17 @@ class FundSpendController extends Controller
                 'name' => $bank->name,
                 'logoUrl' => $bank->institution?->logo_url,
             ]),
-            'recipients' => $current_team->recipients()->get(['id', 'name']),
             'categories' => $plan->categories->map(fn ($category) => [
                 'id' => $category->id,
                 'name' => $category->name,
                 'bankIds' => $category->banks->pluck('id')->all(),
             ]),
             'categoryBankMap' => $this->balanceService->categoryBankMap($plan),
-            'spends' => $spends->map(fn (FundSpend $spend) => $this->spendPayload($spend)),
+            'transfers' => $transfers->map(fn (FundTransfer $transfer) => $this->transferPayload($transfer)),
         ]);
     }
 
-    public function store(SaveFundSpendRequest $request, Team $current_team): RedirectResponse
+    public function store(SaveFundTransferRequest $request, Team $current_team): RedirectResponse
     {
         $plan = $this->planService->forTeam($current_team, $request->user());
         abort_if($plan === null, 404);
@@ -69,39 +66,35 @@ class FundSpendController extends Controller
         $this->assertCategoryBelongsToPlan($plan->id, $categoryId);
 
         $bankId = $request->validated('bank_id');
-        if ($bankId !== null) {
-            abort_if(
-                ! $current_team->banks()->where('id', $bankId)->exists(),
-                404,
-            );
-            $this->fundTransferService->assertBankAllowedForCategory($plan, $categoryId, $bankId);
-        }
+        abort_if(
+            ! $current_team->banks()->where('id', $bankId)->exists(),
+            404,
+        );
 
-        $this->fundSpendService->create(
+        $this->fundTransferService->create(
             $plan,
             $categoryId,
+            $bankId,
             $request->validated('amount'),
             $request->validated('description'),
-            $request->validated('spent_on'),
-            $request->validated('bank_id'),
-            $request->validated('recipient_id'),
+            $request->validated('transferred_on'),
             $request->user(),
         );
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Spending recorded.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Transfer recorded — confirm when funds arrive.')]);
 
         return back();
     }
 
-    public function confirm(Request $request, Team $current_team, FundSpend $fundSpend): RedirectResponse
+    public function confirm(Request $request, Team $current_team, FundTransfer $fundTransfer): RedirectResponse
     {
         $plan = $this->planService->forTeam($current_team, $request->user());
         abort_if($plan === null, 404);
-        abort_if($fundSpend->savings_plan_id !== $plan->id, 404);
+        abort_if($fundTransfer->savings_plan_id !== $plan->id, 404);
 
-        $this->fundSpendService->confirm($fundSpend, $request->user());
+        $this->fundTransferService->confirm($fundTransfer, $request->user());
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Spending confirmed.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Transfer confirmed.')]);
 
         return back();
     }
@@ -109,18 +102,18 @@ class FundSpendController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function spendPayload(FundSpend $spend): array
+    private function transferPayload(FundTransfer $transfer): array
     {
         return [
-            'id' => $spend->id,
-            'amount' => $spend->amount_encrypted,
-            'description' => $spend->description,
-            'status' => $spend->status->value,
-            'spentOn' => $spend->spent_on->toDateString(),
-            'bankName' => $spend->bank?->name,
-            'recipientName' => $spend->recipient?->name,
-            'categoryName' => $spend->category?->name,
-            'categoryId' => $spend->category_id,
+            'id' => $transfer->id,
+            'amount' => $transfer->amount_encrypted,
+            'description' => $transfer->description,
+            'status' => $transfer->status->value,
+            'transferredOn' => $transfer->transferred_on->toDateString(),
+            'bankName' => $transfer->bank?->name,
+            'bankLogoUrl' => $transfer->bank?->institution?->logo_url,
+            'categoryName' => $transfer->category?->name,
+            'categoryId' => $transfer->category_id,
         ];
     }
 

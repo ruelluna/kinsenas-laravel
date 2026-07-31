@@ -365,6 +365,42 @@ class SavingsPlanTest extends TestCase
         $response->assertSessionHasErrors('categories.3.allocation_type');
     }
 
+    public function test_syncs_category_bank_assignments_on_plan_update(): void
+    {
+        $user = User::factory()->create();
+        $this->unlockVaultFor($user);
+        $template = SavingsFormulaTemplate::query()->where('slug', 'abundant-formula')->firstOrFail();
+
+        $this->actingAs($user)->post(route('savings.plan.from-template', [
+            'current_team' => $user->currentTeam->slug,
+            'template' => $template->id,
+        ]));
+
+        $plan = SavingsPlan::query()->with('categories')->firstOrFail();
+        $everydayCategory = $plan->categories->firstWhere('name', 'Everyday Fund');
+
+        $bank = \App\Models\Bank::factory()->create([
+            'team_id' => $user->currentTeam->id,
+            'name' => 'BDO',
+        ]);
+
+        $payload = $this->categoriesPayload($plan);
+        $payload[0]['bank_ids'] = [$bank->id];
+
+        $response = $this->actingAs($user)->put(route('savings.plan.update', [
+            'current_team' => $user->currentTeam->slug,
+        ]), [
+            'categories' => $payload,
+        ]);
+
+        $response->assertRedirect();
+
+        $this->assertDatabaseHas('bank_savings_category', [
+            'bank_id' => $bank->id,
+            'savings_category_id' => $everydayCategory->id,
+        ]);
+    }
+
     /**
      * @return array{0: User, 1: SavingsPlan}
      */

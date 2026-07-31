@@ -11,6 +11,7 @@ export type SavingsCategory = {
     deductionValue?: string | null;
     deductFromCategoryId?: string | null;
     deductFromCategoryName?: string | null;
+    bankIds?: string[];
 };
 
 export type SavingsPlan = {
@@ -54,9 +55,22 @@ export type FundBalance = {
     hint: string | null;
     isDefault: boolean;
     allocated: string | null;
+    transferred: string | null;
     spent: string | null;
     remaining: string | null;
     percentUsed: number | null;
+};
+
+export type FundTransfer = {
+    id: string;
+    amount: string | null;
+    description: string | null;
+    status: string;
+    transferredOn: string;
+    bankName: string | null;
+    bankLogoUrl: string | null;
+    categoryName: string | null;
+    categoryId: string;
 };
 
 export type FundSpend = {
@@ -107,7 +121,32 @@ export type Bank = {
     name: string;
     accountLabel: string | null;
     isActive: boolean;
+    logoUrl?: string | null;
+    institutionId?: string | null;
 };
+
+export type BankInstitution = {
+    id: string;
+    name: string;
+    logoUrl: string | null;
+    type: 'bank' | 'e_wallet';
+};
+
+export type BankBalance = {
+    bankId: string;
+    bankName: string;
+    logoUrl: string | null;
+    total: string;
+    byCategory: Array<{ categoryId: string; categoryName: string; total: string }>;
+};
+
+export type BankOption = {
+    id: string;
+    name: string;
+    logoUrl?: string | null;
+};
+
+export type CategoryBankMap = Record<string, string[]>;
 
 export type Recipient = {
     id: string;
@@ -118,12 +157,19 @@ export type Recipient = {
 };
 
 export type ReportTotals = {
-    by_bank: Array<{ bank_id: string; bank_name: string; total: string }>;
+    by_bank: Array<{
+        bank_id: string;
+        bank_name: string;
+        logo_url: string | null;
+        total: string;
+        by_category: Array<{ category_id: string; category_name: string; total: string }>;
+    }>;
     by_recipient: Array<{ recipient_id: string; recipient_name: string; total: string }>;
     fund_health: Array<{
         category_id: string;
         category_name: string;
         allocated: string;
+        transferred: string;
         spent: string;
         remaining: string;
         percent_used: number;

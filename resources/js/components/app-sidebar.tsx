@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, FolderGit2, Landmark, LayoutGrid, PiggyBank, ShoppingBag, Users, Wallet } from 'lucide-react';
+import { BookOpen, FolderGit2, Landmark, LayoutGrid, PiggyBank, ArrowRightLeft, ShoppingBag, Users, Wallet } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -38,6 +38,11 @@ export function AppSidebar() {
             title: 'Income',
             href: `${savingsBase}/income`,
             icon: Wallet,
+        },
+        {
+            title: 'Transfers',
+            href: `${savingsBase}/transfers`,
+            icon: ArrowRightLeft,
         },
         {
             title: 'Spending',

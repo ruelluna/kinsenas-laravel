@@ -22,7 +22,7 @@ class SavingsPlanService
                 $query->where('created_by_user_id', $user->id)
                     ->orWhere('is_shared_with_team', true);
             })
-            ->with(['categories.deductFromCategory'])
+            ->with(['categories.deductFromCategory', 'categories.banks'])
             ->first();
     }
 
@@ -115,8 +115,9 @@ class SavingsPlanService
             }
 
             $this->resolveDeductionSources($categories, $created);
+            $this->syncCategoryBanks($plan, $categories, $created);
 
-            return $plan->fresh(['categories.deductFromCategory']);
+            return $plan->fresh(['categories.deductFromCategory', 'categories.banks']);
         });
     }
 
@@ -246,8 +247,9 @@ class SavingsPlanService
             }
 
             $this->resolveDeductionSources($categories, $indexedCategories);
+            $this->syncCategoryBanks($plan, $categories, $indexedCategories);
 
-            return $plan->fresh(['categories.deductFromCategory']);
+            return $plan->fresh(['categories.deductFromCategory', 'categories.banks']);
         });
     }
 
@@ -361,6 +363,31 @@ class SavingsPlanService
         }
 
         return number_format((float) $value, 2, '.', '');
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $categories
+     * @param  array<int, SavingsCategory>  $indexedCategories
+     */
+    private function syncCategoryBanks(SavingsPlan $plan, array $categories, array $indexedCategories): void
+    {
+        $teamBankIds = \App\Models\Bank::query()
+            ->where('team_id', $plan->team_id)
+            ->pluck('id');
+
+        foreach ($categories as $index => $category) {
+            if (! isset($indexedCategories[$index])) {
+                continue;
+            }
+
+            $bankIds = collect($category['bank_ids'] ?? [])
+                ->filter(fn ($id) => is_string($id) && $id !== '')
+                ->intersect($teamBankIds)
+                ->values()
+                ->all();
+
+            $indexedCategories[$index]->banks()->sync($bankIds);
+        }
     }
 
     public function updateShareSetting(SavingsPlan $plan, bool $isShared): SavingsPlan

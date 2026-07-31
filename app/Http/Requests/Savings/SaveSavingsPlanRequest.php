@@ -29,6 +29,8 @@ class SaveSavingsPlanRequest extends FormRequest
             'categories.*.deduction_mode' => ['nullable', Rule::enum(DeductionMode::class)],
             'categories.*.deduction_value' => ['nullable', 'numeric', 'min:0.01'],
             'categories.*.deduct_from_index' => ['nullable', 'integer', 'min:0'],
+            'categories.*.bank_ids' => ['nullable', 'array'],
+            'categories.*.bank_ids.*' => ['uuid', 'exists:banks,id'],
             'is_shared_with_team' => ['sometimes', 'boolean'],
         ];
     }
@@ -44,6 +46,10 @@ class SaveSavingsPlanRequest extends FormRequest
 
             if (($category['deduction_value'] ?? '') === '') {
                 $categories[$index]['deduction_value'] = null;
+            }
+
+            if (! isset($category['bank_ids']) || ! is_array($category['bank_ids'])) {
+                $categories[$index]['bank_ids'] = [];
             }
         }
 

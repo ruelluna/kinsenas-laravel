@@ -1,16 +1,14 @@
 import { Form, Head, usePage } from '@inertiajs/react';
-import { ChevronDown } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import BankSelect from '@/components/savings/bank-select';
+import BankSelect, { banksForCategory } from '@/components/savings/bank-select';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { formatMoney } from '@/lib/format-money';
-import type { BankOption, CategoryBankMap, FundBalance, FundSpend } from '@/types/savings';
+import type { BankOption, CategoryBankMap, FundBalance, FundTransfer } from '@/types/savings';
 import type { SharedData } from '@/types';
 
 type Props = {
@@ -18,17 +16,16 @@ type Props = {
     fundBalances: FundBalance[];
     defaultCategoryId: string | null;
     banks: BankOption[];
-    recipients: Array<{ id: string; name: string }>;
     categories: Array<{ id: string; name: string; bankIds: string[] }>;
     categoryBankMap: CategoryBankMap;
-    spends: FundSpend[];
+    transfers: FundTransfer[];
 };
 
 function todayString(): string {
     return new Date().toISOString().slice(0, 10);
 }
 
-function remainingAfterSpend(remaining: string | null, amount: string): string | null {
+function remainingAfterAmount(remaining: string | null, amount: string): string | null {
     if (remaining === null || amount === '') {
         return remaining;
     }
@@ -58,42 +55,45 @@ function remainingTone(percentUsed: number | null): string {
     return 'text-emerald-600 dark:text-emerald-400';
 }
 
-export default function SpendingIndex({
+export default function TransfersIndex({
     plan,
     fundBalances,
     defaultCategoryId,
     banks,
-    recipients,
     categories,
     categoryBankMap,
-    spends,
+    transfers,
 }: Props) {
     const { currentTeam, errors } = usePage<SharedData & { errors: Record<string, string> }>().props;
     const teamSlug = currentTeam?.slug ?? '';
     const [selectedCategoryId, setSelectedCategoryId] = useState(defaultCategoryId ?? categories[0]?.id ?? '');
+    const [selectedBankId, setSelectedBankId] = useState('');
     const [amount, setAmount] = useState('');
-    const [bankDetailsOpen, setBankDetailsOpen] = useState(false);
 
     const selectedBalance = useMemo(
         () => fundBalances.find((balance) => balance.categoryId === selectedCategoryId) ?? null,
         [fundBalances, selectedCategoryId],
     );
 
-    const projectedRemaining = remainingAfterSpend(selectedBalance?.remaining ?? null, amount);
+    const availableBanks = useMemo(
+        () => banksForCategory(banks, categoryBankMap, selectedCategoryId),
+        [banks, categoryBankMap, selectedCategoryId],
+    );
+
+    const projectedRemaining = remainingAfterAmount(selectedBalance?.remaining ?? null, amount);
 
     return (
         <>
-            <Head title="Spending" />
+            <Head title="Transfers" />
             <Heading
                 variant="small"
-                title="Spending"
-                description={`Track spending from ${plan.name} fund balances.`}
+                title="Transfers"
+                description={`Move allocated savings into bank accounts for ${plan.name}.`}
             />
 
             {!plan.hasLockedIncome && (
                 <p className="mt-4 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                    Lock at least one income period before recording spending. Fund balances come from
-                    locked income allocations.
+                    Lock at least one income period before recording transfers.
                 </p>
             )}
 
@@ -140,7 +140,7 @@ export default function SpendingIndex({
                                 className="mt-4 w-full"
                                 onClick={() => setSelectedCategoryId(balance.categoryId)}
                             >
-                                Spend from {balance.name}
+                                Transfer to {balance.name}
                             </Button>
                         </div>
                     ))}
@@ -149,14 +149,14 @@ export default function SpendingIndex({
 
             {plan.hasLockedIncome && (
                 <Form
-                    action={`/${teamSlug}/savings/spending`}
+                    action={`/${teamSlug}/savings/transfers`}
                     method="post"
                     className="mt-8 max-w-lg space-y-4 rounded-lg border p-4"
                 >
                     <div>
-                        <h3 className="font-medium">Record spending</h3>
+                        <h3 className="font-medium">Record transfer</h3>
                         <p className="mt-1 text-sm text-muted-foreground">
-                            Quick entry for daily expenses. Bank details are optional.
+                            Log money moved from income into a fund&apos;s bank account. Confirm when it arrives.
                         </p>
                     </div>
 
@@ -167,7 +167,10 @@ export default function SpendingIndex({
                             name="category_id"
                             className="border-input h-9 rounded-md border px-3 text-sm"
                             value={selectedCategoryId}
-                            onChange={(event) => setSelectedCategoryId(event.target.value)}
+                            onChange={(event) => {
+                                setSelectedCategoryId(event.target.value);
+                                setSelectedBankId('');
+                            }}
                             required
                         >
                             {categories.map((category) => (
@@ -177,6 +180,20 @@ export default function SpendingIndex({
                             ))}
                         </select>
                         <InputError message={errors.category_id} />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="bank_id">Bank</Label>
+                        <BankSelect
+                            id="bank_id"
+                            banks={banks}
+                            categoryBankMap={categoryBankMap}
+                            categoryId={selectedCategoryId}
+                            required
+                            value={selectedBankId || availableBanks[0]?.id || ''}
+                            onChange={setSelectedBankId}
+                        />
+                        <InputError message={errors.bank_id} />
                     </div>
 
                     <div className="grid gap-2">
@@ -193,7 +210,7 @@ export default function SpendingIndex({
                         />
                         {selectedBalance?.remaining !== null && amount !== '' && (
                             <p className="text-xs text-muted-foreground">
-                                After this spend: {formatMoney(projectedRemaining)} remaining in{' '}
+                                After this transfer: {formatMoney(projectedRemaining)} remaining in{' '}
                                 {selectedBalance?.name}
                             </p>
                         )}
@@ -205,89 +222,51 @@ export default function SpendingIndex({
                         <Input
                             id="description"
                             name="description"
-                            placeholder="Groceries, car repair, tithe…"
+                            placeholder="Payroll allocation, emergency fund deposit…"
                             required
                         />
                         <InputError message={errors.description} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="spent_on">Date</Label>
-                        <Input id="spent_on" name="spent_on" type="date" defaultValue={todayString()} required />
-                        <InputError message={errors.spent_on} />
+                        <Label htmlFor="transferred_on">Date</Label>
+                        <Input
+                            id="transferred_on"
+                            name="transferred_on"
+                            type="date"
+                            defaultValue={todayString()}
+                            required
+                        />
+                        <InputError message={errors.transferred_on} />
                     </div>
 
-                    <Collapsible open={bankDetailsOpen} onOpenChange={setBankDetailsOpen}>
-                        <CollapsibleTrigger asChild>
-                            <Button type="button" variant="ghost" size="sm" className="gap-2 px-0">
-                                <ChevronDown
-                                    className={`size-4 transition-transform ${bankDetailsOpen ? 'rotate-180' : ''}`}
-                                />
-                                Bank details (optional)
-                            </Button>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="mt-3 space-y-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="bank_id">Bank</Label>
-                                <BankSelect
-                                    id="bank_id"
-                                    banks={banks}
-                                    categoryBankMap={categoryBankMap}
-                                    categoryId={selectedCategoryId}
-                                />
-                                <InputError message={errors.bank_id} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="recipient_id">Recipient</Label>
-                                <select
-                                    id="recipient_id"
-                                    name="recipient_id"
-                                    className="border-input h-9 rounded-md border px-3 text-sm"
-                                    defaultValue=""
-                                >
-                                    <option value="">None</option>
-                                    {recipients.map((recipient) => (
-                                        <option key={recipient.id} value={recipient.id}>
-                                            {recipient.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                <InputError message={errors.recipient_id} />
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                                When a bank is selected, spending stays pending until you confirm it.
-                            </p>
-                        </CollapsibleContent>
-                    </Collapsible>
-
-                    <Button type="submit">Record spending</Button>
+                    <Button type="submit">Record transfer</Button>
                 </Form>
             )}
 
             <div className="mt-8">
-                <h3 className="font-medium">Recent activity</h3>
+                <h3 className="font-medium">Recent transfers</h3>
                 <div className="mt-3 space-y-3">
-                    {spends.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">No spending recorded yet.</p>
+                    {transfers.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">No transfers recorded yet.</p>
                     ) : (
-                        spends.map((spend) => (
+                        transfers.map((transfer) => (
                             <div
-                                key={spend.id}
+                                key={transfer.id}
                                 className="flex items-center justify-between gap-4 rounded-lg border p-3 text-sm"
                             >
                                 <div>
                                     <p className="font-medium">
-                                        {formatMoney(spend.amount)} · {spend.description}
+                                        {formatMoney(transfer.amount)} · {transfer.description}
                                     </p>
                                     <p className="text-muted-foreground">
-                                        {spend.categoryName} · {spend.spentOn}
-                                        {spend.bankName ? ` · ${spend.bankName}` : ''}
-                                        {spend.recipientName ? ` → ${spend.recipientName}` : ''}
+                                        {transfer.categoryName} · {transfer.transferredOn}
+                                        {transfer.bankName ? ` · ${transfer.bankName}` : ''}
                                     </p>
                                 </div>
-                                {spend.status === 'pending' && (
+                                {transfer.status === 'pending' && (
                                     <Form
-                                        action={`/${teamSlug}/savings/spending/${spend.id}/confirm`}
+                                        action={`/${teamSlug}/savings/transfers/${transfer.id}/confirm`}
                                         method="post"
                                     >
                                         <Button type="submit" size="sm" variant="outline">
@@ -304,6 +283,6 @@ export default function SpendingIndex({
     );
 }
 
-SpendingIndex.layout = (props: SharedData) => ({
-    breadcrumbs: [{ title: 'Spending', href: `/${props.currentTeam?.slug}/savings/spending` }],
+TransfersIndex.layout = (props: SharedData) => ({
+    breadcrumbs: [{ title: 'Transfers', href: `/${props.currentTeam?.slug}/savings/transfers` }],
 });

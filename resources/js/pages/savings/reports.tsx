@@ -1,4 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import { BankLogo } from '@/components/savings/bank-select';
 import Heading from '@/components/heading';
 import { formatMoney } from '@/lib/format-money';
 import type { ReportTotals } from '@/types/savings';
@@ -16,7 +17,7 @@ export default function SavingsReports({ totals }: Props) {
             <Heading
                 variant="small"
                 title="Reports"
-                description="Fund health and confirmed spending totals (decrypted in your session only)."
+                description="Fund health and bank balances (decrypted in your session only)."
             />
 
             <div className="mt-6">
@@ -27,6 +28,7 @@ export default function SavingsReports({ totals }: Props) {
                             <tr className="border-b bg-muted/50 text-left">
                                 <th className="px-4 py-3 font-medium">Fund</th>
                                 <th className="px-4 py-3 font-medium text-right">Allocated</th>
+                                <th className="px-4 py-3 font-medium text-right">Transferred</th>
                                 <th className="px-4 py-3 font-medium text-right">Spent</th>
                                 <th className="px-4 py-3 font-medium text-right">Remaining</th>
                                 <th className="px-4 py-3 font-medium text-right">Used</th>
@@ -35,8 +37,8 @@ export default function SavingsReports({ totals }: Props) {
                         <tbody>
                             {totals.fund_health.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
-                                        Lock income and record spending to see fund health.
+                                    <td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">
+                                        Lock income and record transfers or spending to see fund health.
                                     </td>
                                 </tr>
                             ) : (
@@ -44,6 +46,7 @@ export default function SavingsReports({ totals }: Props) {
                                     <tr key={row.category_id} className="border-b last:border-b-0">
                                         <td className="px-4 py-3">{row.category_name}</td>
                                         <td className="px-4 py-3 text-right">{formatMoney(row.allocated)}</td>
+                                        <td className="px-4 py-3 text-right">{formatMoney(row.transferred)}</td>
                                         <td className="px-4 py-3 text-right">{formatMoney(row.spent)}</td>
                                         <td className="px-4 py-3 text-right font-medium">
                                             {formatMoney(row.remaining)}
@@ -58,11 +61,36 @@ export default function SavingsReports({ totals }: Props) {
             </div>
 
             <div className="mt-8 grid gap-6 md:grid-cols-2">
-                <ReportSection
-                    title="By bank"
-                    items={totals.by_bank.map((row) => ({ label: row.bank_name, total: row.total }))}
-                    emptyMessage="No bank spending recorded yet."
-                />
+                <div className="rounded-lg border p-4">
+                    <h3 className="font-medium">By bank</h3>
+                    {totals.by_bank.length === 0 ? (
+                        <p className="mt-3 text-sm text-muted-foreground">No bank balances recorded yet.</p>
+                    ) : (
+                        <ul className="mt-3 space-y-4 text-sm">
+                            {totals.by_bank.map((row) => (
+                                <li key={row.bank_id}>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div className="flex items-center gap-2">
+                                            <BankLogo logoUrl={row.logo_url} name={row.bank_name} />
+                                            <span className="font-medium">{row.bank_name}</span>
+                                        </div>
+                                        <span>{formatMoney(row.total)}</span>
+                                    </div>
+                                    {row.by_category.length > 0 && (
+                                        <ul className="mt-2 space-y-1 border-l pl-4 text-muted-foreground">
+                                            {row.by_category.map((category) => (
+                                                <li key={category.category_id} className="flex justify-between gap-2">
+                                                    <span>{category.category_name}</span>
+                                                    <span>{formatMoney(category.total)}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
                 <ReportSection
                     title="By recipient"
                     items={totals.by_recipient.map((row) => ({ label: row.recipient_name, total: row.total }))}
@@ -70,7 +98,10 @@ export default function SavingsReports({ totals }: Props) {
                 />
             </div>
 
-            <p className="mt-6 text-sm text-muted-foreground">
+            <p className="mt-6 flex flex-wrap gap-4 text-sm text-muted-foreground">
+                <Link href={`/${teamSlug}/savings/transfers`} className="text-primary underline-offset-4 hover:underline">
+                    Record transfers →
+                </Link>
                 <Link href={`/${teamSlug}/savings/spending`} className="text-primary underline-offset-4 hover:underline">
                     Record spending →
                 </Link>

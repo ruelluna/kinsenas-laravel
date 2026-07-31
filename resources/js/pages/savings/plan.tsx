@@ -1,6 +1,7 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { AlertTriangle, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
+import CategoryBankSelect from '@/components/savings/category-bank-select';
 import Heading from '@/components/heading';
 import {
     BeforeChooseAlert,
@@ -26,6 +27,7 @@ import type {
     DeductionMode,
     FormulaTemplate,
     FundBalance,
+    BankOption,
     SavingsCategory,
     SavingsPlan,
     SavingsPlanPageGuidance,
@@ -38,6 +40,7 @@ type Props = {
     templates: FormulaTemplate[];
     fundBalances: FundBalance[];
     pageGuidance: SavingsPlanPageGuidance;
+    teamBanks: BankOption[];
 };
 
 type CategoryRow = {
@@ -49,6 +52,7 @@ type CategoryRow = {
     deductionMode: DeductionMode | '';
     deductionValue: string;
     deductFromIndex: string;
+    bankIds: string[];
 };
 
 let nextRowKey = 0;
@@ -68,6 +72,7 @@ function createEmptyRow(): CategoryRow {
         deductionMode: 'fixed',
         deductionValue: '',
         deductFromIndex: '',
+        bankIds: [],
     };
 }
 
@@ -80,6 +85,7 @@ function createEmptyCustomRow(): CategoryRow {
         deductionMode: '',
         deductionValue: '',
         deductFromIndex: '',
+        bankIds: [],
     };
 }
 
@@ -104,6 +110,7 @@ function rowsFromPlan(categories: SavingsCategory[]): CategoryRow[] {
             deductionMode: category.deductionMode ?? '',
             deductionValue: category.deductionValue ?? '',
             deductFromIndex: sourceIndex >= 0 ? String(sourceIndex) : '',
+            bankIds: category.bankIds ?? [],
         };
     });
 }
@@ -168,7 +175,7 @@ function hasCustomCategoryChanges(
     });
 }
 
-export default function SavingsPlanPage({ plan, templates, fundBalances, pageGuidance }: Props) {
+export default function SavingsPlanPage({ plan, templates, fundBalances, pageGuidance, teamBanks }: Props) {
     const { currentTeam } = usePage<SharedData>().props;
     const teamSlug = currentTeam?.slug ?? '';
 
@@ -196,6 +203,7 @@ export default function SavingsPlanPage({ plan, templates, fundBalances, pageGui
             teamSlug={teamSlug}
             fundBalances={fundBalances}
             pageGuidance={pageGuidance}
+            teamBanks={teamBanks}
         />
     );
 }
@@ -205,11 +213,13 @@ function SavingsPlanEditor({
     teamSlug,
     fundBalances,
     pageGuidance,
+    teamBanks,
 }: {
     plan: SavingsPlan;
     teamSlug: string;
     fundBalances: FundBalance[];
     pageGuidance: SavingsPlanPageGuidance;
+    teamBanks: BankOption[];
 }) {
     const [rows, setRows] = useState<CategoryRow[]>(() => rowsFromPlan(plan.categories));
     const [confirmOpen, setConfirmOpen] = useState(false);
@@ -338,7 +348,7 @@ function SavingsPlanEditor({
                         <div>
                             <h3 className="font-medium">Fund balances</h3>
                             <p className="mt-1 text-sm text-muted-foreground">
-                                Running totals from all locked income minus confirmed spending.
+                                Running totals from locked income minus transfers and spending.
                             </p>
                         </div>
                         <Button variant="outline" size="sm" asChild>
@@ -630,6 +640,15 @@ function SavingsPlanEditor({
                                             </div>
                                         </>
                                     )}
+                                </div>
+
+                                <div className="mt-4">
+                                    <CategoryBankSelect
+                                        banks={teamBanks}
+                                        selectedIds={row.bankIds}
+                                        onChange={(bankIds) => updateRow(index, { bankIds })}
+                                        namePrefix={`categories[${index}]`}
+                                    />
                                 </div>
                             </div>
                         );

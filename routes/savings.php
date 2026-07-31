@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Savings\BankController;
 use App\Http\Controllers\Savings\FundSpendController;
+use App\Http\Controllers\Savings\FundTransferController;
 use App\Http\Controllers\Savings\IncomePeriodController;
 use App\Http\Controllers\Savings\RecipientController;
 use App\Http\Controllers\Savings\SavingsPlanController;
@@ -36,7 +37,9 @@ Route::prefix('savings')
         Route::post('spending', [FundSpendController::class, 'store'])->name('spending.store');
         Route::post('spending/{fundSpend}/confirm', [FundSpendController::class, 'confirm'])->name('spending.confirm');
 
-        Route::redirect('transfers', 'spending')->name('transfers.index');
+        Route::get('transfers', [FundTransferController::class, 'index'])->name('transfers.index');
+        Route::post('transfers', [FundTransferController::class, 'store'])->name('transfers.store');
+        Route::post('transfers/{fundTransfer}/confirm', [FundTransferController::class, 'confirm'])->name('transfers.confirm');
 
         Route::get('reports', SavingsReportController::class)->name('reports');
     });

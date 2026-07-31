@@ -68,6 +68,7 @@ it('shows spending page with fund balances', function () {
         ->where('fundBalances.0.name', 'Everyday Fund')
         ->where('fundBalances.0.allocated', '35000.00')
         ->where('fundBalances.0.spent', '0.00')
+        ->where('fundBalances.0.transferred', '0.00')
         ->where('fundBalances.0.remaining', '35000.00'),
     );
 });
@@ -174,16 +175,17 @@ it('creates pending spending when bank is provided', function () {
     );
 });
 
-it('redirects legacy transfers route to spending', function () {
+it('shows transfers page', function () {
     [$user] = createUserWithLockedIncome();
 
     $response = $this->actingAs($user)->get(route('savings.transfers.index', [
         'current_team' => $user->currentTeam->slug,
     ]));
 
-    $response->assertRedirect(route('savings.spending.index', [
-        'current_team' => $user->currentTeam->slug,
-    ]));
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('savings/transfers/index'),
+    );
 });
 
 it('shows remaining balances on income detail when income is locked', function () {

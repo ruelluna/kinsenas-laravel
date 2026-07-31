@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SavingsCategory extends Model
@@ -60,6 +61,16 @@ class SavingsCategory extends Model
     public function fundSpends(): HasMany
     {
         return $this->hasMany(FundSpend::class, 'category_id');
+    }
+
+    public function fundTransfers(): HasMany
+    {
+        return $this->hasMany(FundTransfer::class, 'category_id');
+    }
+
+    public function banks(): BelongsToMany
+    {
+        return $this->belongsToMany(Bank::class, 'bank_savings_category');
     }
 
     public function isPercentage(): bool
