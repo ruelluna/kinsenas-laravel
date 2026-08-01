@@ -4,15 +4,15 @@
 
 ## Summary
 
-Email verification is disabled while no mail system is configured. New signups are marked verified immediately and can access beta pending, dashboard, settings, and admin routes without visiting a verification prompt.
+Email verification is **not required** while no mail system is configured, but Fortify verification routes and pages remain registered for future use and Wayfinder codegen.
 
 ## Changelog
 
-- Removed Fortify `emailVerification` feature and `verified` route middleware
-- Removed post-auth redirect to the verification notice page
+- Removed `verified` route middleware and post-auth redirect to verification notice
 - New users are auto-verified on registration (`markEmailAsVerified()`)
-- Beta launch discount now grants on admin approval without a separate email-verification step
-- Profile settings no longer show the “resend verification email” banner
+- Beta launch discount grants on admin approval without a separate verification step
+- Profile settings hide the “resend verification email” banner (`mustVerifyEmail` false)
+- Kept Fortify `emailVerification` feature so verification routes/pages still exist for deploy builds
 
 ## Files touched
 
