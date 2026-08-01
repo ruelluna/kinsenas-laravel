@@ -45,6 +45,8 @@ class CreateNewUser implements CreatesNewUsers
                 'password' => $input['password'],
             ]);
 
+            $user->markEmailAsVerified();
+
             $this->createTeam->handle($user, isPersonal: true);
 
             $this->betaApplicationService->apply($user);

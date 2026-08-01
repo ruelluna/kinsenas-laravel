@@ -46,9 +46,7 @@ class BetaApplicationService
             'beta_approved_by' => $admin->id,
         ])->save();
 
-        if ($user->hasVerifiedEmail()) {
-            $this->grantLaunchDiscountIfEligible($user);
-        }
+        $this->grantLaunchDiscountIfEligible($user);
 
         SyncBetaApplicationToGhl::dispatch($user->fresh(), 'application_approved');
 

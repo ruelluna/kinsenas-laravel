@@ -7,7 +7,6 @@ use Database\Seeders\BillingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
-use Illuminate\Support\Facades\URL;
 use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
@@ -47,36 +46,25 @@ it('creates a pending beta application on registration', function () {
         ->and($user->personalTeam()->subscription->status)->toBe(SubscriptionStatus::OpenBeta);
 });
 
-it('redirects verified pending applicants to the beta pending page', function () {
+it('redirects pending applicants to the beta pending page after login', function () {
     $user = User::factory()->betaPending()->create(['email' => 'pending-verify@example.com']);
 
-    $verificationUrl = URL::temporarySignedRoute(
-        'verification.verify',
-        now()->addMinutes(60),
-        ['id' => $user->id, 'hash' => sha1($user->email)],
-    );
+    $response = $this->post(route('login.store'), [
+        'email' => 'pending-verify@example.com',
+        'password' => 'password',
+    ]);
 
-    $this->actingAs($user)->get($verificationUrl)
-        ->assertRedirect(route('beta.pending', absolute: false).'?verified=1');
+    $response->assertRedirect(route('beta.pending', absolute: false));
 });
 
-it('grants launch discount eligibility after admin approval and email verification', function () {
+it('grants launch discount eligibility after admin approval', function () {
     $admin = User::factory()->create(['email' => 'admin@example.com', 'is_platform_admin' => true]);
-    $user = User::factory()->unverified()->betaPending()->create(['email' => 'discount@example.com']);
+    $user = User::factory()->betaPending()->create(['email' => 'discount@example.com']);
 
     $this->actingAs($admin)->post(route('admin.beta-applications.approve', $user));
 
-    expect($user->fresh()->beta_application_status)->toBe(BetaApplicationStatus::Approved);
-
-    $verificationUrl = URL::temporarySignedRoute(
-        'verification.verify',
-        now()->addMinutes(60),
-        ['id' => $user->id, 'hash' => sha1($user->email)],
-    );
-
-    $this->actingAs($user)->get($verificationUrl);
-
-    expect($user->fresh()->beta_launch_discount_eligible)->toBeTrue();
+    expect($user->fresh()->beta_application_status)->toBe(BetaApplicationStatus::Approved)
+        ->and($user->fresh()->beta_launch_discount_eligible)->toBeTrue();
 });
 
 it('dispatches GHL webhook when beta application is submitted', function () {

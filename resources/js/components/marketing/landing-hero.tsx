@@ -27,7 +27,9 @@ export default function LandingHero({ showCtas }: LandingHeroProps) {
                                 : 'Spend only after you have saved.'}
                         </p>
                         <h1 className="text-balance text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-[3.25rem]">
-                            Have a system. Save now!
+                            Not how big you save —
+                            <br />
+                            but the habit of saving!
                         </h1>
                         <p className="mx-auto max-w-xl text-pretty text-lg leading-relaxed text-white/80 lg:mx-0">
                             {openBeta.isActive

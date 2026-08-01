@@ -11,13 +11,14 @@ beforeEach(function () {
     $this->seed(BillingSeeder::class);
 });
 
-it('blocks unverified users from the dashboard', function () {
-    $user = User::factory()->unverified()->create(['email' => 'unverified@example.com']);
+it('allows unverified users to access the dashboard', function () {
+    $user = User::factory()->unverified()->betaApproved()->create(['email' => 'unverified@example.com']);
+    $this->unlockVaultFor($user);
     $team = $user->personalTeam();
 
     $response = $this->actingAs($user)->get(route('dashboard', ['current_team' => $team->slug]));
 
-    $response->assertRedirect(route('verification.notice'));
+    $response->assertOk();
 });
 
 it('allows verified approved users to access the dashboard', function () {
@@ -30,7 +31,9 @@ it('allows verified approved users to access the dashboard', function () {
     $response->assertOk();
 });
 
-it('redirects newly registered users to email verification', function () {
+it('redirects newly registered open beta users to the beta pending page', function () {
+    config(['billing.mode' => 'open_beta']);
+
     $response = $this->post(route('register.store'), [
         'name' => 'Beta User',
         'email' => 'beta-user@example.com',
@@ -39,5 +42,18 @@ it('redirects newly registered users to email verification', function () {
     ]);
 
     $this->assertAuthenticated();
-    $response->assertRedirect(route('verification.notice'));
+    $response->assertRedirect(route('beta.pending', absolute: false));
+});
+
+it('marks newly registered users as email verified', function () {
+    $this->post(route('register.store'), [
+        'name' => 'Verified User',
+        'email' => 'verified-user@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ]);
+
+    $user = User::where('email', 'verified-user@example.com')->firstOrFail();
+
+    expect($user->hasVerifiedEmail())->toBeTrue();
 });

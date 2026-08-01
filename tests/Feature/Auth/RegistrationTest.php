@@ -75,7 +75,7 @@ it('new users can register', function () {
         ->and($personalTeam->subscription->status)->toBe(SubscriptionStatus::Trialing)
         ->and($personalTeam->subscription->trial_ends_at)->not->toBeNull();
 
-    $response->assertRedirect(route('verification.notice'));
+    $response->assertRedirect("/{$personalTeam->slug}/dashboard");
 });
 
 it('registration creates a user named default workspace', function () {
