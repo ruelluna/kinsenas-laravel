@@ -4,22 +4,22 @@ overview: Add a lightweight first-run product tour (Driver.js) that walks new us
 todos:
   - id: install-driver
     content: "Install driver.js; add CSS import in app entry (resources/js/app.tsx)"
-    status: pending
+    status: completed
   - id: tour-hook
     content: "Create useOnboardingTour hook + tour step definitions with data-tour selectors"
-    status: pending
+    status: completed
   - id: persist-completion
     content: "Persist tour completed (team preference or user meta; localStorage OK for v1)"
-    status: pending
+    status: completed
   - id: wire-triggers
     content: "Auto-start for new teams with incomplete setup; Restart tour entry in Settings or Dashboard"
-    status: pending
+    status: completed
   - id: data-tour-attrs
     content: "Ensure data-tour attributes on sidebar Banks/Plan, Add bank, plan templates, income CTA"
-    status: pending
+    status: completed
   - id: tests
     content: "Feature/browser coverage for tour completion flag; smoke that banks-first selectors exist"
-    status: pending
+    status: completed
 isProject: true
 ---
 
@@ -130,6 +130,14 @@ php artisan test --compact tests/Feature/Savings/SavingsPlanTest.php
 4. Dashboard “Continue setup” already points at first incomplete step (banks) — optional highlight on checklist
 5. Persist completion + Restart control
 6. Tests + Visual QA
+
+## Changelog — 2026-08-02 (implemented)
+
+- Installed `driver.js` and imported CSS in `app.tsx`
+- Multi-page tour via session resume (`OnboardingTourHost` in app sidebar layout)
+- localStorage completion per team; **Take a tour** on Dashboard checklist
+- Auto-start once for incomplete setup on Dashboard
+- Themed popover (`.kinsenas-driver-popover`) to Kinsenas tokens
 
 ## Fresh-seed regression checklist
 

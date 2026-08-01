@@ -2,6 +2,7 @@ import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
+import OnboardingTourHost from '@/components/onboarding/onboarding-tour-host';
 import { OpenBetaBanner } from '@/components/open-beta-banner';
 import { PageContent } from '@/components/page-content';
 import type { AppLayoutProps } from '@/types';
@@ -18,6 +19,7 @@ export default function AppSidebarLayout({
                 <OpenBetaBanner />
                 <PageContent>{children}</PageContent>
             </AppContent>
+            <OnboardingTourHost />
         </AppShell>
     );
 }

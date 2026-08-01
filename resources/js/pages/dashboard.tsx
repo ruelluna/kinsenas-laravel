@@ -1,5 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PendingActionsPanel from '@/components/dashboard/pending-actions-panel';
 import RecentActivityFeed from '@/components/dashboard/recent-activity-feed';
 import SetupChecklist from '@/components/dashboard/setup-checklist';
@@ -7,6 +7,7 @@ import SummaryStatCards from '@/components/dashboard/summary-stat-cards';
 import PendingInvitationsModal from '@/components/pending-invitations-modal';
 import FundBalanceGrid from '@/components/savings/fund-balance-grid';
 import { Button } from '@/components/ui/button';
+import { requestOnboardingTourAutoStart } from '@/lib/onboarding-tour/storage';
 import { dashboard } from '@/routes';
 import type { DashboardInvitation, SharedData } from '@/types';
 import type { DashboardPageProps } from '@/types/dashboard';
@@ -29,10 +30,17 @@ export default function Dashboard({
     const [showInvitations, setShowInvitations] = useState(
         pendingInvitations.length > 0,
     );
-    const recoveryKey = usePage<SharedData & { registrationRecoveryKey?: string | null }>().props
-        .registrationRecoveryKey;
+    const page = usePage<SharedData & { registrationRecoveryKey?: string | null }>();
+    const recoveryKey = page.props.registrationRecoveryKey;
+    const teamId = page.props.currentTeam?.id;
 
     const showFinancialSections = setup.hasPlan && setup.hasLockedIncome;
+
+    useEffect(() => {
+        if (teamId && !setup.complete) {
+            requestOnboardingTourAutoStart(teamId);
+        }
+    }, [teamId, setup.complete]);
 
     return (
         <>

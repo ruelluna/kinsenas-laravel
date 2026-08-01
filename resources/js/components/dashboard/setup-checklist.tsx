@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { Check, Circle } from 'lucide-react';
+import ReplayTourButton from '@/components/onboarding/replay-tour-button';
 import { cn } from '@/lib/utils';
 import type { DashboardSetup } from '@/types/dashboard';
 
@@ -10,10 +11,14 @@ type Props = {
 export default function SetupChecklist({ setup }: Props) {
     if (setup.complete) {
         return (
-            <div className="flex items-center gap-2 rounded-lg border border-success/30 bg-success/5 px-4 py-3 text-sm">
+            <div
+                className="flex flex-wrap items-center gap-3 rounded-lg border border-success/30 bg-success/5 px-4 py-3 text-sm"
+                data-tour="setup-checklist"
+            >
                 <Check className="size-4 shrink-0 text-success" />
                 <span className="font-medium">All set</span>
                 <span className="text-muted-foreground">Your savings workspace is ready.</span>
+                <ReplayTourButton className="ms-auto" />
             </div>
         );
     }
@@ -21,7 +26,7 @@ export default function SetupChecklist({ setup }: Props) {
     const nextStep = setup.steps.find((step) => !step.complete);
 
     return (
-        <div className="rounded-lg border p-4">
+        <div className="rounded-lg border p-4" data-tour="setup-checklist">
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h2 className="font-medium">Get started</h2>
@@ -29,14 +34,17 @@ export default function SetupChecklist({ setup }: Props) {
                         Start with your banks, then choose a plan and track income.
                     </p>
                 </div>
-                {nextStep && (
-                    <Link
-                        href={nextStep.href}
-                        className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                    >
-                        Continue setup
-                    </Link>
-                )}
+                <div className="flex flex-wrap items-center gap-2">
+                    <ReplayTourButton />
+                    {nextStep && (
+                        <Link
+                            href={nextStep.href}
+                            className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                        >
+                            Continue setup
+                        </Link>
+                    )}
+                </div>
             </div>
             <ol className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
                 {setup.steps.map((step, index) => (
