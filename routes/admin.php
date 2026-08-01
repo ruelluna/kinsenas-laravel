@@ -2,8 +2,8 @@
 
 use App\Http\Controllers\Admin\AdminBetaApplicationController;
 use App\Http\Controllers\Admin\AdminBetaFeedbackController;
-use App\Http\Controllers\Admin\AdminPaymentSubmissionController;
 use App\Http\Controllers\Admin\AdminPaymentQrController;
+use App\Http\Controllers\Admin\AdminPaymentSubmissionController;
 use App\Http\Controllers\Admin\AdminPlatformUserController;
 use App\Http\Controllers\Admin\AdminSavingsFormulaTemplateController;
 use App\Http\Controllers\Admin\AdminSavingsPlanPageGuidanceController;

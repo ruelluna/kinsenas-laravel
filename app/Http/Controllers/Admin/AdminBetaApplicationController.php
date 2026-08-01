@@ -13,9 +13,7 @@ use Inertia\Response;
 
 class AdminBetaApplicationController extends Controller
 {
-    public function __construct(private BetaApplicationService $betaApplicationService)
-    {
-    }
+    public function __construct(private BetaApplicationService $betaApplicationService) {}
 
     public function index(Request $request): Response
     {

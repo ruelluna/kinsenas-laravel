@@ -9,9 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureVaultUnlocked
 {
-    public function __construct(private VaultKeyManager $vaultKeyManager)
-    {
-    }
+    public function __construct(private VaultKeyManager $vaultKeyManager) {}
 
     public function handle(Request $request, Closure $next): Response
     {

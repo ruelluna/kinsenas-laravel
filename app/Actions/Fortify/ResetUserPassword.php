@@ -12,9 +12,7 @@ class ResetUserPassword implements ResetsUserPasswords
 {
     use PasswordValidationRules;
 
-    public function __construct(private FinancialEncryptionService $encryption)
-    {
-    }
+    public function __construct(private FinancialEncryptionService $encryption) {}
 
     /**
      * Validate and reset the user's forgotten password.

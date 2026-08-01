@@ -8,6 +8,7 @@ use App\Models\IncomePeriodDeduction;
 use App\Models\SavingsCategory;
 use App\Models\SavingsPlan;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -16,8 +17,7 @@ class IncomeCalculationService
     public function __construct(
         private CategoryAllocationCalculator $calculator,
         private FundBalanceService $fundBalanceService,
-    ) {
-    }
+    ) {}
 
     public function create(SavingsPlan $plan, string $name, string $amount, string $periodStart): IncomePeriod
     {
@@ -219,12 +219,12 @@ class IncomeCalculationService
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<string, IncomeAllocation>  $allocationsByCategory
+     * @param  Collection<string, IncomeAllocation>  $allocationsByCategory
      */
     private function deductionNoteForLocked(
         ?SavingsCategory $category,
         IncomeAllocation $allocation,
-        \Illuminate\Support\Collection $allocationsByCategory,
+        Collection $allocationsByCategory,
     ): ?string {
         if ($category === null) {
             return null;

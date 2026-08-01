@@ -11,9 +11,7 @@ use Inertia\Response;
 
 class VaultUnlockController extends Controller
 {
-    public function __construct(private VaultKeyManager $vaultKeyManager)
-    {
-    }
+    public function __construct(private VaultKeyManager $vaultKeyManager) {}
 
     public function create(): Response
     {

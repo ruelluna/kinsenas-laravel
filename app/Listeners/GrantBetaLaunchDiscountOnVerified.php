@@ -7,9 +7,7 @@ use Illuminate\Auth\Events\Verified;
 
 class GrantBetaLaunchDiscountOnVerified
 {
-    public function __construct(private BetaApplicationService $betaApplicationService)
-    {
-    }
+    public function __construct(private BetaApplicationService $betaApplicationService) {}
 
     public function handle(Verified $event): void
     {

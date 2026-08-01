@@ -9,9 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
-/* @chisel-passkeys */
 use Laravel\Passkeys\Contracts\PasskeyLoginResponse;
-/* @end-chisel-passkeys */
 
 uses(RefreshDatabase::class);
 
@@ -54,7 +52,6 @@ it('users can authenticate using the login screen', function () {
     $response->assertRedirect(route('dashboard'));
 });
 
-/* @chisel-passkeys */
 it('passkey login response redirects to the current team dashboard', function () {
     $user = User::factory()->create();
 
@@ -70,7 +67,6 @@ it('passkey login response redirects to the current team dashboard', function ()
         route('dashboard', ['current_team' => $user->personalTeam()->slug]),
     );
 });
-/* @end-chisel-passkeys */
 
 it('users with two factor enabled are redirected to two factor challenge', function () {
     if (! Features::canManageTwoFactorAuthentication()) {

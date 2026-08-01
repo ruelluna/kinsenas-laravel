@@ -247,7 +247,7 @@ it('encrypts income amount in database', function () {
         'period_start' => '2026-01-01',
     ]);
 
-    $raw = \DB::table('income_periods')->value('amount_encrypted');
+    $raw = DB::table('income_periods')->value('amount_encrypted');
 
     $this->assertIsString($raw);
     $this->assertStringNotContainsString('50000', $raw);

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\ClearVaultOnLogout;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Support\Facades\Date;
@@ -9,7 +10,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-use App\Listeners\ClearVaultOnLogout;
 
 class AppServiceProvider extends ServiceProvider
 {

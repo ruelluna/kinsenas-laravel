@@ -5,7 +5,6 @@ use App\Models\Bank;
 use App\Models\FundSpend;
 use App\Models\FundTransfer;
 use App\Models\IncomePeriod;
-use App\Models\SavingsCategory;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlan;
 use App\Models\Team;

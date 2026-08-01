@@ -1,8 +1,9 @@
 <?php
 
+use App\Models\Bank;
 use App\Models\FundSpend;
 use App\Models\IncomePeriod;
-use App\Models\SavingsCategory;
+use App\Models\Recipient;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlan;
 use App\Models\User;
@@ -131,7 +132,7 @@ it('creates pending spending when bank is provided', function () {
         'account_label' => 'Everyday',
     ]);
 
-    $bankId = \App\Models\Bank::query()->firstOrFail()->id;
+    $bankId = Bank::query()->firstOrFail()->id;
 
     $this->actingAs($user)->post(route('savings.recipients.store', [
         'current_team' => $user->currentTeam->slug,
@@ -140,7 +141,7 @@ it('creates pending spending when bank is provided', function () {
         'name' => 'Mechanic',
     ]);
 
-    $recipientId = \App\Models\Recipient::query()->firstOrFail()->id;
+    $recipientId = Recipient::query()->firstOrFail()->id;
 
     $this->actingAs($user)->post(route('savings.spending.store', [
         'current_team' => $user->currentTeam->slug,

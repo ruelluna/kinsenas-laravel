@@ -2,8 +2,6 @@
 
 use App\Actions\Teams\CreateTeam;
 use App\Enums\SubscriptionStatus;
-use App\Enums\TeamRole;
-use App\Models\Team;
 use App\Models\User;
 use Database\Seeders\BillingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureBetaApproved;
 use App\Http\Middleware\EnsurePlatformAdmin;
 use App\Http\Middleware\EnsureSubscribedOrTrialing;
 use App\Http\Middleware\EnsureSubscriptionFeature;
@@ -27,7 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'subscribed' => EnsureSubscribedOrTrialing::class,
             'subscribed.feature' => EnsureSubscriptionFeature::class,
             'platform.admin' => EnsurePlatformAdmin::class,
-            'beta.approved' => \App\Http\Middleware\EnsureBetaApproved::class,
+            'beta.approved' => EnsureBetaApproved::class,
         ]);
 
         $middleware->web(append: [

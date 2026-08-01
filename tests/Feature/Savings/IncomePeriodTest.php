@@ -2,6 +2,7 @@
 
 use App\Models\IncomePeriod;
 use App\Models\SavingsFormulaTemplate;
+use App\Models\SavingsPlan;
 use App\Models\User;
 use Database\Seeders\BillingSeeder;
 use Database\Seeders\SavingsFormulaTemplateSeeder;
@@ -160,7 +161,7 @@ it('includes spent and remaining summary on income index when income is locked',
         'incomePeriod' => $period->id,
     ]));
 
-    $plan = \App\Models\SavingsPlan::query()->firstOrFail();
+    $plan = SavingsPlan::query()->firstOrFail();
     $everydayCategory = $plan->categories()->where('name', 'Everyday Fund')->firstOrFail();
 
     $this->actingAs($user)->post(route('savings.spending.store', [
@@ -336,7 +337,7 @@ it('allows clearing a custom amount for an income period while keeping the categ
 
     $period = createIncomePeriodFor($user, '50000.00');
 
-    $plan = \App\Models\SavingsPlan::query()->firstOrFail();
+    $plan = SavingsPlan::query()->firstOrFail();
     $collegeCategory = $plan->categories()->where('name', 'College Fund')->firstOrFail();
 
     $this->actingAs($user)->put(route('savings.income.custom-amounts', [

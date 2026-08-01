@@ -417,9 +417,9 @@ class FundBalanceService
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, SavingsCategory>
+     * @return Collection<int, SavingsCategory>
      */
-    public function categoriesWithDefaultFirst(SavingsPlan $plan): \Illuminate\Support\Collection
+    public function categoriesWithDefaultFirst(SavingsPlan $plan): Collection
     {
         $plan->loadMissing('categories');
         $defaultId = $this->defaultCategoryId($plan);

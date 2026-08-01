@@ -22,8 +22,7 @@ class IncomePeriodController extends Controller
         private SavingsPlanService $planService,
         private IncomeCalculationService $incomeService,
         private FundBalanceService $fundBalanceService,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request, Team $current_team): Response
     {

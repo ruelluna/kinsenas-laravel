@@ -2,17 +2,15 @@
 
 namespace App\Http\Middleware;
 
-use App\Services\Billing\BetaApplicationService;
 use App\Enums\BetaApplicationStatus;
+use App\Services\Billing\BetaApplicationService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureBetaApproved
 {
-    public function __construct(private BetaApplicationService $betaApplicationService)
-    {
-    }
+    public function __construct(private BetaApplicationService $betaApplicationService) {}
 
     public function handle(Request $request, Closure $next): Response
     {

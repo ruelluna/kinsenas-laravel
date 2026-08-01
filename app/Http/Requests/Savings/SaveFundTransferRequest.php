@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Savings;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class SaveFundTransferRequest extends FormRequest
 {

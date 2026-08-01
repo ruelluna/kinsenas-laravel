@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Team;
+use App\Models\User;
 use App\Services\Billing\SubscriptionService;
 use Closure;
 use Illuminate\Http\Request;
@@ -10,9 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureSubscribedOrTrialing
 {
-    public function __construct(private SubscriptionService $subscriptionService)
-    {
-    }
+    public function __construct(private SubscriptionService $subscriptionService) {}
 
     public function handle(Request $request, Closure $next): Response
     {
@@ -56,7 +55,7 @@ class EnsureSubscribedOrTrialing
             ]));
     }
 
-    private function resolveTeam(Request $request, \App\Models\User $user): ?Team
+    private function resolveTeam(Request $request, User $user): ?Team
     {
         $routeTeam = $request->route('current_team') ?? $request->route('team');
 

@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\Bank;
 use App\Models\FundSpend;
+use App\Models\FundTransfer;
 use App\Models\IncomePeriod;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlan;
@@ -108,9 +110,9 @@ it('subtracts confirmed transfers from remaining balance', function () {
     $user = User::factory()->create();
     $plan = setupLockedPlan($user, '50000.00');
     $everydayCategory = $plan->categories->firstWhere('name', 'Everyday Fund');
-    $bank = \App\Models\Bank::factory()->create(['team_id' => $user->currentTeam->id]);
+    $bank = Bank::factory()->create(['team_id' => $user->currentTeam->id]);
 
-    \App\Models\FundTransfer::factory()->confirmed()->create([
+    FundTransfer::factory()->confirmed()->create([
         'savings_plan_id' => $plan->id,
         'from_category_id' => $everydayCategory->id,
         'to_category_id' => $plan->categories->firstWhere('name', 'Empower Fund')->id,
@@ -133,7 +135,7 @@ it('includes assigned categories in bank balance breakdown before any activity',
     $plan = setupLockedPlan($user, '50000.00');
     $everydayCategory = $plan->categories->firstWhere('name', 'Everyday Fund');
     $empowerCategory = $plan->categories->firstWhere('name', 'Empower Fund');
-    $bank = \App\Models\Bank::factory()->create(['team_id' => $user->currentTeam->id]);
+    $bank = Bank::factory()->create(['team_id' => $user->currentTeam->id]);
 
     $everydayCategory->update(['bank_id' => $bank->id]);
     $empowerCategory->update(['bank_id' => $bank->id]);

@@ -3,7 +3,6 @@
 namespace App\Services\Vault;
 
 use App\Models\Team;
-use App\Models\TeamVault;
 use App\Models\User;
 use Illuminate\Support\Facades\Session;
 
@@ -13,9 +12,7 @@ class VaultKeyManager
 
     public const string SESSION_TEAM_DEK_PREFIX = 'vault.team_dek.';
 
-    public function __construct(private FinancialEncryptionService $encryption)
-    {
-    }
+    public function __construct(private FinancialEncryptionService $encryption) {}
 
     public function storeUserDek(string $dek): void
     {

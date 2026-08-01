@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Marketing\SurveyResponseController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Marketing\SurveyResponseController;
 use App\Http\Controllers\Teams\TeamInvitationController;
 use App\Http\Controllers\Vault\VaultUnlockController;
 use App\Http\Middleware\EnsureTeamMembership;

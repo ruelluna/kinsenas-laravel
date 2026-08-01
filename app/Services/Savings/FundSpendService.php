@@ -8,12 +8,11 @@ use App\Models\SavingsPlan;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class FundSpendService
 {
-    public function __construct(private FundBalanceService $balanceService)
-    {
-    }
+    public function __construct(private FundBalanceService $balanceService) {}
 
     public function create(
         SavingsPlan $plan,
@@ -59,7 +58,7 @@ class FundSpendService
         $amount = $spend->amount_encrypted;
 
         if ($amount === null) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'amount' => __('Unlock your vault to confirm spending.'),
             ]);
         }

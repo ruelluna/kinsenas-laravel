@@ -3,6 +3,7 @@
 use App\Enums\SubscriptionStatus;
 use App\Enums\TeamRole;
 use App\Models\Team;
+use App\Models\TeamInvitation;
 use App\Models\User;
 use Database\Seeders\BillingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -40,7 +41,7 @@ it('registration screen includes team invitation context', function () {
     $team = Team::factory()->create(['name' => 'Laravel Team']);
     $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
 
-    $invitation = \App\Models\TeamInvitation::factory()->create([
+    $invitation = TeamInvitation::factory()->create([
         'team_id' => $team->id,
         'email' => 'invited@example.com',
         'invited_by' => $owner->id,

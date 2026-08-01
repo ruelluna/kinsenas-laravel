@@ -2,53 +2,35 @@
 
 namespace App\Providers;
 
-/* @chisel-registration */
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UnlockUserVault;
-use App\Http\Responses\LoginResponse;
-/* @chisel-passkeys */
-use App\Http\Responses\PasskeyLoginResponse;
-/* @end-chisel-passkeys */
-/* @chisel-registration */
-use App\Http\Responses\RegisterResponse;
-/* @end-chisel-registration */
-/* @chisel-2fa */
-use App\Http\Responses\TwoFactorLoginResponse;
-/* @end-chisel-2fa */
-/* @chisel-email-verification */
-use App\Http\Responses\VerifyEmailResponse;
-/* @end-chisel-email-verification */
 use App\Enums\BillingMode;
+use App\Http\Responses\LoginResponse;
+use App\Http\Responses\PasskeyLoginResponse;
+use App\Http\Responses\RegisterResponse;
+use App\Http\Responses\TwoFactorLoginResponse;
+use App\Http\Responses\VerifyEmailResponse;
 use App\Models\TeamInvitation;
 use App\Services\Billing\BillingPlanPresenter;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Laravel\Fortify\Actions\AttemptToAuthenticate;
-/* @chisel-registration */
 use Laravel\Fortify\Actions\CanonicalizeUsername;
-/* @end-chisel-registration */
-/* @chisel-2fa */
 use Laravel\Fortify\Actions\PrepareAuthenticatedSession;
-/* @end-chisel-2fa */
-/* @chisel-email-verification */
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
-/* @end-chisel-email-verification */
 use Laravel\Fortify\Contracts\RedirectsIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
 use Laravel\Fortify\Contracts\TwoFactorLoginResponse as TwoFactorLoginResponseContract;
 use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
-/* @chisel-passkeys */
 use Laravel\Passkeys\Contracts\PasskeyLoginResponse as PasskeyLoginResponseContract;
-
-/* @end-chisel-passkeys */
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -58,18 +40,10 @@ class FortifyServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(LoginResponseContract::class, LoginResponse::class);
-        /* @chisel-passkeys */
         $this->app->singleton(PasskeyLoginResponseContract::class, PasskeyLoginResponse::class);
-        /* @end-chisel-passkeys */
-        /* @chisel-registration */
         $this->app->singleton(RegisterResponseContract::class, RegisterResponse::class);
-        /* @end-chisel-registration */
-        /* @chisel-2fa */
         $this->app->singleton(TwoFactorLoginResponseContract::class, TwoFactorLoginResponse::class);
-        /* @end-chisel-2fa */
-        /* @chisel-email-verification */
         $this->app->singleton(VerifyEmailResponseContract::class, VerifyEmailResponse::class);
-        /* @end-chisel-email-verification */
     }
 
     /**
@@ -88,9 +62,7 @@ class FortifyServiceProvider extends ServiceProvider
     private function configureActions(): void
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
-        /* @chisel-registration */
         Fortify::createUsersUsing(CreateNewUser::class);
-        /* @end-chisel-registration */
 
         Fortify::loginThrough(function (Request $request) {
             return array_filter([
@@ -123,28 +95,20 @@ class FortifyServiceProvider extends ServiceProvider
             'status' => $request->session()->get('status'),
         ]));
 
-        /* @chisel-email-verification */
         Fortify::verifyEmailView(fn (Request $request) => Inertia::render('auth/verify-email', [
             'status' => $request->session()->get('status'),
         ]));
-        /* @end-chisel-email-verification */
 
-        /* @chisel-registration */
         Fortify::registerView(fn (Request $request) => Inertia::render('auth/register', [
             'passwordRules' => Password::defaults()->toPasswordRulesString(),
             'teamInvitation' => $this->teamInvitation($request),
             'trialOffer' => BillingMode::isOpenBeta() ? null : app(BillingPlanPresenter::class)->trialOffer(),
             'openBetaOffer' => app(BillingPlanPresenter::class)->openBetaOffer(),
         ]));
-        /* @end-chisel-registration */
 
-        /* @chisel-2fa */
         Fortify::twoFactorChallengeView(fn () => Inertia::render('auth/two-factor-challenge'));
-        /* @end-chisel-2fa */
 
-        /* @chisel-password-confirmation */
         Fortify::confirmPasswordView(fn () => Inertia::render('auth/confirm-password'));
-        /* @end-chisel-password-confirmation */
     }
 
     /**
@@ -152,11 +116,9 @@ class FortifyServiceProvider extends ServiceProvider
      */
     private function configureRateLimiting(): void
     {
-        /* @chisel-2fa */
         RateLimiter::for('two-factor', function (Request $request) {
             return Limit::perMinute(5)->by($request->session()->get('login.id'));
         });
-        /* @end-chisel-2fa */
 
         RateLimiter::for('login', function (Request $request) {
             $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
@@ -164,7 +126,6 @@ class FortifyServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($throttleKey);
         });
 
-        /* @chisel-passkeys */
         RateLimiter::for('passkeys', function (Request $request) {
             $credentialId = $request->input('credential.id');
 
@@ -172,7 +133,6 @@ class FortifyServiceProvider extends ServiceProvider
                 ($credentialId ?: $request->session()->getId()).'|'.$request->ip(),
             );
         });
-        /* @end-chisel-passkeys */
     }
 
     /**

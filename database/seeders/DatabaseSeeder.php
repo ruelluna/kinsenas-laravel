@@ -4,13 +4,13 @@ namespace Database\Seeders;
 
 use App\Models\SavingsFormulaTemplate;
 use App\Models\User;
-use App\Services\Billing\SubscriptionService;
 use App\Services\Savings\SavingsPlanService;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use \Illuminate\Database\Console\Seeds\WithoutModelEvents;
+    use WithoutModelEvents;
 
     public function run(): void
     {

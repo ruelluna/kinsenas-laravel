@@ -16,8 +16,7 @@ class SavingsReportController extends Controller
     public function __construct(
         private SavingsPlanService $planService,
         private FundBalanceService $fundBalanceService,
-    ) {
-    }
+    ) {}
 
     public function __invoke(Request $request, Team $current_team): Response
     {

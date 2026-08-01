@@ -18,9 +18,7 @@ use Inertia\Response;
 
 class AdminPaymentSubmissionController extends Controller
 {
-    public function __construct(private SubscriptionService $subscriptionService)
-    {
-    }
+    public function __construct(private SubscriptionService $subscriptionService) {}
 
     public function index(Request $request): Response
     {

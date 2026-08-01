@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\TeamPermission;
 use App\Models\SavingsPlan;
 use App\Models\Team;
 use App\Models\User;
@@ -31,6 +32,6 @@ class SavingsPlanPolicy
             return true;
         }
 
-        return $plan->is_shared_with_team && $user->hasTeamPermission($team, \App\Enums\TeamPermission::TeamUpdate);
+        return $plan->is_shared_with_team && $user->hasTeamPermission($team, TeamPermission::TeamUpdate);
     }
 }

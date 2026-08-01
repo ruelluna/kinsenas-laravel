@@ -1,7 +1,6 @@
 <?php
 
 use App\Actions\Teams\CreateTeam;
-use App\Enums\BetaApplicationStatus;
 use App\Enums\SubscriptionStatus;
 use App\Enums\TeamRole;
 use App\Models\Team;

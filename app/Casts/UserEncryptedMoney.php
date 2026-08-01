@@ -6,7 +6,6 @@ use App\Services\Vault\FinancialEncryptionService;
 use App\Services\Vault\VaultKeyManager;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;
-use RuntimeException;
 
 /**
  * @implements CastsAttributes<string|null, string|null>
@@ -15,8 +14,7 @@ class UserEncryptedMoney implements CastsAttributes
 {
     public function __construct(
         private ?bool $useTeamVault = null,
-    ) {
-    }
+    ) {}
 
     public function get(Model $model, string $key, mixed $value, array $attributes): ?string
     {

@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use App\Enums\BetaApplicationStatus;
 use App\Concerns\HasTeams;
+use App\Enums\BetaApplicationStatus;
+use App\Services\Billing\BetaApplicationService;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -65,9 +66,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
             'beta_application_status' => BetaApplicationStatus::class,
             'beta_approved_at' => 'datetime',
             'beta_launch_discount_eligible' => 'boolean',
-            /* @chisel-2fa */
             'two_factor_confirmed_at' => 'datetime',
-            /* @end-chisel-2fa */
         ];
     }
 
@@ -102,6 +101,6 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 
     public function hasApprovedBetaAccess(): bool
     {
-        return app(\App\Services\Billing\BetaApplicationService::class)->hasAppAccess($this);
+        return app(BetaApplicationService::class)->hasAppAccess($this);
     }
 }
