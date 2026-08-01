@@ -112,40 +112,51 @@ export default function Dashboard({
                     </>
                 )}
 
-                {setup.hasPlan && (
+                {(setup.hasPlan || !setup.hasBank) && (
                     <section className="flex flex-wrap gap-2">
-                        <Button variant="outline" size="sm" asChild>
-                            <Link href={quickLinks.income}>Add income</Link>
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            asChild={setup.hasLockedIncome}
-                            disabled={!setup.hasLockedIncome}
-                        >
-                            {setup.hasLockedIncome ? (
-                                <Link href={quickLinks.spending}>Add spending</Link>
-                            ) : (
-                                <span>Add spending</span>
-                            )}
-                        </Button>
-                        {features.transfers && (
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                asChild={setup.hasLockedIncome}
-                                disabled={!setup.hasLockedIncome}
-                            >
-                                {setup.hasLockedIncome ? (
-                                    <Link href={quickLinks.transfers}>Transfer funds</Link>
-                                ) : (
-                                    <span>Transfer funds</span>
-                                )}
+                        {!setup.hasBank && (
+                            <Button variant="outline" size="sm" asChild data-tour="add-bank">
+                                <Link href={quickLinks.banks}>Add bank</Link>
                             </Button>
                         )}
-                        <Button variant="outline" size="sm" asChild>
-                            <Link href={quickLinks.banks}>Add bank</Link>
-                        </Button>
+                        {setup.hasPlan && (
+                            <>
+                                <Button variant="outline" size="sm" asChild>
+                                    <Link href={quickLinks.income}>Add income</Link>
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    asChild={setup.hasLockedIncome}
+                                    disabled={!setup.hasLockedIncome}
+                                >
+                                    {setup.hasLockedIncome ? (
+                                        <Link href={quickLinks.spending}>Add spending</Link>
+                                    ) : (
+                                        <span>Add spending</span>
+                                    )}
+                                </Button>
+                                {features.transfers && (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        asChild={setup.hasLockedIncome}
+                                        disabled={!setup.hasLockedIncome}
+                                    >
+                                        {setup.hasLockedIncome ? (
+                                            <Link href={quickLinks.transfers}>Transfer funds</Link>
+                                        ) : (
+                                            <span>Transfer funds</span>
+                                        )}
+                                    </Button>
+                                )}
+                                {setup.hasBank && (
+                                    <Button variant="outline" size="sm" asChild>
+                                        <Link href={quickLinks.banks}>Add bank</Link>
+                                    </Button>
+                                )}
+                            </>
+                        )}
                     </section>
                 )}
             </div>

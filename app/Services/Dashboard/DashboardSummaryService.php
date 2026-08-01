@@ -59,6 +59,12 @@ class DashboardSummaryService
 
         $steps = [
             [
+                'key' => 'bank',
+                'label' => 'Add your banks',
+                'complete' => $hasBank,
+                'href' => "{$savingsBase}/banks",
+            ],
+            [
                 'key' => 'plan',
                 'label' => 'Choose a savings plan',
                 'complete' => $hasPlan,
@@ -75,12 +81,6 @@ class DashboardSummaryService
                 'label' => 'Lock income',
                 'complete' => $hasLockedIncome,
                 'href' => $lockIncomeHref,
-            ],
-            [
-                'key' => 'bank',
-                'label' => 'Add a bank',
-                'complete' => $hasBank,
-                'href' => "{$savingsBase}/banks",
             ],
             [
                 'key' => 'spending',

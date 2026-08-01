@@ -102,6 +102,43 @@ it('allows user to create savings plan from template', function () {
     $this->assertDatabaseCount('savings_categories', 7);
 });
 
+it('plan chooser includes empty team banks for banks-first soft gate', function () {
+    $user = User::factory()->create();
+    test()->unlockVaultFor($user);
+
+    $response = $this->actingAs($user)->get(route('savings.plan.show', [
+        'current_team' => $user->currentTeam->slug,
+    ]));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('savings/plan')
+        ->where('plan', null)
+        ->has('teamBanks', 0),
+    );
+});
+
+it('plan chooser includes team banks after banks are added', function () {
+    $user = User::factory()->create();
+    test()->unlockVaultFor($user);
+
+    Bank::factory()->create([
+        'team_id' => $user->currentTeam->id,
+        'name' => 'BDO Checking',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('savings.plan.show', [
+        'current_team' => $user->currentTeam->slug,
+    ]));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('savings/plan')
+        ->has('teamBanks', 1)
+        ->where('teamBanks.0.name', 'BDO Checking'),
+    );
+});
+
 it('requires category percentages to total one hundred', function () {
     $user = User::factory()->create();
     test()->unlockVaultFor($user);

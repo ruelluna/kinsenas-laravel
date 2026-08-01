@@ -193,6 +193,7 @@ export default function SavingsPlanPage({ plan, templates, fundBalances, pageGui
                     templates={templates}
                     pageGuidance={pageGuidance}
                     teamSlug={teamSlug}
+                    hasBanks={teamBanks.length > 0}
                 />
             </>
         );

@@ -26,7 +26,7 @@ export default function SetupChecklist({ setup }: Props) {
                 <div>
                     <h2 className="font-medium">Get started</h2>
                     <p className="mt-1 text-sm text-muted-foreground">
-                        Complete these steps to track your savings plan.
+                        Start with your banks, then choose a plan and track income.
                     </p>
                 </div>
                 {nextStep && (

@@ -13,7 +13,7 @@ export default function CategoryBankSelect({ banks, selectedId, onChange, namePr
     if (banks.length === 0) {
         return (
             <p className="text-xs text-muted-foreground">
-                Add banks under Banks in the sidebar to assign an account to this fund.
+                Add banks under Banks in the sidebar first, then assign an account to this fund.
             </p>
         );
     }

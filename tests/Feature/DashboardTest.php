@@ -4,9 +4,6 @@ use App\Enums\TeamRole;
 use App\Models\Bank;
 use App\Models\FundSpend;
 use App\Models\FundTransfer;
-use App\Models\IncomePeriod;
-use App\Models\SavingsFormulaTemplate;
-use App\Models\SavingsPlan;
 use App\Models\Team;
 use App\Models\TeamInvitation;
 use App\Models\User;
@@ -28,39 +25,6 @@ beforeEach(function () {
 function dashboardRoute(User $user): string
 {
     return route('dashboard', ['current_team' => $user->currentTeam->slug]);
-}
-
-function createUserWithLockedIncome(string $amount = '50000.00'): array
-{
-    $user = User::factory()->create();
-    test()->unlockVaultFor($user);
-
-    $template = SavingsFormulaTemplate::query()->where('slug', 'abundant-formula')->firstOrFail();
-
-    test()->actingAs($user)->post(route('savings.plan.from-template', [
-        'current_team' => $user->currentTeam->slug,
-        'template' => $template->id,
-    ]));
-
-    test()->actingAs($user)->post(route('savings.income.store', [
-        'current_team' => $user->currentTeam->slug,
-    ]), [
-        'name' => 'January salary',
-        'amount' => $amount,
-        'period_start' => '2026-01-01',
-    ]);
-
-    $period = IncomePeriod::query()->firstOrFail();
-
-    test()->actingAs($user)->post(route('savings.income.lock', [
-        'current_team' => $user->currentTeam->slug,
-        'incomePeriod' => $period->id,
-    ]));
-
-    $plan = SavingsPlan::query()->firstOrFail();
-    $everydayCategory = $plan->categories()->where('name', 'Everyday Fund')->firstOrFail();
-
-    return [$user, $plan, $everydayCategory, $period];
 }
 
 it('guests are redirected to the login page', function () {
@@ -210,8 +174,9 @@ it('dashboard setup shows incomplete steps for a new team without a plan', funct
         ->where('setup.hasPlan', false)
         ->where('setup.complete', false)
         ->has('setup.steps', 5)
-        ->where('setup.steps.0.key', 'plan')
+        ->where('setup.steps.0.key', 'bank')
         ->where('setup.steps.0.complete', false)
+        ->where('setup.steps.1.key', 'plan')
         ->where('plan', null)
         ->has('fundBalances', 0),
     );
@@ -291,6 +256,7 @@ it('dashboard setup marks bank step complete when team has a bank', function () 
     $response->assertInertia(fn (Assert $page) => $page
         ->component('dashboard')
         ->where('setup.hasBank', true)
-        ->where('setup.steps.3.complete', true),
+        ->where('setup.steps.0.key', 'bank')
+        ->where('setup.steps.0.complete', true),
     );
 });

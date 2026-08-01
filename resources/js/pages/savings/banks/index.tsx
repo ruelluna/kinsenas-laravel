@@ -1,9 +1,10 @@
-import { Head } from '@inertiajs/react';
-import { Plus } from 'lucide-react';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { Info, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import Heading from '@/components/heading';
 import AddBankModal from '@/components/savings/add-bank-modal';
 import { BankLogo } from '@/components/savings/bank-select';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { formatBankOptionLabel } from '@/lib/format-bank-label';
 import { formatMoney } from '@/lib/format-money';
@@ -24,6 +25,8 @@ type BankGroup = {
 };
 
 export default function BanksIndex({ banks, institutions, bankBalances }: Props) {
+    const { currentTeam } = usePage<SharedData>().props;
+    const teamSlug = currentTeam?.slug ?? '';
     const [addModalOpen, setAddModalOpen] = useState(false);
 
     const balanceForBank = (bankId: string) => bankBalances.find((balance) => balance.bankId === bankId);
@@ -97,16 +100,39 @@ export default function BanksIndex({ banks, institutions, bankBalances }: Props)
     return (
         <>
             <Head title="Banks" />
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-4">
                 <Heading
                     variant="small"
                     title="Banks"
-                    description="Accounts where you transfer savings. Balances show each assigned fund's remaining allocation."
+                    description="Add every bank account you use so you can see which funds live where. These are references only — Kinsenas does not move money. You still transfer in your real banking apps so balances stay in sync."
                 />
-                <Button onClick={() => setAddModalOpen(true)}>
+                <Button onClick={() => setAddModalOpen(true)} data-tour="add-bank">
                     <Plus /> Add bank
                 </Button>
             </div>
+
+            <Alert variant="info" className="mt-6" data-tour="banks-intro">
+                <Info />
+                <AlertTitle>Start with your banks</AlertTitle>
+                <AlertDescription>
+                    List all the banks (and GoSave spaces) you use here first. When you pick a savings
+                    plan, you&apos;ll assign each fund to one of these accounts. This is your map of
+                    where money should go — you still make the transfers yourself.
+                    {banks.length > 0 && teamSlug !== '' && (
+                        <>
+                            {' '}
+                            Next:{' '}
+                            <Link
+                                href={`/${teamSlug}/savings/plan`}
+                                className="font-medium text-foreground underline-offset-4 hover:underline"
+                            >
+                                Choose a savings plan
+                            </Link>
+                            .
+                        </>
+                    )}
+                </AlertDescription>
+            </Alert>
 
             <AddBankModal
                 open={addModalOpen}
@@ -116,7 +142,20 @@ export default function BanksIndex({ banks, institutions, bankBalances }: Props)
 
             <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {banks.length === 0 ? (
-                    <li className="col-span-full text-sm text-muted-foreground">No banks added yet.</li>
+                    <li className="col-span-full rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
+                        <p className="font-medium text-foreground">No banks added yet</p>
+                        <p className="mt-2">
+                            Start here before you pick a savings plan. Add all the banks (and GoSave
+                            spaces) you use, then assign funds to those accounts on your plan.
+                        </p>
+                        <p className="mt-2">
+                            Reminder: this is your map of where money <em>should</em> go — you still
+                            make the transfers yourself.
+                        </p>
+                        <Button className="mt-4" onClick={() => setAddModalOpen(true)}>
+                            <Plus /> Add your first bank
+                        </Button>
+                    </li>
                 ) : (
                     bankGroups.map((group) => {
                         if (group.banks.length === 1 && !group.banks[0].bankAccountGroupId) {
