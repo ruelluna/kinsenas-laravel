@@ -7,7 +7,7 @@ alwaysApply: true
 
 When executing an approved plan (or a plan attached to the conversation), follow this order **before** marking work complete.
 
-**Before implementation:** plans must follow [feature-planning.mdc](./feature-planning.mdc) — seeders, factories, tests, permissions, and adjacent UI should already be listed in the plan todos.
+**Before implementation:** plans must follow [feature-planning.mdc](./feature-planning.mdc) — seeders, factories, tests, permissions, and adjacent UI should already be listed in the plan todos. Major plans live in `.cursor/plans/` per [feature-plans.mdc](./feature-plans.mdc) (`YYYYMMDD-HHMM-<task-slug>-plan.md`).
 
 ## When this rule applies
 

@@ -1,0 +1,111 @@
+---
+description: Where and how to save major feature plans — .cursor/plans with dated filenames matching breakdown convention
+alwaysApply: true
+---
+
+# Feature plans (Kinsenas)
+
+Major feature plans live in **`.cursor/plans/`** in the repo — tracked in git for handoff, same as breakdowns.
+
+Plans are **internal engineering artifacts**. Do not link to `.cursor/plans/` from `docs/admin/` or `docs/members/`.
+
+## When to create a plan file
+
+Create a dated plan in `.cursor/plans/` for:
+
+- New features or multi-file rollouts (before implementation)
+- Feature roadmaps and tiered backlogs
+- Bug fixes that change behavior across layers (migrations, auth, UI)
+- Approved work that will later get a breakdown in `.cursor/breakdowns/`
+
+**Skip a plan file** for lightweight work (copy/styling, single-file tweak, cursor rules only) — use implementation summary only per [plan-implementation.mdc](./plan-implementation.mdc).
+
+## File location and naming
+
+Save to `.cursor/plans/` using this exact pattern (mirrors breakdowns, different suffix):
+
+```
+YYYYMMDD-HHMM-<task-slug>-plan.md
+```
+
+| Part | Rule |
+|------|------|
+| `YYYYMMDD` | Local date when the plan is **written** |
+| `HHMM` | Local 24-hour time (no colon), e.g. `2112` |
+| `<task-slug>` | Short kebab-case label (e.g. `tier-1-improve-existing`, `teams-admin`) |
+| Suffix | Always `-plan.md` |
+
+Sort the folder by filename to see the **latest plan first** (newest date/time at top when listed descending).
+
+### Examples
+
+```
+.cursor/plans/20260801-2112-feature-roadmap-overview-plan.md
+.cursor/plans/20260801-2112-tier-1-improve-existing-plan.md
+.cursor/plans/20260815-0930-recurring-obligations-plan.md
+```
+
+Compare with breakdowns:
+
+```
+.cursor/breakdowns/20260801-0930-disable-email-verification-breakdown.md
+```
+
+Same date/time prefix → easy to match a plan to its implementation breakdown.
+
+## Plan content
+
+Follow [feature-planning.mdc](./feature-planning.mdc) for the impact checklist. Every major plan should include, when applicable:
+
+1. Problem / target model
+2. Data model & migration
+3. Backend — services, requests, policies, props
+4. Frontend — types, components, pages
+5. Seeders & factories
+6. Role / permission / subscription gates
+7. Tests — files to update + suggested commands (do not run unless asked)
+8. Out of scope
+
+Use YAML frontmatter when helpful:
+
+```yaml
+---
+name: Short plan title
+overview: One-line summary
+todos:
+  - id: slug
+    content: Actionable todo
+    status: pending
+isProject: true
+---
+```
+
+## Creating and updating plans
+
+| Rule | Detail |
+|------|--------|
+| **Create** | New topic → new dated file (do not reuse an old timestamp for a different topic) |
+| **Update same topic later** | Append a dated changelog section to the **latest** plan for that `<task-slug>`, or create a new dated plan if scope changed significantly |
+| **Multi-tier / roadmap** | One overview plan + one plan per tier or phase, each with its own timestamp |
+| **Cross-links** | Link sibling plans with relative paths: `[Tier 1](./20260801-2112-tier-1-improve-existing-plan.md)` |
+
+## Relationship to breakdowns
+
+| Artifact | When | Path pattern |
+|----------|------|--------------|
+| **Plan** | Before / during design | `.cursor/plans/YYYYMMDD-HHMM-<slug>-plan.md` |
+| **Breakdown** | After implementation ships | `.cursor/breakdowns/YYYYMMDD-HHMM-<slug>-breakdown.md` |
+
+Use the same `<task-slug>` when a plan becomes an implementation (e.g. `tier-1-improve-existing`) so pairs are easy to find.
+
+## Agents must not commit unless asked
+
+Creating or editing plans does **not** imply permission to `git commit`. Suggest commit messages only when the user asks.
+
+Suggested commit when plans are added/renamed:
+
+```
+Summary: Add dated feature plan(s) for <topic>
+
+<body — what the plan covers and suggested phase order>
+```

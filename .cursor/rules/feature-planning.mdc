@@ -7,6 +7,8 @@ alwaysApply: true
 
 When creating or updating a **plan** (before implementation), do not stop at the primary feature file. Scan the application for **affected surfaces** and include them as explicit plan sections or todos.
 
+Save major feature plans to `.cursor/plans/` using the dated naming in [feature-plans.mdc](./feature-plans.mdc): `YYYYMMDD-HHMM-<task-slug>-plan.md`.
+
 ## Required impact checklist
 
 For every feature plan, walk through this list. Mark **N/A** only when genuinely not applicable — do not skip silently.
