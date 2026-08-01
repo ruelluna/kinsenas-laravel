@@ -23,12 +23,12 @@ export default function AdminSubscribersIndex({ subscribers, filters, statusOpti
     return (
         <>
             <Head title="Admin — Subscribers" />
-            <Heading variant="small" title="Subscribers" description="Search and manage subscription lifecycle." />
+            <Heading variant="small" title="Subscribers" description="Search and manage team subscription lifecycle." />
 
             <Form method="get" action="/admin/subscribers" className="mt-6 flex flex-wrap gap-3">
                 <div className="grid gap-2">
                     <Label htmlFor="search">Search</Label>
-                    <Input id="search" name="search" defaultValue={filters.search ?? ''} placeholder="Name or email" />
+                    <Input id="search" name="search" defaultValue={filters.search ?? ''} placeholder="Team name or slug" />
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="status">Status</Label>
@@ -58,17 +58,21 @@ export default function AdminSubscribersIndex({ subscribers, filters, statusOpti
                         <div className="flex flex-wrap items-start justify-between gap-3">
                             <div>
                                 <p className="font-medium">{subscriber.name}</p>
-                                <p className="text-muted-foreground">{subscriber.email}</p>
+                                <p className="text-muted-foreground">
+                                    {subscriber.ownerName ?? '—'}
+                                    {subscriber.ownerEmail ? ` · ${subscriber.ownerEmail}` : ''}
+                                </p>
                                 <p className="mt-1 text-muted-foreground">
                                     {subscriber.subscription?.statusLabel ?? 'No subscription'}
                                     {subscriber.subscription?.planName
                                         ? ` · ${subscriber.subscription.planName}`
                                         : ''}
                                     {subscriber.subscription?.hasAccess ? ' · Access granted' : ' · No access'}
+                                    {subscriber.isPersonal ? ' · Personal workspace' : ''}
                                 </p>
                             </div>
                             <Button variant="outline" size="sm" asChild>
-                                <Link href={`/admin/subscribers/${subscriber.id}`}>Manage</Link>
+                                <Link href={`/admin/subscribers/${subscriber.slug}`}>Manage</Link>
                             </Button>
                         </div>
                     </div>

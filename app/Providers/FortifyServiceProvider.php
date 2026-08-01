@@ -19,9 +19,12 @@ use App\Http\Responses\TwoFactorLoginResponse;
 /* @chisel-email-verification */
 use App\Http\Responses\VerifyEmailResponse;
 /* @end-chisel-email-verification */
+use App\Enums\BillingMode;
 use App\Models\TeamInvitation;
+use App\Services\Billing\BillingPlanPresenter;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -128,7 +131,10 @@ class FortifyServiceProvider extends ServiceProvider
 
         /* @chisel-registration */
         Fortify::registerView(fn (Request $request) => Inertia::render('auth/register', [
+            'passwordRules' => Password::defaults()->toPasswordRulesString(),
             'teamInvitation' => $this->teamInvitation($request),
+            'trialOffer' => BillingMode::isOpenBeta() ? null : app(BillingPlanPresenter::class)->trialOffer(),
+            'openBetaOffer' => app(BillingPlanPresenter::class)->openBetaOffer(),
         ]));
         /* @end-chisel-registration */
 

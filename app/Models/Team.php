@@ -116,6 +116,16 @@ class Team extends Model
         return $this->hasMany(Recipient::class);
     }
 
+    public function subscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class);
+    }
+
+    public function paymentSubmissions(): HasMany
+    {
+        return $this->hasMany(PaymentSubmission::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *

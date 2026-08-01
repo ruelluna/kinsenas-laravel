@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\BetaApplicationStatus;
 use App\Concerns\HasTeams;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Collection;
@@ -30,6 +31,11 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string|null $remember_token
  * @property int|null $current_team_id
  * @property bool $is_platform_admin
+ * @property Carbon|null $beta_enrolled_at
+ * @property BetaApplicationStatus|null $beta_application_status
+ * @property Carbon|null $beta_approved_at
+ * @property int|null $beta_approved_by
+ * @property bool $beta_launch_discount_eligible
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Team|null $currentTeam
@@ -37,9 +43,9 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property-read Collection<int, Membership> $teamMemberships
  * @property-read Collection<int, Team> $teams
  */
-#[Fillable(['name', 'email', 'password', 'current_team_id', 'is_platform_admin'])]
+#[Fillable(['name', 'email', 'password', 'current_team_id', 'is_platform_admin', 'beta_enrolled_at', 'beta_application_status', 'beta_approved_at', 'beta_approved_by', 'beta_launch_discount_eligible'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
-class User extends Authenticatable implements PasskeyUser
+class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasTeams, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
@@ -55,6 +61,10 @@ class User extends Authenticatable implements PasskeyUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_platform_admin' => 'boolean',
+            'beta_enrolled_at' => 'datetime',
+            'beta_application_status' => BetaApplicationStatus::class,
+            'beta_approved_at' => 'datetime',
+            'beta_launch_discount_eligible' => 'boolean',
             /* @chisel-2fa */
             'two_factor_confirmed_at' => 'datetime',
             /* @end-chisel-2fa */
@@ -66,18 +76,32 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasOne(UserVault::class);
     }
 
-    public function subscription(): HasOne
-    {
-        return $this->hasOne(Subscription::class);
-    }
-
     public function paymentSubmissions(): HasMany
     {
         return $this->hasMany(PaymentSubmission::class);
     }
 
+    public function betaFeedbacks(): HasMany
+    {
+        return $this->hasMany(BetaFeedback::class);
+    }
+
+    public function canManageBilling(Team $team): bool
+    {
+        if ($this->isPlatformAdmin()) {
+            return true;
+        }
+
+        return $this->ownsTeam($team);
+    }
+
     public function isPlatformAdmin(): bool
     {
         return (bool) $this->is_platform_admin;
+    }
+
+    public function hasApprovedBetaAccess(): bool
+    {
+        return app(\App\Services\Billing\BetaApplicationService::class)->hasAppAccess($this);
     }
 }

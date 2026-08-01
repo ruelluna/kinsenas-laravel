@@ -15,7 +15,7 @@ class Subscription extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'user_id',
+        'team_id',
         'plan_id',
         'status',
         'trial_ends_at',
@@ -31,9 +31,9 @@ class Subscription extends Model
         ];
     }
 
-    public function user(): BelongsTo
+    public function team(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Team::class);
     }
 
     public function plan(): BelongsTo

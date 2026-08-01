@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'subscribed' => EnsureSubscribedOrTrialing::class,
             'subscribed.feature' => EnsureSubscriptionFeature::class,
             'platform.admin' => EnsurePlatformAdmin::class,
+            'beta.approved' => \App\Http\Middleware\EnsureBetaApproved::class,
         ]);
 
         $middleware->web(append: [

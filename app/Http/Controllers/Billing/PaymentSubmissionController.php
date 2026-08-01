@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Billing;
 
+use App\Enums\BillingMode;
+use App\Enums\PaymentSubmissionStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Billing\SubmitPaymentRequest;
-use App\Enums\PaymentSubmissionStatus;
 use App\Models\PaymentSubmission;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,8 +14,13 @@ use Inertia\Response;
 
 class PaymentSubmissionController extends Controller
 {
-    public function create(Request $request): Response
+    public function create(Request $request): Response|RedirectResponse
     {
+        if (BillingMode::isOpenBeta()) {
+            return to_route('settings.billing')
+                ->with('error', __('Payments are not accepted during the open beta.'));
+        }
+
         return Inertia::render('billing/pay', [
             'planPriceId' => $request->query('plan_price_id'),
         ]);
@@ -22,21 +28,34 @@ class PaymentSubmissionController extends Controller
 
     public function store(SubmitPaymentRequest $request): RedirectResponse
     {
+        if (BillingMode::isOpenBeta()) {
+            return to_route('settings.billing')
+                ->with('error', __('Payments are not accepted during the open beta.'));
+        }
+
+        $user = $request->user();
+        $team = $user->currentTeam;
+
+        abort_if($team === null, 404);
+
+        $this->authorize('manageBilling', $team);
+
         $hasPending = PaymentSubmission::query()
-            ->where('user_id', $request->user()->id)
+            ->where('team_id', $team->id)
             ->where('status', PaymentSubmissionStatus::Pending)
             ->exists();
 
         if ($hasPending) {
             return back()->withErrors([
-                'reference_number' => __('You already have a pending payment submission.'),
+                'reference_number' => __('This team already has a pending payment submission.'),
             ]);
         }
 
         $path = $request->file('proof_image')?->store('payment-proofs', 'public');
 
         PaymentSubmission::query()->create([
-            'user_id' => $request->user()->id,
+            'user_id' => $user->id,
+            'team_id' => $team->id,
             'plan_price_id' => $request->validated('plan_price_id'),
             'reference_number' => $request->validated('reference_number'),
             'proof_image_path' => $path,

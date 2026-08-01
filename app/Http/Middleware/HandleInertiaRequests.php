@@ -2,6 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\SubscriptionStatus;
+use App\Models\Team;
+use App\Services\Billing\BetaApplicationService;
+use App\Services\Billing\SubscriptionService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -36,10 +40,14 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
+        $subscriptionService = app(SubscriptionService::class);
+        $betaApplicationService = app(BetaApplicationService::class);
 
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'billingMode' => config('billing.mode'),
+            'openBeta' => fn () => $betaApplicationService->sharedProps($user),
             'auth' => [
                 'user' => $user ? [
                     ...$user->toArray(),
@@ -50,11 +58,49 @@ class HandleInertiaRequests extends Middleware
             'currentTeam' => fn () => $user?->currentTeam ? $user->toUserTeam($user->currentTeam) : null,
             'teams' => fn () => $user?->toUserTeams(includeCurrent: true) ?? [],
             'vaultLocked' => fn () => $user !== null && $user->vault !== null && ! session()->has(\App\Services\Vault\VaultKeyManager::SESSION_USER_DEK),
-            'subscription' => fn () => $user?->subscription ? [
-                'status' => $user->subscription->status->value,
-                'trialEndsAt' => $user->subscription->trial_ends_at?->toISOString(),
-            ] : null,
+            'subscription' => fn () => $this->sharedSubscription($user, $subscriptionService),
             'registrationRecoveryKey' => fn () => session('registration.recovery_key'),
+            'flash' => fn () => [
+                'error' => $request->session()->get('error'),
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function sharedSubscription(?\App\Models\User $user, SubscriptionService $subscriptionService): ?array
+    {
+        if ($user === null) {
+            return null;
+        }
+
+        $team = $user->currentTeam?->loadMissing('subscription.plan');
+
+        if ($team === null) {
+            return null;
+        }
+
+        $subscription = $team->subscription;
+        $daysRemaining = null;
+
+        if ($subscription !== null
+            && $subscription->status === SubscriptionStatus::Trialing
+            && $subscription->trial_ends_at !== null) {
+            $daysRemaining = max(0, (int) now()->diffInDays($subscription->trial_ends_at, false));
+        }
+
+        return [
+            'teamId' => $team->id,
+            'teamName' => $team->name,
+            'teamSlug' => $team->slug,
+            'isPersonalTeam' => $team->is_personal,
+            'canManageBilling' => $user->canManageBilling($team),
+            'status' => $subscription?->status->value,
+            'statusLabel' => $subscription?->status?->label(),
+            'trialEndsAt' => $subscription?->trial_ends_at?->toISOString(),
+            'hasAccess' => $subscriptionService->teamHasAccess($team),
+            'daysRemaining' => $daysRemaining,
         ];
     }
 }

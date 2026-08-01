@@ -27,7 +27,7 @@ class AdminPaymentSubmissionController extends Controller
         $status = $request->query('status', PaymentSubmissionStatus::Pending->value);
 
         $submissions = PaymentSubmission::query()
-            ->with(['user', 'planPrice.plan'])
+            ->with(['user', 'team', 'planPrice.plan'])
             ->when($status !== 'all', fn ($query) => $query->where('status', $status))
             ->latest()
             ->get();
@@ -75,7 +75,7 @@ class AdminPaymentSubmissionController extends Controller
         ]);
 
         $this->subscriptionService->activate(
-            $submission->user,
+            $submission->team,
             $submission->planPrice->interval ?? BillingInterval::Monthly,
         );
 

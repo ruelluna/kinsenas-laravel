@@ -1,8 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, FolderGit2, Landmark, LayoutGrid, PiggyBank, ArrowRightLeft, ShoppingBag, Users, Wallet } from 'lucide-react';
+import { BookOpen, CreditCard, Landmark, LayoutGrid, MessageSquare, PiggyBank, ArrowRightLeft, ShoppingBag, Users, Wallet } from 'lucide-react';
 import { AdminSidebarNav } from '@/components/admin/admin-sidebar-nav';
 import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { TeamSwitcher } from '@/components/team-switcher';
@@ -16,16 +15,27 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
-import type { NavItem } from '@/types';
+import type { NavItem, SharedData } from '@/types';
 
 export function AppSidebar() {
-    const page = usePage();
+    const page = usePage<SharedData>();
     const teamSlug = page.props.currentTeam?.slug;
-    const isPlatformAdmin = Boolean(
-        (page.props.auth as { user?: { isPlatformAdmin?: boolean } })?.user?.isPlatformAdmin,
-    );
+    const subscription = page.props.subscription;
+    const openBeta = page.props.openBeta;
+    const hasAccess = subscription?.hasAccess ?? true;
+    const isPlatformAdmin = Boolean(page.props.auth.user?.isPlatformAdmin);
     const dashboardUrl = teamSlug ? dashboard(teamSlug) : '/';
     const savingsBase = teamSlug ? `/${teamSlug}/savings` : '/';
+    const billingUrl = '/settings/billing';
+    const homeUrl = hasAccess ? dashboardUrl : billingUrl;
+
+    const billingNavItems: NavItem[] = [
+        {
+            title: 'Billing',
+            href: billingUrl,
+            icon: CreditCard,
+        },
+    ];
 
     const mainNavItems: NavItem[] = [
         {
@@ -68,14 +78,15 @@ export function AppSidebar() {
             href: `${savingsBase}/reports`,
             icon: BookOpen,
         },
-    ];
-
-    const footerNavItems: NavItem[] = [
-        {
-            title: 'Repository',
-            href: 'https://github.com/laravel/react-starter-kit',
-            icon: FolderGit2,
-        },
+        ...(openBeta.isActive && openBeta.isApproved
+            ? [
+                  {
+                      title: 'Feedback',
+                      href: '/settings/feedback',
+                      icon: MessageSquare,
+                  } satisfies NavItem,
+              ]
+            : []),
     ];
 
     return (
@@ -84,7 +95,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboardUrl} prefetch>
+                            <Link href={homeUrl} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -98,12 +109,11 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
-                {isPlatformAdmin && <AdminSidebarNav />}
+                <NavMain items={hasAccess ? mainNavItems : billingNavItems} />
+                {hasAccess && isPlatformAdmin && <AdminSidebarNav />}
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'ghl' => [
+        'enabled' => env('GHL_ENABLED', false),
+        'webhook_application_url' => env('GHL_WEBHOOK_APPLICATION_URL'),
+        'webhook_approved_url' => env('GHL_WEBHOOK_APPROVED_URL'),
+        'webhook_rejected_url' => env('GHL_WEBHOOK_REJECTED_URL'),
+    ],
+
 ];

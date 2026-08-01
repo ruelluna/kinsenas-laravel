@@ -19,6 +19,7 @@ beforeEach(function () {
 it('approves a pending payment submission and activates subscription', function () {
     $admin = User::factory()->create(['is_platform_admin' => true]);
     $member = User::factory()->create(['email' => 'member@example.com']);
+    $team = $member->personalTeam();
 
     $plan = SubscriptionPlan::query()->where('slug', 'basic')->firstOrFail();
     $price = SubscriptionPlanPrice::query()
@@ -28,6 +29,7 @@ it('approves a pending payment submission and activates subscription', function 
 
     $submission = PaymentSubmission::factory()->pending()->create([
         'user_id' => $member->id,
+        'team_id' => $team->id,
         'plan_price_id' => $price->id,
     ]);
 
@@ -36,12 +38,13 @@ it('approves a pending payment submission and activates subscription', function 
     $response->assertRedirect();
 
     expect($submission->fresh()->status)->toBe(PaymentSubmissionStatus::Approved)
-        ->and($member->subscription->fresh()->status)->toBe(SubscriptionStatus::Active);
+        ->and($team->subscription->fresh()->status)->toBe(SubscriptionStatus::Active);
 });
 
 it('rejects a pending payment submission with notes', function () {
     $admin = User::factory()->create(['is_platform_admin' => true]);
     $member = User::factory()->create(['email' => 'member@example.com']);
+    $team = $member->personalTeam();
 
     $plan = SubscriptionPlan::query()->where('slug', 'basic')->firstOrFail();
     $price = SubscriptionPlanPrice::query()
@@ -51,6 +54,7 @@ it('rejects a pending payment submission with notes', function () {
 
     $submission = PaymentSubmission::factory()->pending()->create([
         'user_id' => $member->id,
+        'team_id' => $team->id,
         'plan_price_id' => $price->id,
     ]);
 
@@ -68,6 +72,7 @@ it('rejects a pending payment submission with notes', function () {
 it('blocks approving a non-pending submission', function () {
     $admin = User::factory()->create(['is_platform_admin' => true]);
     $member = User::factory()->create(['email' => 'member@example.com']);
+    $team = $member->personalTeam();
 
     $plan = SubscriptionPlan::query()->where('slug', 'basic')->firstOrFail();
     $price = SubscriptionPlanPrice::query()
@@ -77,6 +82,7 @@ it('blocks approving a non-pending submission', function () {
 
     $submission = PaymentSubmission::factory()->approved()->create([
         'user_id' => $member->id,
+        'team_id' => $team->id,
         'plan_price_id' => $price->id,
     ]);
 
@@ -88,6 +94,7 @@ it('blocks approving a non-pending submission', function () {
 it('includes proof image url in payment submissions index props', function () {
     $admin = User::factory()->create(['is_platform_admin' => true]);
     $member = User::factory()->create(['email' => 'member@example.com']);
+    $team = $member->personalTeam();
 
     $plan = SubscriptionPlan::query()->where('slug', 'basic')->firstOrFail();
     $price = SubscriptionPlanPrice::query()
@@ -97,6 +104,7 @@ it('includes proof image url in payment submissions index props', function () {
 
     PaymentSubmission::factory()->pending()->create([
         'user_id' => $member->id,
+        'team_id' => $team->id,
         'plan_price_id' => $price->id,
         'proof_image_path' => 'payment-proofs/test.jpg',
     ]);
@@ -111,8 +119,9 @@ it('includes proof image url in payment submissions index props', function () {
         );
 });
 
-it('blocks member from submitting when a pending submission exists', function () {
+it('blocks owner from submitting when team has pending submission', function () {
     $member = User::factory()->create(['email' => 'member@example.com']);
+    $team = $member->personalTeam();
 
     $plan = SubscriptionPlan::query()->where('slug', 'basic')->firstOrFail();
     $price = SubscriptionPlanPrice::query()
@@ -122,6 +131,7 @@ it('blocks member from submitting when a pending submission exists', function ()
 
     PaymentSubmission::factory()->pending()->create([
         'user_id' => $member->id,
+        'team_id' => $team->id,
         'plan_price_id' => $price->id,
     ]);
 

@@ -19,7 +19,7 @@ class AdminPlatformUserController extends Controller
         $adminFilter = $request->query('admin');
 
         $users = User::query()
-            ->with(['subscription'])
+            ->with(['currentTeam.subscription'])
             ->when($search, function ($query, string $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
@@ -39,8 +39,8 @@ class AdminPlatformUserController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'isPlatformAdmin' => $user->isPlatformAdmin(),
-                'subscriptionStatus' => $user->subscription?->status->value,
-                'subscriptionStatusLabel' => $user->subscription?->status->label(),
+                'subscriptionStatus' => $user->currentTeam?->subscription?->status->value,
+                'subscriptionStatusLabel' => $user->currentTeam?->subscription?->status?->label(),
             ]),
             'filters' => [
                 'search' => $search,

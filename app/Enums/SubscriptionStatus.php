@@ -8,6 +8,7 @@ enum SubscriptionStatus: string
     case Active = 'active';
     case PastDue = 'past_due';
     case Cancelled = 'cancelled';
+    case OpenBeta = 'open_beta';
 
     public function label(): string
     {
@@ -16,13 +17,14 @@ enum SubscriptionStatus: string
             self::Active => 'Active',
             self::PastDue => 'Past Due',
             self::Cancelled => 'Cancelled',
+            self::OpenBeta => 'Open beta',
         };
     }
 
     public function allowsSavingsAccess(): bool
     {
         return match ($this) {
-            self::Trialing, self::Active => true,
+            self::Trialing, self::Active, self::OpenBeta => true,
             self::PastDue, self::Cancelled => false,
         };
     }

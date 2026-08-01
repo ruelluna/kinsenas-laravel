@@ -6,7 +6,7 @@ use App\Actions\Teams\CreateTeam;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\User;
-use App\Services\Billing\SubscriptionService;
+use App\Services\Billing\BetaApplicationService;
 use App\Services\Vault\FinancialEncryptionService;
 use App\Services\Vault\VaultKeyManager;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +21,7 @@ class CreateNewUser implements CreatesNewUsers
         private CreateTeam $createTeam,
         private FinancialEncryptionService $encryption,
         private VaultKeyManager $vaultKeyManager,
-        private SubscriptionService $subscriptionService,
+        private BetaApplicationService $betaApplicationService,
     ) {
         //
     }
@@ -47,6 +47,8 @@ class CreateNewUser implements CreatesNewUsers
 
             $this->createTeam->handle($user, isPersonal: true);
 
+            $this->betaApplicationService->apply($user);
+
             $result = $this->encryption->createUserVault($user, $input['password']);
             session(['registration.recovery_key' => $result['recovery_key']]);
 
@@ -56,8 +58,6 @@ class CreateNewUser implements CreatesNewUsers
                 $result['vault']->salt,
             );
             $this->vaultKeyManager->storeUserDek($dek);
-
-            $this->subscriptionService->startTrial($user);
 
             return $user;
         });

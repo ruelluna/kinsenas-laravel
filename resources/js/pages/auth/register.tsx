@@ -3,20 +3,25 @@ import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import TeamInvitationAlert from '@/components/team-invitation-alert';
 import TextLink from '@/components/text-link';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { formatMoneyFromCents } from '@/lib/format-money';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
-import type { TeamInvitationContext } from '@/types';
+import { BETA_FREE_MESSAGE } from '@/lib/beta-copy';
+import type { TeamInvitationContext, OpenBetaOffer, TrialOffer } from '@/types';
 
 type Props = {
     passwordRules: string;
     teamInvitation?: TeamInvitationContext | null;
+    trialOffer?: TrialOffer | null;
+    openBetaOffer?: OpenBetaOffer | null;
 };
 
-export default function Register({ passwordRules, teamInvitation }: Props) {
+export default function Register({ passwordRules, teamInvitation, trialOffer, openBetaOffer }: Props) {
     return (
         <>
             <Head title="Register" />
@@ -33,6 +38,49 @@ export default function Register({ passwordRules, teamInvitation }: Props) {
                                 invitation={teamInvitation}
                                 action="Register"
                             />
+                        )}
+
+                        {openBetaOffer && (
+                            <Alert>
+                                <AlertTitle>Apply for public beta access</AlertTitle>
+                                <AlertDescription className="space-y-2">
+                                    <p>
+                                        Create a real Kinsenas account and apply for the public beta. After
+                                        you verify your email and we approve your application, you can use
+                                        the core savings planner at no cost.
+                                    </p>
+                                    <p>{BETA_FREE_MESSAGE}</p>
+                                    <p className="text-muted-foreground">Pricing: coming soon.</p>
+                                </AlertDescription>
+                            </Alert>
+                        )}
+
+                        {trialOffer && (
+                            <Alert>
+                                <AlertTitle>
+                                    Start your {trialOffer.trialDays}-day free trial
+                                </AlertTitle>
+                                <AlertDescription className="space-y-2">
+                                    <p>
+                                        Create an account and start a{' '}
+                                        <span className="font-medium">{trialOffer.trialDays}-day free trial</span>{' '}
+                                        on your personal finance workspace (
+                                        <span className="font-medium">{trialOffer.name}</span>
+                                        ). You will not be charged until the trial ends.
+                                    </p>
+                                    {trialOffer.prices.length > 0 && (
+                                        <p>
+                                            After your trial:{' '}
+                                            {trialOffer.prices
+                                                .map(
+                                                    (price) =>
+                                                        `${price.intervalLabel} ${formatMoneyFromCents(price.amount)}`,
+                                                )
+                                                .join(' · ')}
+                                        </p>
+                                    )}
+                                </AlertDescription>
+                            </Alert>
                         )}
 
                         <div className="grid gap-6">
@@ -107,7 +155,7 @@ export default function Register({ passwordRules, teamInvitation }: Props) {
                                 data-test="register-user-button"
                             >
                                 {processing && <Spinner />}
-                                Create account
+                                {openBetaOffer ? 'Apply for beta access' : 'Create account'}
                             </Button>
                         </div>
 
@@ -137,7 +185,11 @@ export default function Register({ passwordRules, teamInvitation }: Props) {
     );
 }
 
-Register.layout = {
+Register.layout = (props: Props) => ({
     title: 'Create an account',
-    description: 'Enter your details below to create your account',
-};
+    description: props.openBetaOffer
+        ? 'Apply for the free public beta — real accounts, core savings planner, pricing coming soon'
+        : props.trialOffer
+          ? `Start your ${props.trialOffer.trialDays}-day free trial on your personal finance workspace`
+          : 'Enter your details below to create your account',
+});

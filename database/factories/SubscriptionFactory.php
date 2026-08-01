@@ -5,7 +5,7 @@ namespace Database\Factories;
 use App\Enums\SubscriptionStatus;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
-use App\Models\User;
+use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,7 +21,7 @@ class SubscriptionFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory(),
+            'team_id' => Team::factory(),
             'plan_id' => SubscriptionPlan::factory(),
             'status' => SubscriptionStatus::Trialing,
             'trial_ends_at' => now()->addDays(14),
@@ -51,7 +51,7 @@ class SubscriptionFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => SubscriptionStatus::PastDue,
-            'trial_ends_at' => now()->subDay(),
+            'trial_ends_at' => null,
             'current_period_ends_at' => null,
         ]);
     }
@@ -60,6 +60,15 @@ class SubscriptionFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => SubscriptionStatus::Cancelled,
+            'trial_ends_at' => null,
+            'current_period_ends_at' => null,
+        ]);
+    }
+
+    public function openBeta(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => SubscriptionStatus::OpenBeta,
             'trial_ends_at' => null,
             'current_period_ends_at' => null,
         ]);

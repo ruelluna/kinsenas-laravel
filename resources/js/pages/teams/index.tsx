@@ -74,6 +74,12 @@ export default function TeamsIndex({ teams }: Props) {
                                         </div>
                                         <span className="text-sm text-muted-foreground">
                                             {team.roleLabel}
+                                            {team.subscriptionStatusLabel
+                                                ? ` · ${team.subscriptionStatusLabel}`
+                                                : ''}
+                                            {team.hasSubscriptionAccess === false
+                                                ? ' · Subscription required'
+                                                : ''}
                                         </span>
                                     </div>
                                 </div>

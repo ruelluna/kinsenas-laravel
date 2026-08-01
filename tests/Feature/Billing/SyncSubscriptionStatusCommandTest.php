@@ -13,7 +13,7 @@ beforeEach(function () {
 
 it('marks expired trialing subscriptions as past due', function () {
     $member = User::factory()->create(['email' => 'member@example.com']);
-    $subscription = $member->subscription;
+    $subscription = $member->personalTeam()->subscription;
 
     $subscription->update([
         'status' => SubscriptionStatus::Trialing,
@@ -27,7 +27,7 @@ it('marks expired trialing subscriptions as past due', function () {
 
 it('marks expired active subscriptions as past due', function () {
     $member = User::factory()->create(['email' => 'member@example.com']);
-    $subscription = $member->subscription;
+    $subscription = $member->personalTeam()->subscription;
 
     $subscription->update([
         'status' => SubscriptionStatus::Active,
@@ -42,7 +42,7 @@ it('marks expired active subscriptions as past due', function () {
 
 it('leaves valid subscriptions unchanged', function () {
     $member = User::factory()->create(['email' => 'member@example.com']);
-    $subscription = $member->subscription;
+    $subscription = $member->personalTeam()->subscription;
 
     $subscription->update([
         'status' => SubscriptionStatus::Trialing,

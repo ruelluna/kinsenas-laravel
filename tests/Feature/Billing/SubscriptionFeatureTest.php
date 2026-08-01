@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\SubscriptionFeature;
+use App\Enums\SubscriptionStatus;
 use App\Models\SubscriptionPlan;
 use App\Models\User;
 use App\Services\Billing\SubscriptionService;
@@ -15,8 +16,8 @@ beforeEach(function () {
 
 it('grants platform admins access regardless of subscription', function () {
     $admin = User::factory()->create(['is_platform_admin' => true]);
-    $admin->subscription->update([
-        'status' => \App\Enums\SubscriptionStatus::Cancelled,
+    $admin->personalTeam()->subscription->update([
+        'status' => SubscriptionStatus::Cancelled,
     ]);
 
     expect(app(SubscriptionService::class)->userHasAccess($admin))->toBeTrue();

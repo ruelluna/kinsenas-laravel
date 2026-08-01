@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Actions\Teams\CreateTeam;
 use App\Models\User;
-use App\Services\Billing\SubscriptionService;
 use App\Services\Vault\FinancialEncryptionService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -48,7 +47,6 @@ class UserFactory extends Factory
             app(CreateTeam::class)->handle($user, isPersonal: true);
 
             app(FinancialEncryptionService::class)->createUserVault($user, 'password');
-            app(SubscriptionService::class)->startTrial($user->fresh());
         });
     }
 
@@ -60,6 +58,31 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    public function betaParticipant(bool $discountEligible = false): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'beta_enrolled_at' => now(),
+            'beta_application_status' => \App\Enums\BetaApplicationStatus::Approved,
+            'beta_approved_at' => now(),
+            'beta_launch_discount_eligible' => $discountEligible,
+        ]);
+    }
+
+    public function betaPending(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'beta_enrolled_at' => now(),
+            'beta_application_status' => \App\Enums\BetaApplicationStatus::Pending,
+            'beta_approved_at' => null,
+            'beta_launch_discount_eligible' => false,
+        ]);
+    }
+
+    public function betaApproved(bool $discountEligible = false): static
+    {
+        return $this->betaParticipant($discountEligible);
     }
 
     /**

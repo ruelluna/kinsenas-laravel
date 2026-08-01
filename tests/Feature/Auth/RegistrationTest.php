@@ -1,13 +1,18 @@
 <?php
 
+use App\Enums\SubscriptionStatus;
 use App\Enums\TeamRole;
 use App\Models\Team;
-use App\Models\TeamInvitation;
 use App\Models\User;
+use Database\Seeders\BillingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    $this->seed(BillingSeeder::class);
+});
 
 it('registration screen can be rendered', function () {
     $response = $this->get(route('register'));
@@ -15,12 +20,27 @@ it('registration screen can be rendered', function () {
     $response->assertOk();
 });
 
+it('registration screen includes trial offer and password rules', function () {
+    $response = $this->get(route('register'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('auth/register')
+        ->has('passwordRules')
+        ->has('trialOffer', fn (Assert $offer) => $offer
+            ->where('name', 'Basic')
+            ->where('trialDays', 14)
+            ->has('prices', 2),
+        ),
+    );
+});
+
 it('registration screen includes team invitation context', function () {
     $owner = User::factory()->create();
     $team = Team::factory()->create(['name' => 'Laravel Team']);
     $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
 
-    $invitation = TeamInvitation::factory()->create([
+    $invitation = \App\Models\TeamInvitation::factory()->create([
         'team_id' => $team->id,
         'email' => 'invited@example.com',
         'invited_by' => $owner->id,
@@ -46,8 +66,15 @@ it('new users can register', function () {
 
     $this->assertAuthenticated();
 
-    $user = User::where('email', 'test@example.com')->first();
-    $response->assertRedirect(route('dashboard'));
+    $user = User::where('email', 'test@example.com')->firstOrFail();
+    $personalTeam = $user->personalTeam();
+
+    expect($personalTeam)->not->toBeNull()
+        ->and($personalTeam->subscription)->not->toBeNull()
+        ->and($personalTeam->subscription->status)->toBe(SubscriptionStatus::Trialing)
+        ->and($personalTeam->subscription->trial_ends_at)->not->toBeNull();
+
+    $response->assertRedirect(route('verification.notice'));
 });
 
 it('registration creates a user named default workspace', function () {

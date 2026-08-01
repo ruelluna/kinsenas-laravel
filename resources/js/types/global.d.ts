@@ -1,4 +1,5 @@
 import type { Auth } from '@/types/auth';
+import type { SharedSubscription } from '@/types/billing';
 import type { Team } from '@/types/teams';
 
 declare module 'react' {
@@ -16,6 +17,9 @@ declare module '@inertiajs/core' {
             sidebarOpen: boolean;
             currentTeam: Team | null;
             teams: Team[];
+            subscription: SharedSubscription | null;
+            vaultLocked: boolean;
+            registrationRecoveryKey?: string | null;
             [key: string]: unknown;
         };
     }

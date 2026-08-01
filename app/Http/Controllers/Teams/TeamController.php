@@ -10,6 +10,7 @@ use App\Http\Requests\Teams\SaveTeamRequest;
 use App\Models\Membership;
 use App\Models\Team;
 use App\Models\User;
+use App\Services\Billing\SubscriptionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,21 +23,50 @@ class TeamController extends Controller
     /**
      * Display a listing of the user's teams.
      */
-    public function index(Request $request): Response
+    public function index(Request $request, SubscriptionService $subscriptionService): Response
     {
         $user = $request->user();
 
+        $teams = $user->teams()
+            ->with('subscription')
+            ->get()
+            ->map(function (Team $team) use ($user, $subscriptionService) {
+                $userTeam = $user->toUserTeam($team);
+
+                return [
+                    'id' => $userTeam->id,
+                    'name' => $userTeam->name,
+                    'slug' => $userTeam->slug,
+                    'isPersonal' => $userTeam->isPersonal,
+                    'role' => $userTeam->role,
+                    'roleLabel' => $userTeam->roleLabel,
+                    'isCurrent' => $userTeam->isCurrent,
+                    'subscriptionStatusLabel' => $team->subscription?->status?->label(),
+                    'hasSubscriptionAccess' => $subscriptionService->teamHasAccess($team),
+                ];
+            })
+            ->values();
+
         return Inertia::render('teams/index', [
-            'teams' => $user->toUserTeams(includeCurrent: true),
+            'teams' => $teams,
         ]);
     }
 
     /**
      * Store a newly created team.
      */
-    public function store(SaveTeamRequest $request, CreateTeam $createTeam): RedirectResponse
+    public function store(SaveTeamRequest $request, CreateTeam $createTeam, SubscriptionService $subscriptionService): RedirectResponse
     {
         $team = $createTeam->handle($request->user(), $request->validated('name'));
+
+        if (! $subscriptionService->teamHasAccess($team)) {
+            Inertia::flash('toast', [
+                'type' => 'info',
+                'message' => __('Subscribe to activate this team workspace.'),
+            ]);
+
+            return to_route('settings.billing');
+        }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Team created.')]);
 

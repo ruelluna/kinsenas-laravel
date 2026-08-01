@@ -10,7 +10,7 @@ use App\Http\Requests\Admin\CancelSubscriptionRequest;
 use App\Http\Requests\Admin\ChangePlanRequest;
 use App\Http\Requests\Admin\ExtendTrialRequest;
 use App\Models\SubscriptionPlan;
-use App\Models\User;
+use App\Models\Team;
 use App\Services\Billing\SubscriptionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,12 +28,12 @@ class AdminSubscriberController extends Controller
         $status = $request->query('status');
         $search = $request->query('search');
 
-        $users = User::query()
+        $teams = Team::query()
             ->with(['subscription.plan'])
             ->when($search, function ($query, string $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
+                        ->orWhere('slug', 'like', "%{$search}%");
                 });
             })
             ->when($status === 'none', fn ($query) => $query->whereDoesntHave('subscription'))
@@ -45,7 +45,7 @@ class AdminSubscriberController extends Controller
             ->withQueryString();
 
         return Inertia::render('admin/subscribers/index', [
-            'subscribers' => $users->through(fn (User $user) => $this->mapSubscriber($user)),
+            'subscribers' => $teams->through(fn (Team $team) => $this->mapSubscriber($team)),
             'filters' => [
                 'status' => $status,
                 'search' => $search,
@@ -54,6 +54,7 @@ class AdminSubscriberController extends Controller
                 ['value' => '', 'label' => 'All'],
                 ['value' => SubscriptionStatus::Trialing->value, 'label' => 'Trialing'],
                 ['value' => SubscriptionStatus::Active->value, 'label' => 'Active'],
+                ['value' => SubscriptionStatus::OpenBeta->value, 'label' => 'Open beta'],
                 ['value' => SubscriptionStatus::PastDue->value, 'label' => 'Past Due'],
                 ['value' => SubscriptionStatus::Cancelled->value, 'label' => 'Cancelled'],
                 ['value' => 'none', 'label' => 'No subscription'],
@@ -61,9 +62,9 @@ class AdminSubscriberController extends Controller
         ]);
     }
 
-    public function show(User $user): Response
+    public function show(Team $team): Response
     {
-        $user->load(['subscription.plan', 'paymentSubmissions.planPrice.plan']);
+        $team->load(['subscription.plan', 'paymentSubmissions.planPrice.plan']);
 
         $plans = SubscriptionPlan::query()
             ->where('is_active', true)
@@ -76,8 +77,8 @@ class AdminSubscriberController extends Controller
             ]);
 
         return Inertia::render('admin/subscribers/show', [
-            'subscriber' => $this->mapSubscriber($user),
-            'paymentSubmissions' => $user->paymentSubmissions
+            'subscriber' => $this->mapSubscriber($team),
+            'paymentSubmissions' => $team->paymentSubmissions
                 ->sortByDesc('created_at')
                 ->values()
                 ->map(fn ($submission) => [
@@ -101,9 +102,9 @@ class AdminSubscriberController extends Controller
         ]);
     }
 
-    public function extendTrial(ExtendTrialRequest $request, User $user): RedirectResponse
+    public function extendTrial(ExtendTrialRequest $request, Team $team): RedirectResponse
     {
-        $subscription = $user->subscription()->firstOrFail();
+        $subscription = $team->subscription()->firstOrFail();
 
         $this->subscriptionService->extendTrial($subscription, $request->validated('days'));
 
@@ -112,9 +113,9 @@ class AdminSubscriberController extends Controller
         return back();
     }
 
-    public function cancel(CancelSubscriptionRequest $request, User $user): RedirectResponse
+    public function cancel(CancelSubscriptionRequest $request, Team $team): RedirectResponse
     {
-        $subscription = $user->subscription()->firstOrFail();
+        $subscription = $team->subscription()->firstOrFail();
 
         $this->subscriptionService->cancel($subscription, $request->validated('reason'));
 
@@ -123,11 +124,11 @@ class AdminSubscriberController extends Controller
         return back();
     }
 
-    public function activate(ActivateSubscriptionRequest $request, User $user): RedirectResponse
+    public function activate(ActivateSubscriptionRequest $request, Team $team): RedirectResponse
     {
-        if ($user->subscription === null) {
-            $this->subscriptionService->startTrial($user);
-            $user->refresh();
+        if ($team->subscription === null) {
+            $this->subscriptionService->startTrial($team);
+            $team->refresh();
         }
 
         $validated = $request->validated();
@@ -136,7 +137,7 @@ class AdminSubscriberController extends Controller
             : null;
 
         $this->subscriptionService->activateManually(
-            $user,
+            $team,
             BillingInterval::from($validated['interval']),
             $plan,
         );
@@ -146,9 +147,9 @@ class AdminSubscriberController extends Controller
         return back();
     }
 
-    public function changePlan(ChangePlanRequest $request, User $user): RedirectResponse
+    public function changePlan(ChangePlanRequest $request, Team $team): RedirectResponse
     {
-        $subscription = $user->subscription()->firstOrFail();
+        $subscription = $team->subscription()->firstOrFail();
         $plan = SubscriptionPlan::query()->findOrFail($request->validated('plan_id'));
 
         $this->subscriptionService->changePlan($subscription, $plan);
@@ -161,15 +162,18 @@ class AdminSubscriberController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function mapSubscriber(User $user): array
+    private function mapSubscriber(Team $team): array
     {
-        $subscription = $user->subscription;
+        $subscription = $team->subscription;
+        $owner = $team->owner();
 
         return [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'isPlatformAdmin' => $user->isPlatformAdmin(),
+            'id' => $team->id,
+            'slug' => $team->slug,
+            'name' => $team->name,
+            'isPersonal' => $team->is_personal,
+            'ownerName' => $owner?->name,
+            'ownerEmail' => $owner?->email,
             'subscription' => $subscription ? [
                 'id' => $subscription->id,
                 'status' => $subscription->status->value,
@@ -178,9 +182,9 @@ class AdminSubscriberController extends Controller
                 'planId' => $subscription->plan_id,
                 'trialEndsAt' => $subscription->trial_ends_at?->toISOString(),
                 'currentPeriodEndsAt' => $subscription->current_period_ends_at?->toISOString(),
-                'hasAccess' => $this->subscriptionService->userHasAccess($user),
+                'hasAccess' => $this->subscriptionService->teamHasAccess($team),
             ] : null,
-            'createdAt' => $user->created_at->toISOString(),
+            'createdAt' => $team->created_at->toISOString(),
         ];
     }
 }

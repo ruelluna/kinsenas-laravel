@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Enums\PaymentSubmissionStatus;
 use App\Models\PaymentSubmission;
 use App\Models\SubscriptionPlanPrice;
+use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,6 +23,7 @@ class PaymentSubmissionFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
+            'team_id' => Team::factory(),
             'plan_price_id' => SubscriptionPlanPrice::factory(),
             'reference_number' => strtoupper(fake()->bothify('REF-####??')),
             'proof_image_path' => null,

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminBetaApplicationController;
+use App\Http\Controllers\Admin\AdminBetaFeedbackController;
 use App\Http\Controllers\Admin\AdminPaymentSubmissionController;
 use App\Http\Controllers\Admin\AdminPaymentQrController;
 use App\Http\Controllers\Admin\AdminPlatformUserController;
@@ -13,17 +15,23 @@ Route::prefix('admin')
     ->name('admin.')
     ->group(function () {
         Route::get('subscribers', [AdminSubscriberController::class, 'index'])->name('subscribers.index');
-        Route::get('subscribers/{user}', [AdminSubscriberController::class, 'show'])->name('subscribers.show');
-        Route::post('subscribers/{user}/extend-trial', [AdminSubscriberController::class, 'extendTrial'])->name('subscribers.extend-trial');
-        Route::post('subscribers/{user}/cancel', [AdminSubscriberController::class, 'cancel'])->name('subscribers.cancel');
-        Route::post('subscribers/{user}/activate', [AdminSubscriberController::class, 'activate'])->name('subscribers.activate');
-        Route::post('subscribers/{user}/change-plan', [AdminSubscriberController::class, 'changePlan'])->name('subscribers.change-plan');
+        Route::get('subscribers/{team}', [AdminSubscriberController::class, 'show'])->name('subscribers.show');
+        Route::post('subscribers/{team}/extend-trial', [AdminSubscriberController::class, 'extendTrial'])->name('subscribers.extend-trial');
+        Route::post('subscribers/{team}/cancel', [AdminSubscriberController::class, 'cancel'])->name('subscribers.cancel');
+        Route::post('subscribers/{team}/activate', [AdminSubscriberController::class, 'activate'])->name('subscribers.activate');
+        Route::post('subscribers/{team}/change-plan', [AdminSubscriberController::class, 'changePlan'])->name('subscribers.change-plan');
 
         Route::get('plans', [AdminSubscriptionPlanController::class, 'index'])->name('plans.index');
         Route::get('plans/create', [AdminSubscriptionPlanController::class, 'create'])->name('plans.create');
         Route::post('plans', [AdminSubscriptionPlanController::class, 'store'])->name('plans.store');
         Route::get('plans/{plan}/edit', [AdminSubscriptionPlanController::class, 'edit'])->name('plans.edit');
         Route::put('plans/{plan}', [AdminSubscriptionPlanController::class, 'update'])->name('plans.update');
+
+        Route::get('beta-applications', [AdminBetaApplicationController::class, 'index'])->name('beta-applications.index');
+        Route::post('beta-applications/{user}/approve', [AdminBetaApplicationController::class, 'approve'])->name('beta-applications.approve');
+        Route::post('beta-applications/{user}/reject', [AdminBetaApplicationController::class, 'reject'])->name('beta-applications.reject');
+
+        Route::get('beta-feedback', [AdminBetaFeedbackController::class, 'index'])->name('beta-feedback.index');
 
         Route::get('payment-qr', [AdminPaymentQrController::class, 'edit'])->name('payment-qr.edit');
         Route::post('payment-qr', [AdminPaymentQrController::class, 'update'])->name('payment-qr.update');

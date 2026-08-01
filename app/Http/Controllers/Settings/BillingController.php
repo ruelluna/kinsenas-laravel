@@ -4,40 +4,39 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Models\PaymentMethodConfig;
-use App\Models\SubscriptionPlan;
+use App\Services\Billing\BillingPlanPresenter;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class BillingController extends Controller
 {
-    public function show(Request $request): Response
+    public function show(Request $request, BillingPlanPresenter $billingPlanPresenter): Response
     {
-        $user = $request->user()->load('subscription.plan.prices');
-        $plans = SubscriptionPlan::query()->where('is_active', true)->with('prices')->orderBy('sort_order')->get();
+        $user = $request->user();
+        $team = $user->currentTeam?->load('subscription.plan');
+
+        abort_if($team === null, 404);
+
+        $subscription = $team->subscription;
         $paymentMethod = PaymentMethodConfig::query()->where('is_active', true)->first();
 
         return Inertia::render('settings/billing', [
-            'subscription' => $user->subscription ? [
-                'status' => $user->subscription->status->value,
-                'statusLabel' => $user->subscription->status->label(),
-                'trialEndsAt' => $user->subscription->trial_ends_at?->toISOString(),
-                'currentPeriodEndsAt' => $user->subscription->current_period_ends_at?->toISOString(),
-                'planName' => $user->subscription->plan?->name,
+            'team' => [
+                'id' => $team->id,
+                'name' => $team->name,
+                'slug' => $team->slug,
+                'isPersonal' => $team->is_personal,
+            ],
+            'canManageBilling' => $user->canManageBilling($team),
+            'subscription' => $subscription ? [
+                'status' => $subscription->status->value,
+                'statusLabel' => $subscription->status->label(),
+                'trialEndsAt' => $subscription->trial_ends_at?->toISOString(),
+                'currentPeriodEndsAt' => $subscription->current_period_ends_at?->toISOString(),
+                'planName' => $subscription->plan?->name,
             ] : null,
-            'plans' => $plans->map(fn ($plan) => [
-                'id' => $plan->id,
-                'name' => $plan->name,
-                'slug' => $plan->slug,
-                'trialDays' => $plan->trial_days,
-                'prices' => $plan->prices->where('is_active', true)->map(fn ($price) => [
-                    'id' => $price->id,
-                    'interval' => $price->interval->value,
-                    'intervalLabel' => $price->interval->label(),
-                    'amount' => $price->amount,
-                    'currency' => $price->currency,
-                ])->values(),
-            ]),
+            'plans' => $billingPlanPresenter->activePlans(),
             'paymentMethod' => $paymentMethod ? [
                 'label' => $paymentMethod->label,
                 'instructions' => $paymentMethod->instructions,

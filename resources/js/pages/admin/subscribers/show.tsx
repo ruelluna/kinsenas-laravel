@@ -36,7 +36,7 @@ export default function AdminSubscribersShow({
             <Heading
                 variant="small"
                 title={subscriber.name}
-                description={subscriber.email}
+                description={`Owner: ${subscriber.ownerName ?? '—'}${subscriber.ownerEmail ? ` (${subscriber.ownerEmail})` : ''}`}
             />
 
             <section className="mt-6 rounded-lg border p-4 text-sm">
@@ -68,7 +68,7 @@ export default function AdminSubscribersShow({
                 <section className="rounded-lg border p-4">
                     <h2 className="text-sm font-medium">Extend trial</h2>
                     <Form
-                        action={`/admin/subscribers/${subscriber.id}/extend-trial`}
+                        action={`/admin/subscribers/${subscriber.slug}/extend-trial`}
                         method="post"
                         className="mt-3 flex flex-wrap items-end gap-3"
                     >
@@ -85,7 +85,7 @@ export default function AdminSubscribersShow({
                 <section className="rounded-lg border p-4">
                     <h2 className="text-sm font-medium">Activate manually</h2>
                     <Form
-                        action={`/admin/subscribers/${subscriber.id}/activate`}
+                        action={`/admin/subscribers/${subscriber.slug}/activate`}
                         method="post"
                         className="mt-3 space-y-3"
                     >
@@ -126,7 +126,7 @@ export default function AdminSubscribersShow({
                 <section className="rounded-lg border p-4">
                     <h2 className="text-sm font-medium">Change plan</h2>
                     <Form
-                        action={`/admin/subscribers/${subscriber.id}/change-plan`}
+                        action={`/admin/subscribers/${subscriber.slug}/change-plan`}
                         method="post"
                         className="mt-3 flex flex-wrap items-end gap-3"
                     >
@@ -155,7 +155,7 @@ export default function AdminSubscribersShow({
                 <section className="rounded-lg border p-4">
                     <h2 className="text-sm font-medium">Cancel subscription</h2>
                     <Form
-                        action={`/admin/subscribers/${subscriber.id}/cancel`}
+                        action={`/admin/subscribers/${subscriber.slug}/cancel`}
                         method="post"
                         className="mt-3 space-y-3"
                     >
