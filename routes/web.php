@@ -7,6 +7,7 @@ use App\Http\Middleware\EnsureTeamMembership;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
+Route::inertia('/survey', 'marketing/survey')->name('survey');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('beta/pending', 'auth/beta-pending')->name('beta.pending');
