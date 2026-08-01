@@ -1,4 +1,4 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head, useHttp, usePage } from '@inertiajs/react';
 import { useCallback, useMemo, useState } from 'react';
 import SurveyIntro from '@/components/survey/survey-intro';
 import SurveyInterstitial from '@/components/survey/survey-interstitial';
@@ -27,6 +27,7 @@ import type {
     SurveySubmissionPayload,
 } from '@/lib/survey/survey-types';
 import { cn } from '@/lib/utils';
+import { store as storeSurveyResponse } from '@/routes/survey/responses';
 
 function questionIdFromStep(step: SurveyStep): QuestionId | null {
     const number = getQuestionNumber(step);
@@ -68,11 +69,13 @@ function isStepValid(step: SurveyStep, answers: SurveyAnswers): boolean {
 
 export default function Survey() {
     const { name } = usePage().props;
+    const { post, processing } = useHttp<SurveySubmissionPayload, { id: string }>();
 
     const [step, setStep] = useState<SurveyStep>('language');
     const [language, setLanguage] = useState<SurveyLanguage | null>(null);
     const [answers, setAnswers] = useState<SurveyAnswers>({});
     const [resultSlug, setResultSlug] = useState<ResultSlug | null>(null);
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     const content = useMemo(
         () => (language ? getSurveyContent(language) : null),
@@ -128,24 +131,31 @@ export default function Survey() {
         setStep('result');
     }, []);
 
-    const handleResultSubmit = ({ email, name: respondentName }: { email: string; name: string }) => {
-        if (!language || !resultSlug) {
+    const handleResultSubmit = async ({ email, name: respondentName }: { email: string; name: string }) => {
+        if (!language || !resultSlug || !content) {
             return;
         }
 
         const payload: SurveySubmissionPayload = {
             language,
-            completedAt: new Date().toISOString(),
+            completed_at: new Date().toISOString(),
             answers,
             result: resultSlug,
             email,
             name: respondentName,
         };
 
-        // Future: POST /survey/responses with validated payload + optional GHL webhook.
-        console.log('[Kinsenas Survey]', payload);
+        setSubmitError(null);
 
-        setStep('thank-you');
+        try {
+            await post(storeSurveyResponse.url(), {
+                data: payload,
+            });
+
+            setStep('thank-you');
+        } catch {
+            setSubmitError(content.resultCTA.submitError);
+        }
     };
 
     const showPrivacyNote = step === 'intro' || step === 'result';
@@ -181,6 +191,8 @@ export default function Survey() {
                     <SurveyResult
                         resultSlug={resultSlug}
                         content={content}
+                        processing={processing}
+                        submitError={submitError}
                         onSubmit={handleResultSubmit}
                     />
                 ) : null;

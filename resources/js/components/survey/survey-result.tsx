@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
 import { ALLOCATION_BORDER_CLASSES } from '@/components/marketing/landing-content';
 import { RESULT_ALLOCATION_INDEX } from '@/lib/survey/survey-content';
 import type { ResultSlug, SurveyLanguageContent } from '@/lib/survey/survey-types';
@@ -10,12 +11,20 @@ import { cn } from '@/lib/utils';
 type SurveyResultProps = {
     resultSlug: ResultSlug;
     content: SurveyLanguageContent;
-    onSubmit: (payload: { email: string; name: string }) => void;
+    processing: boolean;
+    submitError: string | null;
+    onSubmit: (payload: { email: string; name: string }) => void | Promise<void>;
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export default function SurveyResult({ resultSlug, content, onSubmit }: SurveyResultProps) {
+export default function SurveyResult({
+    resultSlug,
+    content,
+    processing,
+    submitError,
+    onSubmit,
+}: SurveyResultProps) {
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
     const [emailError, setEmailError] = useState<string | null>(null);
@@ -23,7 +32,7 @@ export default function SurveyResult({ resultSlug, content, onSubmit }: SurveyRe
     const result = content.results[resultSlug];
     const allocationIndex = RESULT_ALLOCATION_INDEX[resultSlug];
 
-    const handleSubmit = (event: React.FormEvent) => {
+    const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
 
         const trimmedEmail = email.trim();
@@ -39,7 +48,7 @@ export default function SurveyResult({ resultSlug, content, onSubmit }: SurveyRe
         }
 
         setEmailError(null);
-        onSubmit({ email: trimmedEmail, name: name.trim() });
+        await onSubmit({ email: trimmedEmail, name: name.trim() });
     };
 
     return (
@@ -77,6 +86,7 @@ export default function SurveyResult({ resultSlug, content, onSubmit }: SurveyRe
                         aria-invalid={emailError ? true : undefined}
                     />
                     {emailError && <p className="text-sm text-destructive">{emailError}</p>}
+                    {submitError && <p className="text-sm text-destructive">{submitError}</p>}
                 </div>
 
                 <div className="grid gap-2">
@@ -91,7 +101,8 @@ export default function SurveyResult({ resultSlug, content, onSubmit }: SurveyRe
                     />
                 </div>
 
-                <Button type="submit" size="lg" className="mt-2 h-11 rounded-full">
+                <Button type="submit" size="lg" className="mt-2 h-11 rounded-full" disabled={processing}>
+                    {processing && <Spinner />}
                     {content.resultCTA.submit}
                 </Button>
             </form>

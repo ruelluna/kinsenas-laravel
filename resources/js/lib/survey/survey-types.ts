@@ -76,6 +76,7 @@ export type SurveyLanguageContent = {
         submit: string;
         emailRequired: string;
         emailInvalid: string;
+        submitError: string;
     };
     thankYou: string;
     questions: SurveyQuestion[];
@@ -84,7 +85,7 @@ export type SurveyLanguageContent = {
 
 export type SurveySubmissionPayload = {
     language: SurveyLanguage;
-    completedAt: string;
+    completed_at: string;
     answers: SurveyAnswers;
     result: ResultSlug;
     email: string;

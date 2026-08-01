@@ -99,7 +99,31 @@ interstitials, result scoring, and console-logged lead payload for
 future backend integration.
 ```
 
-## Linear paste block
+## Survey response persistence (2026-08-01)
+
+- Added `survey_responses` table (UUID PK, JSON `answers`, indexed `language`/`result`/`email`)
+- Public `POST /survey/responses` with throttle (10/min), validation, and logging
+- Frontend submits via Inertia `useHttp().post()` instead of console-only logging
+
+### New backend files
+- `app/Models/SurveyResponse.php`
+- `app/Enums/SurveyLanguage.php`, `app/Enums/SurveyResultSlug.php`
+- `app/Support/Survey/SurveyAnswerOptions.php`
+- `app/Http/Controllers/Marketing/SurveyResponseController.php`
+- `app/Http/Requests/Marketing/StoreSurveyResponseRequest.php`
+- `database/factories/SurveyResponseFactory.php`
+- `database/migrations/2026_08_01_004519_create_survey_responses_table.php`
+- `tests/Feature/SurveyResponseStoreTest.php`
+
+### Deploy
+- Run `php artisan migrate`
+
+### Suggested tests
+```bash
+php artisan test --compact tests/Feature/SurveyResponseStoreTest.php
+php artisan test --compact tests/Feature/SurveyPageTest.php
+```
+
 
 ```
 Title: Add public ad-to-survey flow at /survey

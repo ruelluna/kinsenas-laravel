@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Marketing\SurveyResponseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Teams\TeamInvitationController;
 use App\Http\Controllers\Vault\VaultUnlockController;
@@ -8,6 +9,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
 Route::inertia('/survey', 'marketing/survey')->name('survey');
+Route::post('survey/responses', [SurveyResponseController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('survey.responses.store');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('beta/pending', 'auth/beta-pending')->name('beta.pending');
