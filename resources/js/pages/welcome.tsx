@@ -6,8 +6,8 @@ import LandingFormulaSection from '@/components/marketing/landing-formula-sectio
 import LandingHeader from '@/components/marketing/landing-header';
 import LandingHero from '@/components/marketing/landing-hero';
 import LandingHowItWorks from '@/components/marketing/landing-how-it-works';
-import LandingOutcome from '@/components/marketing/landing-outcome';
 import LandingOpenBetaBanner from '@/components/marketing/landing-open-beta-banner';
+import LandingOutcome from '@/components/marketing/landing-outcome';
 import LandingPrivacy from '@/components/marketing/landing-privacy';
 import LandingTrustStrip from '@/components/marketing/landing-trust-strip';
 import { dashboard } from '@/routes';

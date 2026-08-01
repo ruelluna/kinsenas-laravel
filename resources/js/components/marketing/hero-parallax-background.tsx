@@ -1,6 +1,6 @@
 import { useRef } from 'react';
-import { KINSENAS_HERO_ILLUSTRATION } from '@/lib/brand';
 import { useParallaxOffset } from '@/hooks/use-parallax';
+import { KINSENAS_HERO_ILLUSTRATION } from '@/lib/brand';
 
 export default function HeroParallaxBackground() {
     const sectionRef = useRef<HTMLDivElement>(null);

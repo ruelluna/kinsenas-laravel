@@ -1,11 +1,11 @@
 import { Head } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
-import AddRecipientModal from '@/components/savings/add-recipient-modal';
 import Heading from '@/components/heading';
+import AddRecipientModal from '@/components/savings/add-recipient-modal';
 import { Button } from '@/components/ui/button';
-import type { Recipient } from '@/types/savings';
 import type { SharedData } from '@/types';
+import type { Recipient } from '@/types/savings';
 
 type Props = {
     recipients: Recipient[];

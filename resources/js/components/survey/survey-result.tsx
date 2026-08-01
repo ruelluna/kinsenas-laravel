@@ -1,9 +1,9 @@
 import { useState } from 'react';
+import { ALLOCATION_BORDER_CLASSES } from '@/components/marketing/landing-content';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { ALLOCATION_BORDER_CLASSES } from '@/components/marketing/landing-content';
 import { RESULT_ALLOCATION_INDEX } from '@/lib/survey/survey-content';
 import type { ResultSlug, SurveyLanguageContent } from '@/lib/survey/survey-types';
 import { cn } from '@/lib/utils';
@@ -39,11 +39,13 @@ export default function SurveyResult({
 
         if (!trimmedEmail) {
             setEmailError(content.resultCTA.emailRequired);
+
             return;
         }
 
         if (!EMAIL_PATTERN.test(trimmedEmail)) {
             setEmailError(content.resultCTA.emailInvalid);
+
             return;
         }
 
@@ -79,6 +81,7 @@ export default function SurveyResult({
                         value={email}
                         onChange={(event) => {
                             setEmail(event.target.value);
+
                             if (emailError) {
                                 setEmailError(null);
                             }

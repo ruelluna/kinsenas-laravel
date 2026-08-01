@@ -16,8 +16,8 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { BankInstitution } from '@/types/savings';
 import type { SharedData } from '@/types';
+import type { BankInstitution } from '@/types/savings';
 
 type Props = {
     open: boolean;

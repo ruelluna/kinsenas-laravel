@@ -21,26 +21,26 @@ class DatabaseSeeder extends Seeder
             PhilippineBankSeeder::class,
         ]);
 
-        $user = User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // $user = User::factory()->create([
+        //     'name' => 'Test User',
+        //     'email' => 'test@example.com',
+        // ]);
 
-        $template = SavingsFormulaTemplate::query()->where('slug', 'trc-savings')->first();
+        // $template = SavingsFormulaTemplate::query()->where('slug', 'trc-savings')->first();
 
-        if ($template !== null) {
-            app(SavingsPlanService::class)->cloneFromTemplate(
-                $user->currentTeam,
-                $user,
-                $template,
-                'My TRC Plan',
-            );
-        }
+        // if ($template !== null) {
+        //     app(SavingsPlanService::class)->cloneFromTemplate(
+        //         $user->currentTeam,
+        //         $user,
+        //         $template,
+        //         'My TRC Plan',
+        //     );
+        // }
 
-        User::factory()->create([
-            'name' => 'Platform Admin',
-            'email' => 'admin@example.com',
-            'is_platform_admin' => true,
-        ]);
+        // User::factory()->create([
+        //     'name' => 'Platform Admin',
+        //     'email' => 'admin@example.com',
+        //     'is_platform_admin' => true,
+        // ]);
     }
 }

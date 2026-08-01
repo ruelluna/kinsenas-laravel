@@ -1,5 +1,5 @@
-import { Label } from '@/components/ui/label';
 import BankOptionSelect from '@/components/savings/bank-option-select';
+import { Label } from '@/components/ui/label';
 import type { BankOption } from '@/types/savings';
 
 type Props = {

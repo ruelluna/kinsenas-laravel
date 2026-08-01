@@ -1,14 +1,14 @@
 import { Form, Head, usePage } from '@inertiajs/react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import Heading from '@/components/heading';
 import AddSpendingModal from '@/components/savings/add-spending-modal';
 import EditSpendingModal from '@/components/savings/edit-spending-modal';
 import FundBalanceGrid from '@/components/savings/fund-balance-grid';
-import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { formatMoney } from '@/lib/format-money';
-import type { FundBalance, FundSpend } from '@/types/savings';
 import type { SharedData } from '@/types';
+import type { FundBalance, FundSpend } from '@/types/savings';
 
 type Props = {
     plan: { id: string; name: string; hasLockedIncome: boolean; allowEditingSpends: boolean };

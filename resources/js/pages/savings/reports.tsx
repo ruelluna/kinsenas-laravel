@@ -1,9 +1,9 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { BankLogo } from '@/components/savings/bank-select';
 import Heading from '@/components/heading';
+import { BankLogo } from '@/components/savings/bank-select';
 import { formatMoney } from '@/lib/format-money';
-import type { ReportTotals } from '@/types/savings';
 import type { SharedData } from '@/types';
+import type { ReportTotals } from '@/types/savings';
 
 type Props = { totals: ReportTotals };
 

@@ -1,7 +1,7 @@
 import { Head, useHttp, usePage } from '@inertiajs/react';
 import { useCallback, useMemo, useState } from 'react';
-import SurveyIntro from '@/components/survey/survey-intro';
 import SurveyInterstitial from '@/components/survey/survey-interstitial';
+import SurveyIntro from '@/components/survey/survey-intro';
 import SurveyLanguageSelect from '@/components/survey/survey-language-select';
 import SurveyLoading from '@/components/survey/survey-loading';
 import SurveyNav from '@/components/survey/survey-nav';
@@ -98,6 +98,7 @@ export default function Survey() {
             const result = resolveSurveyResult(answers);
             setResultSlug(result);
             setStep('loading');
+
             return;
         }
 

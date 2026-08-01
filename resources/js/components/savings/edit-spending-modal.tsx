@@ -1,7 +1,7 @@
 import { Form, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
-import ReceiptUploadField from '@/components/savings/receipt-upload-field';
 import InputError from '@/components/input-error';
+import ReceiptUploadField from '@/components/savings/receipt-upload-field';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -15,8 +15,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { formatMoney } from '@/lib/format-money';
-import type { FundBalance, FundSpend } from '@/types/savings';
 import type { SharedData } from '@/types';
+import type { FundBalance, FundSpend } from '@/types/savings';
 
 type Props = {
     open: boolean;

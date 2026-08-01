@@ -7,13 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { formatMoney } from '@/lib/format-money';
+import type { SharedData } from '@/types';
 import type {
     FundBalance,
     IncomeBreakdownRow,
     IncomeCustomCategory,
     IncomePeriodSummary,
 } from '@/types/savings';
-import type { SharedData } from '@/types';
 
 type Props = {
     plan: { id: string; name: string };

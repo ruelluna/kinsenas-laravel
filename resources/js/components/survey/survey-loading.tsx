@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import { ArrowLeftRight, Check, Loader2, Wallet } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 type SurveyLoadingProps = {

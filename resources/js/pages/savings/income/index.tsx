@@ -1,13 +1,13 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { ChevronRight, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import AddIncomeModal from '@/components/savings/add-income-modal';
 import Heading from '@/components/heading';
+import AddIncomeModal from '@/components/savings/add-income-modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatMoney } from '@/lib/format-money';
-import type { IncomeFundSummary, IncomePeriodTableRow, IncomePlanCategory } from '@/types/savings';
 import type { SharedData } from '@/types';
+import type { IncomeFundSummary, IncomePeriodTableRow, IncomePlanCategory } from '@/types/savings';
 
 type Props = {
     plan: { id: string; name: string };

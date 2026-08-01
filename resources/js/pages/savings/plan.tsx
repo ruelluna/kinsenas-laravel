@@ -1,16 +1,16 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { AlertTriangle, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
+import Heading from '@/components/heading';
+import InputError from '@/components/input-error';
 import CategoryBankSelect from '@/components/savings/category-bank-select';
 import FundBalanceGrid from '@/components/savings/fund-balance-grid';
-import Heading from '@/components/heading';
 import {
     BeforeChooseAlert,
     PlanEditRulesPanel,
 } from '@/components/savings/plan-guidance-panels';
 import SavingsPlanTemplatePicker from '@/components/savings/plan-template-picker';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -23,6 +23,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { formatMoney } from '@/lib/format-money';
+import type { SharedData } from '@/types';
 import type {
     CategoryAllocationType,
     DeductionMode,
@@ -34,7 +35,6 @@ import type {
     SavingsPlanPageGuidance,
 } from '@/types/savings';
 
-import type { SharedData } from '@/types';
 
 type Props = {
     plan: SavingsPlan | null;

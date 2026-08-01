@@ -14,8 +14,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { formatMoney } from '@/lib/format-money';
-import type { CategoryBankMap, FundBalance } from '@/types/savings';
 import type { SharedData } from '@/types';
+import type { CategoryBankMap, FundBalance } from '@/types/savings';
 
 type CategoryOption = {
     id: string;

@@ -1,7 +1,7 @@
 import { Form } from '@inertiajs/react';
-import VideoEmbed from '@/components/savings/video-embed';
-import TemplateAllocationPieChart from '@/components/savings/template-allocation-pie-chart';
 import { BeforeChooseAlert } from '@/components/savings/plan-guidance-panels';
+import TemplateAllocationPieChart from '@/components/savings/template-allocation-pie-chart';
+import VideoEmbed from '@/components/savings/video-embed';
 import { Button } from '@/components/ui/button';
 import type { FormulaTemplate, SavingsPlanPageGuidance } from '@/types/savings';
 

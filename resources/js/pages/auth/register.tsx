@@ -8,10 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { BETA_FREE_MESSAGE } from '@/lib/beta-copy';
 import { formatMoneyFromCents } from '@/lib/format-money';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
-import { BETA_FREE_MESSAGE } from '@/lib/beta-copy';
 import type { TeamInvitationContext, OpenBetaOffer, TrialOffer } from '@/types';
 
 type Props = {

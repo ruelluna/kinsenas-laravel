@@ -19,6 +19,7 @@ export default function SurveyQuestion({ question, value, multiSelectHint, onCha
                 : [...selectedValues, optionValue];
 
             onChange(next);
+
             return;
         }
 

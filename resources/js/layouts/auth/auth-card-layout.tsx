@@ -1,6 +1,5 @@
 import { Link } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
-import { KINSENAS_HORIZONTAL_LOGO } from '@/lib/brand';
 import {
     Card,
     CardContent,
@@ -8,6 +7,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { KINSENAS_HORIZONTAL_LOGO } from '@/lib/brand';
 import { home } from '@/routes';
 
 export default function AuthCardLayout({

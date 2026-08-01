@@ -55,6 +55,7 @@ export default function BankInstitutionPicker({
                 value={query}
                 onChange={(event) => {
                     setQuery(event.target.value);
+
                     if (selected && event.target.value !== selected.name) {
                         setSelectedId('');
                         onChange(null);

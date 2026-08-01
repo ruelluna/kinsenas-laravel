@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { pageContentPaddingX } from '@/components/page-content';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { BETA_FREE_MESSAGE } from '@/lib/beta-copy';
 import { cn } from '@/lib/utils';
 import type { SharedData } from '@/types';

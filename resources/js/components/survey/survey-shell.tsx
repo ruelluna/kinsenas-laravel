@@ -1,11 +1,11 @@
-import type { ReactNode } from 'react';
 import { Link } from '@inertiajs/react';
 import { Lock } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import type { ReactNode } from 'react';
 import { KINSENAS_HORIZONTAL_LOGO } from '@/lib/brand';
-import { home } from '@/routes';
 import { showsProgress } from '@/lib/survey/survey-navigation';
 import type { SurveyStep } from '@/lib/survey/survey-types';
+import { cn } from '@/lib/utils';
+import { home } from '@/routes';
 
 type SurveyShellProps = {
     appName: string;

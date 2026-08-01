@@ -1,9 +1,9 @@
 import { Link, usePage } from '@inertiajs/react';
 import { Sparkles } from 'lucide-react';
 /* @chisel-registration */
+import { BETA_FREE_MESSAGE } from '@/lib/beta-copy';
 import { register } from '@/routes';
 /* @end-chisel-registration */
-import { BETA_FREE_MESSAGE } from '@/lib/beta-copy';
 import type { SharedData } from '@/types';
 
 export default function LandingOpenBetaBanner() {

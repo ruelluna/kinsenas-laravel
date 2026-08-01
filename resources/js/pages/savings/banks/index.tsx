@@ -1,14 +1,14 @@
 import { Head } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import Heading from '@/components/heading';
 import AddBankModal from '@/components/savings/add-bank-modal';
 import { BankLogo } from '@/components/savings/bank-select';
-import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
-import { formatMoney } from '@/lib/format-money';
 import { formatBankOptionLabel } from '@/lib/format-bank-label';
-import type { Bank, BankBalance, BankInstitution } from '@/types/savings';
+import { formatMoney } from '@/lib/format-money';
 import type { SharedData } from '@/types';
+import type { Bank, BankBalance, BankInstitution } from '@/types/savings';
 
 type Props = {
     banks: Bank[];

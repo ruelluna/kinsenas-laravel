@@ -1,14 +1,14 @@
 import { Form, Head, usePage } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
-import AddTransferModal from '@/components/savings/add-transfer-modal';
 import Heading from '@/components/heading';
+import AddTransferModal from '@/components/savings/add-transfer-modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatMoney } from '@/lib/format-money';
 import { remainingTone } from '@/lib/fund-balance-tone';
-import type { CategoryBankMap, FundBalance, FundTransfer } from '@/types/savings';
 import type { SharedData } from '@/types';
+import type { CategoryBankMap, FundBalance, FundTransfer } from '@/types/savings';
 
 type CategoryOption = {
     id: string;
