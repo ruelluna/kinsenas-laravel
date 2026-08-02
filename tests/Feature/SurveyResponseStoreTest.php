@@ -2,6 +2,7 @@
 
 use App\Models\SurveyResponse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 
 uses(RefreshDatabase::class);
 
@@ -90,4 +91,63 @@ it('accepts completedAt from the frontend payload', function () {
     $response = $this->postJson(route('survey.responses.store'), $payload);
 
     $response->assertCreated();
+});
+
+it('upserts a GHL contact tagged from survey answers', function () {
+    fakeGhlApi();
+
+    $response = $this->postJson(route('survey.responses.store'), validSurveyPayload([
+        'answers' => array_merge(validSurveyPayload()['answers'], [
+            'q8' => ['shopping'],
+        ]),
+    ]));
+
+    $response->assertCreated();
+
+    Http::assertSent(function ($request) {
+        $data = $request->data();
+
+        return $request->method() === 'POST'
+            && $request->url() === 'https://services.leadconnectorhq.com/contacts/upsert'
+            && $request->hasHeader('Authorization', 'Bearer test-pit-token')
+            && $request->hasHeader('Version', '2021-07-28')
+            && ($data['locationId'] ?? null) === 'loc_test_123'
+            && ($data['email'] ?? null) === 'survey@example.com'
+            && ($data['firstName'] ?? null) === 'Maria'
+            && ($data['lastName'] ?? null) === 'Santos'
+            && ! array_key_exists('tags', $data)
+            && ! array_key_exists('customFields', $data)
+            && ! array_key_exists('answers', $data);
+    });
+
+    Http::assertSent(function ($request) {
+        $data = $request->data();
+        $tags = collect($data['tags'] ?? []);
+
+        return $request->method() === 'POST'
+            && str_ends_with($request->url(), '/contacts/ct_test_123/tags')
+            && $tags->contains('kinsenas-survey')
+            && $tags->contains('survey-completed')
+            && $tags->contains('survey-lang-en')
+            && $tags->contains('survey-result-family-first-planner')
+            && $tags->contains('survey-q1-employee')
+            && $tags->contains('survey-q5-family_support')
+            && $tags->contains('survey-q5-bills')
+            && $tags->contains('survey-q8-shopping')
+            && $tags->contains('survey-q10-early_access');
+    });
+});
+
+it('does not call GHL for survey when sync is disabled', function () {
+    config([
+        'services.ghl.enabled' => false,
+        'services.ghl.pit' => 'test-pit-token',
+        'services.ghl.location_id' => 'loc_test_123',
+    ]);
+
+    Http::fake();
+
+    $this->postJson(route('survey.responses.store'), validSurveyPayload())->assertCreated();
+
+    Http::assertNothingSent();
 });

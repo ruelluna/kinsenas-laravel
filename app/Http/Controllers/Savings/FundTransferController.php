@@ -7,6 +7,7 @@ use App\Http\Requests\Savings\SaveFundTransferRequest;
 use App\Models\FundTransfer;
 use App\Models\SavingsCategory;
 use App\Models\Team;
+use App\Services\Marketing\ActivationGhlTagService;
 use App\Services\Savings\FundBalanceService;
 use App\Services\Savings\FundTransferService;
 use App\Services\Savings\SavingsPlanService;
@@ -22,6 +23,7 @@ class FundTransferController extends Controller
         private SavingsPlanService $planService,
         private FundBalanceService $balanceService,
         private FundTransferService $fundTransferService,
+        private ActivationGhlTagService $activationGhlTagService,
     ) {}
 
     public function index(Request $request, Team $current_team): Response
@@ -69,6 +71,8 @@ class FundTransferController extends Controller
             $request->validated('transferred_on'),
             $request->user(),
         );
+
+        $this->activationGhlTagService->syncFirstTransfer($request->user(), $current_team);
 
         $message = $transfer->isConfirmed()
             ? __('Transfer recorded.')

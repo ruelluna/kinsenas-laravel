@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Vault;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Vault\UnlockVaultRequest;
+use App\Services\Marketing\ActivationGhlTagService;
 use App\Services\Vault\VaultKeyManager;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -11,7 +12,10 @@ use Inertia\Response;
 
 class VaultUnlockController extends Controller
 {
-    public function __construct(private VaultKeyManager $vaultKeyManager) {}
+    public function __construct(
+        private VaultKeyManager $vaultKeyManager,
+        private ActivationGhlTagService $activationGhlTagService,
+    ) {}
 
     public function create(): Response
     {
@@ -29,6 +33,8 @@ class VaultUnlockController extends Controller
         } else {
             $this->vaultKeyManager->unlockForUser($user, $request->string('password')->value());
         }
+
+        $this->activationGhlTagService->syncVaultUnlocked($user);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Vault unlocked.')]);
 

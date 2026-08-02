@@ -7,8 +7,10 @@ use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\User;
 use App\Services\Billing\BetaApplicationService;
+use App\Services\Marketing\GhlUserTagService;
 use App\Services\Vault\FinancialEncryptionService;
 use App\Services\Vault\VaultKeyManager;
+use App\Support\Marketing\GhlTagCatalog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -22,6 +24,7 @@ class CreateNewUser implements CreatesNewUsers
         private FinancialEncryptionService $encryption,
         private VaultKeyManager $vaultKeyManager,
         private BetaApplicationService $betaApplicationService,
+        private GhlUserTagService $ghlUserTagService,
     ) {
         //
     }
@@ -45,11 +48,16 @@ class CreateNewUser implements CreatesNewUsers
                 'password' => $input['password'],
             ]);
 
-            $user->markEmailAsVerified();
-
             $this->createTeam->handle($user, isPersonal: true);
 
             $this->betaApplicationService->apply($user);
+
+            $this->ghlUserTagService->dispatch(
+                $user,
+                [GhlTagCatalog::KINSENAS_USER, GhlTagCatalog::REGISTERED],
+                [],
+                ['event' => 'registered'],
+            );
 
             $result = $this->encryption->createUserVault($user, $input['password']);
             session(['registration.recovery_key' => $result['recovery_key']]);

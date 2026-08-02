@@ -37,9 +37,10 @@ return [
 
     'ghl' => [
         'enabled' => env('GHL_ENABLED', false),
-        'webhook_application_url' => env('GHL_WEBHOOK_APPLICATION_URL'),
-        'webhook_approved_url' => env('GHL_WEBHOOK_APPROVED_URL'),
-        'webhook_rejected_url' => env('GHL_WEBHOOK_REJECTED_URL'),
+        'pit' => env('GHL_PIT'),
+        'location_id' => env('GHL_LOCATION_ID'),
+        'base_url' => env('GHL_BASE_URL', 'https://services.leadconnectorhq.com'),
+        'api_version' => env('GHL_API_VERSION', '2021-07-28'),
     ],
 
 ];

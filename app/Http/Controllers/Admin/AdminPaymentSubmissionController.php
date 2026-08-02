@@ -9,6 +9,8 @@ use App\Http\Requests\Admin\ApprovePaymentSubmissionRequest;
 use App\Http\Requests\Admin\RejectPaymentSubmissionRequest;
 use App\Models\PaymentSubmission;
 use App\Services\Billing\SubscriptionService;
+use App\Services\Marketing\GhlUserTagService;
+use App\Support\Marketing\GhlTagCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -18,7 +20,10 @@ use Inertia\Response;
 
 class AdminPaymentSubmissionController extends Controller
 {
-    public function __construct(private SubscriptionService $subscriptionService) {}
+    public function __construct(
+        private SubscriptionService $subscriptionService,
+        private GhlUserTagService $ghlUserTagService,
+    ) {}
 
     public function index(Request $request): Response
     {
@@ -76,6 +81,15 @@ class AdminPaymentSubmissionController extends Controller
             $submission->team,
             $submission->planPrice->interval ?? BillingInterval::Monthly,
         );
+
+        if ($submission->user !== null) {
+            $this->ghlUserTagService->dispatch(
+                $submission->user,
+                [GhlTagCatalog::SUBSCRIPTION_ACTIVE],
+                [GhlTagCatalog::PAYMENT_SUBMITTED, GhlTagCatalog::TRIAL_ACTIVE],
+                ['event' => 'payment_approved', 'submission_id' => $submission->id],
+            );
+        }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Payment approved.')]);
 

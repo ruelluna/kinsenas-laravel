@@ -7,7 +7,9 @@ use App\Enums\TeamRole;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\Billing\SubscriptionService;
+use App\Services\Marketing\GhlUserTagService;
 use App\Services\Teams\PersonalTeamNaming;
+use App\Support\Marketing\GhlTagCatalog;
 use Illuminate\Support\Facades\DB;
 
 class CreateTeam
@@ -15,6 +17,7 @@ class CreateTeam
     public function __construct(
         private PersonalTeamNaming $personalTeamNaming,
         private SubscriptionService $subscriptionService,
+        private GhlUserTagService $ghlUserTagService,
     ) {}
 
     /**
@@ -47,6 +50,15 @@ class CreateTeam
                 $this->subscriptionService->startTrial($team);
             } else {
                 $this->subscriptionService->requirePaidSubscription($team);
+            }
+
+            if (! $isPersonal) {
+                $this->ghlUserTagService->dispatch(
+                    $user,
+                    [GhlTagCatalog::TEAM_CREATED],
+                    [],
+                    ['event' => 'team_created', 'team_id' => $team->id],
+                );
             }
 
             return $team;

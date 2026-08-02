@@ -4,17 +4,58 @@ use App\Models\IncomePeriod;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlan;
 use App\Models\User;
+use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Http;
 use Laravel\Fortify\Features;
 use Tests\TestCase;
 
 uses(TestCase::class)->in('Feature');
 uses(TestCase::class)->in('Unit');
 
+/*
+|--------------------------------------------------------------------------
+| GHL safety net
+|--------------------------------------------------------------------------
+|
+| phpunit.xml force-disables GHL credentials from .env. Tests that assert
+| sync should call fakeGhlApi() to opt in with a mocked client.
+|
+| Do not register a global Http fake for leadconnectorhq.com here — Laravel
+| merges fake callbacks, so a global stub would win over fakeGhlApi() and
+| return {ok: true} without contact.id (skipping tag add/remove calls).
+|
+*/
+
 function skipUnlessFortifyHas(string $feature, ?string $message = null): void
 {
     if (! Features::enabled($feature)) {
         test()->markTestSkipped($message ?? "Fortify feature [{$feature}] is not enabled.");
     }
+}
+
+function fakeGhlApi(string $contactId = 'ct_test_123'): void
+{
+    config([
+        'services.ghl.enabled' => true,
+        'services.ghl.pit' => 'test-pit-token',
+        'services.ghl.location_id' => 'loc_test_123',
+        'services.ghl.base_url' => 'https://services.leadconnectorhq.com',
+        'services.ghl.api_version' => '2021-07-28',
+    ]);
+
+    Http::fake(function (Request $request) use ($contactId) {
+        $url = $request->url();
+
+        if (str_contains($url, '/contacts/upsert')) {
+            return Http::response(['contact' => ['id' => $contactId]], 200);
+        }
+
+        if (preg_match('#/contacts/[^/]+/tags$#', $url) === 1) {
+            return Http::response(['ok' => true], 200);
+        }
+
+        return Http::response(['ok' => true], 200);
+    });
 }
 
 function createUserWithLockedIncome(string $amount = '50000.00'): array

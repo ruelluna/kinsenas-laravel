@@ -15,6 +15,10 @@ trait RedirectsToCurrentTeam
     {
         $user = $request->user();
 
+        if ($user !== null && ! $user->hasVerifiedEmail()) {
+            return route('verification.notice');
+        }
+
         if ($user !== null && BillingMode::isOpenBeta() && ! $user->isPlatformAdmin()) {
             if ($user->beta_application_status === BetaApplicationStatus::Rejected) {
                 return route('beta.rejected');

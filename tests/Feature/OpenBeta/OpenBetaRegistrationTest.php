@@ -67,26 +67,110 @@ it('grants launch discount eligibility after admin approval', function () {
         ->and($user->fresh()->beta_launch_discount_eligible)->toBeTrue();
 });
 
-it('dispatches GHL webhook when beta application is submitted', function () {
-    config([
-        'services.ghl.enabled' => true,
-        'services.ghl.webhook_application_url' => 'https://hooks.example.test/ghl/application',
-    ]);
-
-    Http::fake([
-        'hooks.example.test/*' => Http::response(['ok' => true], 200),
-    ]);
+it('upserts a GHL contact when beta application is submitted', function () {
+    fakeGhlApi();
 
     $this->post(route('register.store'), [
-        'name' => 'Webhook User',
-        'email' => 'webhook@example.com',
+        'name' => 'Ghl Beta User',
+        'email' => 'ghl-beta@example.com',
         'password' => 'password',
         'password_confirmation' => 'password',
     ]);
 
-    Http::assertSent(fn ($request) => $request->url() === 'https://hooks.example.test/ghl/application'
-        && $request['event'] === 'application_submitted'
-        && $request['user']['email'] === 'webhook@example.com');
+    Http::assertSent(function ($request) {
+        $data = $request->data();
+
+        return $request->method() === 'POST'
+            && $request->url() === 'https://services.leadconnectorhq.com/contacts/upsert'
+            && $request->hasHeader('Authorization', 'Bearer test-pit-token')
+            && $request->hasHeader('Version', '2021-07-28')
+            && ($data['locationId'] ?? null) === 'loc_test_123'
+            && ($data['email'] ?? null) === 'ghl-beta@example.com'
+            && ($data['firstName'] ?? null) === 'Ghl'
+            && ($data['lastName'] ?? null) === 'Beta User'
+            && ! array_key_exists('tags', $data)
+            && ! array_key_exists('customFields', $data);
+    });
+
+    Http::assertSent(function ($request) {
+        $data = $request->data();
+        $tags = collect($data['tags'] ?? []);
+
+        return $request->method() === 'POST'
+            && str_ends_with($request->url(), '/contacts/ct_test_123/tags')
+            && $tags->contains('kinsenas-beta')
+            && $tags->contains('beta-pending');
+    });
+
+    Http::assertSent(function ($request) {
+        $data = $request->data();
+        $tags = collect($data['tags'] ?? []);
+
+        return $request->method() === 'POST'
+            && str_ends_with($request->url(), '/contacts/ct_test_123/tags')
+            && $tags->contains('kinsenas-user')
+            && $tags->contains('registered');
+    });
+});
+
+it('does not call GHL when enabled but PIT is missing', function () {
+    config([
+        'services.ghl.enabled' => true,
+        'services.ghl.pit' => '',
+        'services.ghl.location_id' => 'loc_test_123',
+    ]);
+
+    Http::fake();
+
+    $this->post(route('register.store'), [
+        'name' => 'No Pit User',
+        'email' => 'no-pit@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ]);
+
+    Http::assertNothingSent();
+});
+
+it('upserts a GHL contact with approved tags when admin approves', function () {
+    fakeGhlApi();
+
+    $admin = User::factory()->create(['email' => 'admin-ghl@example.com', 'is_platform_admin' => true]);
+    $applicant = User::factory()->betaPending()->create([
+        'name' => 'Approve Me',
+        'email' => 'approve-ghl@example.com',
+    ]);
+
+    $this->actingAs($admin)->post(route('admin.beta-applications.approve', $applicant));
+
+    Http::assertSent(function ($request) {
+        $data = $request->data();
+
+        return $request->method() === 'POST'
+            && $request->url() === 'https://services.leadconnectorhq.com/contacts/upsert'
+            && ($data['email'] ?? null) === 'approve-ghl@example.com'
+            && ! array_key_exists('tags', $data);
+    });
+
+    Http::assertSent(function ($request) {
+        $data = $request->data();
+        $tags = collect($data['tags'] ?? []);
+
+        return $request->method() === 'POST'
+            && str_ends_with($request->url(), '/contacts/ct_test_123/tags')
+            && $tags->contains('kinsenas-beta')
+            && $tags->contains('beta-approved');
+    });
+
+    Http::assertSent(function ($request) {
+        $data = $request->data();
+        $tags = collect($data['tags'] ?? []);
+
+        return $request->method() === 'DELETE'
+            && str_ends_with($request->url(), '/contacts/ct_test_123/tags')
+            && $tags->contains('beta-pending')
+            && $tags->contains('beta-rejected');
+    });
 });
 
 it('allows admin to approve a pending beta application', function () {

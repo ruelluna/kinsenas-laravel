@@ -9,6 +9,8 @@ use App\Http\Requests\Teams\RespondToTeamInvitationRequest;
 use App\Models\Team;
 use App\Models\TeamInvitation;
 use App\Notifications\Teams\TeamInvitation as TeamInvitationNotification;
+use App\Services\Marketing\GhlUserTagService;
+use App\Support\Marketing\GhlTagCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -17,6 +19,8 @@ use Inertia\Inertia;
 
 class TeamInvitationController extends Controller
 {
+    public function __construct(private GhlUserTagService $ghlUserTagService) {}
+
     /**
      * Store a newly created invitation.
      */
@@ -33,6 +37,13 @@ class TeamInvitationController extends Controller
 
         Notification::route('mail', $invitation->email)
             ->notify(new TeamInvitationNotification($invitation));
+
+        $this->ghlUserTagService->dispatch(
+            $request->user(),
+            [GhlTagCatalog::TEAM_INVITE_SENT],
+            [],
+            ['event' => 'team_invite_sent', 'team_id' => $team->id],
+        );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Invitation sent.')]);
 
@@ -74,6 +85,13 @@ class TeamInvitationController extends Controller
 
             $user->switchTeam($team);
         });
+
+        $this->ghlUserTagService->dispatch(
+            $user,
+            [GhlTagCatalog::TEAM_MEMBER],
+            [],
+            ['event' => 'team_invite_accepted', 'team_id' => $invitation->team_id],
+        );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Invitation accepted.')]);
 

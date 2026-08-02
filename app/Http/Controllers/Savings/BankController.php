@@ -7,6 +7,7 @@ use App\Http\Requests\Savings\SaveBankRequest;
 use App\Models\Bank;
 use App\Models\BankInstitution;
 use App\Models\Team;
+use App\Services\Marketing\BankGhlTagService;
 use App\Services\Savings\BankAccountSetupService;
 use App\Services\Savings\BankPayloadMapper;
 use App\Services\Savings\FundBalanceService;
@@ -22,6 +23,7 @@ class BankController extends Controller
         private SavingsPlanService $planService,
         private FundBalanceService $fundBalanceService,
         private BankAccountSetupService $bankAccountSetupService,
+        private BankGhlTagService $bankGhlTagService,
     ) {}
 
     public function index(Request $request, Team $current_team): Response
@@ -50,6 +52,10 @@ class BankController extends Controller
 
         if (! empty($data['bank_institution_id'])) {
             $institution = BankInstitution::query()->findOrFail($data['bank_institution_id']);
+            $isFirstBankOnTeam = ! $current_team->banks()->exists();
+            $isFirstInstitutionOnTeam = ! $current_team->banks()
+                ->where('bank_institution_id', $institution->id)
+                ->exists();
 
             if ($institution->supportsSavingsSpaces()) {
                 $this->bankAccountSetupService->createSavingsSpaces(
@@ -57,6 +63,15 @@ class BankController extends Controller
                     $institution,
                     $data['main_label'] ?? $institution->savingsSpacesConfig()['main_label'] ?? 'Main account',
                     $data['spaces'] ?? [],
+                );
+
+                $this->bankGhlTagService->syncBankAdded(
+                    $request->user(),
+                    $current_team->fresh(),
+                    $institution,
+                    withSavingsSpaces: true,
+                    isFirstBankOnTeam: $isFirstBankOnTeam,
+                    isFirstInstitutionOnTeam: $isFirstInstitutionOnTeam,
                 );
 
                 Inertia::flash('toast', ['type' => 'success', 'message' => __('GoTyme account and GoSave spaces added.')]);
@@ -69,7 +84,25 @@ class BankController extends Controller
             }
         }
 
+        $isFirstBankOnTeam = ! $current_team->banks()->exists();
+        $isFirstInstitutionOnTeam = ! empty($data['bank_institution_id'])
+            && ! $current_team->banks()->where('bank_institution_id', $data['bank_institution_id'])->exists();
+
         $current_team->banks()->create($data);
+
+        if (! empty($data['bank_institution_id'])) {
+            $institution = BankInstitution::query()->find($data['bank_institution_id']);
+
+            if ($institution !== null) {
+                $this->bankGhlTagService->syncBankAdded(
+                    $request->user(),
+                    $current_team->fresh(),
+                    $institution,
+                    isFirstBankOnTeam: $isFirstBankOnTeam,
+                    isFirstInstitutionOnTeam: $isFirstInstitutionOnTeam,
+                );
+            }
+        }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Bank added.')]);
 
@@ -91,7 +124,18 @@ class BankController extends Controller
     {
         abort_if($bank->team_id !== $current_team->id, 404);
 
+        $bank->load('institution');
+        $institution = $bank->institution;
+
         $bank->delete();
+
+        if ($institution !== null) {
+            $this->bankGhlTagService->syncBankRemoved(
+                $request->user(),
+                $current_team->fresh(),
+                $institution,
+            );
+        }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Bank removed.')]);
 

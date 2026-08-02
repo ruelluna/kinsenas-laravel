@@ -13,6 +13,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->seed(BillingSeeder::class);
+    config(['billing.mode' => 'live']);
 });
 
 it('registration screen can be rendered', function () {
@@ -31,7 +32,8 @@ it('registration screen includes trial offer and password rules', function () {
         ->has('trialOffer', fn (Assert $offer) => $offer
             ->where('name', 'Basic')
             ->where('trialDays', 14)
-            ->has('prices', 2),
+            ->has('prices', 2)
+            ->etc(),
         ),
     );
 });
@@ -73,9 +75,10 @@ it('new users can register', function () {
     expect($personalTeam)->not->toBeNull()
         ->and($personalTeam->subscription)->not->toBeNull()
         ->and($personalTeam->subscription->status)->toBe(SubscriptionStatus::Trialing)
-        ->and($personalTeam->subscription->trial_ends_at)->not->toBeNull();
+        ->and($personalTeam->subscription->trial_ends_at)->not->toBeNull()
+        ->and($user->hasVerifiedEmail())->toBeFalse();
 
-    $response->assertRedirect("/{$personalTeam->slug}/dashboard");
+    $response->assertRedirect(route('verification.notice', absolute: false));
 });
 
 it('registration creates a user named default workspace', function () {
@@ -102,6 +105,8 @@ it('registration assigns distinct slugs when display names collide', function ()
         'password' => 'password',
         'password_confirmation' => 'password',
     ]);
+
+    $this->post(route('logout'));
 
     $this->post(route('register.store'), [
         'name' => 'Juan Dela Cruz',

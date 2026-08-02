@@ -8,6 +8,7 @@ use App\Http\Requests\Savings\UpdateFundSpendRequest;
 use App\Models\FundSpend;
 use App\Models\SavingsCategory;
 use App\Models\Team;
+use App\Services\Marketing\ActivationGhlTagService;
 use App\Services\Savings\FundBalanceService;
 use App\Services\Savings\FundSpendService;
 use App\Services\Savings\FundTransferService;
@@ -25,6 +26,7 @@ class FundSpendController extends Controller
         private FundBalanceService $balanceService,
         private FundSpendService $fundSpendService,
         private FundTransferService $fundTransferService,
+        private ActivationGhlTagService $activationGhlTagService,
     ) {}
 
     public function index(Request $request, Team $current_team): Response
@@ -86,6 +88,8 @@ class FundSpendController extends Controller
             $request->user(),
             $receiptImagePath,
         );
+
+        $this->activationGhlTagService->syncFirstSpend($request->user(), $current_team);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Spending recorded.')]);
 

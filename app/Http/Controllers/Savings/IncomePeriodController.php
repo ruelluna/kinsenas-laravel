@@ -8,6 +8,7 @@ use App\Http\Requests\Savings\SaveIncomePeriodRequest;
 use App\Models\IncomePeriod;
 use App\Models\SavingsCategory;
 use App\Models\Team;
+use App\Services\Marketing\ActivationGhlTagService;
 use App\Services\Savings\FundBalanceService;
 use App\Services\Savings\IncomeCalculationService;
 use App\Services\Savings\SavingsPlanService;
@@ -22,6 +23,7 @@ class IncomePeriodController extends Controller
         private SavingsPlanService $planService,
         private IncomeCalculationService $incomeService,
         private FundBalanceService $fundBalanceService,
+        private ActivationGhlTagService $activationGhlTagService,
     ) {}
 
     public function index(Request $request, Team $current_team): Response
@@ -126,6 +128,8 @@ class IncomePeriodController extends Controller
             $request->validated('period_start'),
         );
 
+        $this->activationGhlTagService->syncFirstIncomeEntered($request->user(), $current_team);
+
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Income period saved.')]);
 
         return back();
@@ -136,6 +140,8 @@ class IncomePeriodController extends Controller
         abort_if($incomePeriod->plan_id !== $this->planService->forTeam($current_team, $request->user())?->id, 404);
 
         $this->incomeService->lock($incomePeriod, $request->user());
+
+        $this->activationGhlTagService->syncIncomeLocked($request->user(), $current_team);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Income locked.')]);
 

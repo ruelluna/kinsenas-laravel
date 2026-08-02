@@ -7,6 +7,8 @@ use App\Enums\PaymentSubmissionStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Billing\SubmitPaymentRequest;
 use App\Models\PaymentSubmission;
+use App\Services\Marketing\GhlUserTagService;
+use App\Support\Marketing\GhlTagCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,6 +16,8 @@ use Inertia\Response;
 
 class PaymentSubmissionController extends Controller
 {
+    public function __construct(private GhlUserTagService $ghlUserTagService) {}
+
     public function create(Request $request): Response|RedirectResponse
     {
         if (BillingMode::isOpenBeta()) {
@@ -38,7 +42,7 @@ class PaymentSubmissionController extends Controller
 
         abort_if($team === null, 404);
 
-        $this->authorize('manageBilling', $team);
+        abort_unless($user->canManageBilling($team), 403);
 
         $hasPending = PaymentSubmission::query()
             ->where('team_id', $team->id)
@@ -60,6 +64,13 @@ class PaymentSubmissionController extends Controller
             'reference_number' => $request->validated('reference_number'),
             'proof_image_path' => $path,
         ]);
+
+        $this->ghlUserTagService->dispatch(
+            $user,
+            [GhlTagCatalog::PAYMENT_SUBMITTED],
+            [],
+            ['event' => 'payment_submitted', 'team_id' => $team->id],
+        );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Payment submitted for review.')]);
 

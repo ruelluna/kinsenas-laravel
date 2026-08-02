@@ -10,17 +10,21 @@ use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\Team;
 use App\Models\User;
+use App\Services\Marketing\GhlUserTagService;
+use App\Support\Marketing\GhlTagCatalog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class SubscriptionService
 {
+    public function __construct(private GhlUserTagService $ghlUserTagService) {}
+
     public function startTrial(Team $team, ?SubscriptionPlan $plan = null): Subscription
     {
         $plan ??= $this->defaultPlan();
 
         return DB::transaction(function () use ($team, $plan) {
-            return Subscription::query()->updateOrCreate(
+            $subscription = Subscription::query()->updateOrCreate(
                 ['team_id' => $team->id],
                 [
                     'plan_id' => $plan->id,
@@ -29,6 +33,10 @@ class SubscriptionService
                     'current_period_ends_at' => null,
                 ],
             );
+
+            $this->syncTrialStartedTag($team);
+
+            return $subscription;
         });
     }
 
@@ -145,6 +153,8 @@ class SubscriptionService
                 'team_id' => $subscription->team_id,
                 'reason' => $reason,
             ]);
+
+            $this->syncSubscriptionCancelledTag($subscription->team);
 
             return $subscription->fresh('plan');
         });
@@ -286,5 +296,37 @@ class SubscriptionService
         }
 
         return $plan;
+    }
+
+    private function syncTrialStartedTag(Team $team): void
+    {
+        $owner = $team->owner();
+
+        if (! $owner instanceof User) {
+            return;
+        }
+
+        $this->ghlUserTagService->dispatch(
+            $owner,
+            [GhlTagCatalog::TRIAL_ACTIVE],
+            [],
+            ['event' => 'trial_started', 'team_id' => $team->id],
+        );
+    }
+
+    private function syncSubscriptionCancelledTag(Team $team): void
+    {
+        $owner = $team->owner();
+
+        if (! $owner instanceof User) {
+            return;
+        }
+
+        $this->ghlUserTagService->dispatch(
+            $owner,
+            [GhlTagCatalog::SUBSCRIPTION_CANCELLED],
+            [GhlTagCatalog::SUBSCRIPTION_ACTIVE, GhlTagCatalog::TRIAL_ACTIVE],
+            ['event' => 'subscription_cancelled', 'team_id' => $team->id],
+        );
     }
 }

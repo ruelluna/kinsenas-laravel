@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Marketing;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Marketing\StoreSurveyResponseRequest;
+use App\Jobs\SyncSurveyResponseToGhl;
 use App\Models\SurveyResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
@@ -28,6 +29,8 @@ class SurveyResponseController extends Controller
             'result' => $surveyResponse->result->value,
             'email' => $surveyResponse->email,
         ]);
+
+        SyncSurveyResponseToGhl::dispatch($surveyResponse);
 
         return response()->json([
             'id' => $surveyResponse->id,

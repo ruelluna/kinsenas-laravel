@@ -32,5 +32,9 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="BILLING_MODE" value="live" force="true"/>
+        <env name="GHL_ENABLED" value="false" force="true"/>
+        <env name="GHL_PIT" value="" force="true"/>
+        <env name="GHL_LOCATION_ID" value="" force="true"/>
     </php>
 </phpunit>

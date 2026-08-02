@@ -8,6 +8,7 @@ use App\Http\Requests\Savings\SaveSavingsPlanRequest;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlanPageGuidance;
 use App\Models\Team;
+use App\Services\Marketing\ActivationGhlTagService;
 use App\Services\Savings\BankPayloadMapper;
 use App\Services\Savings\FundBalanceService;
 use App\Services\Savings\SavingsPlanService;
@@ -21,6 +22,7 @@ class SavingsPlanController extends Controller
     public function __construct(
         private SavingsPlanService $planService,
         private FundBalanceService $fundBalanceService,
+        private ActivationGhlTagService $activationGhlTagService,
     ) {}
 
     public function show(Request $request, Team $current_team): Response
@@ -94,6 +96,8 @@ class SavingsPlanController extends Controller
             $template,
             $template->name,
         );
+
+        $this->activationGhlTagService->syncPlanCreated($request->user(), $current_team);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Savings plan created.')]);
 
