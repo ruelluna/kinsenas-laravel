@@ -34,4 +34,17 @@ class SavingsPlanPolicy
 
         return $plan->is_shared_with_team && $user->hasTeamPermission($team, TeamPermission::TeamUpdate);
     }
+
+    public function delete(User $user, SavingsPlan $plan, Team $team): bool
+    {
+        if ($plan->team_id !== $team->id) {
+            return false;
+        }
+
+        if ($plan->created_by_user_id !== $user->id) {
+            return false;
+        }
+
+        return ! $plan->hasIncomePeriod();
+    }
 }

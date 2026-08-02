@@ -1,5 +1,5 @@
-import { Form, Head, Link, usePage } from '@inertiajs/react';
-import { AlertTriangle, Plus, Trash2 } from 'lucide-react';
+import { Form, Head, usePage } from '@inertiajs/react';
+import { AlertTriangle, ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -229,6 +229,7 @@ function SavingsPlanEditor({
 }) {
     const [rows, setRows] = useState<CategoryRow[]>(() => rowsFromPlan(plan.categories));
     const [confirmOpen, setConfirmOpen] = useState(false);
+    const [chooseFormulaOpen, setChooseFormulaOpen] = useState(false);
     const submitButtonRef = useRef<HTMLButtonElement>(null);
     const skipCustomConfirmRef = useRef(false);
 
@@ -347,7 +348,20 @@ function SavingsPlanEditor({
     return (
         <div data-tour="plan-main">
             <Head title="Savings Plan" />
-            <Heading variant="small" title={plan.name} description={planDescription} />
+            <div className="flex flex-wrap items-start justify-between gap-4">
+                <Heading variant="small" title={plan.name} description={planDescription} />
+                {!plan.hasIncome && (
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setChooseFormulaOpen(true)}
+                    >
+                        <ArrowLeft className="size-4" />
+                        Choose a different formula
+                    </Button>
+                )}
+            </div>
 
             {!plan.hasIncome && (
                 <BeforeChooseAlert note={pageGuidance.beforeChooseNote} />
@@ -787,6 +801,39 @@ function SavingsPlanEditor({
                         <Button type="button" onClick={confirmSave}>
                             Save anyway
                         </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={chooseFormulaOpen} onOpenChange={setChooseFormulaOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Choose a different formula?</DialogTitle>
+                        <DialogDescription>
+                            This removes your current plan setup and returns you to the formula
+                            chooser. You have not entered income yet, so you can pick another split
+                            without losing historical data.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setChooseFormulaOpen(false)}
+                        >
+                            Keep this plan
+                        </Button>
+                        <Form
+                            action={`/${teamSlug}/savings/plan`}
+                            method="delete"
+                            options={{ preserveScroll: true }}
+                        >
+                            {({ processing }) => (
+                                <Button type="submit" variant="destructive" disabled={processing}>
+                                    Choose another formula
+                                </Button>
+                            )}
+                        </Form>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

@@ -587,3 +587,47 @@ it('rejects opening balance changes after income is recorded', function () {
 
     $response->assertSessionHasErrors('categories.0.opening_balance');
 });
+
+it('allows discarding plan before income to return to formula chooser', function () {
+    $user = User::factory()->create();
+    test()->unlockVaultFor($user);
+    $template = SavingsFormulaTemplate::query()->where('slug', 'trc-savings')->firstOrFail();
+
+    $this->actingAs($user)->post(route('savings.plan.from-template', [
+        'current_team' => $user->currentTeam->slug,
+        'template' => $template->id,
+    ]));
+
+    $this->assertDatabaseCount('savings_plans', 1);
+
+    $response = $this->actingAs($user)->delete(route('savings.plan.destroy', [
+        'current_team' => $user->currentTeam->slug,
+    ]));
+
+    $response->assertRedirect(route('savings.plan.show', [
+        'current_team' => $user->currentTeam->slug,
+    ]));
+    $this->assertDatabaseCount('savings_plans', 0);
+    $this->assertDatabaseCount('savings_categories', 0);
+
+    $showResponse = $this->actingAs($user)->get(route('savings.plan.show', [
+        'current_team' => $user->currentTeam->slug,
+    ]));
+
+    $showResponse->assertOk();
+    $showResponse->assertInertia(fn ($page) => $page
+        ->component('savings/plan')
+        ->where('plan', null),
+    );
+});
+
+it('cannot discard plan after income exists', function () {
+    [$user] = createUserWithSavingsPlanAndIncome();
+
+    $response = $this->actingAs($user)->delete(route('savings.plan.destroy', [
+        'current_team' => $user->currentTeam->slug,
+    ]));
+
+    $response->assertForbidden();
+    $this->assertDatabaseCount('savings_plans', 1);
+});

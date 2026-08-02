@@ -17,6 +17,7 @@ Route::prefix('savings')
             Route::post('plan/from-template/{template}', [SavingsPlanController::class, 'storeFromTemplate'])->name('plan.from-template');
             Route::post('plan/custom', [SavingsPlanController::class, 'storeCustom'])->name('plan.custom');
             Route::put('plan', [SavingsPlanController::class, 'update'])->name('plan.update');
+            Route::delete('plan', [SavingsPlanController::class, 'destroy'])->name('plan.destroy');
 
             Route::get('income', [IncomePeriodController::class, 'index'])->name('income.index');
             Route::get('income/{incomePeriod}', [IncomePeriodController::class, 'show'])->name('income.show');

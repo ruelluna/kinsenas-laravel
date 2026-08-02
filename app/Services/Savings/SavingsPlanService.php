@@ -467,4 +467,15 @@ class SavingsPlanService
 
         return $plan->fresh(['categories.deductFromCategory']);
     }
+
+    public function discardDraft(SavingsPlan $plan): void
+    {
+        if ($plan->hasIncomePeriod()) {
+            throw ValidationException::withMessages([
+                'plan' => __('You cannot change formulas after income has been entered.'),
+            ]);
+        }
+
+        $plan->delete();
+    }
 }

@@ -150,4 +150,22 @@ class SavingsPlanController extends Controller
 
         return back();
     }
+
+    public function destroy(Request $request, Team $current_team): RedirectResponse
+    {
+        $plan = $this->planService->forTeam($current_team, $request->user());
+
+        abort_if($plan === null, 404);
+
+        abort_if(
+            ! $request->user()->can('delete', [$plan, $current_team]),
+            403,
+        );
+
+        $this->planService->discardDraft($plan);
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Plan removed. Choose a savings formula below.')]);
+
+        return redirect()->route('savings.plan.show', ['current_team' => $current_team->slug]);
+    }
 }
