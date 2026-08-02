@@ -27,7 +27,7 @@ export default function SavingsReports({ totals }: Props) {
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="border-b bg-muted/50 text-left">
-                                <th className="px-4 py-3 font-medium">Fund</th>
+                                <th className="px-4 py-3 font-medium">Fund bucket</th>
                                 <th className="px-4 py-3 font-medium text-right">Allocated</th>
                                 <th className="px-4 py-3 font-medium text-right">Transferred</th>
                                 <th className="px-4 py-3 font-medium text-right">Spent</th>

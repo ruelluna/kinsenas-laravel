@@ -13,7 +13,7 @@ export default function CategoryBankSelect({ banks, selectedId, onChange, namePr
     if (banks.length === 0) {
         return (
             <p className="text-xs text-muted-foreground">
-                Add banks under Banks in the sidebar first, then assign an account to this fund.
+                Add banks under Banks in the sidebar first, then assign an account to this fund bucket.
             </p>
         );
     }
@@ -32,7 +32,7 @@ export default function CategoryBankSelect({ banks, selectedId, onChange, namePr
                 placeholder="Select a bank"
             />
             <p className="text-xs text-muted-foreground">
-                One bank or GoSave space per fund. The same account can be used for multiple funds.
+                One bank or GoSave space per fund bucket. The same account can be used for multiple fund buckets.
             </p>
         </div>
     );

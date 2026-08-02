@@ -51,7 +51,7 @@ export default function TransfersIndex({
                 <Heading
                     variant="small"
                     title="Transfers"
-                    description={`Move savings between funds in ${plan.name}.`}
+                    description={`Move savings between fund buckets in ${plan.name}.`}
                 />
                 {plan.hasLockedIncome && (
                     <Button onClick={() => openAddModal()}>

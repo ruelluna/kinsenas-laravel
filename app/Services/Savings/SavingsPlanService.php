@@ -148,7 +148,7 @@ class SavingsPlanService
 
         if ($existing->isEmpty()) {
             throw ValidationException::withMessages([
-                'categories' => __('Cannot update categories for an empty plan.'),
+                'categories' => __('Cannot update fund buckets for an empty plan.'),
             ]);
         }
 
@@ -160,7 +160,7 @@ class SavingsPlanService
         foreach ($existing as $existingCategory) {
             if ($existingCategory->isPercentage() && ! $submittedIds->contains($existingCategory->id)) {
                 throw ValidationException::withMessages([
-                    'categories' => __('Percentage categories cannot be removed after income has been entered.'),
+                    'categories' => __('Percentage fund buckets cannot be removed after income has been entered.'),
                 ]);
             }
         }
@@ -176,7 +176,7 @@ class SavingsPlanService
 
                 if ($existingCategory === null) {
                     throw ValidationException::withMessages([
-                        "categories.{$index}.id" => __('Unknown category.'),
+                        "categories.{$index}.id" => __('Unknown fund bucket.'),
                     ]);
                 }
 
@@ -189,7 +189,7 @@ class SavingsPlanService
 
                 if (($category['allocation_type'] ?? '') !== CategoryAllocationType::Deduction->value) {
                     throw ValidationException::withMessages([
-                        "categories.{$index}.allocation_type" => __('Custom categories cannot become percentage categories.'),
+                        "categories.{$index}.allocation_type" => __('Custom fund buckets cannot become percentage fund buckets.'),
                     ]);
                 }
 
@@ -200,7 +200,7 @@ class SavingsPlanService
 
             if (($category['allocation_type'] ?? '') === CategoryAllocationType::Percentage->value) {
                 throw ValidationException::withMessages([
-                    "categories.{$index}.allocation_type" => __('Cannot add percentage categories after income has been entered.'),
+                    "categories.{$index}.allocation_type" => __('Cannot add percentage fund buckets after income has been entered.'),
                 ]);
             }
 
@@ -301,13 +301,13 @@ class SavingsPlanService
     ): void {
         if (($category['allocation_type'] ?? '') !== CategoryAllocationType::Percentage->value) {
             throw ValidationException::withMessages([
-                "categories.{$index}.allocation_type" => __('Percentage categories cannot be changed after income has been entered.'),
+                "categories.{$index}.allocation_type" => __('Percentage fund buckets cannot be changed after income has been entered.'),
             ]);
         }
 
         if ($existing->name !== $category['name']) {
             throw ValidationException::withMessages([
-                "categories.{$index}.name" => __('Percentage category names cannot be changed after income has been entered.'),
+                "categories.{$index}.name" => __('Percentage fund bucket names cannot be changed after income has been entered.'),
             ]);
         }
 
@@ -331,7 +331,7 @@ class SavingsPlanService
 
         if ($sourceIndex === null) {
             throw ValidationException::withMessages([
-                "categories.{$index}.deduct_from_index" => __('Select a source category for this custom category.'),
+                "categories.{$index}.deduct_from_index" => __('Select a source fund bucket for this custom fund bucket.'),
             ]);
         }
 
@@ -339,13 +339,13 @@ class SavingsPlanService
 
         if ($source === null || ($source['allocation_type'] ?? '') !== CategoryAllocationType::Percentage->value) {
             throw ValidationException::withMessages([
-                "categories.{$index}.deduct_from_index" => __('Custom categories must deduct from a percentage category.'),
+                "categories.{$index}.deduct_from_index" => __('Custom fund buckets must deduct from a percentage fund bucket.'),
             ]);
         }
 
         if ($sourceIndex === $index) {
             throw ValidationException::withMessages([
-                "categories.{$index}.deduct_from_index" => __('A category cannot deduct from itself.'),
+                "categories.{$index}.deduct_from_index" => __('A fund bucket cannot deduct from itself.'),
             ]);
         }
     }
@@ -361,7 +361,7 @@ class SavingsPlanService
 
         if (round($percentageTotal, 2) !== 100.0) {
             throw ValidationException::withMessages([
-                'categories' => __('Category percentages must total exactly 100%.'),
+                'categories' => __('Fund bucket percentages must total exactly 100%.'),
             ]);
         }
 

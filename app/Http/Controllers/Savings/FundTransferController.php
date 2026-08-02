@@ -128,7 +128,7 @@ class FundTransferController extends Controller
 
         if (! $exists) {
             throw ValidationException::withMessages([
-                $field => __('The selected fund is not part of your savings plan.'),
+                $field => __('The selected fund bucket is not part of your savings plan.'),
             ]);
         }
     }

@@ -67,7 +67,7 @@ class SaveSavingsPlanRequest extends FormRequest
                 }
 
                 if ($type === CategoryAllocationType::Deduction->value && ! isset($category['deduct_from_index'])) {
-                    $validator->errors()->add("categories.{$index}.deduct_from_index", __('Source category is required.'));
+                    $validator->errors()->add("categories.{$index}.deduct_from_index", __('Source fund bucket is required.'));
                 }
             }
         });

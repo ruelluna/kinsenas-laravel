@@ -29,7 +29,7 @@ export const ONBOARDING_TOUR_STEPS: OnboardingTourStep[] = [
         pathIncludes: null,
         title: 'Banks come first',
         description:
-            'Open Banks and add every account you use. You’ll assign savings funds to these accounts next.',
+            'Open Banks and add every account you use. You’ll assign fund buckets to these accounts next.',
     },
     {
         id: 'banks-intro',
@@ -54,7 +54,7 @@ export const ONBOARDING_TOUR_STEPS: OnboardingTourStep[] = [
         pathIncludes: null,
         title: 'Then choose a plan',
         description:
-            'After your banks are listed, pick a savings formula and assign each fund to an account.',
+            'After your banks are listed, pick a savings formula and assign each fund bucket to an account.',
     },
     {
         id: 'plan-main',
@@ -63,7 +63,7 @@ export const ONBOARDING_TOUR_STEPS: OnboardingTourStep[] = [
         navigateTo: 'savings/plan',
         title: 'Your savings formula',
         description:
-            'Compare formulas, then assign each fund to a bank so you know where money should live.',
+            'Compare formulas, then assign each fund bucket to a bank so you know where money should live.',
     },
     {
         id: 'nav-income',

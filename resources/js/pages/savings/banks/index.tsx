@@ -229,7 +229,7 @@ function BankListItem({
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="border-b bg-muted/50 text-left">
-                                <th className="px-3 py-2 font-medium">Fund</th>
+                                <th className="px-3 py-2 font-medium">Fund bucket</th>
                                 <th className="px-3 py-2 text-right font-medium">Balance</th>
                             </tr>
                         </thead>

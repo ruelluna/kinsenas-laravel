@@ -37,7 +37,7 @@ class SaveFundTransferRequest extends FormRequest
     {
         return [
             'description.required' => __('Describe what this transfer was for.'),
-            'to_category_id.different' => __('Choose a different fund to transfer to.'),
+            'to_category_id.different' => __('Choose a different fund bucket to transfer to.'),
         ];
     }
 }

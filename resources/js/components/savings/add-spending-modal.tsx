@@ -97,7 +97,7 @@ export default function AddSpendingModal({
                             </DialogHeader>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="category_id">Fund</Label>
+                                <Label htmlFor="category_id">Fund bucket</Label>
                                 <select
                                     id="category_id"
                                     name="category_id"

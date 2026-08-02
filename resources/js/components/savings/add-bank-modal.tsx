@@ -90,7 +90,7 @@ export default function AddBankModal({ open, onOpenChange, institutions }: Props
                             <DialogHeader>
                                 <DialogTitle>Add bank</DialogTitle>
                                 <DialogDescription>
-                                    Link a bank account where you hold savings. Assign funds to
+                                    Link a bank account where you hold savings. Assign fund buckets to
                                     each account in your savings plan.
                                 </DialogDescription>
                             </DialogHeader>

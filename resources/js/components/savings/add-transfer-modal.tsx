@@ -167,7 +167,7 @@ export default function AddTransferModal({
                                 </DialogHeader>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="from_category_id">From fund</Label>
+                                    <Label htmlFor="from_category_id">From fund bucket</Label>
                                     <select
                                         id="from_category_id"
                                         name="from_category_id"
@@ -193,7 +193,7 @@ export default function AddTransferModal({
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="to_category_id">To fund</Label>
+                                    <Label htmlFor="to_category_id">To fund bucket</Label>
                                     <select
                                         id="to_category_id"
                                         name="to_category_id"

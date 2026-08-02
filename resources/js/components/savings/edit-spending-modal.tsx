@@ -105,12 +105,12 @@ export default function EditSpendingModal({
                             <DialogHeader>
                                 <DialogTitle>Edit spending</DialogTitle>
                                 <DialogDescription>
-                                    Update amount, fund, date, or description.
+                                    Update amount, fund bucket, date, or description.
                                 </DialogDescription>
                             </DialogHeader>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="edit_category_id">Fund</Label>
+                                <Label htmlFor="edit_category_id">Fund bucket</Label>
                                 <select
                                     id="edit_category_id"
                                     name="category_id"

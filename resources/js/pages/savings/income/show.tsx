@@ -136,10 +136,10 @@ export default function IncomeShow({
                     className="mt-6 space-y-4 rounded-lg border p-4"
                 >
                     <div>
-                        <h3 className="font-medium">Custom categories</h3>
+                        <h3 className="font-medium">Custom fund buckets</h3>
                         <p className="mt-1 text-sm text-muted-foreground">
                             Optional amounts for this income period. Clear a field to skip the
-                            deduction — the category stays on your plan.
+                            deduction — the fund bucket stays on your plan.
                         </p>
                     </div>
 
@@ -155,7 +155,7 @@ export default function IncomeShow({
                                     {category.name}
                                 </Label>
                                 <p className="text-xs text-muted-foreground">
-                                    From {category.deductFromCategoryName ?? 'source category'}
+                                    From {category.deductFromCategoryName ?? 'source fund bucket'}
                                     {category.planDefaultAmount
                                         ? ` · plan default ${formatMoney(category.planDefaultAmount)}`
                                         : ''}
@@ -194,7 +194,7 @@ export default function IncomeShow({
                 <table className="w-full text-sm">
                     <thead>
                         <tr className="border-b bg-muted/50 text-left">
-                            <th className="px-4 py-3 font-medium">Category</th>
+                            <th className="px-4 py-3 font-medium">Fund bucket</th>
                             <th className="px-4 py-3 font-medium text-right">Allocation</th>
                             <th className="px-4 py-3 font-medium text-right">Amount</th>
                             {fundBalances.length > 0 && (

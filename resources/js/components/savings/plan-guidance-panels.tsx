@@ -49,7 +49,7 @@ export function PlanEditRulesPanel({
                 <table className="w-full min-w-[320px] text-left text-sm">
                     <thead>
                         <tr className="border-b bg-muted/40">
-                            <th className="px-3 py-2 font-medium">Category type</th>
+                            <th className="px-3 py-2 font-medium">Fund bucket type</th>
                             <th className="px-3 py-2 font-medium">After first income</th>
                         </tr>
                     </thead>
@@ -105,7 +105,7 @@ export function BanksFirstAlert({
             <AlertDescription className="space-y-3">
                 <p>
                     Add the bank accounts you use before picking a formula. After you choose a plan,
-                    you&apos;ll assign each fund to one of those accounts. You can still pick a plan
+                    you&apos;ll assign each fund bucket to one of those accounts. You can still pick a plan
                     now, but bank assignment will be empty until you add banks.
                 </p>
                 <Button variant="outline" size="sm" asChild>

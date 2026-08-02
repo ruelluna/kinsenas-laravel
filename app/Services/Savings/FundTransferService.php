@@ -25,7 +25,7 @@ class FundTransferService
     ): FundTransfer {
         if ($fromCategoryId === $toCategoryId) {
             throw ValidationException::withMessages([
-                'to_category_id' => __('Choose a different fund to transfer to.'),
+                'to_category_id' => __('Choose a different fund bucket to transfer to.'),
             ]);
         }
 
@@ -116,7 +116,7 @@ class FundTransferService
 
         if ($category === null) {
             throw ValidationException::withMessages([
-                'category_id' => __('The selected fund is not part of your savings plan.'),
+                'category_id' => __('The selected fund bucket is not part of your savings plan.'),
             ]);
         }
 
@@ -126,7 +126,7 @@ class FundTransferService
 
         if ($category->bank_id !== $bankId) {
             throw ValidationException::withMessages([
-                'bank_id' => __('This bank is not assigned to the selected fund.'),
+                'bank_id' => __('This bank is not assigned to the selected fund bucket.'),
             ]);
         }
     }
@@ -140,7 +140,7 @@ class FundTransferService
 
         if ($category === null) {
             throw ValidationException::withMessages([
-                $field => __('The selected fund is not part of your savings plan.'),
+                $field => __('The selected fund bucket is not part of your savings plan.'),
             ]);
         }
 

@@ -136,9 +136,9 @@ const QUESTION_PROMPTS: Record<
         type: 'multi',
     },
     q6: {
-        en: 'Do you currently split your income into categories?',
-        tl: 'Hinahati mo ba ang income mo sa categories ngayon?',
-        ceb: 'Gibahin ba nimo ang imong income sa categories karon?',
+        en: 'Do you currently split your income into fund buckets?',
+        tl: 'Hinahati mo ba ang income mo sa fund buckets ngayon?',
+        ceb: 'Gibahin ba nimo ang imong income sa fund buckets karon?',
         type: 'single',
     },
     q7: {

@@ -32,7 +32,7 @@ export default function SummaryStatCards({ setup, summary, quickLinks }: Props) 
                 icon={Wallet}
                 title="Total remaining"
                 value={formatMoney(summary.totalRemaining)}
-                description="Across all funds"
+                description="Across all fund buckets"
             />
             <StatCard
                 icon={Landmark}
@@ -70,7 +70,7 @@ function attentionDescription(summary: DashboardSummary): string {
 
     if (summary.lowBalanceFunds.length > 0) {
         parts.push(
-            `${summary.lowBalanceFunds.length} low fund${summary.lowBalanceFunds.length === 1 ? '' : 's'}`,
+            `${summary.lowBalanceFunds.length} low fund bucket${summary.lowBalanceFunds.length === 1 ? '' : 's'}`,
         );
     }
 

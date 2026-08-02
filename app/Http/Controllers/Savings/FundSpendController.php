@@ -179,7 +179,7 @@ class FundSpendController extends Controller
 
         if (! $exists) {
             throw ValidationException::withMessages([
-                'category_id' => __('The selected fund is not part of your savings plan.'),
+                'category_id' => __('The selected fund bucket is not part of your savings plan.'),
             ]);
         }
     }

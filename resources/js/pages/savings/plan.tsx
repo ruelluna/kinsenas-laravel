@@ -330,8 +330,8 @@ function SavingsPlanEditor({
     };
 
     const planDescription = plan.percentagesLocked
-        ? 'Percentages are locked after your first income entry. You can add, edit, or remove custom categories anytime.'
-        : 'Percentage categories must total 100%. Custom categories can use optional defaults or amounts set per income.';
+        ? 'Percentages are locked after your first income entry. You can add, edit, or remove custom fund buckets anytime.'
+        : 'Percentage fund buckets must total 100%. Custom fund buckets can use optional defaults or amounts set per income.';
 
     return (
         <div data-tour="plan-main">
@@ -357,11 +357,11 @@ function SavingsPlanEditor({
             {plan.hasIncome && (
                 <Alert className="mt-6">
                     <AlertTriangle className="text-warning" />
-                    <AlertTitle>Custom category changes affect all income</AlertTitle>
+                    <AlertTitle>Custom fund bucket changes affect all income</AlertTitle>
                     <AlertDescription>
-                        Adding, editing, or removing a custom category updates this plan for
+                        Adding, editing, or removing a custom fund bucket updates this plan for
                         every income period — including locked periods. Past breakdowns and
-                        spending tied to a removed category may no longer match.
+                        spending tied to a removed fund bucket may no longer match.
                     </AlertDescription>
                 </Alert>
             )}
@@ -391,7 +391,7 @@ function SavingsPlanEditor({
                             <div key={row.key} className="rounded-lg border p-4">
                                 <div className="mb-4 flex items-center justify-between gap-2">
                                     <p className="text-sm font-medium">
-                                        Category {index + 1}
+                                        Fund bucket {index + 1}
                                         {rowLocked && (
                                             <span className="ml-2 text-xs font-normal text-muted-foreground">
                                                 Locked
@@ -608,7 +608,7 @@ function SavingsPlanEditor({
                                                     disabled={rowLocked}
                                                     required
                                                 >
-                                                    <option value="">Select a category</option>
+                                                    <option value="">Select a fund bucket</option>
                                                     {percentageRows.map(
                                                         ({ row: sourceRow, index: sourceIndex }) => (
                                                             <option
@@ -617,7 +617,7 @@ function SavingsPlanEditor({
                                                                 disabled={sourceIndex === index}
                                                             >
                                                                 {sourceRow.name ||
-                                                                    `Category ${sourceIndex + 1}`}
+                                                                    `Fund bucket ${sourceIndex + 1}`}
                                                             </option>
                                                         ),
                                                     )}
@@ -642,7 +642,7 @@ function SavingsPlanEditor({
 
                         <Button type="button" variant="outline" onClick={addRow}>
                             <Plus className="size-4" />
-                            {plan.percentagesLocked ? 'Add custom category' : 'Add category'}
+                            {plan.percentagesLocked ? 'Add custom fund bucket' : 'Add fund bucket'}
                         </Button>
 
                         {!plan.percentagesLocked && (
@@ -701,11 +701,11 @@ function SavingsPlanEditor({
             <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Save custom category changes?</DialogTitle>
+                        <DialogTitle>Save custom fund bucket changes?</DialogTitle>
                         <DialogDescription>
                             These changes apply to this savings plan for all income periods.
                             Locked periods, breakdowns, and spending linked to a removed custom
-                            category may no longer match historical records.
+                            fund bucket may no longer match historical records.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>

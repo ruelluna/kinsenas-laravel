@@ -18,7 +18,7 @@ export default function AdminFormulaTemplatesIndex({ templates }: Props) {
             <Heading
                 variant="small"
                 title="Savings formula templates"
-                description="Edit guidance, videos, and category descriptions shown when members choose a plan."
+                description="Edit guidance, videos, and fund bucket descriptions shown when members choose a plan."
             />
             <ul className="mt-6 space-y-3">
                 {templates.map((template) => (

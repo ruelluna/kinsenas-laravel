@@ -42,7 +42,7 @@ export default function AdminFormulaTemplateEdit({ template }: Props) {
             <Heading
                 variant="small"
                 title={template.name}
-                description={`Slug: ${template.slug}. Category names and percentages are fixed; edit descriptions and guidance below.`}
+                description={`Slug: ${template.slug}. Fund bucket names and percentages are fixed; edit descriptions and guidance below.`}
             />
             <Form
                 action={`/admin/formula-templates/${template.id}`}
@@ -80,7 +80,7 @@ export default function AdminFormulaTemplateEdit({ template }: Props) {
                 </div>
 
                 <div className="space-y-4">
-                    <p className="text-sm font-medium">Category descriptions</p>
+                    <p className="text-sm font-medium">Fund bucket descriptions</p>
                     {template.categories.map((category, index) => (
                         <div key={category.id} className="rounded-lg border p-4">
                             <input
@@ -101,7 +101,7 @@ export default function AdminFormulaTemplateEdit({ template }: Props) {
                                     name={`categories[${index}][description]`}
                                     defaultValue={category.description ?? ''}
                                     className={textareaClassName}
-                                    placeholder="Describe what this fund is for…"
+                                    placeholder="Describe what this fund bucket is for…"
                                 />
                             </div>
                         </div>

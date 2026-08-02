@@ -109,7 +109,7 @@ export const HOW_IT_WORKS_STEPS = [
     {
         title: 'Set aside with intention',
         description:
-            'Create categories like savings, bills, family, giving, emergency fund, and personal goals.',
+            'Set up fund buckets like savings, bills, family, giving, emergency fund, and personal goals.',
     },
     {
         title: 'Track what you actually moved',
