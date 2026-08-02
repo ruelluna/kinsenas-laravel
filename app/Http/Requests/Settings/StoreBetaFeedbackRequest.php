@@ -15,6 +15,15 @@ class StoreBetaFeedbackRequest extends FormRequest
         return BillingMode::isOpenBeta() && $this->user() !== null;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $category = $this->input('category');
+
+        if (! is_string($category) || $category === '') {
+            $this->merge(['category' => BetaFeedbackCategory::General->value]);
+        }
+    }
+
     /**
      * @return array<string, ValidationRule|array<mixed>|string>
      */

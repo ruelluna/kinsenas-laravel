@@ -38,9 +38,8 @@ export default function FeedbackSettings({ categories }: Props) {
                                 id="category"
                                 name="category"
                                 className="border-input h-9 rounded-md border px-3 text-sm"
-                                defaultValue=""
+                                defaultValue="general"
                             >
-                                <option value="">General feedback</option>
                                 {categories.map((category) => (
                                     <option key={category.value} value={category.value}>
                                         {category.label}

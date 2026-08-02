@@ -44,11 +44,13 @@ class BetaFeedbackController extends Controller
             'category' => $feedback->category?->value,
         ]);
 
+        $category = $feedback->category ?? BetaFeedbackCategory::General;
+
         $this->ghlUserTagService->dispatch(
             $user,
             [
                 GhlTagCatalog::BETA_FEEDBACK,
-                GhlTagCatalog::betaFeedbackCategoryTag($feedback->category->value),
+                GhlTagCatalog::betaFeedbackCategoryTag($category->value),
             ],
             [],
             ['event' => 'beta_feedback_submitted', 'feedback_id' => $feedback->id],
