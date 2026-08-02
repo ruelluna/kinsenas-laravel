@@ -556,7 +556,7 @@ it('saves opening balances on plan update before income', function () {
     $response->assertRedirect();
 
     $everyday = $plan->fresh('categories')->categories->firstWhere('name', 'Everyday Fund');
-    $savings = $plan->fresh('categories')->categories->firstWhere('name', 'Savings Fund');
+    $savings = $plan->fresh('categories')->categories->firstWhere('name', 'Savings');
 
     expect($everyday?->opening_balance_encrypted)->toBe('25000.00')
         ->and($savings?->opening_balance_encrypted)->toBe('10000.00');
