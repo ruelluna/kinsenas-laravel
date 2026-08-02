@@ -11,7 +11,13 @@ import type { SharedData } from '@/types';
 import type { FundBalance, FundSpend } from '@/types/savings';
 
 type Props = {
-    plan: { id: string; name: string; hasLockedIncome: boolean; allowEditingSpends: boolean };
+    plan: {
+        id: string;
+        name: string;
+        hasLockedIncome: boolean;
+        canDrawFromFunds: boolean;
+        allowEditingSpends: boolean;
+    };
     fundBalances: FundBalance[];
     defaultCategoryId: string | null;
     recipients: Array<{ id: string; name: string }>;
@@ -53,21 +59,21 @@ export default function SpendingIndex({
                     title="Spending"
                     description={`Track spending from ${plan.name} fund balances.`}
                 />
-                {plan.hasLockedIncome && (
+                {plan.canDrawFromFunds && (
                     <Button onClick={() => openAddModal()}>
                         <Plus /> Add spending
                     </Button>
                 )}
             </div>
 
-            {!plan.hasLockedIncome && (
+            {!plan.canDrawFromFunds && (
                 <p className="mt-4 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                    Lock at least one income period before recording spending. Fund balances come from
-                    locked income allocations.
+                    Lock at least one income period or add existing savings on your plan before
+                    recording spending.
                 </p>
             )}
 
-            {plan.hasLockedIncome && (
+            {plan.canDrawFromFunds && (
                 <>
                     <AddSpendingModal
                         open={addModalOpen}
@@ -94,7 +100,7 @@ export default function SpendingIndex({
                     <FundBalanceGrid
                         fundBalances={fundBalances}
                         variant="detailed"
-                        hasLockedIncome={plan.hasLockedIncome}
+                        hasLockedIncome={plan.canDrawFromFunds}
                         onSpendFrom={openAddModal}
                     />
                 </div>

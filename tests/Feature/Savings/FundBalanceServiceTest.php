@@ -228,3 +228,27 @@ it('includes bank metadata on report fund health rows', function () {
         ->and($everydayHealth['bank_display_name'])->toBe('BDO')
         ->and($everydayHealth['bank_logo_url'])->toBeNull();
 });
+
+it('includes opening balances in remaining before locked income', function () {
+    $user = User::factory()->create();
+    test()->unlockVaultFor($user);
+
+    $template = SavingsFormulaTemplate::query()->where('slug', 'abundant-formula')->firstOrFail();
+
+    test()->actingAs($user)->post(route('savings.plan.from-template', [
+        'current_team' => $user->currentTeam->slug,
+        'template' => $template->id,
+    ]));
+
+    $plan = SavingsPlan::query()->with('categories')->firstOrFail();
+    $everyday = $plan->categories->firstWhere('name', 'Everyday Fund');
+    $everyday->update(['opening_balance_encrypted' => '15000.00']);
+
+    $service = app(FundBalanceService::class);
+    $balances = $service->balancesForPlan($plan->fresh('categories'));
+    $everydayBalance = collect($balances)->firstWhere('name', 'Everyday Fund');
+
+    expect($everydayBalance['openingBalance'])->toBe('15000.00')
+        ->and($everydayBalance['allocated'])->toBe('0.00')
+        ->and($everydayBalance['remaining'])->toBe('15000.00');
+});

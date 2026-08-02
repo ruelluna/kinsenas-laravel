@@ -65,4 +65,21 @@ class SavingsPlan extends Model
     {
         return $this->incomePeriods()->exists();
     }
+
+    public function hasOpeningBalances(): bool
+    {
+        return $this->categories()
+            ->whereNotNull('opening_balance_encrypted')
+            ->exists();
+    }
+
+    public function shouldShowFundBalances(): bool
+    {
+        return $this->hasLockedIncomePeriod() || $this->hasOpeningBalances();
+    }
+
+    public function canDrawFromFunds(): bool
+    {
+        return $this->shouldShowFundBalances();
+    }
 }

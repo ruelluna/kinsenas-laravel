@@ -15,12 +15,16 @@ export default function SummaryStatCards({ setup, summary, quickLinks }: Props) 
         return null;
     }
 
-    if (!setup.hasLockedIncome) {
+    if (!setup.hasLockedIncome && !setup.hasOpeningBalances) {
         return (
             <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                Lock income to see balances.{' '}
+                Lock income or add existing savings on your plan to see balances.{' '}
+                <Link href={quickLinks.plan} className="text-primary underline-offset-4 hover:underline">
+                    Savings Plan
+                </Link>
+                {' · '}
                 <Link href={quickLinks.income} className="text-primary underline-offset-4 hover:underline">
-                    Go to Income
+                    Income
                 </Link>
             </div>
         );

@@ -44,9 +44,12 @@ class FundSpendController extends Controller
                 'id' => $plan->id,
                 'name' => $plan->name,
                 'hasLockedIncome' => $plan->hasLockedIncomePeriod(),
+                'canDrawFromFunds' => $plan->canDrawFromFunds(),
                 'allowEditingSpends' => $plan->allow_editing_spends,
             ],
-            'fundBalances' => $this->balanceService->balancesWithDefaultFirst($plan),
+            'fundBalances' => $plan->shouldShowFundBalances()
+                ? $this->balanceService->balancesWithDefaultFirst($plan)
+                : [],
             'defaultCategoryId' => $defaultCategoryId,
             'recipients' => $current_team->recipients()->get(['id', 'name']),
             'categories' => $categories->map(fn ($category) => [

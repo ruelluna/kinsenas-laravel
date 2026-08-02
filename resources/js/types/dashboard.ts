@@ -11,6 +11,7 @@ export type DashboardSetup = {
     hasPlan: boolean;
     hasIncome: boolean;
     hasLockedIncome: boolean;
+    hasOpeningBalances: boolean;
     hasBank: boolean;
     hasSpending: boolean;
     complete: boolean;
@@ -21,6 +22,7 @@ export type DashboardPlan = {
     id: string;
     name: string;
     hasLockedIncome: boolean;
+    canDrawFromFunds: boolean;
 };
 
 export type DashboardLowBalanceFund = {

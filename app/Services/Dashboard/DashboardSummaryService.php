@@ -38,6 +38,7 @@ class DashboardSummaryService
         $hasPlan = $plan !== null;
         $hasIncome = $plan?->hasIncomePeriod() ?? false;
         $hasLockedIncome = $plan?->hasLockedIncomePeriod() ?? false;
+        $hasOpeningBalances = $plan?->hasOpeningBalances() ?? false;
         $hasBank = $team->banks()->exists();
         $hasSpending = $hasPlan && FundSpend::query()
             ->where('savings_plan_id', $plan->id)
@@ -92,11 +93,11 @@ class DashboardSummaryService
 
         $setupComplete = collect($steps)->every(fn (array $step) => $step['complete']);
 
-        $fundBalances = $plan !== null && $hasLockedIncome
+        $fundBalances = $plan !== null && $plan->shouldShowFundBalances()
             ? $this->balanceService->balancesWithDefaultFirst($plan)
             : [];
 
-        $bankBalances = $plan !== null && $hasLockedIncome
+        $bankBalances = $plan !== null && $plan->shouldShowFundBalances()
             ? $this->balanceService->bankBalancesForTeam($team, $plan)
             : [];
 
@@ -118,6 +119,7 @@ class DashboardSummaryService
                 'hasPlan' => $hasPlan,
                 'hasIncome' => $hasIncome,
                 'hasLockedIncome' => $hasLockedIncome,
+                'hasOpeningBalances' => $hasOpeningBalances,
                 'hasBank' => $hasBank,
                 'hasSpending' => $hasSpending,
                 'complete' => $setupComplete,
@@ -127,6 +129,7 @@ class DashboardSummaryService
                 'id' => $plan->id,
                 'name' => $plan->name,
                 'hasLockedIncome' => $hasLockedIncome,
+                'canDrawFromFunds' => $plan->canDrawFromFunds(),
             ] : null,
             'summary' => $summary,
             'fundBalances' => $fundBalances,

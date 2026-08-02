@@ -37,8 +37,15 @@ class FundTransferController extends Controller
         $categories = $this->balanceService->categoriesWithDefaultFirst($plan);
 
         return Inertia::render('savings/transfers/index', [
-            'plan' => ['id' => $plan->id, 'name' => $plan->name, 'hasLockedIncome' => $plan->hasLockedIncomePeriod()],
-            'fundBalances' => $this->balanceService->balancesWithDefaultFirst($plan),
+            'plan' => [
+                'id' => $plan->id,
+                'name' => $plan->name,
+                'hasLockedIncome' => $plan->hasLockedIncomePeriod(),
+                'canDrawFromFunds' => $plan->canDrawFromFunds(),
+            ],
+            'fundBalances' => $plan->shouldShowFundBalances()
+                ? $this->balanceService->balancesWithDefaultFirst($plan)
+                : [],
             'defaultCategoryId' => $defaultCategoryId,
             'categories' => $categories->map(fn ($category) => [
                 'id' => $category->id,

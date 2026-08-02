@@ -3,6 +3,8 @@
 use App\Models\Bank;
 use App\Models\FundSpend;
 use App\Models\Recipient;
+use App\Models\SavingsFormulaTemplate;
+use App\Models\SavingsPlan;
 use Database\Seeders\BillingSeeder;
 use Database\Seeders\SavingsFormulaTemplateSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -412,4 +414,42 @@ it('persists allow_editing_spends from plan settings', function () {
     ]);
 
     expect($plan->fresh()->allow_editing_spends)->toBeTrue();
+});
+
+it('records spending against opening balance before income is locked', function () {
+    $user = User::factory()->create();
+    test()->unlockVaultFor($user);
+
+    $template = SavingsFormulaTemplate::query()->where('slug', 'abundant-formula')->firstOrFail();
+
+    test()->actingAs($user)->post(route('savings.plan.from-template', [
+        'current_team' => $user->currentTeam->slug,
+        'template' => $template->id,
+    ]));
+
+    $plan = SavingsPlan::query()->with('categories')->firstOrFail();
+    $everydayCategory = $plan->categories->firstWhere('name', 'Everyday Fund');
+    $everydayCategory->update(['opening_balance_encrypted' => '20000.00']);
+
+    $response = test()->actingAs($user)->post(route('savings.spending.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'category_id' => $everydayCategory->id,
+        'amount' => '500.00',
+        'description' => 'Groceries',
+        'spent_on' => '2026-02-01',
+    ]);
+
+    $response->assertRedirect();
+
+    $indexResponse = test()->actingAs($user)->get(route('savings.spending.index', [
+        'current_team' => $user->currentTeam->slug,
+    ]));
+
+    $indexResponse->assertOk();
+    $indexResponse->assertInertia(fn (Assert $page) => $page
+        ->where('fundBalances.0.remaining', '19500.00')
+        ->where('fundBalances.0.openingBalance', '20000.00')
+        ->where('fundBalances.0.spent', '500.00'),
+    );
 });

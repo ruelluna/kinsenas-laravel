@@ -61,7 +61,7 @@ class IncomePeriodController extends Controller
 
         $fundSummary = null;
 
-        if ($plan->hasLockedIncomePeriod()) {
+        if ($plan->shouldShowFundBalances()) {
             $balances = $this->fundBalanceService->balancesForPlan($plan);
 
             $fundSummary = [
@@ -96,7 +96,7 @@ class IncomePeriodController extends Controller
             'period' => $this->periodSummary($incomePeriod),
             'breakdown' => $this->incomeService->breakdownForPeriod($incomePeriod),
             'customCategories' => $this->incomeService->customCategoriesForPeriod($incomePeriod),
-            'fundBalances' => $plan->hasLockedIncomePeriod()
+            'fundBalances' => $plan->shouldShowFundBalances()
                 ? $this->fundBalanceService->balancesForPlan($plan)
                 : [],
         ]);

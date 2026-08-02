@@ -531,3 +531,59 @@ it('allows same bank on multiple categories', function () {
 
     $this->assertEquals(2, SavingsCategory::query()->where('bank_id', $bank->id)->count());
 });
+
+it('saves opening balances on plan update before income', function () {
+    $user = User::factory()->create();
+    test()->unlockVaultFor($user);
+    $template = SavingsFormulaTemplate::query()->where('slug', 'abundant-formula')->firstOrFail();
+
+    $this->actingAs($user)->post(route('savings.plan.from-template', [
+        'current_team' => $user->currentTeam->slug,
+        'template' => $template->id,
+    ]));
+
+    $plan = SavingsPlan::query()->with('categories')->firstOrFail();
+    $payload = categoriesPayload($plan);
+    $payload[0]['opening_balance'] = '25000.00';
+    $payload[1]['opening_balance'] = '10000.00';
+
+    $response = $this->actingAs($user)->put(route('savings.plan.update', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'categories' => $payload,
+    ]);
+
+    $response->assertRedirect();
+
+    $everyday = $plan->fresh('categories')->categories->firstWhere('name', 'Everyday Fund');
+    $savings = $plan->fresh('categories')->categories->firstWhere('name', 'Savings Fund');
+
+    expect($everyday?->opening_balance_encrypted)->toBe('25000.00')
+        ->and($savings?->opening_balance_encrypted)->toBe('10000.00');
+
+    $showResponse = $this->actingAs($user)->get(route('savings.plan.show', [
+        'current_team' => $user->currentTeam->slug,
+    ]));
+
+    $showResponse->assertOk();
+    $showResponse->assertInertia(fn ($page) => $page
+        ->has('fundBalances', 3)
+        ->where('fundBalances.0.name', 'Everyday Fund')
+        ->where('fundBalances.0.openingBalance', '25000.00')
+        ->where('fundBalances.0.remaining', '25000.00'),
+    );
+});
+
+it('rejects opening balance changes after income is recorded', function () {
+    [$user, $plan] = createUserWithSavingsPlanAndIncome();
+    $payload = categoriesPayload($plan);
+    $payload[0]['opening_balance'] = '99999.00';
+
+    $response = $this->actingAs($user)->put(route('savings.plan.update', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'categories' => $payload,
+    ]);
+
+    $response->assertSessionHasErrors('categories.0.opening_balance');
+});

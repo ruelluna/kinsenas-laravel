@@ -32,4 +32,11 @@ class SavingsCategoryFactory extends Factory
             'percentage' => null,
         ]);
     }
+
+    public function withOpeningBalance(string $amount = '10000.00'): static
+    {
+        return $this->state(fn () => [
+            'opening_balance_encrypted' => $amount,
+        ]);
+    }
 }

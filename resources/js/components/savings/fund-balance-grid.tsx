@@ -117,6 +117,13 @@ export default function FundBalanceGrid({
                 >
                     <FundCardHeader {...balance} />
                     <dl className="mt-4 space-y-1 text-sm">
+                        {balance.openingBalance !== null
+                            && parseFloat(balance.openingBalance) > 0 && (
+                            <div className="flex justify-between gap-2">
+                                <dt className="text-muted-foreground">Existing savings</dt>
+                                <dd>{formatMoney(balance.openingBalance)}</dd>
+                            </div>
+                        )}
                         <div className="flex justify-between gap-2">
                             <dt className="text-muted-foreground">Allocated</dt>
                             <dd>{formatMoney(balance.allocated)}</dd>

@@ -34,7 +34,8 @@ export default function Dashboard({
     const recoveryKey = page.props.registrationRecoveryKey;
     const teamId = page.props.currentTeam?.id;
 
-    const showFinancialSections = setup.hasPlan && setup.hasLockedIncome;
+    const showFinancialSections =
+        setup.hasPlan && (setup.hasLockedIncome || setup.hasOpeningBalances);
 
     useEffect(() => {
         if (teamId && !setup.complete) {
@@ -69,10 +70,14 @@ export default function Dashboard({
                     <>
                         <FundBalancesSection
                             title={plan?.name ?? 'Fund balances'}
-                            description="Running totals from locked income minus transfers and spending."
+                            description={
+                                setup.hasLockedIncome
+                                    ? 'Running totals from locked income minus transfers and spending.'
+                                    : 'Balances from your existing savings. Lock income to add payday allocations.'
+                            }
                             fundBalances={fundBalances}
                             spendHref={quickLinks.spending}
-                            hasLockedIncome={plan?.hasLockedIncome ?? false}
+                            hasLockedIncome={plan?.canDrawFromFunds ?? false}
                         />
                         <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
                             <Link href={quickLinks.plan} className="text-primary underline-offset-4 hover:underline">
@@ -121,10 +126,10 @@ export default function Dashboard({
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    asChild={setup.hasLockedIncome}
-                                    disabled={!setup.hasLockedIncome}
+                                    asChild={setup.hasLockedIncome || setup.hasOpeningBalances}
+                                    disabled={!setup.hasLockedIncome && !setup.hasOpeningBalances}
                                 >
-                                    {setup.hasLockedIncome ? (
+                                    {setup.hasLockedIncome || setup.hasOpeningBalances ? (
                                         <Link href={quickLinks.spending}>Add spending</Link>
                                     ) : (
                                         <span>Add spending</span>
@@ -134,10 +139,10 @@ export default function Dashboard({
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        asChild={setup.hasLockedIncome}
-                                        disabled={!setup.hasLockedIncome}
+                                        asChild={setup.hasLockedIncome || setup.hasOpeningBalances}
+                                        disabled={!setup.hasLockedIncome && !setup.hasOpeningBalances}
                                     >
-                                        {setup.hasLockedIncome ? (
+                                        {setup.hasLockedIncome || setup.hasOpeningBalances ? (
                                             <Link href={quickLinks.transfers}>Transfer funds</Link>
                                         ) : (
                                             <span>Transfer funds</span>

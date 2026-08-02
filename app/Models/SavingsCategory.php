@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\UserEncryptedMoney;
 use App\Enums\CategoryAllocationType;
 use App\Enums\DeductionMode;
 use Database\Factories\SavingsCategoryFactory;
@@ -26,6 +27,7 @@ class SavingsCategory extends Model
         'deduct_from_category_id',
         'sort_order',
         'bank_id',
+        'opening_balance_encrypted',
     ];
 
     protected function casts(): array
@@ -35,6 +37,7 @@ class SavingsCategory extends Model
             'percentage' => 'decimal:2',
             'deduction_mode' => DeductionMode::class,
             'deduction_value' => 'decimal:2',
+            'opening_balance_encrypted' => UserEncryptedMoney::class.':true',
         ];
     }
 

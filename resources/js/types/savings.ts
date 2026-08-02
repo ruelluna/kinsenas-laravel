@@ -12,6 +12,7 @@ export type SavingsCategory = {
     deductFromCategoryId?: string | null;
     deductFromCategoryName?: string | null;
     bankId?: string | null;
+    openingBalance?: string | null;
 };
 
 export type SavingsPlan = {
@@ -60,6 +61,7 @@ export type FundBalance = {
     received: string | null;
     spent: string | null;
     remaining: string | null;
+    openingBalance: string | null;
     percentUsed: number | null;
     bankId: string | null;
     bankDisplayName: string | null;

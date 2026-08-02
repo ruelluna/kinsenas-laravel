@@ -4,6 +4,8 @@ namespace App\Http\Requests\Savings;
 
 use App\Enums\CategoryAllocationType;
 use App\Enums\DeductionMode;
+use App\Models\SavingsPlan;
+use App\Services\Savings\SavingsPlanService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -30,6 +32,7 @@ class SaveSavingsPlanRequest extends FormRequest
             'categories.*.deduction_value' => ['nullable', 'numeric', 'min:0.01'],
             'categories.*.deduct_from_index' => ['nullable', 'integer', 'min:0'],
             'categories.*.bank_id' => ['nullable', 'uuid', 'exists:banks,id'],
+            'categories.*.opening_balance' => ['nullable', 'numeric', 'min:0'],
             'is_shared_with_team' => ['sometimes', 'boolean'],
             'allow_editing_spends' => ['sometimes', 'boolean'],
         ];
@@ -51,6 +54,10 @@ class SaveSavingsPlanRequest extends FormRequest
             if (($category['bank_id'] ?? '') === '') {
                 $categories[$index]['bank_id'] = null;
             }
+
+            if (($category['opening_balance'] ?? '') === '') {
+                $categories[$index]['opening_balance'] = null;
+            }
         }
 
         $this->merge(['categories' => $categories]);
@@ -59,6 +66,11 @@ class SaveSavingsPlanRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
+            $team = $this->route('current_team');
+            $plan = $team !== null
+                ? app(SavingsPlanService::class)->forTeam($team, $this->user())
+                : null;
+
             foreach ($this->input('categories', []) as $index => $category) {
                 $type = $category['allocation_type'] ?? null;
 
@@ -68,6 +80,26 @@ class SaveSavingsPlanRequest extends FormRequest
 
                 if ($type === CategoryAllocationType::Deduction->value && ! isset($category['deduct_from_index'])) {
                     $validator->errors()->add("categories.{$index}.deduct_from_index", __('Source fund bucket is required.'));
+                }
+
+                if ($plan instanceof SavingsPlan && $plan->hasIncomePeriod() && array_key_exists('opening_balance', $category)) {
+                    $existing = $plan->categories->firstWhere('id', $category['id'] ?? null);
+                    $submitted = $category['opening_balance'] ?? null;
+                    $existingPlain = $existing?->opening_balance_encrypted;
+
+                    $submittedNormalized = $submitted === null || $submitted === ''
+                        ? null
+                        : number_format((float) $submitted, 2, '.', '');
+                    $existingNormalized = $existingPlain === null || $existingPlain === ''
+                        ? null
+                        : number_format((float) $existingPlain, 2, '.', '');
+
+                    if ($submittedNormalized !== $existingNormalized) {
+                        $validator->errors()->add(
+                            "categories.{$index}.opening_balance",
+                            __('Existing savings cannot be changed after your first income entry.'),
+                        );
+                    }
                 }
             }
         });

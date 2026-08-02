@@ -85,7 +85,8 @@ class SavingsPlanService
      *     percentage?: float|int|string|null,
      *     deduction_mode?: string|null,
      *     deduction_value?: float|int|string|null,
-     *     deduct_from_index?: int|null
+     *     deduct_from_index?: int|null,
+     *     opening_balance?: float|int|string|null
      * }>  $categories
      */
     public function updateCategories(SavingsPlan $plan, array $categories): SavingsPlan
@@ -128,12 +129,16 @@ class SavingsPlanService
                         && $category['deduction_value'] !== ''
                         ? $category['deduction_value']
                         : null,
+                    'opening_balance_encrypted' => $allocationType === CategoryAllocationType::Percentage
+                        ? $this->normalizeOpeningBalance($category['opening_balance'] ?? null)
+                        : null,
                     'sort_order' => $index,
                 ]);
             }
 
             $this->resolveDeductionSources($categories, $created);
             $this->syncCategoryBanks($plan, $categories, $created);
+            $this->syncOpeningBalances($plan, $categories, $created);
 
             return $plan->fresh(['categories.deductFromCategory', 'categories.bank']);
         });
@@ -269,6 +274,46 @@ class SavingsPlanService
 
             return $plan->fresh(['categories.deductFromCategory', 'categories.bank']);
         });
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $categories
+     * @param  array<int, SavingsCategory>  $indexedCategories
+     */
+    private function syncOpeningBalances(SavingsPlan $plan, array $categories, array $indexedCategories): void
+    {
+        if ($plan->hasIncomePeriod()) {
+            return;
+        }
+
+        foreach ($categories as $index => $category) {
+            if (! isset($indexedCategories[$index])) {
+                continue;
+            }
+
+            if (CategoryAllocationType::from($category['allocation_type']) !== CategoryAllocationType::Percentage) {
+                continue;
+            }
+
+            $indexedCategories[$index]->update([
+                'opening_balance_encrypted' => $this->normalizeOpeningBalance($category['opening_balance'] ?? null),
+            ]);
+        }
+    }
+
+    private function normalizeOpeningBalance(mixed $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $normalized = number_format((float) $value, 2, '.', '');
+
+        if (bccomp($normalized, '0', 2) !== 1) {
+            return null;
+        }
+
+        return $normalized;
     }
 
     /**

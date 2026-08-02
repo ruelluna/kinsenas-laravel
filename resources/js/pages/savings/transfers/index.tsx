@@ -18,7 +18,12 @@ type CategoryOption = {
 };
 
 type Props = {
-    plan: { id: string; name: string; hasLockedIncome: boolean };
+    plan: {
+        id: string;
+        name: string;
+        hasLockedIncome: boolean;
+        canDrawFromFunds: boolean;
+    };
     fundBalances: FundBalance[];
     defaultCategoryId: string | null;
     categories: CategoryOption[];
@@ -53,20 +58,21 @@ export default function TransfersIndex({
                     title="Transfers"
                     description={`Move savings between fund buckets in ${plan.name}.`}
                 />
-                {plan.hasLockedIncome && (
+                {plan.canDrawFromFunds && (
                     <Button onClick={() => openAddModal()}>
                         <Plus /> Add transfer
                     </Button>
                 )}
             </div>
 
-            {!plan.hasLockedIncome && (
+            {!plan.canDrawFromFunds && (
                 <p className="mt-4 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                    Lock at least one income period before recording transfers.
+                    Lock at least one income period or add existing savings on your plan before
+                    recording transfers.
                 </p>
             )}
 
-            {plan.hasLockedIncome && (
+            {plan.canDrawFromFunds && (
                 <AddTransferModal
                     open={addModalOpen}
                     onOpenChange={setAddModalOpen}
@@ -85,7 +91,7 @@ export default function TransfersIndex({
                         variant="detailed"
                         showReceived
                         transferredLabel="Transferred out"
-                        hasLockedIncome={plan.hasLockedIncome}
+                        hasLockedIncome={plan.canDrawFromFunds}
                         action={{
                             label: (balance) => `Transfer from ${balance.name}`,
                             onClick: openAddModal,

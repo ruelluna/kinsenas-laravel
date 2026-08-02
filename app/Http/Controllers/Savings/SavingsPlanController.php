@@ -63,12 +63,15 @@ class SavingsPlanController extends Controller
                     'deductFromCategoryId' => $c->deduct_from_category_id,
                     'deductFromCategoryName' => $c->deductFromCategory?->name,
                     'bankId' => $c->bank_id,
+                    'openingBalance' => $c->opening_balance_encrypted !== null
+                        ? (string) $c->opening_balance_encrypted
+                        : null,
                 ]),
                 'hasLockedIncome' => $plan->hasLockedIncomePeriod(),
                 'hasIncome' => $plan->hasIncomePeriod(),
                 'percentagesLocked' => $plan->hasIncomePeriod(),
             ] : null,
-            'fundBalances' => $plan && $plan->hasLockedIncomePeriod()
+            'fundBalances' => $plan && $plan->shouldShowFundBalances()
                 ? $this->fundBalanceService->balancesForPlan($plan)
                 : [],
             'templates' => $templates->map(fn ($t) => [
@@ -103,7 +106,7 @@ class SavingsPlanController extends Controller
             $template->slug,
         );
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Savings plan created.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Savings plan created. Add any existing savings on this page before your first income.')]);
 
         return back();
     }
@@ -118,7 +121,7 @@ class SavingsPlanController extends Controller
             'custom',
         );
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Custom savings plan created.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Custom savings plan created. Add any existing savings on this page before your first income.')]);
 
         return back();
     }

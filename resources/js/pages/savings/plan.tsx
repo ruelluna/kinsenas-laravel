@@ -54,6 +54,7 @@ type CategoryRow = {
     deductionValue: string;
     deductFromIndex: string;
     bankId: string;
+    openingBalance: string;
 };
 
 let nextRowKey = 0;
@@ -74,6 +75,7 @@ function createEmptyRow(): CategoryRow {
         deductionValue: '',
         deductFromIndex: '',
         bankId: '',
+        openingBalance: '',
     };
 }
 
@@ -87,6 +89,7 @@ function createEmptyCustomRow(): CategoryRow {
         deductionValue: '',
         deductFromIndex: '',
         bankId: '',
+        openingBalance: '',
     };
 }
 
@@ -112,6 +115,7 @@ function rowsFromPlan(categories: SavingsCategory[]): CategoryRow[] {
             deductionValue: category.deductionValue ?? '',
             deductFromIndex: sourceIndex >= 0 ? String(sourceIndex) : '',
             bankId: category.bankId ?? '',
+            openingBalance: category.openingBalance ?? '',
         };
     });
 }
@@ -333,6 +337,13 @@ function SavingsPlanEditor({
         ? 'Percentages are locked after your first income entry. You can add, edit, or remove custom fund buckets anytime.'
         : 'Percentage fund buckets must total 100%. Custom fund buckets can use optional defaults or amounts set per income.';
 
+    const hasAnyOpeningBalance = rows.some(
+        (row) =>
+            row.allocationType === 'percentage'
+            && row.openingBalance !== ''
+            && parseFloat(row.openingBalance) > 0,
+    );
+
     return (
         <div data-tour="plan-main">
             <Head title="Savings Plan" />
@@ -347,12 +358,29 @@ function SavingsPlanEditor({
             <FundBalancesSection
                 className="mt-6"
                 title="Fund balances"
-                description="Running totals from locked income minus transfers and spending."
+                description={
+                    plan.hasLockedIncome
+                        ? 'Running totals from existing savings and locked income minus transfers and spending.'
+                        : 'From your existing savings. Lock income to add payday allocations.'
+                }
                 fundBalances={fundBalances}
                 spendHref={`/${teamSlug}/savings/spending`}
+                hasLockedIncome={fundBalances.length > 0}
                 limit={6}
                 bordered
             />
+
+            {!plan.hasIncome && (
+                <Alert className="mt-6">
+                    <AlertTriangle className="text-muted-foreground" />
+                    <AlertTitle>Already saving?</AlertTitle>
+                    <AlertDescription>
+                        Enter what you currently have in each fund below. This is optional — skip
+                        any fund or leave everything blank. Amounts lock after your first income
+                        entry.
+                    </AlertDescription>
+                </Alert>
+            )}
 
             {plan.hasIncome && (
                 <Alert className="mt-6">
@@ -376,6 +404,46 @@ function SavingsPlanEditor({
                     <>
                         {typeof errors.categories === 'string' && (
                             <InputError message={errors.categories} />
+                        )}
+
+                        {!plan.hasIncome && percentageRows.length > 0 && (
+                            <div className="rounded-lg border bg-muted/20 p-4">
+                                <h3 className="font-medium">Existing savings</h3>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                    Optional — money you already have in each fund bucket (PHP).
+                                </p>
+                                <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                    {percentageRows.map(({ row, index }) => (
+                                        <div key={`opening-${row.key}`}>
+                                            <Label htmlFor={`opening-balance-${index}`}>
+                                                {row.name || `Category ${index + 1}`}
+                                            </Label>
+                                            <Input
+                                                id={`opening-balance-${index}`}
+                                                name={`categories[${index}][opening_balance]`}
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                value={row.openingBalance}
+                                                onChange={(event) =>
+                                                    updateRow(index, {
+                                                        openingBalance: event.target.value,
+                                                    })
+                                                }
+                                                placeholder="0.00"
+                                            />
+                                            <InputError
+                                                message={errors[`categories.${index}.opening_balance`]}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                                {!hasAnyOpeningBalance && (
+                                    <p className="mt-3 text-xs text-muted-foreground">
+                                        Leave blank if you are starting from zero this payday cycle.
+                                    </p>
+                                )}
+                            </div>
                         )}
 
                         <div className="grid gap-4 lg:grid-cols-3">

@@ -40,7 +40,7 @@ class BankController extends Controller
                 fn (Bank $bank) => BankPayloadMapper::toOption($bank),
             ),
             'institutions' => $institutions,
-            'bankBalances' => $plan && $plan->hasLockedIncomePeriod()
+            'bankBalances' => $plan && $plan->shouldShowFundBalances()
                 ? $this->fundBalanceService->bankBalancesForTeam($current_team, $plan)
                 : [],
         ]);

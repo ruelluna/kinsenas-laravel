@@ -33,6 +33,7 @@ class FundBalanceService
      *     received: string|null,
      *     spent: string|null,
      *     remaining: string|null,
+     *     openingBalance: string|null,
      *     percentUsed: float|null,
      *     bankId: string|null,
      *     bankDisplayName: string|null,
@@ -64,10 +65,15 @@ class FundBalanceService
                 $transferredOut = $transferredOutByCategory[$category->id] ?? '0.00';
                 $receivedIn = $receivedInByCategory[$category->id] ?? '0.00';
                 $spent = $spentByCategory[$category->id] ?? '0.00';
+                $openingBalance = $this->openingBalanceForCategory($category, $dek);
                 $remaining = $dek === null
                     ? null
                     : bcsub(
-                        bcadd(bcsub($allocated, $transferredOut, 2), $receivedIn, 2),
+                        bcadd(
+                            bcadd($openingBalance, bcsub($allocated, $transferredOut, 2), 2),
+                            $receivedIn,
+                            2,
+                        ),
                         $spent,
                         2,
                     );
@@ -90,6 +96,7 @@ class FundBalanceService
                     'received' => $dek === null ? null : $receivedIn,
                     'spent' => $dek === null ? null : $spent,
                     'remaining' => $remaining,
+                    'openingBalance' => $dek === null ? null : $openingBalance,
                     'percentUsed' => $percentUsed,
                     'bankId' => $bank?->id,
                     'bankDisplayName' => $bank !== null ? $bank->displayLabel() : null,
@@ -111,9 +118,17 @@ class FundBalanceService
         $transferredOut = $this->transferredOutTotalsByCategory($plan, $dek)[$categoryId] ?? '0.00';
         $receivedIn = $this->receivedInTotalsByCategory($plan, $dek)[$categoryId] ?? '0.00';
         $spent = $this->spentTotalsByCategory($plan, $dek)[$categoryId] ?? '0.00';
+        $category = $plan->categories()->find($categoryId);
+        $openingBalance = $category !== null
+            ? $this->openingBalanceForCategory($category, $dek)
+            : '0.00';
 
         return bcsub(
-            bcadd(bcsub($allocated, $transferredOut, 2), $receivedIn, 2),
+            bcadd(
+                bcadd($openingBalance, bcsub($allocated, $transferredOut, 2), 2),
+                $receivedIn,
+                2,
+            ),
             $spent,
             2,
         );
@@ -418,6 +433,7 @@ class FundBalanceService
      *     received: string|null,
      *     spent: string|null,
      *     remaining: string|null,
+     *     openingBalance: string|null,
      *     percentUsed: float|null,
      *     bankId: string|null,
      *     bankDisplayName: string|null,
@@ -630,18 +646,18 @@ class FundBalanceService
         string $amount,
         string $action,
     ): void {
-        if (! $plan->hasLockedIncomePeriod()) {
-            throw ValidationException::withMessages([
-                'amount' => __('Lock at least one income period before recording :action.', [
-                    'action' => $action,
-                ]),
-            ]);
-        }
-
         $remaining = $this->remainingForCategory($plan, $categoryId);
 
         if ($remaining === null) {
             return;
+        }
+
+        if (bccomp($remaining, '0', 2) !== 1) {
+            throw ValidationException::withMessages([
+                'amount' => __('Lock at least one income period or add existing savings before recording :action.', [
+                    'action' => $action,
+                ]),
+            ]);
         }
 
         if (bccomp($amount, $remaining, 2) === 1) {
@@ -704,6 +720,21 @@ class FundBalanceService
         }
 
         return $this->encryption->tryDecryptForDisplay($dek, $encrypted);
+    }
+
+    private function openingBalanceForCategory(SavingsCategory $category, ?string $dek): string
+    {
+        if ($dek === null) {
+            return '0.00';
+        }
+
+        $plain = $category->opening_balance_encrypted;
+
+        if ($plain === null || $plain === '') {
+            return '0.00';
+        }
+
+        return number_format((float) $plain, 2, '.', '');
     }
 
     private function hintForCategory(string $name): ?string
