@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminBetaAccessCodeController;
 use App\Http\Controllers\Admin\AdminBetaApplicationController;
 use App\Http\Controllers\Admin\AdminBetaFeedbackController;
 use App\Http\Controllers\Admin\AdminPaymentQrController;
@@ -30,6 +31,13 @@ Route::prefix('admin')
         Route::get('beta-applications', [AdminBetaApplicationController::class, 'index'])->name('beta-applications.index');
         Route::post('beta-applications/{user}/approve', [AdminBetaApplicationController::class, 'approve'])->name('beta-applications.approve');
         Route::post('beta-applications/{user}/reject', [AdminBetaApplicationController::class, 'reject'])->name('beta-applications.reject');
+
+        Route::get('beta-access-codes', [AdminBetaAccessCodeController::class, 'index'])->name('beta-access-codes.index');
+        Route::get('beta-access-codes/create', [AdminBetaAccessCodeController::class, 'create'])->name('beta-access-codes.create');
+        Route::post('beta-access-codes', [AdminBetaAccessCodeController::class, 'store'])->name('beta-access-codes.store');
+        Route::post('beta-access-codes/batches', [AdminBetaAccessCodeController::class, 'storeBatch'])->name('beta-access-codes.batches.store');
+        Route::patch('beta-access-codes/{betaAccessCode}', [AdminBetaAccessCodeController::class, 'update'])->name('beta-access-codes.update');
+        Route::get('beta-access-codes/batches/{batch}/export', [AdminBetaAccessCodeController::class, 'exportBatch'])->name('beta-access-codes.batches.export');
 
         Route::get('beta-feedback', [AdminBetaFeedbackController::class, 'index'])->name('beta-feedback.index');
 

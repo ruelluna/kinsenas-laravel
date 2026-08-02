@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import {
     ClipboardList,
     CreditCard,
+    KeyRound,
     MessageSquare,
     QrCode,
     Shield,
@@ -22,6 +23,7 @@ const adminNavItems: NavItem[] = [
     { title: 'Plans', href: '/admin/plans', icon: CreditCard },
     { title: 'Payments', href: '/admin/payment-submissions', icon: QrCode },
     { title: 'Beta applications', href: '/admin/beta-applications', icon: ClipboardList },
+    { title: 'Beta access codes', href: '/admin/beta-access-codes', icon: KeyRound },
     { title: 'Beta feedback', href: '/admin/beta-feedback', icon: MessageSquare },
     { title: 'Payment QR', href: '/admin/payment-qr', icon: QrCode },
     { title: 'Users', href: '/admin/platform-users', icon: Shield },

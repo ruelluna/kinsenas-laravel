@@ -21,6 +21,7 @@ class AdminBetaApplicationController extends Controller
         $search = $request->query('search');
 
         $applications = User::query()
+            ->with('betaAccessCode')
             ->whereNotNull('beta_application_status')
             ->when($status !== '' && $status !== 'all', fn ($query) => $query->where('beta_application_status', $status))
             ->when($search, function ($query, string $search) {
@@ -43,6 +44,9 @@ class AdminBetaApplicationController extends Controller
                 'emailVerified' => $user->hasVerifiedEmail(),
                 'appliedAt' => $user->beta_enrolled_at?->toISOString(),
                 'approvedAt' => $user->beta_approved_at?->toISOString(),
+                'approvedViaCode' => $user->beta_access_code_id !== null,
+                'betaAccessCodeLabel' => $user->betaAccessCode?->label,
+                'sourceLabel' => $this->sourceLabel($user),
             ]),
             'filters' => [
                 'status' => $status,
@@ -67,5 +71,18 @@ class AdminBetaApplicationController extends Controller
         $this->betaApplicationService->reject($user, $request->user());
 
         return back()->with('success', __('Beta application rejected for :name.', ['name' => $user->name]));
+    }
+
+    private function sourceLabel(User $user): string
+    {
+        if ($user->beta_access_code_id !== null) {
+            return $user->betaAccessCode?->label ?? 'Event code';
+        }
+
+        if ($user->beta_application_status === BetaApplicationStatus::Pending) {
+            return 'Pending review';
+        }
+
+        return 'Manual';
     }
 }

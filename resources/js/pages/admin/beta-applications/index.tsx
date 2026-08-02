@@ -74,6 +74,8 @@ export default function AdminBetaApplicationsIndex({
                                     <p className="text-muted-foreground">
                                         {application.statusLabel}
                                         {application.emailVerified ? ' · Email verified' : ' · Email not verified'}
+                                        {' · '}
+                                        {application.sourceLabel}
                                     </p>
                                     {application.appliedAt && (
                                         <p className="text-muted-foreground">

@@ -23,6 +23,8 @@ it('registration screen shows open beta application offer instead of trial offer
     $response->assertInertia(fn (Assert $page) => $page
         ->component('auth/register')
         ->where('trialOffer', null)
+        ->where('betaCode', null)
+        ->where('betaCodeLabel', null)
         ->has('openBetaOffer', fn (Assert $offer) => $offer
             ->where('launchDiscountPercent', 20),
         ),

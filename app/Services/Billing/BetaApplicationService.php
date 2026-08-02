@@ -8,9 +8,12 @@ use App\Jobs\SyncBetaApplicationToGhl;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class BetaApplicationService
 {
+    public function __construct(private BetaAccessCodeService $betaAccessCodeService) {}
+
     public function apply(User $user): void
     {
         if (! BillingMode::isOpenBeta()) {
@@ -34,6 +37,47 @@ class BetaApplicationService
         ]);
     }
 
+    public function applyWithOptionalCode(User $user, ?string $code): void
+    {
+        if (! BillingMode::isOpenBeta()) {
+            return;
+        }
+
+        $normalizedCode = is_string($code) ? trim($code) : '';
+
+        if ($normalizedCode === '') {
+            $this->apply($user);
+
+            return;
+        }
+
+        $accessCode = $this->betaAccessCodeService->findRedeemable($normalizedCode);
+
+        if ($accessCode === null) {
+            throw ValidationException::withMessages([
+                'beta_code' => __('This beta access code is invalid or no longer available.'),
+            ]);
+        }
+
+        if ($user->beta_application_status !== null) {
+            return;
+        }
+
+        $user->forceFill([
+            'beta_enrolled_at' => now(),
+            'beta_application_status' => BetaApplicationStatus::Pending,
+        ])->save();
+
+        $this->betaAccessCodeService->redeem($accessCode, $user);
+        $this->approveViaCode($user);
+
+        Log::info('Beta application auto-approved via access code', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'beta_access_code_id' => $user->beta_access_code_id,
+        ]);
+    }
+
     public function approve(User $user, User $admin): void
     {
         if ($user->beta_application_status === BetaApplicationStatus::Approved) {
@@ -54,6 +98,23 @@ class BetaApplicationService
             'user_id' => $user->id,
             'admin_user_id' => $admin->id,
         ]);
+    }
+
+    public function approveViaCode(User $user): void
+    {
+        if ($user->beta_application_status === BetaApplicationStatus::Approved) {
+            return;
+        }
+
+        $user->forceFill([
+            'beta_application_status' => BetaApplicationStatus::Approved,
+            'beta_approved_at' => now(),
+            'beta_approved_by' => null,
+        ])->save();
+
+        $this->grantLaunchDiscountIfEligible($user);
+
+        SyncBetaApplicationToGhl::dispatch($user->fresh(), 'application_approved_via_code')->afterCommit();
     }
 
     public function reject(User $user, User $admin): void

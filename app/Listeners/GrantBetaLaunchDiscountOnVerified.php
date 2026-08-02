@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Enums\BetaApplicationStatus;
+use App\Jobs\SyncBetaApplicationToGhl;
 use App\Services\Billing\BetaApplicationService;
 use App\Services\Marketing\GhlUserTagService;
 use App\Support\Marketing\GhlTagCatalog;
@@ -22,6 +23,10 @@ class GrantBetaLaunchDiscountOnVerified
         $this->betaApplicationService->grantLaunchDiscountIfEligible($user);
 
         $user = $user->fresh();
+
+        if ($user->beta_application_status === BetaApplicationStatus::Approved) {
+            SyncBetaApplicationToGhl::dispatch($user, 'application_approved')->afterCommit();
+        }
 
         $tagsToAdd = [GhlTagCatalog::EMAIL_VERIFIED];
 

@@ -19,9 +19,18 @@ type Props = {
     teamInvitation?: TeamInvitationContext | null;
     trialOffer?: TrialOffer | null;
     openBetaOffer?: OpenBetaOffer | null;
+    betaCode?: string | null;
+    betaCodeLabel?: string | null;
 };
 
-export default function Register({ passwordRules, teamInvitation, trialOffer, openBetaOffer }: Props) {
+export default function Register({
+    passwordRules,
+    teamInvitation,
+    trialOffer,
+    openBetaOffer,
+    betaCode,
+    betaCodeLabel,
+}: Props) {
     return (
         <>
             <Head title="Register" />
@@ -46,8 +55,20 @@ export default function Register({ passwordRules, teamInvitation, trialOffer, op
                                 <AlertDescription className="space-y-2">
                                     <p>
                                         Create a real Kinsenas account and apply for the public beta. After
-                                        you verify your email and we approve your application, you can use
-                                        the core savings planner at no cost.
+                                        you verify your email
+                                        {betaCodeLabel ? (
+                                            <>
+                                                {' '}
+                                                with your event code for <span className="font-medium">{betaCodeLabel}</span>
+                                            </>
+                                        ) : (
+                                            <> and we approve your application</>
+                                        )}
+                                        , you can use the core savings planner at no cost.
+                                    </p>
+                                    <p>
+                                        Have an event code? Enter it below for instant beta approval after email
+                                        verification.
                                     </p>
                                     <p>{BETA_FREE_MESSAGE}</p>
                                     <p className="text-muted-foreground">Pricing: coming soon.</p>
@@ -148,13 +169,29 @@ export default function Register({ passwordRules, teamInvitation, trialOffer, op
                                 />
                             </div>
 
+                            {openBetaOffer && (
+                                <div className="grid gap-2">
+                                    <Label htmlFor="beta_code">Beta access code (optional)</Label>
+                                    <Input
+                                        id="beta_code"
+                                        type="text"
+                                        tabIndex={5}
+                                        name="beta_code"
+                                        defaultValue={betaCode ?? ''}
+                                        placeholder="KINSENAS-MNL-2026"
+                                        autoComplete="off"
+                                    />
+                                    <InputError message={errors.beta_code} />
+                                </div>
+                            )}
+
                             <div className="flex items-start gap-3">
                                 <input
                                     type="checkbox"
                                     id="marketing_emails_opt_in"
                                     name="marketing_emails_opt_in"
                                     value="1"
-                                    tabIndex={5}
+                                    tabIndex={6}
                                     className="mt-1 size-4 shrink-0 rounded border border-input shadow-xs"
                                 />
                                 <div className="grid gap-1">
@@ -174,7 +211,7 @@ export default function Register({ passwordRules, teamInvitation, trialOffer, op
                             <Button
                                 type="submit"
                                 className="mt-2 w-full"
-                                tabIndex={6}
+                                tabIndex={7}
                                 data-test="register-user-button"
                             >
                                 {processing && <Spinner />}
@@ -196,7 +233,7 @@ export default function Register({ passwordRules, teamInvitation, trialOffer, op
                                         : login()
                                 }
                                 data-test="team-invitation-login-link"
-                                tabIndex={7}
+                                tabIndex={8}
                             >
                                 Log in
                             </TextLink>

@@ -45,6 +45,26 @@ export type AdminBetaApplication = {
     emailVerified: boolean;
     appliedAt: string | null;
     approvedAt: string | null;
+    approvedViaCode: boolean;
+    betaAccessCodeLabel: string | null;
+    sourceLabel: string;
+};
+
+export type AdminBetaAccessCode = {
+    id: string;
+    code: string;
+    label: string;
+    type: string;
+    typeLabel: string;
+    maxUses: number | null;
+    redemptionsCount: number;
+    remainingUses: number | null;
+    expiresAt: string | null;
+    isActive: boolean;
+    isRedeemable: boolean;
+    batchId: string | null;
+    batchName: string | null;
+    createdAt: string | null;
 };
 
 export type SharedSubscription = {

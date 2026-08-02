@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -36,6 +37,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property BetaApplicationStatus|null $beta_application_status
  * @property Carbon|null $beta_approved_at
  * @property int|null $beta_approved_by
+ * @property string|null $beta_access_code_id
  * @property bool $beta_launch_discount_eligible
  * @property bool $marketing_emails_opt_in
  * @property Carbon|null $marketing_emails_opted_in_at
@@ -46,7 +48,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property-read Collection<int, Membership> $teamMemberships
  * @property-read Collection<int, Team> $teams
  */
-#[Fillable(['name', 'email', 'password', 'current_team_id', 'is_platform_admin', 'beta_enrolled_at', 'beta_application_status', 'beta_approved_at', 'beta_approved_by', 'beta_launch_discount_eligible', 'marketing_emails_opt_in', 'marketing_emails_opted_in_at'])]
+#[Fillable(['name', 'email', 'password', 'current_team_id', 'is_platform_admin', 'beta_enrolled_at', 'beta_application_status', 'beta_approved_at', 'beta_approved_by', 'beta_access_code_id', 'beta_launch_discount_eligible', 'marketing_emails_opt_in', 'marketing_emails_opted_in_at'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
@@ -87,6 +89,11 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     public function betaFeedbacks(): HasMany
     {
         return $this->hasMany(BetaFeedback::class);
+    }
+
+    public function betaAccessCode(): BelongsTo
+    {
+        return $this->belongsTo(BetaAccessCode::class, 'beta_access_code_id');
     }
 
     public function canManageBilling(Team $team): bool

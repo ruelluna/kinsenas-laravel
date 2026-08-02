@@ -22,6 +22,8 @@ final class GhlTagCatalog
 
     public const BETA_LAUNCH_DISCOUNT_ELIGIBLE = 'beta-launch-discount-eligible';
 
+    public const BETA_CODE_REDEEMED = 'beta-code-redeemed';
+
     public const BANK_ADDED = 'bank-added';
 
     public const GOTYME_GOSAVE_SETUP = 'gotyme-gosave-setup';
@@ -77,6 +79,10 @@ final class GhlTagCatalog
             'application_approved' => [
                 [self::KINSENAS_BETA, self::BETA_APPROVED],
                 [self::BETA_PENDING, self::BETA_REJECTED],
+            ],
+            'application_approved_via_code' => [
+                [self::KINSENAS_BETA, self::BETA_CODE_REDEEMED],
+                [],
             ],
             'application_rejected' => [
                 [self::KINSENAS_BETA, self::BETA_REJECTED],
@@ -144,6 +150,7 @@ final class GhlTagCatalog
             self::BETA_APPROVED,
             self::BETA_REJECTED,
             self::BETA_LAUNCH_DISCOUNT_ELIGIBLE,
+            self::BETA_CODE_REDEEMED,
             self::BANK_ADDED,
             self::GOTYME_GOSAVE_SETUP,
             self::PLAN_CREATED,
