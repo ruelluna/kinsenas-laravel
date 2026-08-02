@@ -23,7 +23,26 @@ it('the teams index page can be rendered', function () {
     $response->assertOk();
 });
 
-it('teams can be created', function () {
+it('blocks creating additional owned teams by default', function () {
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->post(route('teams.store'), [
+            'name' => 'Test Team',
+        ]);
+
+    $response->assertForbidden();
+
+    $this->assertDatabaseMissing('teams', [
+        'name' => 'Test Team',
+        'is_personal' => false,
+    ]);
+});
+
+it('teams can be created when additional owned teams are enabled', function () {
+    config(['teams.allow_additional_owned_teams' => true]);
+
     $user = User::factory()->create();
 
     $response = $this
@@ -41,6 +60,8 @@ it('teams can be created', function () {
 });
 
 it('team slug uses next available suffix', function () {
+    config(['teams.allow_additional_owned_teams' => true]);
+
     $user = User::factory()->create();
 
     Team::factory()->create(['name' => 'Acme', 'slug' => 'acme']);

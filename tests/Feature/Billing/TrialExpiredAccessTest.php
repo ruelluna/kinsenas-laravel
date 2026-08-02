@@ -73,6 +73,8 @@ it('redirects expired trial users to billing after login', function () {
 });
 
 it('allows access to an active team when personal team trial expired', function () {
+    config(['teams.allow_additional_owned_teams' => true]);
+
     $owner = expiredTrialMember();
 
     $sharedTeam = app(CreateTeam::class)->handle($owner, 'Family Budget', isPersonal: false);

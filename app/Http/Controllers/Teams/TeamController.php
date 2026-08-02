@@ -57,6 +57,8 @@ class TeamController extends Controller
      */
     public function store(SaveTeamRequest $request, CreateTeam $createTeam, SubscriptionService $subscriptionService): RedirectResponse
     {
+        Gate::authorize('create', Team::class);
+
         $team = $createTeam->handle($request->user(), $request->validated('name'));
 
         if (! $subscriptionService->teamHasAccess($team)) {

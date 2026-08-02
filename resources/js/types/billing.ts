@@ -152,6 +152,7 @@ export type SharedData = {
     sidebarOpen: boolean;
     currentTeam: import('@/types/teams').Team | null;
     teams: import('@/types/teams').Team[];
+    canCreateTeam: boolean;
     subscription: SharedSubscription | null;
     vaultLocked: boolean;
     registrationRecoveryKey?: string | null;

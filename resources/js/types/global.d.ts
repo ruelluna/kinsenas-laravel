@@ -17,6 +17,7 @@ declare module '@inertiajs/core' {
             sidebarOpen: boolean;
             currentTeam: Team | null;
             teams: Team[];
+            canCreateTeam: boolean;
             subscription: SharedSubscription | null;
             vaultLocked: boolean;
             registrationRecoveryKey?: string | null;

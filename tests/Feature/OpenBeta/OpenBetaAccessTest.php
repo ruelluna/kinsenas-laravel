@@ -14,6 +14,7 @@ uses(RefreshDatabase::class, UnlocksVault::class);
 beforeEach(function () {
     $this->seed(BillingSeeder::class);
     config(['billing.mode' => 'open_beta']);
+    config(['teams.allow_additional_owned_teams' => true]);
 });
 
 it('grants access to teams with past due subscriptions during open beta when approved', function () {

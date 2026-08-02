@@ -15,6 +15,7 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->seed(BillingSeeder::class);
     Storage::fake('public');
+    config(['teams.allow_additional_owned_teams' => true]);
 });
 
 it('creates a shared team with past due subscription and no trial', function () {

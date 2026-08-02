@@ -121,6 +121,8 @@ it('blocks deleting the last platform admin', function () {
 });
 
 it('blocks deleting a user who owns a shared team with other members', function () {
+    config(['teams.allow_additional_owned_teams' => true]);
+
     $admin = User::factory()->create(['is_platform_admin' => true]);
     $owner = User::factory()->create(['email' => 'shared-owner@example.com', 'is_platform_admin' => false]);
     $member = User::factory()->create(['email' => 'shared-member@example.com', 'is_platform_admin' => false]);
@@ -138,6 +140,8 @@ it('blocks deleting a user who owns a shared team with other members', function 
 });
 
 it('cancels subscription when deleting sole owner of a shared team', function () {
+    config(['teams.allow_additional_owned_teams' => true]);
+
     $admin = User::factory()->create(['is_platform_admin' => true]);
     $owner = User::factory()->create(['email' => 'solo-owner@example.com', 'is_platform_admin' => false]);
 

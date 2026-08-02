@@ -29,7 +29,11 @@ class TeamPolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        if (config('teams.allow_additional_owned_teams')) {
+            return true;
+        }
+
+        return ! $user->ownedTeams()->exists();
     }
 
     /**

@@ -3,11 +3,13 @@
 namespace App\Http\Middleware;
 
 use App\Enums\SubscriptionStatus;
+use App\Models\Team;
 use App\Models\User;
 use App\Services\Billing\BetaApplicationService;
 use App\Services\Billing\SubscriptionService;
 use App\Services\Vault\VaultKeyManager;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -58,6 +60,7 @@ class HandleInertiaRequests extends Middleware
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'currentTeam' => fn () => $user?->currentTeam ? $user->toUserTeam($user->currentTeam) : null,
             'teams' => fn () => $user?->toUserTeams(includeCurrent: true) ?? [],
+            'canCreateTeam' => fn () => $user ? Gate::allows('create', Team::class) : false,
             'vaultLocked' => fn () => $user !== null && $user->vault !== null && ! session()->has(VaultKeyManager::SESSION_USER_DEK),
             'subscription' => fn () => $this->sharedSubscription($user, $subscriptionService),
             'registrationRecoveryKey' => fn () => session('registration.recovery_key'),
