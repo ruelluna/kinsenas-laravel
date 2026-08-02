@@ -30,8 +30,6 @@ export function useParallaxOffset(
 
     useEffect(() => {
         if (prefersReducedMotion) {
-            setOffset(0);
-
             return;
         }
 
@@ -67,5 +65,5 @@ export function useParallaxOffset(
         };
     }, [prefersReducedMotion, sectionRef, speed]);
 
-    return offset;
+    return prefersReducedMotion ? 0 : offset;
 }

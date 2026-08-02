@@ -1,5 +1,5 @@
 import { Form, usePage } from '@inertiajs/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import {
@@ -35,6 +35,10 @@ type Props = {
     fundBalances: FundBalance[];
 };
 
+type SessionProps = Omit<Props, 'open' | 'onOpenChange'> & {
+    onClose: () => void;
+};
+
 function todayString(): string {
     return new Date().toISOString().slice(0, 10);
 }
@@ -61,33 +65,24 @@ function bankLabel(category: CategoryOption | undefined): string {
     return category.bankName;
 }
 
-export default function AddTransferModal({
-    open,
-    onOpenChange,
+function AddTransferSession({
+    onClose,
     presetFromCategoryId,
     defaultCategoryId,
     categories,
     categoryBankMap,
     fundBalances,
-}: Props) {
+}: SessionProps) {
     const { currentTeam, errors, name } = usePage<SharedData & { errors: Record<string, string> }>().props;
     const teamSlug = currentTeam?.slug ?? '';
     const submitRef = useRef<HTMLButtonElement>(null);
     const skipBankReminderRef = useRef(false);
-    const [formKey, setFormKey] = useState(0);
-    const [fromCategoryId, setFromCategoryId] = useState('');
+    const [fromCategoryId, setFromCategoryId] = useState(
+        () => presetFromCategoryId ?? defaultCategoryId ?? categories[0]?.id ?? '',
+    );
     const [toCategoryId, setToCategoryId] = useState('');
     const [amount, setAmount] = useState('');
     const [bankReminderOpen, setBankReminderOpen] = useState(false);
-
-    useEffect(() => {
-        if (open) {
-            setFromCategoryId(presetFromCategoryId ?? defaultCategoryId ?? categories[0]?.id ?? '');
-            setToCategoryId('');
-            setAmount('');
-            setFormKey((key) => key + 1);
-        }
-    }, [open, presetFromCategoryId, defaultCategoryId, categories]);
 
     const fromCategory = useMemo(
         () => categories.find((category) => category.id === fromCategoryId),
@@ -124,181 +119,165 @@ export default function AddTransferModal({
         submitRef.current?.click();
     }
 
-    function handleOpenChange(nextOpen: boolean) {
-        if (!nextOpen) {
-            setBankReminderOpen(false);
-        }
-
-        onOpenChange(nextOpen);
-    }
-
     return (
         <>
-            <Dialog open={open} onOpenChange={handleOpenChange}>
-                <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-                    <Form
-                        key={formKey}
-                        action={`/${teamSlug}/savings/transfers`}
-                        method="post"
-                        className="space-y-4"
-                        onSuccess={() => handleOpenChange(false)}
-                        onSubmit={(event) => {
-                            if (skipBankReminderRef.current) {
-                                skipBankReminderRef.current = false;
+            <Form
+                action={`/${teamSlug}/savings/transfers`}
+                method="post"
+                className="space-y-4"
+                onSuccess={onClose}
+                onSubmit={(event) => {
+                    if (skipBankReminderRef.current) {
+                        skipBankReminderRef.current = false;
 
-                                return;
-                            }
+                        return;
+                    }
 
-                            if (crossesBanks && toCategoryId !== '') {
-                                event.preventDefault();
-                                setBankReminderOpen(true);
-                            }
-                        }}
-                    >
-                        {({ processing }) => (
-                            <>
-                                <DialogHeader>
-                                    <DialogTitle>Record transfer</DialogTitle>
-                                    <DialogDescription>
-                                        Move money from one fund to another. When funds use
-                                        different banks, move the actual money in your banking app,
-                                        then confirm here.
-                                    </DialogDescription>
-                                </DialogHeader>
+                    if (crossesBanks && toCategoryId !== '') {
+                        event.preventDefault();
+                        setBankReminderOpen(true);
+                    }
+                }}
+            >
+                {({ processing }) => (
+                    <>
+                        <DialogHeader>
+                            <DialogTitle>Record transfer</DialogTitle>
+                            <DialogDescription>
+                                Move money from one fund to another. When funds use different banks,
+                                move the actual money in your banking app, then confirm here.
+                            </DialogDescription>
+                        </DialogHeader>
 
-                                <div className="grid gap-2">
-                                    <Label htmlFor="from_category_id">From fund bucket</Label>
-                                    <select
-                                        id="from_category_id"
-                                        name="from_category_id"
-                                        className="border-input h-9 rounded-md border px-3 text-sm"
-                                        value={fromCategoryId}
-                                        onChange={(event) => {
-                                            setFromCategoryId(event.target.value);
+                        <div className="grid gap-2">
+                            <Label htmlFor="from_category_id">From fund bucket</Label>
+                            <select
+                                id="from_category_id"
+                                name="from_category_id"
+                                className="border-input h-9 rounded-md border px-3 text-sm"
+                                value={fromCategoryId}
+                                onChange={(event) => {
+                                    setFromCategoryId(event.target.value);
 
-                                            if (event.target.value === toCategoryId) {
-                                                setToCategoryId('');
-                                            }
-                                        }}
-                                        required
-                                    >
-                                        {categories.map((category) => (
-                                            <option key={category.id} value={category.id}>
-                                                {category.name}
-                                                {category.bankName ? ` (${category.bankName})` : ''}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <InputError message={errors.from_category_id} />
-                                </div>
+                                    if (event.target.value === toCategoryId) {
+                                        setToCategoryId('');
+                                    }
+                                }}
+                                required
+                            >
+                                {categories.map((category) => (
+                                    <option key={category.id} value={category.id}>
+                                        {category.name}
+                                        {category.bankName ? ` (${category.bankName})` : ''}
+                                    </option>
+                                ))}
+                            </select>
+                            <InputError message={errors.from_category_id} />
+                        </div>
 
-                                <div className="grid gap-2">
-                                    <Label htmlFor="to_category_id">To fund bucket</Label>
-                                    <select
-                                        id="to_category_id"
-                                        name="to_category_id"
-                                        className="border-input h-9 rounded-md border px-3 text-sm"
-                                        value={toCategoryId}
-                                        onChange={(event) => setToCategoryId(event.target.value)}
-                                        required
-                                    >
-                                        <option value="">Select a fund</option>
-                                        {toCategoryOptions.map((category) => (
-                                            <option key={category.id} value={category.id}>
-                                                {category.name}
-                                                {category.bankName ? ` (${category.bankName})` : ''}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <InputError message={errors.to_category_id} />
-                                </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="to_category_id">To fund bucket</Label>
+                            <select
+                                id="to_category_id"
+                                name="to_category_id"
+                                className="border-input h-9 rounded-md border px-3 text-sm"
+                                value={toCategoryId}
+                                onChange={(event) => setToCategoryId(event.target.value)}
+                                required
+                            >
+                                <option value="">Select a fund</option>
+                                {toCategoryOptions.map((category) => (
+                                    <option key={category.id} value={category.id}>
+                                        {category.name}
+                                        {category.bankName ? ` (${category.bankName})` : ''}
+                                    </option>
+                                ))}
+                            </select>
+                            <InputError message={errors.to_category_id} />
+                        </div>
 
-                                {fromCategory && toCategory && (
-                                    <p className="text-xs text-muted-foreground">
-                                        {crossesBanks ? (
-                                            <>
-                                                Different banks: move funds from{' '}
-                                                <strong>{bankLabel(fromCategory)}</strong> to{' '}
-                                                <strong>{bankLabel(toCategory)}</strong> in your
-                                                banking app.
-                                            </>
-                                        ) : (
-                                            <>
-                                                Same bank ({bankLabel(fromCategory)}): this
-                                                transfer will be recorded immediately.
-                                            </>
-                                        )}
-                                    </p>
+                        {fromCategory && toCategory && (
+                            <p className="text-xs text-muted-foreground">
+                                {crossesBanks ? (
+                                    <>
+                                        Different banks: move funds from{' '}
+                                        <strong>{bankLabel(fromCategory)}</strong> to{' '}
+                                        <strong>{bankLabel(toCategory)}</strong> in your banking app.
+                                    </>
+                                ) : (
+                                    <>
+                                        Same bank ({bankLabel(fromCategory)}): this transfer will be
+                                        recorded immediately.
+                                    </>
                                 )}
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="amount">Amount</Label>
-                                    <Input
-                                        id="amount"
-                                        name="amount"
-                                        type="number"
-                                        step="0.01"
-                                        min="0.01"
-                                        value={amount}
-                                        onChange={(event) => setAmount(event.target.value)}
-                                        required
-                                    />
-                                    {fromBalance?.remaining !== null && amount !== '' && (
-                                        <p className="text-xs text-muted-foreground">
-                                            After this transfer:{' '}
-                                            {formatMoney(projectedFromRemaining)} remaining in{' '}
-                                            {fromBalance?.name}
-                                        </p>
-                                    )}
-                                    <InputError message={errors.amount} />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="description">What was this for?</Label>
-                                    <Input
-                                        id="description"
-                                        name="description"
-                                        placeholder="Rebalance emergency fund, move tithe…"
-                                        required
-                                    />
-                                    <InputError message={errors.description} />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="transferred_on">Date</Label>
-                                    <Input
-                                        id="transferred_on"
-                                        name="transferred_on"
-                                        type="date"
-                                        defaultValue={todayString()}
-                                        required
-                                    />
-                                    <InputError message={errors.transferred_on} />
-                                </div>
-
-                                <button
-                                    ref={submitRef}
-                                    type="submit"
-                                    className="hidden"
-                                    aria-hidden
-                                    tabIndex={-1}
-                                />
-
-                                <DialogFooter className="gap-2">
-                                    <DialogClose asChild>
-                                        <Button type="button" variant="secondary">
-                                            Cancel
-                                        </Button>
-                                    </DialogClose>
-                                    <Button type="submit" disabled={processing}>
-                                        Record transfer
-                                    </Button>
-                                </DialogFooter>
-                            </>
+                            </p>
                         )}
-                    </Form>
-                </DialogContent>
-            </Dialog>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="amount">Amount</Label>
+                            <Input
+                                id="amount"
+                                name="amount"
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                value={amount}
+                                onChange={(event) => setAmount(event.target.value)}
+                                required
+                            />
+                            {fromBalance?.remaining !== null && amount !== '' && (
+                                <p className="text-xs text-muted-foreground">
+                                    After this transfer: {formatMoney(projectedFromRemaining)} remaining
+                                    in {fromBalance?.name}
+                                </p>
+                            )}
+                            <InputError message={errors.amount} />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="description">What was this for?</Label>
+                            <Input
+                                id="description"
+                                name="description"
+                                placeholder="Rebalance emergency fund, move tithe…"
+                                required
+                            />
+                            <InputError message={errors.description} />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="transferred_on">Date</Label>
+                            <Input
+                                id="transferred_on"
+                                name="transferred_on"
+                                type="date"
+                                defaultValue={todayString()}
+                                required
+                            />
+                            <InputError message={errors.transferred_on} />
+                        </div>
+
+                        <button
+                            ref={submitRef}
+                            type="submit"
+                            className="hidden"
+                            aria-hidden
+                            tabIndex={-1}
+                        />
+
+                        <DialogFooter className="gap-2">
+                            <DialogClose asChild>
+                                <Button type="button" variant="secondary">
+                                    Cancel
+                                </Button>
+                            </DialogClose>
+                            <Button type="submit" disabled={processing}>
+                                Record transfer
+                            </Button>
+                        </DialogFooter>
+                    </>
+                )}
+            </Form>
 
             <Dialog open={bankReminderOpen} onOpenChange={setBankReminderOpen}>
                 <DialogContent>
@@ -308,8 +287,8 @@ export default function AddTransferModal({
                             Before confirming in {name}, transfer{' '}
                             {amount ? formatMoney(amount) : 'this amount'} from{' '}
                             <strong>{bankLabel(fromCategory)}</strong> to{' '}
-                            <strong>{bankLabel(toCategory)}</strong> in your banking app. This
-                            record stays pending until you confirm the money has moved.
+                            <strong>{bankLabel(toCategory)}</strong> in your banking app. This record
+                            stays pending until you confirm the money has moved.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
@@ -327,5 +306,39 @@ export default function AddTransferModal({
                 </DialogContent>
             </Dialog>
         </>
+    );
+}
+
+export default function AddTransferModal({
+    open,
+    onOpenChange,
+    presetFromCategoryId,
+    defaultCategoryId,
+    categories,
+    categoryBankMap,
+    fundBalances,
+}: Props) {
+    const sessionKey = `${presetFromCategoryId ?? ''}-${defaultCategoryId ?? ''}-${categories.map((category) => category.id).join(',')}`;
+
+    function handleOpenChange(nextOpen: boolean) {
+        onOpenChange(nextOpen);
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={handleOpenChange}>
+            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+                {open ? (
+                    <AddTransferSession
+                        key={sessionKey}
+                        presetFromCategoryId={presetFromCategoryId}
+                        defaultCategoryId={defaultCategoryId}
+                        categories={categories}
+                        categoryBankMap={categoryBankMap}
+                        fundBalances={fundBalances}
+                        onClose={() => handleOpenChange(false)}
+                    />
+                ) : null}
+            </DialogContent>
+        </Dialog>
     );
 }

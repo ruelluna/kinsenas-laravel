@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { KINSENAS_HORIZONTAL_LOGO } from '@/lib/brand';
-import { dashboard, home, login } from '@/routes';
+import { home, login } from '@/routes';
 /* @chisel-registration */
 import { register } from '@/routes';
 /* @end-chisel-registration */

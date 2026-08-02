@@ -1,17 +1,13 @@
 import { Form, Head, usePage } from '@inertiajs/react';
 import { AlertTriangle, ArrowLeft, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import AddFundBalanceModal from '@/components/savings/add-fund-balance-modal';
+import type { ExistingFundTarget } from '@/components/savings/add-fund-balance-modal';
 import CategoryBankSelect from '@/components/savings/category-bank-select';
-import AddFundBalanceModal, {
-    type ExistingFundTarget,
-} from '@/components/savings/add-fund-balance-modal';
 import FundBalancesSection from '@/components/savings/fund-balances-section';
-import {
-    BeforeChooseAlert,
-    PlanEditRulesPanel,
-} from '@/components/savings/plan-guidance-panels';
+import { PlanEditRulesPanel } from '@/components/savings/plan-guidance-panels';
 import SavingsPlanTemplatePicker from '@/components/savings/plan-template-picker';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -123,7 +119,7 @@ function rowsFromPlan(categories: SavingsCategory[]): CategoryRow[] {
     });
 }
 
-function selectClassName(disabled: boolean): string {
+function selectClassName(): string {
     return [
         'border-input flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs',
         'outline-none disabled:cursor-not-allowed disabled:opacity-50',
@@ -213,6 +209,12 @@ export default function SavingsPlanPage({ plan, templates, fundBalances, pageGui
         <>
             {flashError && <PlanRedirectAlert message={flashError} />}
             <SavingsPlanEditor
+                key={plan.categories
+                    .map(
+                        (category) =>
+                            `${category.id ?? category.name}-${category.percentage}-${category.allocationType}`,
+                    )
+                    .join('|')}
                 plan={plan}
                 teamSlug={teamSlug}
                 fundBalances={fundBalances}
@@ -252,10 +254,6 @@ function SavingsPlanEditor({
     const [selectedFundTarget, setSelectedFundTarget] = useState<ExistingFundTarget | null>(null);
     const submitButtonRef = useRef<HTMLButtonElement>(null);
     const skipCustomConfirmRef = useRef(false);
-
-    useEffect(() => {
-        setRows(rowsFromPlan(plan.categories));
-    }, [plan.categories]);
 
     const existingFundForRow = (row: CategoryRow): string | null => {
         if (!row.id) {
@@ -530,7 +528,7 @@ function SavingsPlanEditor({
                                             <select
                                                 id={`category-type-${index}`}
                                                 name={`categories[${index}][allocation_type]`}
-                                                className={selectClassName(rowLocked)}
+                                                className={selectClassName()}
                                                 value={row.allocationType}
                                                 onChange={(event) => {
                                                     const allocationType = event.target
@@ -609,7 +607,7 @@ function SavingsPlanEditor({
                                                 <select
                                                     id={`category-mode-${index}`}
                                                     name={`categories[${index}][deduction_mode]`}
-                                                    className={selectClassName(rowLocked)}
+                                                    className={selectClassName()}
                                                     value={row.deductionMode}
                                                     onChange={(event) =>
                                                         updateRow(index, {
@@ -665,7 +663,7 @@ function SavingsPlanEditor({
                                                 <select
                                                     id={`category-source-${index}`}
                                                     name={`categories[${index}][deduct_from_index]`}
-                                                    className={selectClassName(rowLocked)}
+                                                    className={selectClassName()}
                                                     value={row.deductFromIndex}
                                                     onChange={(event) =>
                                                         updateRow(index, {

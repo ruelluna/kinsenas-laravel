@@ -1,8 +1,7 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import TextLink from '@/components/text-link';
 import { BETA_FREE_MESSAGE } from '@/lib/beta-copy';
 import { logout } from '@/routes';
-import type { SharedData } from '@/types';
 
 export default function BetaPending() {
     return (

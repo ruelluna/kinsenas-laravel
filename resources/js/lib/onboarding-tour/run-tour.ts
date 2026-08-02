@@ -1,17 +1,18 @@
 import { router } from '@inertiajs/react';
-import { driver, type DriveStep, type Driver } from 'driver.js';
-import {
-    clearOnboardingTourActive,
-    markOnboardingTourCompleted,
-    setOnboardingTourActive,
-} from '@/lib/onboarding-tour/storage';
+import { driver } from 'driver.js';
+import type { DriveStep, Driver } from 'driver.js';
 import {
     ONBOARDING_TOUR_STEPS,
     stepMatchesPath,
     teamPath,
     tourElementSelector,
-    type OnboardingTourStep,
 } from '@/lib/onboarding-tour/steps';
+import type { OnboardingTourStep } from '@/lib/onboarding-tour/steps';
+import {
+    clearOnboardingTourActive,
+    markOnboardingTourCompleted,
+    setOnboardingTourActive,
+} from '@/lib/onboarding-tour/storage';
 
 let activeDriver: Driver | null = null;
 let suppressCompleteOnDestroy = false;

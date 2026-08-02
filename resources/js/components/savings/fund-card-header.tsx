@@ -1,5 +1,5 @@
-import { Badge } from '@/components/ui/badge';
 import FundBankBadge from '@/components/savings/fund-bank-badge';
+import { Badge } from '@/components/ui/badge';
 import type { FundBalance } from '@/types/savings';
 
 type Props = Pick<FundBalance, 'name' | 'hint' | 'isDefault' | 'bankId' | 'bankDisplayName' | 'bankLogoUrl'>;

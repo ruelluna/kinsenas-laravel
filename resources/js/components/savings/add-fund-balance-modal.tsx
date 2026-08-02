@@ -1,5 +1,4 @@
 import { Form, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,13 +30,6 @@ type Props = {
 export default function AddFundBalanceModal({ open, onOpenChange, target }: Props) {
     const { currentTeam, errors } = usePage<SharedData & { errors: Record<string, string> }>().props;
     const teamSlug = currentTeam?.slug ?? '';
-    const [formKey, setFormKey] = useState(0);
-
-    useEffect(() => {
-        if (open) {
-            setFormKey((key) => key + 1);
-        }
-    }, [open, target?.categoryId]);
 
     if (!target) {
         return null;
@@ -57,7 +49,7 @@ export default function AddFundBalanceModal({ open, onOpenChange, target }: Prop
                 </DialogHeader>
 
                 <Form
-                    key={formKey}
+                    key={target.categoryId}
                     action={`/${teamSlug}/savings/plan/categories/${target.categoryId}/opening-balance`}
                     method="patch"
                     resetOnSuccess

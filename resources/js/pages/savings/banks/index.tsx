@@ -29,9 +29,10 @@ export default function BanksIndex({ banks, institutions, bankBalances }: Props)
     const teamSlug = currentTeam?.slug ?? '';
     const [addModalOpen, setAddModalOpen] = useState(false);
 
-    const balanceForBank = (bankId: string) => bankBalances.find((balance) => balance.bankId === bankId);
-
     const bankGroups = useMemo(() => {
+        const balanceForBank = (bankId: string) =>
+            bankBalances.find((balance) => balance.bankId === bankId);
+
         const groups = new Map<string, BankGroup>();
         const ungrouped: Bank[] = [];
 

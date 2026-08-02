@@ -1,8 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { useState } from 'react';
-import AddFundBalanceModal, {
-    type ExistingFundTarget,
-} from '@/components/savings/add-fund-balance-modal';
+import AddFundBalanceModal from '@/components/savings/add-fund-balance-modal';
+import type { ExistingFundTarget } from '@/components/savings/add-fund-balance-modal';
 import FundBalanceGrid from '@/components/savings/fund-balance-grid';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';

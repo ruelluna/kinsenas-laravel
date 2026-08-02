@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils';
 
 type Props = {
     error?: string;
-    resetKey?: number;
     existingImageUrl?: string | null;
 };
 
@@ -19,25 +18,12 @@ function isMobileDevice(): boolean {
     return window.matchMedia('(pointer: coarse)').matches;
 }
 
-export default function ReceiptUploadField({ error, resetKey = 0, existingImageUrl = null }: Props) {
+function ReceiptUploadFieldInner({ error, existingImageUrl = null }: Props) {
     const inputId = useId();
     const inputRef = useRef<HTMLInputElement>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [fileName, setFileName] = useState<string | null>(null);
-    const [useCamera, setUseCamera] = useState(false);
-
-    useEffect(() => {
-        setUseCamera(isMobileDevice());
-    }, []);
-
-    useEffect(() => {
-        setPreviewUrl(null);
-        setFileName(null);
-
-        if (inputRef.current) {
-            inputRef.current.value = '';
-        }
-    }, [resetKey]);
+    const [useCamera] = useState(() => isMobileDevice());
 
     const displayUrl = previewUrl ?? existingImageUrl;
 
@@ -161,4 +147,12 @@ export default function ReceiptUploadField({ error, resetKey = 0, existingImageU
             <InputError message={error} />
         </div>
     );
+}
+
+type ReceiptUploadFieldProps = Props & {
+    resetKey?: number;
+};
+
+export default function ReceiptUploadField({ resetKey = 0, ...props }: ReceiptUploadFieldProps) {
+    return <ReceiptUploadFieldInner key={resetKey} {...props} />;
 }

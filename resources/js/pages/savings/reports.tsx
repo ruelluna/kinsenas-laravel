@@ -1,7 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import Heading from '@/components/heading';
-import FundBankBadge from '@/components/savings/fund-bank-badge';
 import { BankLogo } from '@/components/savings/bank-select';
+import FundBankBadge from '@/components/savings/fund-bank-badge';
 import { formatMoney } from '@/lib/format-money';
 import type { SharedData } from '@/types';
 import type { ReportTotals } from '@/types/savings';

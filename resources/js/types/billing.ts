@@ -1,3 +1,6 @@
+import type { Auth } from '@/types/auth';
+import type { Team } from '@/types/teams';
+
 export type SubscriptionFeatureOption = {
     value: string;
     label: string;
@@ -168,10 +171,10 @@ export type SharedData = {
     name: string;
     billingMode: string;
     openBeta: OpenBetaInfo;
-    auth: import('@/types/auth').Auth;
+    auth: Auth;
     sidebarOpen: boolean;
-    currentTeam: import('@/types/teams').Team | null;
-    teams: import('@/types/teams').Team[];
+    currentTeam: Team | null;
+    teams: Team[];
     canCreateTeam: boolean;
     subscription: SharedSubscription | null;
     vaultLocked: boolean;
