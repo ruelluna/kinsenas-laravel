@@ -30,14 +30,18 @@ export default function AdminBetaApplicationsIndex({
                 description="Review open beta sign-ups and approve access."
             />
 
-            <Form method="get" action="/admin/beta-applications" className="mt-6 flex flex-wrap items-end gap-3">
+            <Form
+                method="get"
+                action="/admin/beta-applications"
+                className="mt-6 flex flex-wrap items-end gap-3"
+            >
                 <div className="grid gap-2">
                     <Label htmlFor="status">Status</Label>
                     <select
                         id="status"
                         name="status"
                         defaultValue={filters.status}
-                        className="border-input h-9 rounded-md border px-3 text-sm"
+                        className="h-9 rounded-md border border-input px-3 text-sm"
                     >
                         {statusOptions.map((option) => (
                             <option key={option.value} value={option.value}>
@@ -53,7 +57,7 @@ export default function AdminBetaApplicationsIndex({
                         name="search"
                         defaultValue={filters.search ?? ''}
                         placeholder="Name or email"
-                        className="border-input h-9 rounded-md border px-3 text-sm"
+                        className="h-9 rounded-md border border-input px-3 text-sm"
                     />
                 </div>
                 <Button type="submit" variant="secondary" size="sm">
@@ -63,23 +67,37 @@ export default function AdminBetaApplicationsIndex({
 
             <div className="mt-6 space-y-4">
                 {applications.data.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No applications match this filter.</p>
+                    <p className="text-sm text-muted-foreground">
+                        No applications match this filter.
+                    </p>
                 ) : (
                     applications.data.map((application) => (
-                        <article key={application.id} className="rounded-lg border p-4 text-sm">
+                        <article
+                            key={application.id}
+                            className="rounded-lg border p-4 text-sm"
+                        >
                             <div className="flex flex-wrap items-start justify-between gap-4">
                                 <div className="space-y-1">
-                                    <p className="font-medium">{application.name}</p>
-                                    <p className="text-muted-foreground">{application.email}</p>
+                                    <p className="font-medium">
+                                        {application.name}
+                                    </p>
+                                    <p className="text-muted-foreground">
+                                        {application.email}
+                                    </p>
                                     <p className="text-muted-foreground">
                                         {application.statusLabel}
-                                        {application.emailVerified ? ' · Email verified' : ' · Email not verified'}
+                                        {application.emailVerified
+                                            ? ' · Email verified'
+                                            : ' · Email not verified'}
                                         {' · '}
                                         {application.sourceLabel}
                                     </p>
                                     {application.appliedAt && (
                                         <p className="text-muted-foreground">
-                                            Applied {new Date(application.appliedAt).toLocaleString()}
+                                            Applied{' '}
+                                            {new Date(
+                                                application.appliedAt,
+                                            ).toLocaleString()}
                                         </p>
                                     )}
                                 </div>
@@ -98,7 +116,11 @@ export default function AdminBetaApplicationsIndex({
                                             action={`/admin/beta-applications/${application.id}/reject`}
                                             method="post"
                                         >
-                                            <Button type="submit" size="sm" variant="outline">
+                                            <Button
+                                                type="submit"
+                                                size="sm"
+                                                variant="outline"
+                                            >
                                                 Reject
                                             </Button>
                                         </Form>

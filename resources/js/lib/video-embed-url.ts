@@ -1,4 +1,6 @@
-export function normalizeVideoEmbedUrl(url: string | null | undefined): string | null {
+export function normalizeVideoEmbedUrl(
+    url: string | null | undefined,
+): string | null {
     if (!url || url.trim() === '') {
         return null;
     }
@@ -9,7 +11,9 @@ export function normalizeVideoEmbedUrl(url: string | null | undefined): string |
         if (parsed.hostname === 'youtu.be') {
             const videoId = parsed.pathname.replace(/^\//, '');
 
-            return videoId ? `https://www.youtube-nocookie.com/embed/${videoId}` : null;
+            return videoId
+                ? `https://www.youtube-nocookie.com/embed/${videoId}`
+                : null;
         }
 
         if (parsed.hostname.includes('youtube.com')) {
@@ -36,7 +40,10 @@ export function normalizeVideoEmbedUrl(url: string | null | undefined): string |
             return url.trim();
         }
 
-        if (parsed.hostname.includes('youtube-nocookie.com') && parsed.pathname.startsWith('/embed/')) {
+        if (
+            parsed.hostname.includes('youtube-nocookie.com') &&
+            parsed.pathname.startsWith('/embed/')
+        ) {
             return url.trim();
         }
 

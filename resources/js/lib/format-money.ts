@@ -19,9 +19,7 @@ export function formatMoney(
     return `₱${pesoFormatter.format(numeric)}`;
 }
 
-export function formatMoneyFromCents(
-    cents: number | null | undefined,
-): string {
+export function formatMoneyFromCents(cents: number | null | undefined): string {
     if (cents === null || cents === undefined) {
         return '—';
     }

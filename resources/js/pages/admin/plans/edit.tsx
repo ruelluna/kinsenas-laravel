@@ -22,8 +22,16 @@ export default function AdminPlansEdit({ plan, features }: Props) {
                     </Link>
                 </Button>
             </div>
-            <Heading variant="small" title={`Edit ${plan.name}`} description={`Slug: ${plan.slug}`} />
-            <Form action={`/admin/plans/${plan.id}`} method="put" className="mt-6 max-w-2xl space-y-4">
+            <Heading
+                variant="small"
+                title={`Edit ${plan.name}`}
+                description={`Slug: ${plan.slug}`}
+            />
+            <Form
+                action={`/admin/plans/${plan.id}`}
+                method="put"
+                className="mt-6 max-w-2xl space-y-4"
+            >
                 <PlanFormFields plan={plan} features={features} />
                 <Button type="submit">Save plan</Button>
             </Form>

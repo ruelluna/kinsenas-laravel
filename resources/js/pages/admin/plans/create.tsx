@@ -21,8 +21,16 @@ export default function AdminPlansCreate({ features }: Props) {
                     </Link>
                 </Button>
             </div>
-            <Heading variant="small" title="Create subscription plan" description="Platform admin only." />
-            <Form action="/admin/plans" method="post" className="mt-6 max-w-2xl space-y-4">
+            <Heading
+                variant="small"
+                title="Create subscription plan"
+                description="Platform admin only."
+            />
+            <Form
+                action="/admin/plans"
+                method="post"
+                className="mt-6 max-w-2xl space-y-4"
+            >
                 <PlanFormFields features={features} />
                 <Button type="submit">Create plan</Button>
             </Form>

@@ -22,7 +22,9 @@ function completedKey(teamId: OnboardingTourTeamId): string {
     return `${COMPLETED_PREFIX}${normalizeTeamId(teamId)}`;
 }
 
-export function isOnboardingTourCompleted(teamId: OnboardingTourTeamId): boolean {
+export function isOnboardingTourCompleted(
+    teamId: OnboardingTourTeamId,
+): boolean {
     try {
         return window.localStorage.getItem(completedKey(teamId)) !== null;
     } catch {
@@ -30,13 +32,18 @@ export function isOnboardingTourCompleted(teamId: OnboardingTourTeamId): boolean
     }
 }
 
-export function markOnboardingTourCompleted(teamId: OnboardingTourTeamId): void {
+export function markOnboardingTourCompleted(
+    teamId: OnboardingTourTeamId,
+): void {
     const payload: OnboardingTourCompletion = {
         completedAt: new Date().toISOString(),
     };
 
     try {
-        window.localStorage.setItem(completedKey(teamId), JSON.stringify(payload));
+        window.localStorage.setItem(
+            completedKey(teamId),
+            JSON.stringify(payload),
+        );
     } catch {
         // Ignore quota / private mode failures.
     }
@@ -44,7 +51,9 @@ export function markOnboardingTourCompleted(teamId: OnboardingTourTeamId): void 
     clearOnboardingTourActive();
 }
 
-export function clearOnboardingTourCompleted(teamId: OnboardingTourTeamId): void {
+export function clearOnboardingTourCompleted(
+    teamId: OnboardingTourTeamId,
+): void {
     try {
         window.localStorage.removeItem(completedKey(teamId));
     } catch {
@@ -99,7 +108,9 @@ export function clearOnboardingTourActive(): void {
 
 const autoStartedTeams = new Set<string>();
 
-export function requestOnboardingTourAutoStart(teamId: OnboardingTourTeamId): void {
+export function requestOnboardingTourAutoStart(
+    teamId: OnboardingTourTeamId,
+): void {
     const id = normalizeTeamId(teamId);
 
     if (isOnboardingTourCompleted(id) || autoStartedTeams.has(id)) {
@@ -113,7 +124,9 @@ export function requestOnboardingTourAutoStart(teamId: OnboardingTourTeamId): vo
     }
 }
 
-export function consumeOnboardingTourAutoStart(teamId: OnboardingTourTeamId): boolean {
+export function consumeOnboardingTourAutoStart(
+    teamId: OnboardingTourTeamId,
+): boolean {
     const id = normalizeTeamId(teamId);
 
     try {
@@ -137,6 +150,8 @@ export function consumeOnboardingTourAutoStart(teamId: OnboardingTourTeamId): bo
     }
 }
 
-export function resetOnboardingTourAutoStartGuard(teamId: OnboardingTourTeamId): void {
+export function resetOnboardingTourAutoStartGuard(
+    teamId: OnboardingTourTeamId,
+): void {
     autoStartedTeams.delete(normalizeTeamId(teamId));
 }

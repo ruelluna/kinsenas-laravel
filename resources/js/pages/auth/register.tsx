@@ -51,27 +51,40 @@ export default function Register({
 
                         {openBetaOffer && (
                             <Alert variant="brand">
-                                <AlertTitle>Apply for public beta access</AlertTitle>
+                                <AlertTitle>
+                                    Apply for public beta access
+                                </AlertTitle>
                                 <AlertDescription className="space-y-2">
                                     <p>
-                                        Create a real Kinsenas account and apply for the public beta. After
-                                        you verify your email
+                                        Create a real Kinsenas account and apply
+                                        for the public beta. After you verify
+                                        your email
                                         {betaCodeLabel ? (
                                             <>
                                                 {' '}
-                                                with your event code for <span className="font-medium">{betaCodeLabel}</span>
+                                                with your event code for{' '}
+                                                <span className="font-medium">
+                                                    {betaCodeLabel}
+                                                </span>
                                             </>
                                         ) : (
-                                            <> and we approve your application</>
+                                            <>
+                                                {' '}
+                                                and we approve your application
+                                            </>
                                         )}
-                                        , you can use the core savings planner at no cost.
+                                        , you can use the core savings planner
+                                        at no cost.
                                     </p>
                                     <p>
-                                        Have an event code? Enter it below for instant beta approval after email
+                                        Have an event code? Enter it below for
+                                        instant beta approval after email
                                         verification.
                                     </p>
                                     <p>{BETA_FREE_MESSAGE}</p>
-                                    <p className="text-muted-foreground">Pricing: coming soon.</p>
+                                    <p className="text-muted-foreground">
+                                        Pricing: coming soon.
+                                    </p>
                                 </AlertDescription>
                             </Alert>
                         )}
@@ -79,15 +92,22 @@ export default function Register({
                         {trialOffer && (
                             <Alert variant="guidance">
                                 <AlertTitle>
-                                    Start your {trialOffer.trialDays}-day free trial
+                                    Start your {trialOffer.trialDays}-day free
+                                    trial
                                 </AlertTitle>
                                 <AlertDescription className="space-y-2">
                                     <p>
                                         Create an account and start a{' '}
-                                        <span className="font-medium">{trialOffer.trialDays}-day free trial</span>{' '}
+                                        <span className="font-medium">
+                                            {trialOffer.trialDays}-day free
+                                            trial
+                                        </span>{' '}
                                         on your personal finance workspace (
-                                        <span className="font-medium">{trialOffer.name}</span>
-                                        ). You will not be charged until the trial ends.
+                                        <span className="font-medium">
+                                            {trialOffer.name}
+                                        </span>
+                                        ). You will not be charged until the
+                                        trial ends.
                                     </p>
                                     {trialOffer.prices.length > 0 && (
                                         <p>
@@ -171,7 +191,9 @@ export default function Register({
 
                             {openBetaOffer && (
                                 <div className="grid gap-2">
-                                    <Label htmlFor="beta_code">Beta access code (optional)</Label>
+                                    <Label htmlFor="beta_code">
+                                        Beta access code (optional)
+                                    </Label>
                                     <Input
                                         id="beta_code"
                                         type="text"
@@ -197,13 +219,14 @@ export default function Register({
                                 <div className="grid gap-1">
                                     <Label
                                         htmlFor="marketing_emails_opt_in"
-                                        className="font-normal leading-snug"
+                                        className="leading-snug font-normal"
                                     >
                                         Send me helpful emails from Kinsenas
                                     </Label>
                                     <p className="text-sm text-muted-foreground">
-                                        Occasional tips, product updates, and beta news.
-                                        Not promotional spam — unsubscribe anytime.
+                                        Occasional tips, product updates, and
+                                        beta news. Not promotional spam —
+                                        unsubscribe anytime.
                                     </p>
                                 </div>
                             </div>
@@ -215,7 +238,9 @@ export default function Register({
                                 data-test="register-user-button"
                             >
                                 {processing && <Spinner />}
-                                {openBetaOffer ? 'Apply for beta access' : 'Create account'}
+                                {openBetaOffer
+                                    ? 'Apply for beta access'
+                                    : 'Create account'}
                             </Button>
                         </div>
 

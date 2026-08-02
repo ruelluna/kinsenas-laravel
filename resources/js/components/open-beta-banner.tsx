@@ -12,11 +12,20 @@ export function OpenBetaBanner() {
     }
 
     return (
-        <div className={cn('border-b border-sidebar-border/50 bg-primary/5', pageContentPaddingX, 'py-3')}>
+        <div
+            className={cn(
+                'border-b border-sidebar-border/50 bg-primary/5',
+                pageContentPaddingX,
+                'py-3',
+            )}
+        >
             <PublicBetaAlert>
                 <p>
                     Use the core savings planner with your real account.{' '}
-                    <Link href="/settings/feedback" className="font-medium underline underline-offset-4">
+                    <Link
+                        href="/settings/feedback"
+                        className="font-medium underline underline-offset-4"
+                    >
                         Send feedback
                     </Link>{' '}
                     anytime.

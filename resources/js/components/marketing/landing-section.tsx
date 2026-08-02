@@ -62,11 +62,11 @@ export function LandingSectionHeader({
                     {eyebrow}
                 </p>
             )}
-            <h2 className="text-balance text-3xl font-semibold tracking-tight text-foreground lg:text-4xl lg:leading-tight">
+            <h2 className="text-3xl font-semibold tracking-tight text-balance text-foreground lg:text-4xl lg:leading-tight">
                 {title}
             </h2>
             {description && (
-                <p className="text-pretty text-lg leading-relaxed text-muted-foreground">
+                <p className="text-lg leading-relaxed text-pretty text-muted-foreground">
                     {description}
                 </p>
             )}

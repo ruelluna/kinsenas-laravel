@@ -38,7 +38,9 @@ export default function SpendingIndex({
     const [addModalOpen, setAddModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [editingSpend, setEditingSpend] = useState<FundSpend | null>(null);
-    const [presetCategoryId, setPresetCategoryId] = useState<string | null>(null);
+    const [presetCategoryId, setPresetCategoryId] = useState<string | null>(
+        null,
+    );
 
     function openAddModal(categoryId: string | null = null) {
         setPresetCategoryId(categoryId);
@@ -68,8 +70,8 @@ export default function SpendingIndex({
 
             {!plan.canDrawFromFunds && (
                 <p className="mt-4 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                    Lock at least one income period or add a current balance on your savings plan before
-                    recording spending.
+                    Lock at least one income period or add a current balance on
+                    your savings plan before recording spending.
                 </p>
             )}
 
@@ -110,7 +112,9 @@ export default function SpendingIndex({
                 <h3 className="font-medium">Recent activity</h3>
                 <div className="mt-3 space-y-3">
                     {spends.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">No spending recorded yet.</p>
+                        <p className="text-sm text-muted-foreground">
+                            No spending recorded yet.
+                        </p>
                     ) : (
                         spends.map((spend) => (
                             <div
@@ -119,12 +123,17 @@ export default function SpendingIndex({
                             >
                                 <div>
                                     <p className="font-medium">
-                                        {formatMoney(spend.amount)} · {spend.description}
+                                        {formatMoney(spend.amount)} ·{' '}
+                                        {spend.description}
                                     </p>
                                     <p className="text-muted-foreground">
                                         {spend.categoryName} · {spend.spentOn}
-                                        {spend.bankName ? ` · ${spend.bankName}` : ''}
-                                        {spend.recipientName ? ` → ${spend.recipientName}` : ''}
+                                        {spend.bankName
+                                            ? ` · ${spend.bankName}`
+                                            : ''}
+                                        {spend.recipientName
+                                            ? ` → ${spend.recipientName}`
+                                            : ''}
                                     </p>
                                     {spend.receiptImageUrl && (
                                         <a
@@ -147,7 +156,11 @@ export default function SpendingIndex({
                                             action={`/${teamSlug}/savings/spending/${spend.id}/confirm`}
                                             method="post"
                                         >
-                                            <Button type="submit" size="sm" variant="outline">
+                                            <Button
+                                                type="submit"
+                                                size="sm"
+                                                variant="outline"
+                                            >
                                                 Confirm
                                             </Button>
                                         </Form>
@@ -158,7 +171,9 @@ export default function SpendingIndex({
                                                 type="button"
                                                 size="sm"
                                                 variant="outline"
-                                                onClick={() => openEditModal(spend)}
+                                                onClick={() =>
+                                                    openEditModal(spend)
+                                                }
                                             >
                                                 <Pencil className="size-4" />
                                                 Edit
@@ -167,7 +182,11 @@ export default function SpendingIndex({
                                                 action={`/${teamSlug}/savings/spending/${spend.id}`}
                                                 method="delete"
                                             >
-                                                <Button type="submit" size="sm" variant="outline">
+                                                <Button
+                                                    type="submit"
+                                                    size="sm"
+                                                    variant="outline"
+                                                >
                                                     <Trash2 className="size-4" />
                                                     Delete
                                                 </Button>
@@ -185,5 +204,10 @@ export default function SpendingIndex({
 }
 
 SpendingIndex.layout = (props: SharedData) => ({
-    breadcrumbs: [{ title: 'Spending', href: `/${props.currentTeam?.slug}/savings/spending` }],
+    breadcrumbs: [
+        {
+            title: 'Spending',
+            href: `/${props.currentTeam?.slug}/savings/spending`,
+        },
+    ],
 });

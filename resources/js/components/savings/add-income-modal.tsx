@@ -47,8 +47,8 @@ export default function AddIncomeModal({ open, onOpenChange }: Props) {
                             <DialogHeader>
                                 <DialogTitle>Add income</DialogTitle>
                                 <DialogDescription>
-                                    Enter a monthly income period. Lock it when ready to enable
-                                    transfers and spending.
+                                    Enter a monthly income period. Lock it when
+                                    ready to enable transfers and spending.
                                 </DialogDescription>
                             </DialogHeader>
 
@@ -64,12 +64,21 @@ export default function AddIncomeModal({ open, onOpenChange }: Props) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="period_start">Period start</Label>
-                                <Input id="period_start" name="period_start" type="date" required />
+                                <Label htmlFor="period_start">
+                                    Period start
+                                </Label>
+                                <Input
+                                    id="period_start"
+                                    name="period_start"
+                                    type="date"
+                                    required
+                                />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="amount">Income amount (PHP)</Label>
+                                <Label htmlFor="amount">
+                                    Income amount (PHP)
+                                </Label>
                                 <Input
                                     id="amount"
                                     name="amount"

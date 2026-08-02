@@ -21,16 +21,24 @@ export default function AdminPaymentSubmissionsIndex({
     return (
         <>
             <Head title="Admin — Payments" />
-            <Heading variant="small" title="Payment submissions" description="Approve or reject manual PayMaya payments." />
+            <Heading
+                variant="small"
+                title="Payment submissions"
+                description="Approve or reject manual PayMaya payments."
+            />
 
-            <Form method="get" action="/admin/payment-submissions" className="mt-6 flex flex-wrap items-end gap-3">
+            <Form
+                method="get"
+                action="/admin/payment-submissions"
+                className="mt-6 flex flex-wrap items-end gap-3"
+            >
                 <div className="grid gap-2">
                     <Label htmlFor="status">Status</Label>
                     <select
                         id="status"
                         name="status"
                         defaultValue={filters.status}
-                        className="border-input h-9 rounded-md border px-3 text-sm"
+                        className="h-9 rounded-md border border-input px-3 text-sm"
                     >
                         {statusOptions.map((option) => (
                             <option key={option.value} value={option.value}>
@@ -46,7 +54,9 @@ export default function AdminPaymentSubmissionsIndex({
 
             <div className="mt-6 space-y-4">
                 {submissions.length === 0 && (
-                    <p className="text-sm text-muted-foreground">No submissions for this filter.</p>
+                    <p className="text-sm text-muted-foreground">
+                        No submissions for this filter.
+                    </p>
                 )}
                 {submissions.map((s) => (
                     <div key={s.id} className="rounded-lg border p-4 text-sm">
@@ -54,10 +64,13 @@ export default function AdminPaymentSubmissionsIndex({
                             {s.userName} — {s.referenceNumber}
                         </p>
                         <p className="text-muted-foreground">
-                            {s.userEmail} · {s.planName} · {s.interval} · {s.status}
+                            {s.userEmail} · {s.planName} · {s.interval} ·{' '}
+                            {s.status}
                         </p>
                         {s.amount !== null && (
-                            <p className="text-muted-foreground">{formatMoneyFromCents(s.amount)}</p>
+                            <p className="text-muted-foreground">
+                                {formatMoneyFromCents(s.amount)}
+                            </p>
                         )}
                         {s.proofImageUrl && (
                             <a
@@ -73,10 +86,17 @@ export default function AdminPaymentSubmissionsIndex({
                                 />
                             </a>
                         )}
-                        {s.notes && <p className="mt-2 text-muted-foreground">Notes: {s.notes}</p>}
+                        {s.notes && (
+                            <p className="mt-2 text-muted-foreground">
+                                Notes: {s.notes}
+                            </p>
+                        )}
                         {s.status === 'pending' && (
                             <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-start">
-                                <Form action={`/admin/payment-submissions/${s.id}/approve`} method="post">
+                                <Form
+                                    action={`/admin/payment-submissions/${s.id}/approve`}
+                                    method="post"
+                                >
                                     <Button type="submit" size="sm">
                                         Approve
                                     </Button>
@@ -86,16 +106,22 @@ export default function AdminPaymentSubmissionsIndex({
                                     method="post"
                                     className="flex flex-1 flex-col gap-2 sm:max-w-md"
                                 >
-                                    <Label htmlFor={`notes-${s.id}`}>Reject notes</Label>
+                                    <Label htmlFor={`notes-${s.id}`}>
+                                        Reject notes
+                                    </Label>
                                     <textarea
                                         id={`notes-${s.id}`}
                                         name="notes"
                                         required
                                         minLength={3}
-                                        className="border-input min-h-20 rounded-md border px-3 py-2 text-sm"
+                                        className="min-h-20 rounded-md border border-input px-3 py-2 text-sm"
                                         placeholder="Reason for rejection"
                                     />
-                                    <Button type="submit" size="sm" variant="outline">
+                                    <Button
+                                        type="submit"
+                                        size="sm"
+                                        variant="outline"
+                                    >
                                         Reject
                                     </Button>
                                 </Form>

@@ -7,7 +7,11 @@ import FundBalanceGrid from '@/components/savings/fund-balance-grid';
 import { Button } from '@/components/ui/button';
 import { formatMoney } from '@/lib/format-money';
 import type { SharedData } from '@/types';
-import type { CategoryBankMap, FundBalance, FundTransfer } from '@/types/savings';
+import type {
+    CategoryBankMap,
+    FundBalance,
+    FundTransfer,
+} from '@/types/savings';
 
 type CategoryOption = {
     id: string;
@@ -42,7 +46,9 @@ export default function TransfersIndex({
     const { currentTeam } = usePage<SharedData>().props;
     const teamSlug = currentTeam?.slug ?? '';
     const [addModalOpen, setAddModalOpen] = useState(false);
-    const [presetFromCategoryId, setPresetFromCategoryId] = useState<string | null>(null);
+    const [presetFromCategoryId, setPresetFromCategoryId] = useState<
+        string | null
+    >(null);
 
     function openAddModal(fromCategoryId: string | null = null) {
         setPresetFromCategoryId(fromCategoryId);
@@ -67,8 +73,8 @@ export default function TransfersIndex({
 
             {!plan.canDrawFromFunds && (
                 <p className="mt-4 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                    Lock at least one income period or add a current balance on your savings plan before
-                    recording transfers.
+                    Lock at least one income period or add a current balance on
+                    your savings plan before recording transfers.
                 </p>
             )}
 
@@ -104,7 +110,9 @@ export default function TransfersIndex({
                 <h3 className="font-medium">Recent transfers</h3>
                 <div className="mt-3 space-y-3">
                     {transfers.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">No transfers recorded yet.</p>
+                        <p className="text-sm text-muted-foreground">
+                            No transfers recorded yet.
+                        </p>
                     ) : (
                         transfers.map((transfer) => (
                             <div
@@ -113,16 +121,18 @@ export default function TransfersIndex({
                             >
                                 <div>
                                     <p className="font-medium">
-                                        {formatMoney(transfer.amount)} · {transfer.description}
+                                        {formatMoney(transfer.amount)} ·{' '}
+                                        {transfer.description}
                                     </p>
                                     <p className="text-muted-foreground">
-                                        {transfer.fromCategoryName} → {transfer.toCategoryName} ·{' '}
+                                        {transfer.fromCategoryName} →{' '}
+                                        {transfer.toCategoryName} ·{' '}
                                         {transfer.transferredOn}
                                     </p>
                                     {transfer.crossesBanks && (
                                         <p className="text-xs text-muted-foreground">
-                                            {transfer.fromBankName ?? 'No bank'} →{' '}
-                                            {transfer.toBankName ?? 'No bank'}
+                                            {transfer.fromBankName ?? 'No bank'}{' '}
+                                            → {transfer.toBankName ?? 'No bank'}
                                         </p>
                                     )}
                                 </div>
@@ -131,7 +141,11 @@ export default function TransfersIndex({
                                         action={`/${teamSlug}/savings/transfers/${transfer.id}/confirm`}
                                         method="post"
                                     >
-                                        <Button type="submit" size="sm" variant="outline">
+                                        <Button
+                                            type="submit"
+                                            size="sm"
+                                            variant="outline"
+                                        >
                                             Confirm
                                         </Button>
                                     </Form>
@@ -146,5 +160,10 @@ export default function TransfersIndex({
 }
 
 TransfersIndex.layout = (props: SharedData) => ({
-    breadcrumbs: [{ title: 'Transfers', href: `/${props.currentTeam?.slug}/savings/transfers` }],
+    breadcrumbs: [
+        {
+            title: 'Transfers',
+            href: `/${props.currentTeam?.slug}/savings/transfers`,
+        },
+    ],
 });

@@ -11,17 +11,28 @@ const textareaClassName =
     'border-input min-h-20 w-full rounded-md border px-3 py-2 text-sm shadow-xs outline-none';
 
 export function PlanFormFields({ plan, features }: Props) {
-    const selectedFeatures = plan?.features ?? features.map((feature) => feature.value);
+    const selectedFeatures =
+        plan?.features ?? features.map((feature) => feature.value);
 
     return (
         <>
             <div className="grid gap-2">
                 <Label htmlFor="name">Name</Label>
-                <Input id="name" name="name" defaultValue={plan?.name ?? ''} required />
+                <Input
+                    id="name"
+                    name="name"
+                    defaultValue={plan?.name ?? ''}
+                    required
+                />
             </div>
             <div className="grid gap-2">
                 <Label htmlFor="slug">Slug</Label>
-                <Input id="slug" name="slug" defaultValue={plan?.slug ?? ''} required />
+                <Input
+                    id="slug"
+                    name="slug"
+                    defaultValue={plan?.slug ?? ''}
+                    required
+                />
             </div>
             <div className="grid gap-2">
                 <Label htmlFor="trial_days">Trial days</Label>
@@ -58,12 +69,17 @@ export function PlanFormFields({ plan, features }: Props) {
             <fieldset className="space-y-2">
                 <legend className="text-sm font-medium">Features</legend>
                 {features.map((feature) => (
-                    <label key={feature.value} className="flex items-center gap-2 text-sm">
+                    <label
+                        key={feature.value}
+                        className="flex items-center gap-2 text-sm"
+                    >
                         <input
                             type="checkbox"
                             name="features[]"
                             value={feature.value}
-                            defaultChecked={selectedFeatures.includes(feature.value)}
+                            defaultChecked={selectedFeatures.includes(
+                                feature.value,
+                            )}
                         />
                         {feature.label}
                     </label>
@@ -71,7 +87,9 @@ export function PlanFormFields({ plan, features }: Props) {
             </fieldset>
             <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-3 rounded-lg border p-4">
-                    <p className="text-sm font-medium">Monthly price (centavos)</p>
+                    <p className="text-sm font-medium">
+                        Monthly price (centavos)
+                    </p>
                     <Input
                         name="prices[monthly][amount]"
                         type="number"
@@ -90,7 +108,9 @@ export function PlanFormFields({ plan, features }: Props) {
                     </label>
                 </div>
                 <div className="space-y-3 rounded-lg border p-4">
-                    <p className="text-sm font-medium">Yearly price (centavos)</p>
+                    <p className="text-sm font-medium">
+                        Yearly price (centavos)
+                    </p>
                     <Input
                         name="prices[yearly][amount]"
                         type="number"
@@ -110,7 +130,8 @@ export function PlanFormFields({ plan, features }: Props) {
                 </div>
             </div>
             <p className="text-xs text-muted-foreground">
-                Enter amounts in centavos (e.g. 29900 = ₱299.00). Display uses formatMoneyFromCents on list pages.
+                Enter amounts in centavos (e.g. 29900 = ₱299.00). Display uses
+                formatMoneyFromCents on list pages.
             </p>
         </>
     );

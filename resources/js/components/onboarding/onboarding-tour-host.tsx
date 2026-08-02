@@ -53,9 +53,9 @@ export default function OnboardingTourHost() {
         }
 
         if (
-            consumeOnboardingTourAutoStart(teamId)
-            && !isOnboardingTourCompleted(teamId)
-            && page.url.includes('/dashboard')
+            consumeOnboardingTourAutoStart(teamId) &&
+            !isOnboardingTourCompleted(teamId) &&
+            page.url.includes('/dashboard')
         ) {
             bootstrapping.current = true;
 

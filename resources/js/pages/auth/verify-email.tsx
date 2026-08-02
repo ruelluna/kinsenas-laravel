@@ -17,13 +17,14 @@ export default function VerifyEmail({ status }: { status?: string }) {
 
             <div className="mb-6 space-y-2 text-center text-sm text-muted-foreground">
                 <p>
-                    Verify your email to access Kinsenas. We sent a link to the address you used when
-                    you signed up.
+                    Verify your email to access Kinsenas. We sent a link to the
+                    address you used when you signed up.
                 </p>
                 {openBeta.isActive && (
                     <p>
-                        After you verify your email, your beta application goes to our team for review.
-                        Once approved, you can use the core savings planner with your real account — free
+                        After you verify your email, your beta application goes
+                        to our team for review. Once approved, you can use the
+                        core savings planner with your real account — free
                         during beta. {BETA_FREE_MESSAGE}
                     </p>
                 )}

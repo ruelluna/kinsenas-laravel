@@ -1,16 +1,7 @@
 export type SurveyLanguage = 'en' | 'tl' | 'ceb';
 
 export type QuestionId =
-    | 'q1'
-    | 'q2'
-    | 'q3'
-    | 'q4'
-    | 'q5'
-    | 'q6'
-    | 'q7'
-    | 'q8'
-    | 'q9'
-    | 'q10';
+    'q1' | 'q2' | 'q3' | 'q4' | 'q5' | 'q6' | 'q7' | 'q8' | 'q9' | 'q10';
 
 export type SurveyStep =
     | 'language'

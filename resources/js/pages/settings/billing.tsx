@@ -27,7 +27,13 @@ type Props = {
         name: string;
         slug: string;
         trialDays: number;
-        prices: Array<{ id: string; interval: string; intervalLabel: string; amount: number; currency: string }>;
+        prices: Array<{
+            id: string;
+            interval: string;
+            intervalLabel: string;
+            amount: number;
+            currency: string;
+        }>;
     }>;
     paymentMethod: {
         label: string;
@@ -36,7 +42,13 @@ type Props = {
     } | null;
 };
 
-export default function BillingSettings({ team, canManageBilling, subscription, plans, paymentMethod }: Props) {
+export default function BillingSettings({
+    team,
+    canManageBilling,
+    subscription,
+    plans,
+    paymentMethod,
+}: Props) {
     const page = usePage<SharedData & { flash?: { error?: string } }>();
     const sharedSubscription = page.props.subscription;
     const openBeta = page.props.openBeta;
@@ -60,11 +72,14 @@ export default function BillingSettings({ team, canManageBilling, subscription, 
             {openBeta.isActive && (
                 <PublicBetaAlert className="mt-6">
                     <p>
-                        {team.name} has full access to the core savings planner at no cost. We are not
-                        collecting payments during beta.
+                        {team.name} has full access to the core savings planner
+                        at no cost. We are not collecting payments during beta.
                     </p>
                     <p>
-                        <Link href="/settings/feedback" className="font-medium underline underline-offset-4">
+                        <Link
+                            href="/settings/feedback"
+                            className="font-medium underline underline-offset-4"
+                        >
                             Send beta feedback
                         </Link>{' '}
                         anytime — it helps shape what we ship next.
@@ -100,20 +115,34 @@ export default function BillingSettings({ team, canManageBilling, subscription, 
                 <Alert variant="warning" className="mt-6">
                     <AlertTitle>Owner billing only</AlertTitle>
                     <AlertDescription>
-                        Only the team owner can submit payment for {team.name}. Contact the owner to subscribe.
+                        Only the team owner can submit payment for {team.name}.
+                        Contact the owner to subscribe.
                     </AlertDescription>
                 </Alert>
             )}
 
             {subscription && (
                 <div className="mt-6 rounded-lg border p-4 text-sm">
-                    <p><span className="font-medium">Team:</span> {team.name}</p>
-                    <p><span className="font-medium">Status:</span> {subscription.statusLabel}</p>
+                    <p>
+                        <span className="font-medium">Team:</span> {team.name}
+                    </p>
+                    <p>
+                        <span className="font-medium">Status:</span>{' '}
+                        {subscription.statusLabel}
+                    </p>
                     {!openBeta.isActive && (
-                        <p><span className="font-medium">Plan:</span> {subscription.planName ?? '—'}</p>
+                        <p>
+                            <span className="font-medium">Plan:</span>{' '}
+                            {subscription.planName ?? '—'}
+                        </p>
                     )}
                     {subscription.trialEndsAt && !openBeta.isActive && (
-                        <p><span className="font-medium">Trial ends:</span> {new Date(subscription.trialEndsAt).toLocaleDateString()}</p>
+                        <p>
+                            <span className="font-medium">Trial ends:</span>{' '}
+                            {new Date(
+                                subscription.trialEndsAt,
+                            ).toLocaleDateString()}
+                        </p>
                     )}
                 </div>
             )}
@@ -138,7 +167,8 @@ export default function BillingSettings({ team, canManageBilling, subscription, 
                                 <ul className="mt-3 space-y-1 text-sm text-muted-foreground">
                                     {plan.prices.map((price) => (
                                         <li key={price.id}>
-                                            {price.intervalLabel} — {BETA_PRICING_COMING_SOON_LABEL}
+                                            {price.intervalLabel} —{' '}
+                                            {BETA_PRICING_COMING_SOON_LABEL}
                                         </li>
                                     ))}
                                 </ul>
@@ -152,10 +182,16 @@ export default function BillingSettings({ team, canManageBilling, subscription, 
                 <div className="mt-6 rounded-lg border p-4">
                     <h3 className="font-medium">{paymentMethod.label}</h3>
                     {paymentMethod.qrImageUrl && (
-                        <img src={paymentMethod.qrImageUrl} alt="Payment QR" className="mt-4 max-w-xs rounded border" />
+                        <img
+                            src={paymentMethod.qrImageUrl}
+                            alt="Payment QR"
+                            className="mt-4 max-w-xs rounded border"
+                        />
                     )}
                     {paymentMethod.instructions && (
-                        <p className="mt-3 text-sm text-muted-foreground">{paymentMethod.instructions}</p>
+                        <p className="mt-3 text-sm text-muted-foreground">
+                            {paymentMethod.instructions}
+                        </p>
                     )}
                 </div>
             )}
@@ -167,9 +203,17 @@ export default function BillingSettings({ team, canManageBilling, subscription, 
                             <h3 className="font-medium">{plan.name}</h3>
                             <div className="mt-3 flex flex-wrap gap-2">
                                 {plan.prices.map((price) => (
-                                    <Button key={price.id} asChild variant="outline" size="sm">
-                                        <Link href={`/billing/pay?plan_price_id=${price.id}`}>
-                                            {price.intervalLabel} — {formatMoneyFromCents(price.amount)}
+                                    <Button
+                                        key={price.id}
+                                        asChild
+                                        variant="outline"
+                                        size="sm"
+                                    >
+                                        <Link
+                                            href={`/billing/pay?plan_price_id=${price.id}`}
+                                        >
+                                            {price.intervalLabel} —{' '}
+                                            {formatMoneyFromCents(price.amount)}
                                         </Link>
                                     </Button>
                                 ))}

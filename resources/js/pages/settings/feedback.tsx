@@ -12,7 +12,9 @@ type Props = {
 };
 
 export default function FeedbackSettings({ categories }: Props) {
-    const page = usePage<{ flash?: { toast?: { type: string; message: string } } }>();
+    const page = usePage<{
+        flash?: { toast?: { type: string; message: string } };
+    }>();
 
     return (
         <>
@@ -37,11 +39,14 @@ export default function FeedbackSettings({ categories }: Props) {
                             <select
                                 id="category"
                                 name="category"
-                                className="border-input h-9 rounded-md border px-3 text-sm"
+                                className="h-9 rounded-md border border-input px-3 text-sm"
                                 defaultValue="general"
                             >
                                 {categories.map((category) => (
-                                    <option key={category.value} value={category.value}>
+                                    <option
+                                        key={category.value}
+                                        value={category.value}
+                                    >
                                         {category.label}
                                     </option>
                                 ))}
@@ -57,7 +62,7 @@ export default function FeedbackSettings({ categories }: Props) {
                                 required
                                 rows={6}
                                 placeholder="Share bugs, ideas, or anything that would make Kinsenas better for you."
-                                className="border-input min-h-24 w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                                className="min-h-24 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
                             />
                             <InputError message={errors.message} />
                         </div>

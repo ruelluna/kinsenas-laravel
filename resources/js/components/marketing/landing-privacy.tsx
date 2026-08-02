@@ -20,15 +20,15 @@ export default function LandingPrivacy() {
                                 Encrypted by default
                             </p>
                         </div>
-                        <h2 className="text-balance text-2xl font-semibold tracking-tight text-foreground lg:text-3xl">
+                        <h2 className="text-2xl font-semibold tracking-tight text-balance text-foreground lg:text-3xl">
                             Your income stays yours — even from us.
                         </h2>
-                        <p className="text-pretty text-base leading-relaxed text-muted-foreground lg:text-lg">
+                        <p className="text-base leading-relaxed text-pretty text-muted-foreground lg:text-lg">
                             Kinsenas is built so your payday amounts are private
                             and protected. We encrypt your financial data so
                             nobody on our team can browse your income, savings
-                            splits, or transfers — only you can, when you
-                            unlock your vault.
+                            splits, or transfers — only you can, when you unlock
+                            your vault.
                         </p>
                     </div>
                     <ul className="space-y-3">

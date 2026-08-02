@@ -8,7 +8,12 @@ type SurveyQuestionProps = {
     onChange: (value: string | string[]) => void;
 };
 
-export default function SurveyQuestion({ question, value, multiSelectHint, onChange }: SurveyQuestionProps) {
+export default function SurveyQuestion({
+    question,
+    value,
+    multiSelectHint,
+    onChange,
+}: SurveyQuestionProps) {
     const isMulti = question.type === 'multi';
     const selectedValues = isMulti ? (Array.isArray(value) ? value : []) : [];
 
@@ -29,12 +34,18 @@ export default function SurveyQuestion({ question, value, multiSelectHint, onCha
     return (
         <div className="flex flex-1 flex-col gap-5">
             <div className="space-y-2">
-                <h2 className="text-balance text-xl font-semibold tracking-tight sm:text-2xl">{question.prompt}</h2>
+                <h2 className="text-xl font-semibold tracking-tight text-balance sm:text-2xl">
+                    {question.prompt}
+                </h2>
                 {question.skipNote && (
-                    <p className="text-pretty text-sm text-muted-foreground">{question.skipNote}</p>
+                    <p className="text-sm text-pretty text-muted-foreground">
+                        {question.skipNote}
+                    </p>
                 )}
                 {isMulti && (
-                    <p className="text-sm text-muted-foreground">{multiSelectHint}</p>
+                    <p className="text-sm text-muted-foreground">
+                        {multiSelectHint}
+                    </p>
                 )}
             </div>
 

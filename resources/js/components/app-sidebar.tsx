@@ -1,5 +1,16 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, CreditCard, Landmark, LayoutGrid, MessageSquare, PiggyBank, ArrowRightLeft, ShoppingBag, Users, Wallet } from 'lucide-react';
+import {
+    BookOpen,
+    CreditCard,
+    Landmark,
+    LayoutGrid,
+    MessageSquare,
+    PiggyBank,
+    ArrowRightLeft,
+    ShoppingBag,
+    Users,
+    Wallet,
+} from 'lucide-react';
 import { AdminSidebarNav } from '@/components/admin/admin-sidebar-nav';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';

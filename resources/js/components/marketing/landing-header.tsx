@@ -20,7 +20,10 @@ export default function LandingHeader({
     return (
         <header className="border-b border-border/40 bg-background/75 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
             <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5 lg:px-10">
-                <Link href={home()} className="flex items-center transition-opacity hover:opacity-80">
+                <Link
+                    href={home()}
+                    className="flex items-center transition-opacity hover:opacity-80"
+                >
                     <img
                         src={KINSENAS_HORIZONTAL_LOGO}
                         alt={appName}
@@ -34,7 +37,11 @@ export default function LandingHeader({
                         </Button>
                     ) : (
                         <>
-                            <Button variant="ghost" className="rounded-full" asChild>
+                            <Button
+                                variant="ghost"
+                                className="rounded-full"
+                                asChild
+                            >
                                 <Link href={login()}>Log in</Link>
                             </Button>
                             {/* @chisel-registration */}

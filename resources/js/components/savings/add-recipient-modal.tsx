@@ -20,7 +20,11 @@ type Props = {
     recipientTypes: Array<{ value: string; label: string }>;
 };
 
-export default function AddRecipientModal({ open, onOpenChange, recipientTypes }: Props) {
+export default function AddRecipientModal({
+    open,
+    onOpenChange,
+    recipientTypes,
+}: Props) {
     const { currentTeam } = usePage<SharedData>().props;
     const teamSlug = currentTeam?.slug ?? '';
     const [formKey, setFormKey] = useState(0);
@@ -48,8 +52,8 @@ export default function AddRecipientModal({ open, onOpenChange, recipientTypes }
                             <DialogHeader>
                                 <DialogTitle>Add recipient</DialogTitle>
                                 <DialogDescription>
-                                    People and organizations that receive payments from your
-                                    savings.
+                                    People and organizations that receive
+                                    payments from your savings.
                                 </DialogDescription>
                             </DialogHeader>
 
@@ -58,10 +62,13 @@ export default function AddRecipientModal({ open, onOpenChange, recipientTypes }
                                 <select
                                     id="type"
                                     name="type"
-                                    className="border-input h-9 rounded-md border px-3 text-sm"
+                                    className="h-9 rounded-md border border-input px-3 text-sm"
                                 >
                                     {recipientTypes.map((type) => (
-                                        <option key={type.value} value={type.value}>
+                                        <option
+                                            key={type.value}
+                                            value={type.value}
+                                        >
                                             {type.label}
                                         </option>
                                     ))}

@@ -29,7 +29,8 @@ const legendColors = [
 
 const EXPLODE_DISTANCE = 22;
 const ACTIVE_SCALE = 1.15;
-const SLICE_TRANSITION = 'transform 350ms cubic-bezier(0.34, 1.25, 0.64, 1), opacity 300ms ease';
+const SLICE_TRANSITION =
+    'transform 350ms cubic-bezier(0.34, 1.25, 0.64, 1), opacity 300ms ease';
 
 type Slice = FormulaTemplateCategory & {
     value: number;
@@ -71,7 +72,11 @@ function describeSlice(
     ].join(' ');
 }
 
-function explodeOffset(startAngle: number, endAngle: number, distance: number): { x: number; y: number } {
+function explodeOffset(
+    startAngle: number,
+    endAngle: number,
+    distance: number,
+): { x: number; y: number } {
     if (distance === 0) {
         return { x: 0, y: 0 };
     }
@@ -92,7 +97,9 @@ function buildSlices(categories: FormulaTemplateCategory[]): Slice[] {
             value: parseFloat(category.percentage),
             index,
         }))
-        .filter((category) => Number.isFinite(category.value) && category.value > 0);
+        .filter(
+            (category) => Number.isFinite(category.value) && category.value > 0,
+        );
 
     let currentAngle = 0;
 
@@ -115,7 +122,10 @@ type Props = {
     className?: string;
 };
 
-export default function TemplateAllocationPieChart({ categories, className }: Props) {
+export default function TemplateAllocationPieChart({
+    categories,
+    className,
+}: Props) {
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const slices = buildSlices(categories);
     const size = 256;
@@ -147,7 +157,12 @@ export default function TemplateAllocationPieChart({ categories, className }: Pr
     }
 
     return (
-        <div className={cn('flex flex-col items-center gap-4 sm:flex-row sm:items-center', className)}>
+        <div
+            className={cn(
+                'flex flex-col items-center gap-4 sm:flex-row sm:items-center',
+                className,
+            )}
+        >
             <svg
                 viewBox={`0 0 ${size} ${size}`}
                 className="size-64 shrink-0"
@@ -161,10 +176,15 @@ export default function TemplateAllocationPieChart({ categories, className }: Pr
                             <TooltipTrigger asChild>
                                 <g
                                     style={{
-                                        transform: hoveredIndex === slices[0].index ? `scale(${ACTIVE_SCALE})` : 'scale(1)',
+                                        transform:
+                                            hoveredIndex === slices[0].index
+                                                ? `scale(${ACTIVE_SCALE})`
+                                                : 'scale(1)',
                                         transition: SLICE_TRANSITION,
                                     }}
-                                    onMouseEnter={() => setHoveredIndex(slices[0].index)}
+                                    onMouseEnter={() =>
+                                        setHoveredIndex(slices[0].index)
+                                    }
                                     onMouseLeave={() => setHoveredIndex(null)}
                                     className="cursor-pointer"
                                 >
@@ -173,10 +193,14 @@ export default function TemplateAllocationPieChart({ categories, className }: Pr
                                         cy={0}
                                         r={radius}
                                         className={cn(
-                                            sliceColors[slices[0].index % sliceColors.length],
+                                            sliceColors[
+                                                slices[0].index %
+                                                    sliceColors.length
+                                            ],
                                             'transition-[opacity]',
                                             hoveredIndex !== null &&
-                                                hoveredIndex !== slices[0].index &&
+                                                hoveredIndex !==
+                                                    slices[0].index &&
                                                 'opacity-50',
                                         )}
                                         tabIndex={0}
@@ -184,12 +208,17 @@ export default function TemplateAllocationPieChart({ categories, className }: Pr
                                     />
                                 </g>
                             </TooltipTrigger>
-                            <TooltipContent side="top" className="max-w-xs text-left">
+                            <TooltipContent
+                                side="top"
+                                className="max-w-xs text-left"
+                            >
                                 <p className="font-medium">
                                     {slices[0].name} — {slices[0].percentage}%
                                 </p>
                                 {slices[0].description && (
-                                    <p className="mt-1 text-primary-foreground/90">{slices[0].description}</p>
+                                    <p className="mt-1 text-primary-foreground/90">
+                                        {slices[0].description}
+                                    </p>
                                 )}
                             </TooltipContent>
                         </Tooltip>
@@ -202,33 +231,58 @@ export default function TemplateAllocationPieChart({ categories, className }: Pr
                                     <TooltipTrigger asChild>
                                         <g
                                             style={{
-                                                transform: sliceTransform(slice, isActive),
+                                                transform: sliceTransform(
+                                                    slice,
+                                                    isActive,
+                                                ),
                                                 transition: SLICE_TRANSITION,
                                             }}
-                                            onMouseEnter={() => setHoveredIndex(slice.index)}
-                                            onMouseLeave={() => setHoveredIndex(null)}
+                                            onMouseEnter={() =>
+                                                setHoveredIndex(slice.index)
+                                            }
+                                            onMouseLeave={() =>
+                                                setHoveredIndex(null)
+                                            }
                                             className="cursor-pointer"
                                         >
                                             <path
-                                                d={describeSlice(0, 0, radius, slice.startAngle, slice.endAngle)}
+                                                d={describeSlice(
+                                                    0,
+                                                    0,
+                                                    radius,
+                                                    slice.startAngle,
+                                                    slice.endAngle,
+                                                )}
                                                 className={cn(
-                                                    sliceColors[slice.index % sliceColors.length],
+                                                    sliceColors[
+                                                        slice.index %
+                                                            sliceColors.length
+                                                    ],
                                                     'transition-[opacity]',
-                                                    hoveredIndex !== null && !isActive && 'opacity-45',
+                                                    hoveredIndex !== null &&
+                                                        !isActive &&
+                                                        'opacity-45',
                                                 )}
                                                 tabIndex={0}
                                                 aria-label={`${slice.name}, ${slice.percentage}%`}
                                             />
                                         </g>
                                     </TooltipTrigger>
-                                    <TooltipContent side="top" className="max-w-xs text-left">
+                                    <TooltipContent
+                                        side="top"
+                                        className="max-w-xs text-left"
+                                    >
                                         <p className="font-medium">
                                             {slice.name} — {slice.percentage}%
                                         </p>
                                         {slice.description ? (
-                                            <p className="mt-1 text-primary-foreground/90">{slice.description}</p>
+                                            <p className="mt-1 text-primary-foreground/90">
+                                                {slice.description}
+                                            </p>
                                         ) : (
-                                            <p className="mt-1 text-primary-foreground/70">No description provided.</p>
+                                            <p className="mt-1 text-primary-foreground/70">
+                                                No description provided.
+                                            </p>
                                         )}
                                     </TooltipContent>
                                 </Tooltip>
@@ -255,12 +309,19 @@ export default function TemplateAllocationPieChart({ categories, className }: Pr
                             <span
                                 className={cn(
                                     'size-3 shrink-0 rounded-full transition-transform duration-350 ease-out',
-                                    legendColors[slice.index % legendColors.length],
+                                    legendColors[
+                                        slice.index % legendColors.length
+                                    ],
                                     isActive && 'scale-150',
                                 )}
                                 aria-hidden
                             />
-                            <span className={cn('font-medium tabular-nums', isActive && 'text-foreground')}>
+                            <span
+                                className={cn(
+                                    'font-medium tabular-nums',
+                                    isActive && 'text-foreground',
+                                )}
+                            >
                                 {slice.percentage}%
                             </span>
                             <span

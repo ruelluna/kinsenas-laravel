@@ -5,7 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { formatMoneyFromCents } from '@/lib/format-money';
-import type { AdminPaymentSubmission, AdminSubscriber, FilterOption } from '@/types/billing';
+import type {
+    AdminPaymentSubmission,
+    AdminSubscriber,
+    FilterOption,
+} from '@/types/billing';
 
 type Props = {
     subscriber: AdminSubscriber;
@@ -48,19 +52,27 @@ export default function AdminSubscribersShow({
                         <div>
                             Trial ends:{' '}
                             {subscription.trialEndsAt
-                                ? new Date(subscription.trialEndsAt).toLocaleString()
+                                ? new Date(
+                                      subscription.trialEndsAt,
+                                  ).toLocaleString()
                                 : '—'}
                         </div>
                         <div>
                             Period ends:{' '}
                             {subscription.currentPeriodEndsAt
-                                ? new Date(subscription.currentPeriodEndsAt).toLocaleString()
+                                ? new Date(
+                                      subscription.currentPeriodEndsAt,
+                                  ).toLocaleString()
                                 : '—'}
                         </div>
-                        <div>Access: {subscription.hasAccess ? 'Yes' : 'No'}</div>
+                        <div>
+                            Access: {subscription.hasAccess ? 'Yes' : 'No'}
+                        </div>
                     </dl>
                 ) : (
-                    <p className="mt-2 text-muted-foreground">No subscription record.</p>
+                    <p className="mt-2 text-muted-foreground">
+                        No subscription record.
+                    </p>
                 )}
             </section>
 
@@ -74,9 +86,21 @@ export default function AdminSubscribersShow({
                     >
                         <div className="grid gap-2">
                             <Label htmlFor="days">Days</Label>
-                            <Input id="days" name="days" type="number" min={1} max={90} defaultValue={7} required />
+                            <Input
+                                id="days"
+                                name="days"
+                                type="number"
+                                min={1}
+                                max={90}
+                                defaultValue={7}
+                                required
+                            />
                         </div>
-                        <Button type="submit" size="sm" disabled={!subscription}>
+                        <Button
+                            type="submit"
+                            size="sm"
+                            disabled={!subscription}
+                        >
                             Extend
                         </Button>
                     </Form>
@@ -94,11 +118,14 @@ export default function AdminSubscribersShow({
                             <select
                                 id="interval"
                                 name="interval"
-                                className="border-input h-9 rounded-md border px-3 text-sm"
+                                className="h-9 rounded-md border border-input px-3 text-sm"
                                 required
                             >
                                 {intervalOptions.map((option) => (
-                                    <option key={option.value} value={option.value}>
+                                    <option
+                                        key={option.value}
+                                        value={option.value}
+                                    >
                                         {option.label}
                                     </option>
                                 ))}
@@ -109,7 +136,7 @@ export default function AdminSubscribersShow({
                             <select
                                 id="plan_id"
                                 name="plan_id"
-                                className="border-input h-9 rounded-md border px-3 text-sm"
+                                className="h-9 rounded-md border border-input px-3 text-sm"
                             >
                                 <option value="">Keep current plan</option>
                                 {plans.map((plan) => (
@@ -119,7 +146,9 @@ export default function AdminSubscribersShow({
                                 ))}
                             </select>
                         </div>
-                        <Button type="submit" size="sm">Activate</Button>
+                        <Button type="submit" size="sm">
+                            Activate
+                        </Button>
                     </Form>
                 </section>
 
@@ -135,7 +164,7 @@ export default function AdminSubscribersShow({
                             <select
                                 id="change_plan_id"
                                 name="plan_id"
-                                className="border-input h-9 rounded-md border px-3 text-sm"
+                                className="h-9 rounded-md border border-input px-3 text-sm"
                                 required
                                 disabled={!subscription}
                             >
@@ -146,7 +175,11 @@ export default function AdminSubscribersShow({
                                 ))}
                             </select>
                         </div>
-                        <Button type="submit" size="sm" disabled={!subscription}>
+                        <Button
+                            type="submit"
+                            size="sm"
+                            disabled={!subscription}
+                        >
                             Change plan
                         </Button>
                     </Form>
@@ -164,10 +197,15 @@ export default function AdminSubscribersShow({
                             <textarea
                                 id="reason"
                                 name="reason"
-                                className="border-input min-h-20 w-full rounded-md border px-3 py-2 text-sm"
+                                className="min-h-20 w-full rounded-md border border-input px-3 py-2 text-sm"
                             />
                         </div>
-                        <Button type="submit" size="sm" variant="destructive" disabled={!subscription}>
+                        <Button
+                            type="submit"
+                            size="sm"
+                            variant="destructive"
+                            disabled={!subscription}
+                        >
                             Cancel
                         </Button>
                     </Form>
@@ -178,13 +216,21 @@ export default function AdminSubscribersShow({
                 <h2 className="text-sm font-medium">Payment history</h2>
                 <div className="mt-3 space-y-3">
                     {paymentSubmissions.length === 0 && (
-                        <p className="text-sm text-muted-foreground">No payment submissions.</p>
+                        <p className="text-sm text-muted-foreground">
+                            No payment submissions.
+                        </p>
                     )}
                     {paymentSubmissions.map((submission) => (
-                        <div key={submission.id} className="rounded-lg border p-4 text-sm">
-                            <p className="font-medium">{submission.referenceNumber}</p>
+                        <div
+                            key={submission.id}
+                            className="rounded-lg border p-4 text-sm"
+                        >
+                            <p className="font-medium">
+                                {submission.referenceNumber}
+                            </p>
                             <p className="text-muted-foreground">
-                                {submission.planName} · {submission.interval} · {submission.status}
+                                {submission.planName} · {submission.interval} ·{' '}
+                                {submission.status}
                             </p>
                             {submission.amount !== null && (
                                 <p className="text-muted-foreground">
@@ -192,7 +238,9 @@ export default function AdminSubscribersShow({
                                 </p>
                             )}
                             {submission.notes && (
-                                <p className="mt-1 text-muted-foreground">Notes: {submission.notes}</p>
+                                <p className="mt-1 text-muted-foreground">
+                                    Notes: {submission.notes}
+                                </p>
                             )}
                         </div>
                     ))}

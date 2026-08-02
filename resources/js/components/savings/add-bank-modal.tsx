@@ -25,7 +25,11 @@ type Props = {
     institutions: BankInstitution[];
 };
 
-export default function AddBankModal({ open, onOpenChange, institutions }: Props) {
+export default function AddBankModal({
+    open,
+    onOpenChange,
+    institutions,
+}: Props) {
     const { currentTeam } = usePage<SharedData>().props;
     const teamSlug = currentTeam?.slug ?? '';
     const [formKey, setFormKey] = useState(0);
@@ -40,7 +44,9 @@ export default function AddBankModal({ open, onOpenChange, institutions }: Props
     const savingsSpacesConfig = selectedInstitution?.savingsSpaces ?? null;
 
     const [mainLabel, setMainLabel] = useState('');
-    const [spaces, setSpaces] = useState<Array<{ enabled: boolean; label: string }>>([]);
+    const [spaces, setSpaces] = useState<
+        Array<{ enabled: boolean; label: string }>
+    >([]);
 
     function resetFormState() {
         setInstitutionSelection(null);
@@ -62,7 +68,9 @@ export default function AddBankModal({ open, onOpenChange, institutions }: Props
     ) {
         setInstitutionSelection(selection);
 
-        const institution = institutions.find((item) => item.id === selection?.institutionId);
+        const institution = institutions.find(
+            (item) => item.id === selection?.institutionId,
+        );
 
         if (institution?.savingsSpaces) {
             setMainLabel(institution.savingsSpaces.mainLabel);
@@ -90,8 +98,9 @@ export default function AddBankModal({ open, onOpenChange, institutions }: Props
                             <DialogHeader>
                                 <DialogTitle>Add bank</DialogTitle>
                                 <DialogDescription>
-                                    Link a bank account where you hold savings. Assign fund buckets to
-                                    each account in your savings plan.
+                                    Link a bank account where you hold savings.
+                                    Assign fund buckets to each account in your
+                                    savings plan.
                                 </DialogDescription>
                             </DialogHeader>
 
@@ -110,7 +119,9 @@ export default function AddBankModal({ open, onOpenChange, institutions }: Props
                                 />
                             ) : (
                                 <div className="grid gap-2">
-                                    <Label htmlFor="account_label">Account label (optional)</Label>
+                                    <Label htmlFor="account_label">
+                                        Account label (optional)
+                                    </Label>
                                     <Input
                                         id="account_label"
                                         name="account_label"
@@ -127,9 +138,14 @@ export default function AddBankModal({ open, onOpenChange, institutions }: Props
                                 </DialogClose>
                                 <Button
                                     type="submit"
-                                    disabled={processing || institutionSelection === null}
+                                    disabled={
+                                        processing ||
+                                        institutionSelection === null
+                                    }
                                 >
-                                    {savingsSpacesConfig ? 'Add GoTyme account' : 'Add bank'}
+                                    {savingsSpacesConfig
+                                        ? 'Add GoTyme account'
+                                        : 'Add bank'}
                                 </Button>
                             </DialogFooter>
                         </>

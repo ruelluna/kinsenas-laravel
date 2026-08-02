@@ -28,9 +28,14 @@ export default function AdminBetaAccessCodesCreate() {
             <section className="mt-6 max-w-2xl space-y-4">
                 <h2 className="text-base font-medium">Event code</h2>
                 <p className="text-sm text-muted-foreground">
-                    One shared code for all attendees at an event — ideal for calling cards and QR links.
+                    One shared code for all attendees at an event — ideal for
+                    calling cards and QR links.
                 </p>
-                <Form action="/admin/beta-access-codes" method="post" className="space-y-4">
+                <Form
+                    action="/admin/beta-access-codes"
+                    method="post"
+                    className="space-y-4"
+                >
                     <div className="grid gap-2">
                         <Label htmlFor="code">Code</Label>
                         <Input
@@ -64,8 +69,14 @@ export default function AdminBetaAccessCodesCreate() {
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="expires_at">Expires at (optional)</Label>
-                        <Input id="expires_at" name="expires_at" type="datetime-local" />
+                        <Label htmlFor="expires_at">
+                            Expires at (optional)
+                        </Label>
+                        <Input
+                            id="expires_at"
+                            name="expires_at"
+                            type="datetime-local"
+                        />
                     </div>
 
                     <Button type="submit">Create event code</Button>
@@ -77,9 +88,14 @@ export default function AdminBetaAccessCodesCreate() {
             <section className="max-w-2xl space-y-4">
                 <h2 className="text-base font-medium">Single-use batch</h2>
                 <p className="text-sm text-muted-foreground">
-                    Generate unique codes for individual cards. Export CSV after creation.
+                    Generate unique codes for individual cards. Export CSV after
+                    creation.
                 </p>
-                <Form action="/admin/beta-access-codes/batches" method="post" className="space-y-4">
+                <Form
+                    action="/admin/beta-access-codes/batches"
+                    method="post"
+                    className="space-y-4"
+                >
                     <div className="grid gap-2">
                         <Label htmlFor="batch_name">Batch name</Label>
                         <Input
@@ -104,8 +120,14 @@ export default function AdminBetaAccessCodesCreate() {
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="batch_expires_at">Expires at (optional)</Label>
-                        <Input id="batch_expires_at" name="expires_at" type="datetime-local" />
+                        <Label htmlFor="batch_expires_at">
+                            Expires at (optional)
+                        </Label>
+                        <Input
+                            id="batch_expires_at"
+                            name="expires_at"
+                            type="datetime-local"
+                        />
                     </div>
 
                     <Button type="submit">Generate batch</Button>

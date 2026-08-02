@@ -1,7 +1,4 @@
-import {
-    KINSENAS_HORIZONTAL_LOGO,
-    KINSENAS_SQUARE_LOGO,
-} from '@/lib/brand';
+import { KINSENAS_HORIZONTAL_LOGO, KINSENAS_SQUARE_LOGO } from '@/lib/brand';
 import { cn } from '@/lib/utils';
 
 type AppLogoProps = {
@@ -23,7 +20,7 @@ export default function AppLogo({ className }: AppLogoProps) {
                 src={KINSENAS_HORIZONTAL_LOGO}
                 alt="Kinsenas"
                 className={cn(
-                    'h-auto w-full max-h-11 object-contain object-left group-data-[collapsible=icon]:hidden',
+                    'h-auto max-h-11 w-full object-contain object-left group-data-[collapsible=icon]:hidden',
                     className,
                 )}
             />

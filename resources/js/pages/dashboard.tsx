@@ -30,7 +30,9 @@ export default function Dashboard({
     const [showInvitations, setShowInvitations] = useState(
         pendingInvitations.length > 0,
     );
-    const page = usePage<SharedData & { registrationRecoveryKey?: string | null }>();
+    const page = usePage<
+        SharedData & { registrationRecoveryKey?: string | null }
+    >();
     const recoveryKey = page.props.registrationRecoveryKey;
     const teamId = page.props.currentTeam?.id;
 
@@ -49,9 +51,12 @@ export default function Dashboard({
                 <div className="rounded-lg border border-warning/50 bg-warning/10 p-4 text-sm">
                     <p className="font-medium">Save your recovery key</p>
                     <p className="mt-1 text-muted-foreground">
-                        Store this somewhere safe. You need it if you reset your password.
+                        Store this somewhere safe. You need it if you reset your
+                        password.
                     </p>
-                    <code className="mt-2 block break-all rounded bg-muted p-2 text-xs">{recoveryKey}</code>
+                    <code className="mt-2 block rounded bg-muted p-2 text-xs break-all">
+                        {recoveryKey}
+                    </code>
                 </div>
             )}
             <PendingInvitationsModal
@@ -63,7 +68,11 @@ export default function Dashboard({
             <div className="flex flex-col gap-6">
                 <SetupChecklist setup={setup} />
 
-                <SummaryStatCards setup={setup} summary={summary} quickLinks={quickLinks} />
+                <SummaryStatCards
+                    setup={setup}
+                    summary={summary}
+                    quickLinks={quickLinks}
+                />
 
                 {showFinancialSections && (
                     <>
@@ -79,10 +88,16 @@ export default function Dashboard({
                             canDrawFromFunds={plan?.canDrawFromFunds ?? false}
                         />
                         <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
-                            <Link href={quickLinks.plan} className="text-primary underline-offset-4 hover:underline">
+                            <Link
+                                href={quickLinks.plan}
+                                className="text-primary underline-offset-4 hover:underline"
+                            >
                                 Savings Plan
                             </Link>
-                            <Link href={quickLinks.income} className="text-primary underline-offset-4 hover:underline">
+                            <Link
+                                href={quickLinks.income}
+                                className="text-primary underline-offset-4 hover:underline"
+                            >
                                 Income
                             </Link>
                             {features.reports && (
@@ -113,23 +128,39 @@ export default function Dashboard({
                 {(setup.hasPlan || !setup.hasBank) && (
                     <section className="flex flex-wrap gap-2">
                         {!setup.hasBank && (
-                            <Button variant="outline" size="sm" asChild data-tour="add-bank">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                asChild
+                                data-tour="add-bank"
+                            >
                                 <Link href={quickLinks.banks}>Add bank</Link>
                             </Button>
                         )}
                         {setup.hasPlan && (
                             <>
                                 <Button variant="outline" size="sm" asChild>
-                                    <Link href={quickLinks.income}>Add income</Link>
+                                    <Link href={quickLinks.income}>
+                                        Add income
+                                    </Link>
                                 </Button>
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    asChild={setup.hasLockedIncome || setup.hasOpeningBalances}
-                                    disabled={!setup.hasLockedIncome && !setup.hasOpeningBalances}
+                                    asChild={
+                                        setup.hasLockedIncome ||
+                                        setup.hasOpeningBalances
+                                    }
+                                    disabled={
+                                        !setup.hasLockedIncome &&
+                                        !setup.hasOpeningBalances
+                                    }
                                 >
-                                    {setup.hasLockedIncome || setup.hasOpeningBalances ? (
-                                        <Link href={quickLinks.spending}>Add spending</Link>
+                                    {setup.hasLockedIncome ||
+                                    setup.hasOpeningBalances ? (
+                                        <Link href={quickLinks.spending}>
+                                            Add spending
+                                        </Link>
                                     ) : (
                                         <span>Add spending</span>
                                     )}
@@ -138,11 +169,20 @@ export default function Dashboard({
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        asChild={setup.hasLockedIncome || setup.hasOpeningBalances}
-                                        disabled={!setup.hasLockedIncome && !setup.hasOpeningBalances}
+                                        asChild={
+                                            setup.hasLockedIncome ||
+                                            setup.hasOpeningBalances
+                                        }
+                                        disabled={
+                                            !setup.hasLockedIncome &&
+                                            !setup.hasOpeningBalances
+                                        }
                                     >
-                                        {setup.hasLockedIncome || setup.hasOpeningBalances ? (
-                                            <Link href={quickLinks.transfers}>Transfer funds</Link>
+                                        {setup.hasLockedIncome ||
+                                        setup.hasOpeningBalances ? (
+                                            <Link href={quickLinks.transfers}>
+                                                Transfer funds
+                                            </Link>
                                         ) : (
                                             <span>Transfer funds</span>
                                         )}
@@ -150,7 +190,9 @@ export default function Dashboard({
                                 )}
                                 {setup.hasBank && (
                                     <Button variant="outline" size="sm" asChild>
-                                        <Link href={quickLinks.banks}>Add bank</Link>
+                                        <Link href={quickLinks.banks}>
+                                            Add bank
+                                        </Link>
                                     </Button>
                                 )}
                             </>

@@ -69,7 +69,10 @@ function isStepValid(step: SurveyStep, answers: SurveyAnswers): boolean {
 
 export default function Survey() {
     const { name } = usePage().props;
-    const { post, processing } = useHttp<SurveySubmissionPayload, { id: string }>();
+    const { post, processing } = useHttp<
+        SurveySubmissionPayload,
+        { id: string }
+    >();
 
     const [step, setStep] = useState<SurveyStep>('language');
     const [language, setLanguage] = useState<SurveyLanguage | null>(null);
@@ -84,9 +87,12 @@ export default function Survey() {
 
     const questionNumber = getQuestionNumber(step);
     const currentQuestionId = questionIdFromStep(step);
-    const currentQuestion = content && currentQuestionId
-        ? content.questions.find((question) => question.id === currentQuestionId)
-        : undefined;
+    const currentQuestion =
+        content && currentQuestionId
+            ? content.questions.find(
+                  (question) => question.id === currentQuestionId,
+              )
+            : undefined;
 
     const handleLanguageSelect = (selectedLanguage: SurveyLanguage) => {
         setLanguage(selectedLanguage);
@@ -132,7 +138,13 @@ export default function Survey() {
         setStep('result');
     }, []);
 
-    const handleResultSubmit = async ({ email, name: respondentName }: { email: string; name: string }) => {
+    const handleResultSubmit = async ({
+        email,
+        name: respondentName,
+    }: {
+        email: string;
+        name: string;
+    }) => {
         if (!language || !resultSlug || !content) {
             return;
         }
@@ -175,9 +187,17 @@ export default function Survey() {
             case 'intro':
                 return <SurveyIntro intro={content.intro} />;
             case 'interstitial-1':
-                return <SurveyInterstitial message={content.interstitials.afterQ3} />;
+                return (
+                    <SurveyInterstitial
+                        message={content.interstitials.afterQ3}
+                    />
+                );
             case 'interstitial-2':
-                return <SurveyInterstitial message={content.interstitials.afterQ6} />;
+                return (
+                    <SurveyInterstitial
+                        message={content.interstitials.afterQ6}
+                    />
+                );
             case 'loading':
                 return (
                     <SurveyLoading
@@ -198,7 +218,12 @@ export default function Survey() {
                     />
                 ) : null;
             case 'thank-you':
-                return <SurveyThankYou title={content.thankYouTitle} message={content.thankYou} />;
+                return (
+                    <SurveyThankYou
+                        title={content.thankYouTitle}
+                        message={content.thankYou}
+                    />
+                );
             default:
                 if (currentQuestion) {
                     return (
@@ -222,13 +247,18 @@ export default function Survey() {
                 appName={name}
                 step={step}
                 questionNumber={questionNumber}
-                progressLabel={content?.progressLabel ?? ((current, total) => `Question ${current} of ${total}`)}
-                privacyNote={showPrivacyNote && content ? content.privacyNote : undefined}
+                progressLabel={
+                    content?.progressLabel ??
+                    ((current, total) => `Question ${current} of ${total}`)
+                }
+                privacyNote={
+                    showPrivacyNote && content ? content.privacyNote : undefined
+                }
             >
                 <div
                     key={step}
                     className={cn(
-                        'flex flex-1 flex-col motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300',
+                        'flex flex-1 flex-col motion-safe:animate-in motion-safe:duration-300 motion-safe:fade-in motion-safe:slide-in-from-bottom-2',
                     )}
                 >
                     {renderStep()}

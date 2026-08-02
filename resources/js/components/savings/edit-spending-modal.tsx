@@ -32,7 +32,11 @@ type FormProps = Omit<Props, 'open' | 'onOpenChange'> & {
     onClose: () => void;
 };
 
-function remainingAfterSpend(remaining: string | null, amount: string, currentAmount: string | null): string | null {
+function remainingAfterSpend(
+    remaining: string | null,
+    amount: string,
+    currentAmount: string | null,
+): string | null {
     if (remaining === null || amount === '') {
         return remaining;
     }
@@ -43,8 +47,11 @@ function remainingAfterSpend(remaining: string | null, amount: string, currentAm
         return remaining;
     }
 
-    const parsedCurrent = currentAmount !== null ? parseFloat(currentAmount) : 0;
-    const adjustedRemaining = parseFloat(remaining) + (Number.isFinite(parsedCurrent) ? parsedCurrent : 0);
+    const parsedCurrent =
+        currentAmount !== null ? parseFloat(currentAmount) : 0;
+    const adjustedRemaining =
+        parseFloat(remaining) +
+        (Number.isFinite(parsedCurrent) ? parsedCurrent : 0);
 
     return (adjustedRemaining - parsed).toFixed(2);
 }
@@ -56,9 +63,13 @@ function EditSpendingForm({
     fundBalances,
     recipients,
 }: FormProps) {
-    const { currentTeam, errors } = usePage<SharedData & { errors: Record<string, string> }>().props;
+    const { currentTeam, errors } = usePage<
+        SharedData & { errors: Record<string, string> }
+    >().props;
     const teamSlug = currentTeam?.slug ?? '';
-    const [selectedCategoryId, setSelectedCategoryId] = useState(spend.categoryId);
+    const [selectedCategoryId, setSelectedCategoryId] = useState(
+        spend.categoryId,
+    );
     const [amount, setAmount] = useState(spend.amount ?? '');
     const [description, setDescription] = useState(spend.description ?? '');
     const [spentOn, setSpentOn] = useState(spend.spentOn);
@@ -66,7 +77,10 @@ function EditSpendingForm({
     const [removeReceipt, setRemoveReceipt] = useState(false);
 
     const selectedBalance = useMemo(
-        () => fundBalances.find((balance) => balance.categoryId === selectedCategoryId) ?? null,
+        () =>
+            fundBalances.find(
+                (balance) => balance.categoryId === selectedCategoryId,
+            ) ?? null,
         [fundBalances, selectedCategoryId],
     );
 
@@ -98,9 +112,11 @@ function EditSpendingForm({
                         <select
                             id="edit_category_id"
                             name="category_id"
-                            className="border-input h-9 rounded-md border px-3 text-sm"
+                            className="h-9 rounded-md border border-input px-3 text-sm"
                             value={selectedCategoryId}
-                            onChange={(event) => setSelectedCategoryId(event.target.value)}
+                            onChange={(event) =>
+                                setSelectedCategoryId(event.target.value)
+                            }
                             required
                         >
                             {categories.map((category) => (
@@ -124,22 +140,28 @@ function EditSpendingForm({
                             onChange={(event) => setAmount(event.target.value)}
                             required
                         />
-                        {selectedBalance?.remaining !== null && amount !== '' && (
-                            <p className="text-xs text-muted-foreground">
-                                After this spend: {formatMoney(projectedRemaining)} remaining in{' '}
-                                {selectedBalance?.name}
-                            </p>
-                        )}
+                        {selectedBalance?.remaining !== null &&
+                            amount !== '' && (
+                                <p className="text-xs text-muted-foreground">
+                                    After this spend:{' '}
+                                    {formatMoney(projectedRemaining)} remaining
+                                    in {selectedBalance?.name}
+                                </p>
+                            )}
                         <InputError message={errors.amount} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="edit_description">What was this for?</Label>
+                        <Label htmlFor="edit_description">
+                            What was this for?
+                        </Label>
                         <Input
                             id="edit_description"
                             name="description"
                             value={description}
-                            onChange={(event) => setDescription(event.target.value)}
+                            onChange={(event) =>
+                                setDescription(event.target.value)
+                            }
                             required
                         />
                         <InputError message={errors.description} />
@@ -160,7 +182,9 @@ function EditSpendingForm({
 
                     <ReceiptUploadField
                         error={errors.receipt_image}
-                        existingImageUrl={removeReceipt ? null : spend.receiptImageUrl}
+                        existingImageUrl={
+                            removeReceipt ? null : spend.receiptImageUrl
+                        }
                     />
 
                     {spend.receiptImageUrl && !removeReceipt && (
@@ -168,22 +192,30 @@ function EditSpendingForm({
                             <input
                                 type="checkbox"
                                 checked={removeReceipt}
-                                onChange={(event) => setRemoveReceipt(event.target.checked)}
+                                onChange={(event) =>
+                                    setRemoveReceipt(event.target.checked)
+                                }
                             />
                             Remove receipt image
                         </label>
                     )}
 
-                    {removeReceipt && <input type="hidden" name="remove_receipt" value="1" />}
+                    {removeReceipt && (
+                        <input type="hidden" name="remove_receipt" value="1" />
+                    )}
 
                     <div className="grid gap-2">
-                        <Label htmlFor="edit_recipient_id">Recipient (optional)</Label>
+                        <Label htmlFor="edit_recipient_id">
+                            Recipient (optional)
+                        </Label>
                         <select
                             id="edit_recipient_id"
                             name="recipient_id"
-                            className="border-input h-9 rounded-md border px-3 text-sm"
+                            className="h-9 rounded-md border border-input px-3 text-sm"
                             value={recipientId}
-                            onChange={(event) => setRecipientId(event.target.value)}
+                            onChange={(event) =>
+                                setRecipientId(event.target.value)
+                            }
                         >
                             <option value="">None</option>
                             {recipients.map((recipient) => (

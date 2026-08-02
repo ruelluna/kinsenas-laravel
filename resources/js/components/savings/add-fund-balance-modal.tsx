@@ -27,8 +27,14 @@ type Props = {
     target: ExistingFundTarget | null;
 };
 
-export default function AddFundBalanceModal({ open, onOpenChange, target }: Props) {
-    const { currentTeam, errors } = usePage<SharedData & { errors: Record<string, string> }>().props;
+export default function AddFundBalanceModal({
+    open,
+    onOpenChange,
+    target,
+}: Props) {
+    const { currentTeam, errors } = usePage<
+        SharedData & { errors: Record<string, string> }
+    >().props;
     const teamSlug = currentTeam?.slug ?? '';
 
     if (!target) {
@@ -41,10 +47,12 @@ export default function AddFundBalanceModal({ open, onOpenChange, target }: Prop
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Add existing fund to {target.name}</DialogTitle>
+                    <DialogTitle>
+                        Add existing fund to {target.name}
+                    </DialogTitle>
                     <DialogDescription>
-                        Record money you already have in this fund bucket. Locked income adds payday
-                        allocations on top.
+                        Record money you already have in this fund bucket.
+                        Locked income adds payday allocations on top.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -59,12 +67,18 @@ export default function AddFundBalanceModal({ open, onOpenChange, target }: Prop
                     {({ processing }) => (
                         <>
                             <div className="rounded-lg border bg-muted/40 px-3 py-2 text-sm">
-                                <p className="text-muted-foreground">Existing fund in this bucket</p>
-                                <p className="font-medium">{formatMoney(currentTotal)}</p>
+                                <p className="text-muted-foreground">
+                                    Existing fund in this bucket
+                                </p>
+                                <p className="font-medium">
+                                    {formatMoney(currentTotal)}
+                                </p>
                             </div>
 
                             <div>
-                                <Label htmlFor="fund-amount">Amount to add (PHP)</Label>
+                                <Label htmlFor="fund-amount">
+                                    Amount to add (PHP)
+                                </Label>
                                 <Input
                                     id="fund-amount"
                                     name="amount"

@@ -34,7 +34,6 @@ import type {
     SavingsPlanPageGuidance,
 } from '@/types/savings';
 
-
 type Props = {
     plan: SavingsPlan | null;
     templates: FormulaTemplate[];
@@ -101,7 +100,9 @@ function rowsFromPlan(categories: SavingsCategory[]): CategoryRow[] {
         const sourceIndex =
             category.deductFromCategoryId !== undefined &&
             category.deductFromCategoryId !== null
-                ? categories.findIndex((c) => c.id === category.deductFromCategoryId)
+                ? categories.findIndex(
+                      (c) => c.id === category.deductFromCategoryId,
+                  )
                 : -1;
 
         return {
@@ -126,8 +127,15 @@ function selectClassName(): string {
     ].join(' ');
 }
 
-function isPercentageRowLocked(row: CategoryRow, percentagesLocked: boolean): boolean {
-    return percentagesLocked && row.allocationType === 'percentage' && row.id !== undefined;
+function isPercentageRowLocked(
+    row: CategoryRow,
+    percentagesLocked: boolean,
+): boolean {
+    return (
+        percentagesLocked &&
+        row.allocationType === 'percentage' &&
+        row.id !== undefined
+    );
 }
 
 function resolveDeductFromCategoryId(
@@ -150,36 +158,48 @@ function hasCustomCategoryChanges(
     const initialCustom = initialCategories.filter(
         (category) => category.allocationType === 'deduction',
     );
-    const currentCustom = rows.filter((row) => row.allocationType === 'deduction');
+    const currentCustom = rows.filter(
+        (row) => row.allocationType === 'deduction',
+    );
 
     if (currentCustom.some((row) => row.id === undefined)) {
         return true;
     }
 
-    if (initialCustom.some(
-        (category) => !currentCustom.some((row) => row.id === category.id),
-    )) {
+    if (
+        initialCustom.some(
+            (category) => !currentCustom.some((row) => row.id === category.id),
+        )
+    ) {
         return true;
     }
 
     return currentCustom.some((row) => {
-        const initial = initialCategories.find((category) => category.id === row.id);
+        const initial = initialCategories.find(
+            (category) => category.id === row.id,
+        );
 
         if (!initial) {
             return false;
         }
 
         return (
-            initial.name !== row.name
-            || (initial.deductionMode ?? '') !== row.deductionMode
-            || (initial.deductionValue ?? '') !== row.deductionValue
-            || (initial.deductFromCategoryId ?? null)
-                !== resolveDeductFromCategoryId(row, rows)
+            initial.name !== row.name ||
+            (initial.deductionMode ?? '') !== row.deductionMode ||
+            (initial.deductionValue ?? '') !== row.deductionValue ||
+            (initial.deductFromCategoryId ?? null) !==
+                resolveDeductFromCategoryId(row, rows)
         );
     });
 }
 
-export default function SavingsPlanPage({ plan, templates, fundBalances, pageGuidance, teamBanks }: Props) {
+export default function SavingsPlanPage({
+    plan,
+    templates,
+    fundBalances,
+    pageGuidance,
+    teamBanks,
+}: Props) {
     const page = usePage<SharedData & { flash?: { error?: string } }>();
     const { currentTeam } = page.props;
     const teamSlug = currentTeam?.slug ?? '';
@@ -247,11 +267,14 @@ function SavingsPlanEditor({
     pageGuidance: SavingsPlanPageGuidance;
     teamBanks: BankOption[];
 }) {
-    const [rows, setRows] = useState<CategoryRow[]>(() => rowsFromPlan(plan.categories));
+    const [rows, setRows] = useState<CategoryRow[]>(() =>
+        rowsFromPlan(plan.categories),
+    );
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [chooseFormulaOpen, setChooseFormulaOpen] = useState(false);
     const [fundModalOpen, setFundModalOpen] = useState(false);
-    const [selectedFundTarget, setSelectedFundTarget] = useState<ExistingFundTarget | null>(null);
+    const [selectedFundTarget, setSelectedFundTarget] =
+        useState<ExistingFundTarget | null>(null);
     const submitButtonRef = useRef<HTMLButtonElement>(null);
     const skipCustomConfirmRef = useRef(false);
 
@@ -332,7 +355,10 @@ function SavingsPlanEditor({
 
             const next = current.filter((_, rowIndex) => rowIndex !== index);
 
-            if (plan.percentagesLocked && next.every((item) => item.allocationType === 'percentage')) {
+            if (
+                plan.percentagesLocked &&
+                next.every((item) => item.allocationType === 'percentage')
+            ) {
                 return current;
             }
 
@@ -341,7 +367,10 @@ function SavingsPlanEditor({
             }
 
             return next.map((item) => {
-                if (item.allocationType !== 'deduction' || item.deductFromIndex === '') {
+                if (
+                    item.allocationType !== 'deduction' ||
+                    item.deductFromIndex === ''
+                ) {
                     return item;
                 }
 
@@ -352,7 +381,10 @@ function SavingsPlanEditor({
                 }
 
                 if (sourceIndex > index) {
-                    return { ...item, deductFromIndex: String(sourceIndex - 1) };
+                    return {
+                        ...item,
+                        deductFromIndex: String(sourceIndex - 1),
+                    };
                 }
 
                 return item;
@@ -362,9 +394,9 @@ function SavingsPlanEditor({
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         if (
-            plan.hasIncome
-            && customChangesPending
-            && !skipCustomConfirmRef.current
+            plan.hasIncome &&
+            customChangesPending &&
+            !skipCustomConfirmRef.current
         ) {
             event.preventDefault();
             setConfirmOpen(true);
@@ -387,7 +419,11 @@ function SavingsPlanEditor({
         <div data-tour="plan-main">
             <Head title="Savings Plan" />
             <div className="flex flex-wrap items-start justify-between gap-4">
-                <Heading variant="small" title={plan.name} description={planDescription} />
+                <Heading
+                    variant="small"
+                    title={plan.name}
+                    description={planDescription}
+                />
                 {!plan.hasIncome && (
                     <Button
                         type="button"
@@ -425,16 +461,22 @@ function SavingsPlanEditor({
                             />
                         )}
 
-                        {plan.hasIncome && <PlanEditRulesPanel pageGuidance={pageGuidance} />}
+                        {plan.hasIncome && (
+                            <PlanEditRulesPanel pageGuidance={pageGuidance} />
+                        )}
 
                         {plan.hasIncome && (
                             <Alert variant="warning">
                                 <AlertTriangle />
-                                <AlertTitle>Custom fund bucket changes affect all income</AlertTitle>
+                                <AlertTitle>
+                                    Custom fund bucket changes affect all income
+                                </AlertTitle>
                                 <AlertDescription>
-                                    Adding, editing, or removing a custom fund bucket updates this plan for
-                                    every income period — including locked periods. Past breakdowns and
-                                    spending tied to a removed fund bucket may no longer match.
+                                    Adding, editing, or removing a custom fund
+                                    bucket updates this plan for every income
+                                    period — including locked periods. Past
+                                    breakdowns and spending tied to a removed
+                                    fund bucket may no longer match.
                                 </AlertDescription>
                             </Alert>
                         )}
@@ -444,299 +486,417 @@ function SavingsPlanEditor({
                         )}
 
                         <div className="grid gap-4 lg:grid-cols-3">
-                    {rows.map((row, index) => {
-                        const rowLocked = isPercentageRowLocked(row, plan.percentagesLocked);
-                        const canRemove =
-                            !rowLocked
-                            && (plan.percentagesLocked
-                                ? row.allocationType === 'deduction'
-                                : rows.length > 1);
+                            {rows.map((row, index) => {
+                                const rowLocked = isPercentageRowLocked(
+                                    row,
+                                    plan.percentagesLocked,
+                                );
+                                const canRemove =
+                                    !rowLocked &&
+                                    (plan.percentagesLocked
+                                        ? row.allocationType === 'deduction'
+                                        : rows.length > 1);
 
-                        return (
-                            <div key={row.key} className="rounded-lg border p-4">
-                                <div className="mb-4 flex items-center justify-between gap-2">
-                                    <p className="text-sm font-medium">
-                                        Fund bucket {index + 1}
+                                return (
+                                    <div
+                                        key={row.key}
+                                        className="rounded-lg border p-4"
+                                    >
+                                        <div className="mb-4 flex items-center justify-between gap-2">
+                                            <p className="text-sm font-medium">
+                                                Fund bucket {index + 1}
+                                                {rowLocked && (
+                                                    <span className="ml-2 text-xs font-normal text-muted-foreground">
+                                                        Locked
+                                                    </span>
+                                                )}
+                                            </p>
+                                            {canRemove && (
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        removeRow(index)
+                                                    }
+                                                >
+                                                    <Trash2 className="size-4" />
+                                                    Remove
+                                                </Button>
+                                            )}
+                                        </div>
+
+                                        {row.id && (
+                                            <input
+                                                type="hidden"
+                                                name={`categories[${index}][id]`}
+                                                value={row.id}
+                                            />
+                                        )}
+
                                         {rowLocked && (
-                                            <span className="ml-2 text-xs font-normal text-muted-foreground">
-                                                Locked
-                                            </span>
+                                            <>
+                                                <input
+                                                    type="hidden"
+                                                    name={`categories[${index}][name]`}
+                                                    value={row.name}
+                                                />
+                                                {row.allocationType ===
+                                                    'percentage' && (
+                                                    <input
+                                                        type="hidden"
+                                                        name={`categories[${index}][percentage]`}
+                                                        value={row.percentage}
+                                                    />
+                                                )}
+                                            </>
                                         )}
-                                    </p>
-                                    {canRemove && (
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => removeRow(index)}
-                                        >
-                                            <Trash2 className="size-4" />
-                                            Remove
-                                        </Button>
-                                    )}
-                                </div>
 
-                                {row.id && (
-                                    <input
-                                        type="hidden"
-                                        name={`categories[${index}][id]`}
-                                        value={row.id}
-                                    />
-                                )}
-
-                                {rowLocked && (
-                                    <>
-                                        <input
-                                            type="hidden"
-                                            name={`categories[${index}][name]`}
-                                            value={row.name}
-                                        />
-                                        {row.allocationType === 'percentage' && (
-                                            <input
-                                                type="hidden"
-                                                name={`categories[${index}][percentage]`}
-                                                value={row.percentage}
-                                            />
-                                        )}
-                                    </>
-                                )}
-
-                                <div className="grid gap-4 sm:grid-cols-2">
-                                    <div className="sm:col-span-2">
-                                        <Label htmlFor={`category-name-${index}`}>Name</Label>
-                                        <Input
-                                            id={`category-name-${index}`}
-                                            name={
-                                                rowLocked
-                                                    ? undefined
-                                                    : `categories[${index}][name]`
-                                            }
-                                            value={row.name}
-                                            onChange={(event) =>
-                                                updateRow(index, { name: event.target.value })
-                                            }
-                                            disabled={rowLocked}
-                                            readOnly={rowLocked}
-                                            required
-                                        />
-                                        <InputError message={errors[`categories.${index}.name`]} />
-                                    </div>
-
-                                    {!plan.percentagesLocked || row.id === undefined ? (
-                                        <div>
-                                            <Label htmlFor={`category-type-${index}`}>Type</Label>
-                                            <select
-                                                id={`category-type-${index}`}
-                                                name={`categories[${index}][allocation_type]`}
-                                                className={selectClassName()}
-                                                value={row.allocationType}
-                                                onChange={(event) => {
-                                                    const allocationType = event.target
-                                                        .value as CategoryAllocationType;
-
-                                                    updateRow(index, {
-                                                        allocationType,
-                                                        ...(allocationType === 'deduction'
-                                                            ? {
-                                                                  deductionMode: '',
-                                                                  deductionValue: '',
-                                                              }
-                                                            : {}),
-                                                    });
-                                                }}
-                                                disabled={rowLocked}
-                                            >
-                                                <option value="percentage">Percentage</option>
-                                                <option value="deduction">Custom</option>
-                                            </select>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <input
-                                                type="hidden"
-                                                name={`categories[${index}][allocation_type]`}
-                                                value={row.allocationType}
-                                            />
-                                            <div>
-                                                <Label>Type</Label>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {row.allocationType === 'percentage'
-                                                        ? 'Percentage'
-                                                        : 'Custom'}
-                                                </p>
-                                            </div>
-                                        </>
-                                    )}
-
-                                    {row.allocationType === 'percentage' ? (
-                                        <div>
-                                            <Label htmlFor={`category-percentage-${index}`}>
-                                                Percentage
-                                            </Label>
-                                            <Input
-                                                id={`category-percentage-${index}`}
-                                                name={
-                                                    rowLocked
-                                                        ? undefined
-                                                        : `categories[${index}][percentage]`
-                                                }
-                                                type="number"
-                                                step="0.01"
-                                                min="0.01"
-                                                max="100"
-                                                value={row.percentage}
-                                                onChange={(event) =>
-                                                    updateRow(index, {
-                                                        percentage: event.target.value,
-                                                    })
-                                                }
-                                                disabled={rowLocked}
-                                                readOnly={rowLocked}
-                                                required
-                                            />
-                                            <InputError
-                                                message={errors[`categories.${index}.percentage`]}
-                                            />
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <div>
-                                                <Label htmlFor={`category-mode-${index}`}>
-                                                    Default mode (optional)
+                                        <div className="grid gap-4 sm:grid-cols-2">
+                                            <div className="sm:col-span-2">
+                                                <Label
+                                                    htmlFor={`category-name-${index}`}
+                                                >
+                                                    Name
                                                 </Label>
-                                                <select
-                                                    id={`category-mode-${index}`}
-                                                    name={`categories[${index}][deduction_mode]`}
-                                                    className={selectClassName()}
-                                                    value={row.deductionMode}
+                                                <Input
+                                                    id={`category-name-${index}`}
+                                                    name={
+                                                        rowLocked
+                                                            ? undefined
+                                                            : `categories[${index}][name]`
+                                                    }
+                                                    value={row.name}
                                                     onChange={(event) =>
                                                         updateRow(index, {
-                                                            deductionMode: event.target
-                                                                .value as DeductionMode | '',
-                                                            deductionValue:
-                                                                event.target.value === ''
-                                                                    ? ''
-                                                                    : row.deductionValue,
+                                                            name: event.target
+                                                                .value,
                                                         })
                                                     }
                                                     disabled={rowLocked}
-                                                >
-                                                    <option value="">
-                                                        Set per income period
-                                                    </option>
-                                                    <option value="fixed">Fixed amount (₱)</option>
-                                                    <option value="percent_of_income">
-                                                        % of income
-                                                    </option>
-                                                </select>
-                                            </div>
-
-                                            <div>
-                                                <Label htmlFor={`category-value-${index}`}>
-                                                    {row.deductionMode === 'percent_of_income'
-                                                        ? 'Default % of income (optional)'
-                                                        : 'Default amount (₱, optional)'}
-                                                </Label>
-                                                <Input
-                                                    id={`category-value-${index}`}
-                                                    name={`categories[${index}][deduction_value]`}
-                                                    type="number"
-                                                    step="0.01"
-                                                    min="0.01"
-                                                    value={row.deductionValue}
-                                                    onChange={(event) =>
-                                                        updateRow(index, {
-                                                            deductionValue: event.target.value,
-                                                        })
+                                                    readOnly={rowLocked}
+                                                    required
+                                                />
+                                                <InputError
+                                                    message={
+                                                        errors[
+                                                            `categories.${index}.name`
+                                                        ]
                                                     }
-                                                    disabled={
-                                                        rowLocked || row.deductionMode === ''
-                                                    }
-                                                    placeholder="Enter on income page"
                                                 />
                                             </div>
 
-                                            <div className="sm:col-span-2">
-                                                <Label htmlFor={`category-source-${index}`}>
-                                                    Deduct from
-                                                </Label>
-                                                <select
-                                                    id={`category-source-${index}`}
-                                                    name={`categories[${index}][deduct_from_index]`}
-                                                    className={selectClassName()}
-                                                    value={row.deductFromIndex}
-                                                    onChange={(event) =>
-                                                        updateRow(index, {
-                                                            deductFromIndex: event.target.value,
-                                                        })
-                                                    }
-                                                    disabled={rowLocked}
-                                                    required
-                                                >
-                                                    <option value="">Select a fund bucket</option>
-                                                    {percentageRows.map(
-                                                        ({ row: sourceRow, index: sourceIndex }) => (
-                                                            <option
-                                                                key={`${sourceRow.key}-${sourceIndex}`}
-                                                                value={String(sourceIndex)}
-                                                                disabled={sourceIndex === index}
-                                                            >
-                                                                {sourceRow.name ||
-                                                                    `Fund bucket ${sourceIndex + 1}`}
+                                            {!plan.percentagesLocked ||
+                                            row.id === undefined ? (
+                                                <div>
+                                                    <Label
+                                                        htmlFor={`category-type-${index}`}
+                                                    >
+                                                        Type
+                                                    </Label>
+                                                    <select
+                                                        id={`category-type-${index}`}
+                                                        name={`categories[${index}][allocation_type]`}
+                                                        className={selectClassName()}
+                                                        value={
+                                                            row.allocationType
+                                                        }
+                                                        onChange={(event) => {
+                                                            const allocationType =
+                                                                event.target
+                                                                    .value as CategoryAllocationType;
+
+                                                            updateRow(index, {
+                                                                allocationType,
+                                                                ...(allocationType ===
+                                                                'deduction'
+                                                                    ? {
+                                                                          deductionMode:
+                                                                              '',
+                                                                          deductionValue:
+                                                                              '',
+                                                                      }
+                                                                    : {}),
+                                                            });
+                                                        }}
+                                                        disabled={rowLocked}
+                                                    >
+                                                        <option value="percentage">
+                                                            Percentage
+                                                        </option>
+                                                        <option value="deduction">
+                                                            Custom
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <input
+                                                        type="hidden"
+                                                        name={`categories[${index}][allocation_type]`}
+                                                        value={
+                                                            row.allocationType
+                                                        }
+                                                    />
+                                                    <div>
+                                                        <Label>Type</Label>
+                                                        <p className="text-sm text-muted-foreground">
+                                                            {row.allocationType ===
+                                                            'percentage'
+                                                                ? 'Percentage'
+                                                                : 'Custom'}
+                                                        </p>
+                                                    </div>
+                                                </>
+                                            )}
+
+                                            {row.allocationType ===
+                                            'percentage' ? (
+                                                <div>
+                                                    <Label
+                                                        htmlFor={`category-percentage-${index}`}
+                                                    >
+                                                        Percentage
+                                                    </Label>
+                                                    <Input
+                                                        id={`category-percentage-${index}`}
+                                                        name={
+                                                            rowLocked
+                                                                ? undefined
+                                                                : `categories[${index}][percentage]`
+                                                        }
+                                                        type="number"
+                                                        step="0.01"
+                                                        min="0.01"
+                                                        max="100"
+                                                        value={row.percentage}
+                                                        onChange={(event) =>
+                                                            updateRow(index, {
+                                                                percentage:
+                                                                    event.target
+                                                                        .value,
+                                                            })
+                                                        }
+                                                        disabled={rowLocked}
+                                                        readOnly={rowLocked}
+                                                        required
+                                                    />
+                                                    <InputError
+                                                        message={
+                                                            errors[
+                                                                `categories.${index}.percentage`
+                                                            ]
+                                                        }
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <div>
+                                                        <Label
+                                                            htmlFor={`category-mode-${index}`}
+                                                        >
+                                                            Default mode
+                                                            (optional)
+                                                        </Label>
+                                                        <select
+                                                            id={`category-mode-${index}`}
+                                                            name={`categories[${index}][deduction_mode]`}
+                                                            className={selectClassName()}
+                                                            value={
+                                                                row.deductionMode
+                                                            }
+                                                            onChange={(event) =>
+                                                                updateRow(
+                                                                    index,
+                                                                    {
+                                                                        deductionMode:
+                                                                            event
+                                                                                .target
+                                                                                .value as
+                                                                                | DeductionMode
+                                                                                | '',
+                                                                        deductionValue:
+                                                                            event
+                                                                                .target
+                                                                                .value ===
+                                                                            ''
+                                                                                ? ''
+                                                                                : row.deductionValue,
+                                                                    },
+                                                                )
+                                                            }
+                                                            disabled={rowLocked}
+                                                        >
+                                                            <option value="">
+                                                                Set per income
+                                                                period
                                                             </option>
-                                                        ),
-                                                    )}
-                                                </select>
+                                                            <option value="fixed">
+                                                                Fixed amount (₱)
+                                                            </option>
+                                                            <option value="percent_of_income">
+                                                                % of income
+                                                            </option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div>
+                                                        <Label
+                                                            htmlFor={`category-value-${index}`}
+                                                        >
+                                                            {row.deductionMode ===
+                                                            'percent_of_income'
+                                                                ? 'Default % of income (optional)'
+                                                                : 'Default amount (₱, optional)'}
+                                                        </Label>
+                                                        <Input
+                                                            id={`category-value-${index}`}
+                                                            name={`categories[${index}][deduction_value]`}
+                                                            type="number"
+                                                            step="0.01"
+                                                            min="0.01"
+                                                            value={
+                                                                row.deductionValue
+                                                            }
+                                                            onChange={(event) =>
+                                                                updateRow(
+                                                                    index,
+                                                                    {
+                                                                        deductionValue:
+                                                                            event
+                                                                                .target
+                                                                                .value,
+                                                                    },
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                rowLocked ||
+                                                                row.deductionMode ===
+                                                                    ''
+                                                            }
+                                                            placeholder="Enter on income page"
+                                                        />
+                                                    </div>
+
+                                                    <div className="sm:col-span-2">
+                                                        <Label
+                                                            htmlFor={`category-source-${index}`}
+                                                        >
+                                                            Deduct from
+                                                        </Label>
+                                                        <select
+                                                            id={`category-source-${index}`}
+                                                            name={`categories[${index}][deduct_from_index]`}
+                                                            className={selectClassName()}
+                                                            value={
+                                                                row.deductFromIndex
+                                                            }
+                                                            onChange={(event) =>
+                                                                updateRow(
+                                                                    index,
+                                                                    {
+                                                                        deductFromIndex:
+                                                                            event
+                                                                                .target
+                                                                                .value,
+                                                                    },
+                                                                )
+                                                            }
+                                                            disabled={rowLocked}
+                                                            required
+                                                        >
+                                                            <option value="">
+                                                                Select a fund
+                                                                bucket
+                                                            </option>
+                                                            {percentageRows.map(
+                                                                ({
+                                                                    row: sourceRow,
+                                                                    index: sourceIndex,
+                                                                }) => (
+                                                                    <option
+                                                                        key={`${sourceRow.key}-${sourceIndex}`}
+                                                                        value={String(
+                                                                            sourceIndex,
+                                                                        )}
+                                                                        disabled={
+                                                                            sourceIndex ===
+                                                                            index
+                                                                        }
+                                                                    >
+                                                                        {sourceRow.name ||
+                                                                            `Fund bucket ${sourceIndex + 1}`}
+                                                                    </option>
+                                                                ),
+                                                            )}
+                                                        </select>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+
+                                        <div className="mt-4">
+                                            <CategoryBankSelect
+                                                banks={teamBanks}
+                                                selectedId={row.bankId}
+                                                onChange={(bankId) =>
+                                                    updateRow(index, { bankId })
+                                                }
+                                                namePrefix={`categories[${index}]`}
+                                            />
+                                        </div>
+
+                                        {row.id && (
+                                            <div className="mt-4 space-y-2 border-t pt-4">
+                                                {(() => {
+                                                    const existingFund =
+                                                        existingFundForRow(row);
+                                                    const hasExistingFund =
+                                                        existingFund !== null &&
+                                                        parseFloat(
+                                                            existingFund,
+                                                        ) > 0;
+
+                                                    return hasExistingFund ? (
+                                                        <p className="text-sm text-muted-foreground">
+                                                            Existing fund:{' '}
+                                                            <span className="font-medium text-foreground">
+                                                                {formatMoney(
+                                                                    existingFund,
+                                                                )}
+                                                            </span>
+                                                        </p>
+                                                    ) : null;
+                                                })()}
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="w-full"
+                                                    onClick={() =>
+                                                        openExistingFundModal(
+                                                            row,
+                                                        )
+                                                    }
+                                                >
+                                                    Add Existing Fund
+                                                </Button>
                                             </div>
-                                        </>
-                                    )}
-                                </div>
-
-                                <div className="mt-4">
-                                    <CategoryBankSelect
-                                        banks={teamBanks}
-                                        selectedId={row.bankId}
-                                        onChange={(bankId) => updateRow(index, { bankId })}
-                                        namePrefix={`categories[${index}]`}
-                                    />
-                                </div>
-
-                                {row.id && (
-                                    <div className="mt-4 space-y-2 border-t pt-4">
-                                        {(() => {
-                                            const existingFund = existingFundForRow(row);
-                                            const hasExistingFund =
-                                                existingFund !== null
-                                                && parseFloat(existingFund) > 0;
-
-                                            return hasExistingFund ? (
-                                                <p className="text-sm text-muted-foreground">
-                                                    Existing fund:{' '}
-                                                    <span className="font-medium text-foreground">
-                                                        {formatMoney(existingFund)}
-                                                    </span>
-                                                </p>
-                                            ) : null;
-                                        })()}
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            className="w-full"
-                                            onClick={() => openExistingFundModal(row)}
-                                        >
-                                            Add Existing Fund
-                                        </Button>
+                                        )}
                                     </div>
-                                )}
-                            </div>
-                        );
-                    })}
+                                );
+                            })}
                         </div>
 
-                        <Button type="button" variant="outline" onClick={addRow}>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={addRow}
+                        >
                             <Plus className="size-4" />
-                            {plan.percentagesLocked ? 'Add custom fund bucket' : 'Add fund bucket'}
+                            {plan.percentagesLocked
+                                ? 'Add custom fund bucket'
+                                : 'Add fund bucket'}
                         </Button>
 
                         {!plan.percentagesLocked && (
@@ -754,7 +914,8 @@ function SavingsPlanEditor({
 
                         {plan.percentagesLocked && (
                             <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm">
-                                Percentage total: {percentageTotal.toFixed(2)}% (locked)
+                                Percentage total: {percentageTotal.toFixed(2)}%
+                                (locked)
                             </div>
                         )}
 
@@ -801,11 +962,14 @@ function SavingsPlanEditor({
             <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Save custom fund bucket changes?</DialogTitle>
+                        <DialogTitle>
+                            Save custom fund bucket changes?
+                        </DialogTitle>
                         <DialogDescription>
-                            These changes apply to this savings plan for all income periods.
-                            Locked periods, breakdowns, and spending linked to a removed custom
-                            fund bucket may no longer match historical records.
+                            These changes apply to this savings plan for all
+                            income periods. Locked periods, breakdowns, and
+                            spending linked to a removed custom fund bucket may
+                            no longer match historical records.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
@@ -823,14 +987,18 @@ function SavingsPlanEditor({
                 </DialogContent>
             </Dialog>
 
-            <Dialog open={chooseFormulaOpen} onOpenChange={setChooseFormulaOpen}>
+            <Dialog
+                open={chooseFormulaOpen}
+                onOpenChange={setChooseFormulaOpen}
+            >
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Choose a different formula?</DialogTitle>
                         <DialogDescription>
-                            This removes your current plan setup and returns you to the formula
-                            chooser. You have not entered income yet, so you can pick another split
-                            without losing historical data.
+                            This removes your current plan setup and returns you
+                            to the formula chooser. You have not entered income
+                            yet, so you can pick another split without losing
+                            historical data.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
@@ -847,7 +1015,11 @@ function SavingsPlanEditor({
                             options={{ preserveScroll: true }}
                         >
                             {({ processing }) => (
-                                <Button type="submit" variant="destructive" disabled={processing}>
+                                <Button
+                                    type="submit"
+                                    variant="destructive"
+                                    disabled={processing}
+                                >
                                     Choose another formula
                                 </Button>
                             )}
@@ -861,6 +1033,9 @@ function SavingsPlanEditor({
 
 SavingsPlanPage.layout = (props: SharedData) => ({
     breadcrumbs: [
-        { title: 'Savings Plan', href: `/${props.currentTeam?.slug}/savings/plan` },
+        {
+            title: 'Savings Plan',
+            href: `/${props.currentTeam?.slug}/savings/plan`,
+        },
     ],
 });

@@ -85,7 +85,10 @@ export function teamPath(teamSlug: string, relativePath: string): string {
     return `/${teamSlug}/${trimmed}`;
 }
 
-export function stepMatchesPath(step: OnboardingTourStep, pathname: string): boolean {
+export function stepMatchesPath(
+    step: OnboardingTourStep,
+    pathname: string,
+): boolean {
     if (step.pathIncludes === null) {
         return true;
     }

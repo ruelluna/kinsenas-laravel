@@ -7,7 +7,9 @@ type Props = {
     institutions: BankInstitution[];
     name?: string;
     institutionId?: string;
-    onChange: (selection: { institutionId: string; name: string } | null) => void;
+    onChange: (
+        selection: { institutionId: string; name: string } | null,
+    ) => void;
     error?: string;
 };
 
@@ -33,7 +35,9 @@ export default function BankInstitutionPicker({
         );
     }, [institutions, query]);
 
-    const selected = institutions.find((institution) => institution.id === selectedId) ?? null;
+    const selected =
+        institutions.find((institution) => institution.id === selectedId) ??
+        null;
 
     const handleSelect = (institution: BankInstitution) => {
         setSelectedId(institution.id);
@@ -73,7 +77,9 @@ export default function BankInstitutionPicker({
             {!selected && query !== '' && (
                 <ul className="max-h-48 overflow-y-auto rounded-md border text-sm">
                     {filtered.length === 0 ? (
-                        <li className="px-3 py-2 text-muted-foreground">No matches.</li>
+                        <li className="px-3 py-2 text-muted-foreground">
+                            No matches.
+                        </li>
                     ) : (
                         filtered.slice(0, 12).map((institution) => (
                             <li key={institution.id}>
@@ -103,11 +109,17 @@ export default function BankInstitutionPicker({
             {selected && (
                 <div className="flex items-center gap-3 rounded-md border p-3 text-sm">
                     {selected.logoUrl ? (
-                        <img src={selected.logoUrl} alt="" className="size-8 object-contain" />
+                        <img
+                            src={selected.logoUrl}
+                            alt=""
+                            className="size-8 object-contain"
+                        />
                     ) : null}
                     <div className="flex-1">
                         <p className="font-medium">{selected.name}</p>
-                        <p className="text-xs text-muted-foreground capitalize">{selected.type.replace('_', ' ')}</p>
+                        <p className="text-xs text-muted-foreground capitalize">
+                            {selected.type.replace('_', ' ')}
+                        </p>
                     </div>
                     <button
                         type="button"

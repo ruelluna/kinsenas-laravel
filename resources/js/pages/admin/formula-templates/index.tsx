@@ -28,7 +28,9 @@ export default function AdminFormulaTemplatesIndex({ templates }: Props) {
                     >
                         <div className="min-w-0">
                             <p className="font-medium">{template.name}</p>
-                            <p className="text-sm text-muted-foreground">{template.slug}</p>
+                            <p className="text-sm text-muted-foreground">
+                                {template.slug}
+                            </p>
                             {template.description && (
                                 <p className="mt-1 text-sm text-muted-foreground">
                                     {template.description}
@@ -36,7 +38,9 @@ export default function AdminFormulaTemplatesIndex({ templates }: Props) {
                             )}
                         </div>
                         <Button variant="outline" asChild>
-                            <Link href={`/admin/formula-templates/${template.id}/edit`}>
+                            <Link
+                                href={`/admin/formula-templates/${template.id}/edit`}
+                            >
                                 Edit guidance
                             </Link>
                         </Button>

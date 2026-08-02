@@ -36,7 +36,10 @@ export default function SurveyShell({
 
             <header className="relative border-b border-border/40 bg-background/80 backdrop-blur-md">
                 <div className="mx-auto flex max-w-lg items-center justify-center px-6 py-3.5">
-                    <Link href={home()} className="transition-opacity hover:opacity-80">
+                    <Link
+                        href={home()}
+                        className="transition-opacity hover:opacity-80"
+                    >
                         <img
                             src={KINSENAS_HORIZONTAL_LOGO}
                             alt={appName}
@@ -64,12 +67,24 @@ export default function SurveyShell({
             <main className="relative mx-auto flex w-full max-w-lg flex-1 flex-col px-6 py-8">
                 {privacyNote && (
                     <div className="mb-6 flex items-start gap-2 rounded-xl border border-border/40 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-                        <Lock className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
-                        <p className="text-pretty leading-relaxed">{privacyNote}</p>
+                        <Lock
+                            className="mt-0.5 size-4 shrink-0 text-primary"
+                            aria-hidden
+                        />
+                        <p className="leading-relaxed text-pretty">
+                            {privacyNote}
+                        </p>
                     </div>
                 )}
 
-                <div className={cn('flex flex-1 flex-col', !privacyNote && 'pt-2')}>{children}</div>
+                <div
+                    className={cn(
+                        'flex flex-1 flex-col',
+                        !privacyNote && 'pt-2',
+                    )}
+                >
+                    {children}
+                </div>
             </main>
         </div>
     );

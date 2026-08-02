@@ -20,7 +20,8 @@ const editRulesRows = [
     },
     {
         categoryType: 'Allow editing spends',
-        afterFirstIncome: 'Toggle on plan — enables Edit and Delete on Spending',
+        afterFirstIncome:
+            'Toggle on plan — enables Edit and Delete on Spending',
     },
 ] as const;
 
@@ -36,27 +37,39 @@ export function PlanEditRulesPanel({
                 <div className="min-w-0 space-y-1">
                     <h2 className="text-sm font-medium">What you can change</h2>
                     {pageGuidance.afterIncomeRules && (
-                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                        <p className="text-sm whitespace-pre-wrap text-muted-foreground">
                             {pageGuidance.afterIncomeRules}
                         </p>
                     )}
                 </div>
             </div>
 
-            <VideoEmbed url={pageGuidance.afterIncomeVideoUrl} title="After income rules" />
+            <VideoEmbed
+                url={pageGuidance.afterIncomeVideoUrl}
+                title="After income rules"
+            />
 
             <div className="overflow-x-auto rounded-md border bg-background">
                 <table className="w-full min-w-[320px] text-left text-sm">
                     <thead>
                         <tr className="border-b bg-muted/40">
-                            <th className="px-3 py-2 font-medium">Fund bucket type</th>
-                            <th className="px-3 py-2 font-medium">After first income</th>
+                            <th className="px-3 py-2 font-medium">
+                                Fund bucket type
+                            </th>
+                            <th className="px-3 py-2 font-medium">
+                                After first income
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         {editRulesRows.map((row) => (
-                            <tr key={row.categoryType} className="border-b last:border-0">
-                                <td className="px-3 py-2 align-top font-medium">{row.categoryType}</td>
+                            <tr
+                                key={row.categoryType}
+                                className="border-b last:border-0"
+                            >
+                                <td className="px-3 py-2 align-top font-medium">
+                                    {row.categoryType}
+                                </td>
                                 <td className="px-3 py-2 align-top text-muted-foreground">
                                     {row.afterFirstIncome}
                                 </td>
@@ -69,11 +82,7 @@ export function PlanEditRulesPanel({
     );
 }
 
-export function BeforeChooseAlert({
-    note,
-}: {
-    note: string | null;
-}) {
+export function BeforeChooseAlert({ note }: { note: string | null }) {
     if (!note) {
         return null;
     }
@@ -82,7 +91,9 @@ export function BeforeChooseAlert({
         <Alert variant="guidance" className="mt-6">
             <Info />
             <AlertTitle>Before you choose</AlertTitle>
-            <AlertDescription className="whitespace-pre-wrap">{note}</AlertDescription>
+            <AlertDescription className="whitespace-pre-wrap">
+                {note}
+            </AlertDescription>
         </Alert>
     );
 }
@@ -104,9 +115,10 @@ export function BanksFirstAlert({
             <AlertTitle>Add your banks first</AlertTitle>
             <AlertDescription className="space-y-3">
                 <p>
-                    Add the bank accounts you use before picking a formula. After you choose a plan,
-                    you&apos;ll assign each fund bucket to one of those accounts. You can still pick a plan
-                    now, but bank assignment will be empty until you add banks.
+                    Add the bank accounts you use before picking a formula.
+                    After you choose a plan, you&apos;ll assign each fund bucket
+                    to one of those accounts. You can still pick a plan now, but
+                    bank assignment will be empty until you add banks.
                 </p>
                 <Button variant="outline" size="sm" asChild>
                     <Link href={`/${teamSlug}/savings/banks`}>Go to Banks</Link>

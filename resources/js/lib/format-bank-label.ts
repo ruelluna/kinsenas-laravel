@@ -59,7 +59,9 @@ export function groupBankOptions(banks: BankOption[]): BankOptionGroup[] {
                 return 1;
             }
 
-            return (left.accountLabel ?? '').localeCompare(right.accountLabel ?? '');
+            return (left.accountLabel ?? '').localeCompare(
+                right.accountLabel ?? '',
+            );
         }),
     }));
 

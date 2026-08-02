@@ -1,6 +1,10 @@
 import type { QuestionId, ResultSlug, SurveyAnswers } from './survey-types';
 
-function includesOption(answers: SurveyAnswers, questionId: QuestionId, value: string): boolean {
+function includesOption(
+    answers: SurveyAnswers,
+    questionId: QuestionId,
+    value: string,
+): boolean {
     const answer = answers[questionId];
 
     if (Array.isArray(answer)) {
@@ -17,7 +21,9 @@ function hasAnyQ8Habit(answers: SurveyAnswers): boolean {
         return false;
     }
 
-    return answer.some((value) => value !== 'none' && value !== 'prefer_not_to_say');
+    return answer.some(
+        (value) => value !== 'none' && value !== 'prefer_not_to_say',
+    );
 }
 
 /**

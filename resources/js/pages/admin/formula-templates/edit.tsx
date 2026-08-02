@@ -80,9 +80,14 @@ export default function AdminFormulaTemplateEdit({ template }: Props) {
                 </div>
 
                 <div className="space-y-4">
-                    <p className="text-sm font-medium">Fund bucket descriptions</p>
+                    <p className="text-sm font-medium">
+                        Fund bucket descriptions
+                    </p>
                     {template.categories.map((category, index) => (
-                        <div key={category.id} className="rounded-lg border p-4">
+                        <div
+                            key={category.id}
+                            className="rounded-lg border p-4"
+                        >
                             <input
                                 type="hidden"
                                 name={`categories[${index}][id]`}
@@ -90,10 +95,14 @@ export default function AdminFormulaTemplateEdit({ template }: Props) {
                             />
                             <p className="font-medium">
                                 {category.name}{' '}
-                                <span className="text-muted-foreground">({category.percentage}%)</span>
+                                <span className="text-muted-foreground">
+                                    ({category.percentage}%)
+                                </span>
                             </p>
                             <div className="mt-3 grid gap-2">
-                                <Label htmlFor={`category-description-${category.id}`}>
+                                <Label
+                                    htmlFor={`category-description-${category.id}`}
+                                >
                                     Purpose (shown to members)
                                 </Label>
                                 <textarea

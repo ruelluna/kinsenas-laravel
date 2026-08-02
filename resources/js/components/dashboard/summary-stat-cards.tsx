@@ -2,7 +2,11 @@ import { Link } from '@inertiajs/react';
 import { AlertTriangle, Landmark, Wallet } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { formatMoney } from '@/lib/format-money';
-import type { DashboardQuickLinks, DashboardSummary, DashboardSetup } from '@/types/dashboard';
+import type {
+    DashboardQuickLinks,
+    DashboardSummary,
+    DashboardSetup,
+} from '@/types/dashboard';
 
 type Props = {
     setup: DashboardSetup;
@@ -10,7 +14,11 @@ type Props = {
     quickLinks: DashboardQuickLinks;
 };
 
-export default function SummaryStatCards({ setup, summary, quickLinks }: Props) {
+export default function SummaryStatCards({
+    setup,
+    summary,
+    quickLinks,
+}: Props) {
     if (!setup.hasPlan) {
         return null;
     }
@@ -29,7 +37,10 @@ export default function SummaryStatCards({ setup, summary, quickLinks }: Props) 
                 value={formatMoney(summary.totalInBanks)}
                 description={
                     setup.hasLockedIncome || setup.hasOpeningBalances ? (
-                        <Link href={quickLinks.banks} className="text-primary underline-offset-4 hover:underline">
+                        <Link
+                            href={quickLinks.banks}
+                            className="text-primary underline-offset-4 hover:underline"
+                        >
                             View banks
                         </Link>
                     ) : (
@@ -58,7 +69,9 @@ function attentionDescription(summary: DashboardSummary): string {
     }
 
     if (summary.pendingSpendCount > 0) {
-        parts.push(`${summary.pendingSpendCount} pending spend${summary.pendingSpendCount === 1 ? '' : 's'}`);
+        parts.push(
+            `${summary.pendingSpendCount} pending spend${summary.pendingSpendCount === 1 ? '' : 's'}`,
+        );
     }
 
     if (summary.lowBalanceFunds.length > 0) {
@@ -99,7 +112,9 @@ function StatCard({
                 <Icon className="size-4" />
                 {title}
             </div>
-            <p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p>
+            <p className="mt-2 text-2xl font-semibold tracking-tight">
+                {value}
+            </p>
             <p className="mt-1 text-sm text-muted-foreground">{description}</p>
         </div>
     );

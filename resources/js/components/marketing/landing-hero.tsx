@@ -26,12 +26,12 @@ export default function LandingHero({ showCtas }: LandingHeroProps) {
                                 ? 'Public beta — free'
                                 : 'Spend only after you have saved.'}
                         </p>
-                        <h1 className="text-balance text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-[3.25rem]">
+                        <h1 className="text-4xl leading-[1.1] font-semibold tracking-tight text-balance text-white sm:text-5xl lg:text-[3.25rem]">
                             Not how big you save —
                             <br />
                             but the habit of saving!
                         </h1>
-                        <p className="mx-auto max-w-xl text-pretty text-lg leading-relaxed text-white/80 lg:mx-0">
+                        <p className="mx-auto max-w-xl text-lg leading-relaxed text-pretty text-white/80 lg:mx-0">
                             {openBeta.isActive
                                 ? 'Create a real account, use the core savings planner for free during beta, and keep your data when paid plans launch. Pricing: coming soon.'
                                 : 'Kinsenas helps you split every income into clear portions, so your money already has a purpose before life starts asking for it.'}
@@ -55,9 +55,7 @@ export default function LandingHero({ showCtas }: LandingHeroProps) {
                                     className="h-11 rounded-full border-white/25 bg-white/5 px-7 text-white backdrop-blur-sm hover:bg-white/10 hover:text-white"
                                     asChild
                                 >
-                                    <a href="#how-it-works">
-                                        See How It Works
-                                    </a>
+                                    <a href="#how-it-works">See How It Works</a>
                                 </Button>
                             </div>
                         )}

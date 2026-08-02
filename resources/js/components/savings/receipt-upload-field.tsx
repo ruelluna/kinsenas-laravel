@@ -107,16 +107,24 @@ function ReceiptUploadFieldInner({ error, existingImageUrl = null }: Props) {
                         )}
                     </div>
                     {fileName && (
-                        <p className="truncate text-xs text-muted-foreground">{fileName}</p>
+                        <p className="truncate text-xs text-muted-foreground">
+                            {fileName}
+                        </p>
                     )}
-                    <Button type="button" variant="outline" size="sm" onClick={openPicker}>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={openPicker}
+                    >
                         {useCamera ? (
                             <>
                                 <Camera className="size-4" /> Retake photo
                             </>
                         ) : (
                             <>
-                                <ImagePlus className="size-4" /> Choose different image
+                                <ImagePlus className="size-4" /> Choose
+                                different image
                             </>
                         )}
                     </Button>
@@ -153,6 +161,9 @@ type ReceiptUploadFieldProps = Props & {
     resetKey?: number;
 };
 
-export default function ReceiptUploadField({ resetKey = 0, ...props }: ReceiptUploadFieldProps) {
+export default function ReceiptUploadField({
+    resetKey = 0,
+    ...props
+}: ReceiptUploadFieldProps) {
     return <ReceiptUploadFieldInner key={resetKey} {...props} />;
 }

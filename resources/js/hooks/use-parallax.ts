@@ -1,5 +1,5 @@
-import { useEffect, useState  } from 'react';
-import type {RefObject} from 'react';
+import { useEffect, useState } from 'react';
+import type { RefObject } from 'react';
 
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 

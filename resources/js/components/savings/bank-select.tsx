@@ -1,4 +1,6 @@
-import BankOptionSelect, { BankOptionLogo } from '@/components/savings/bank-option-select';
+import BankOptionSelect, {
+    BankOptionLogo,
+} from '@/components/savings/bank-option-select';
 import type { BankOption, CategoryBankMap } from '@/types/savings';
 
 type Props = {
@@ -43,7 +45,7 @@ export default function BankSelect({
             <select
                 id={id}
                 name={name}
-                className="border-input h-9 w-full rounded-md border px-3 text-sm"
+                className="h-9 w-full rounded-md border border-input px-3 text-sm"
                 disabled
             >
                 <option value="">No bank assigned</option>
@@ -65,7 +67,13 @@ export default function BankSelect({
     );
 }
 
-export function BankLogo({ logoUrl, name }: { logoUrl?: string | null; name: string }) {
+export function BankLogo({
+    logoUrl,
+    name,
+}: {
+    logoUrl?: string | null;
+    name: string;
+}) {
     return (
         <BankOptionLogo
             bank={{ id: name, name, logoUrl: logoUrl ?? null }}

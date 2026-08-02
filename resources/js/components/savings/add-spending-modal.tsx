@@ -36,7 +36,10 @@ function todayString(): string {
     return new Date().toISOString().slice(0, 10);
 }
 
-function remainingAfterSpend(remaining: string | null, amount: string): string | null {
+function remainingAfterSpend(
+    remaining: string | null,
+    amount: string,
+): string | null {
     if (remaining === null || amount === '') {
         return remaining;
     }
@@ -58,7 +61,9 @@ function AddSpendingForm({
     fundBalances,
     recipients,
 }: FormProps) {
-    const { currentTeam, errors } = usePage<SharedData & { errors: Record<string, string> }>().props;
+    const { currentTeam, errors } = usePage<
+        SharedData & { errors: Record<string, string> }
+    >().props;
     const teamSlug = currentTeam?.slug ?? '';
     const [selectedCategoryId, setSelectedCategoryId] = useState(
         () => presetCategoryId ?? defaultCategoryId ?? categories[0]?.id ?? '',
@@ -66,11 +71,17 @@ function AddSpendingForm({
     const [amount, setAmount] = useState('');
 
     const selectedBalance = useMemo(
-        () => fundBalances.find((balance) => balance.categoryId === selectedCategoryId) ?? null,
+        () =>
+            fundBalances.find(
+                (balance) => balance.categoryId === selectedCategoryId,
+            ) ?? null,
         [fundBalances, selectedCategoryId],
     );
 
-    const projectedRemaining = remainingAfterSpend(selectedBalance?.remaining ?? null, amount);
+    const projectedRemaining = remainingAfterSpend(
+        selectedBalance?.remaining ?? null,
+        amount,
+    );
 
     return (
         <Form
@@ -94,9 +105,11 @@ function AddSpendingForm({
                         <select
                             id="category_id"
                             name="category_id"
-                            className="border-input h-9 rounded-md border px-3 text-sm"
+                            className="h-9 rounded-md border border-input px-3 text-sm"
                             value={selectedCategoryId}
-                            onChange={(event) => setSelectedCategoryId(event.target.value)}
+                            onChange={(event) =>
+                                setSelectedCategoryId(event.target.value)
+                            }
                             required
                         >
                             {categories.map((category) => (
@@ -120,12 +133,14 @@ function AddSpendingForm({
                             onChange={(event) => setAmount(event.target.value)}
                             required
                         />
-                        {selectedBalance?.remaining !== null && amount !== '' && (
-                            <p className="text-xs text-muted-foreground">
-                                After this spend: {formatMoney(projectedRemaining)} remaining in{' '}
-                                {selectedBalance?.name}
-                            </p>
-                        )}
+                        {selectedBalance?.remaining !== null &&
+                            amount !== '' && (
+                                <p className="text-xs text-muted-foreground">
+                                    After this spend:{' '}
+                                    {formatMoney(projectedRemaining)} remaining
+                                    in {selectedBalance?.name}
+                                </p>
+                            )}
                         <InputError message={errors.amount} />
                     </div>
 
@@ -155,11 +170,13 @@ function AddSpendingForm({
                     <ReceiptUploadField error={errors.receipt_image} />
 
                     <div className="grid gap-2">
-                        <Label htmlFor="recipient_id">Recipient (optional)</Label>
+                        <Label htmlFor="recipient_id">
+                            Recipient (optional)
+                        </Label>
                         <select
                             id="recipient_id"
                             name="recipient_id"
-                            className="border-input h-9 rounded-md border px-3 text-sm"
+                            className="h-9 rounded-md border border-input px-3 text-sm"
                             defaultValue=""
                         >
                             <option value="">None</option>

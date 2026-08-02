@@ -7,22 +7,72 @@ import type {
 
 const QUESTION_OPTIONS = {
     q1: [
-        { value: 'employee', en: 'Employee', tl: 'Empleyado', ceb: 'Empleyado' },
-        { value: 'freelancer', en: 'Freelancer', tl: 'Freelancer', ceb: 'Freelancer' },
-        { value: 'business_owner', en: 'Business owner', tl: 'May negosyo', ceb: 'Naay negosyo' },
+        {
+            value: 'employee',
+            en: 'Employee',
+            tl: 'Empleyado',
+            ceb: 'Empleyado',
+        },
+        {
+            value: 'freelancer',
+            en: 'Freelancer',
+            tl: 'Freelancer',
+            ceb: 'Freelancer',
+        },
+        {
+            value: 'business_owner',
+            en: 'Business owner',
+            tl: 'May negosyo',
+            ceb: 'Naay negosyo',
+        },
         { value: 'ofw', en: 'OFW', tl: 'OFW', ceb: 'OFW' },
-        { value: 'student', en: 'Student with income or allowance', tl: 'Estudyante na may income o allowance', ceb: 'Estudyante nga naay income o allowance' },
-        { value: 'couple_family', en: 'Couple/family managing shared money', tl: 'Couple/pamilya na nagma-manage ng shared money', ceb: 'Couple/pamilya nga nag-manage ug shared money' },
+        {
+            value: 'student',
+            en: 'Student with income or allowance',
+            tl: 'Estudyante na may income o allowance',
+            ceb: 'Estudyante nga naay income o allowance',
+        },
+        {
+            value: 'couple_family',
+            en: 'Couple/family managing shared money',
+            tl: 'Couple/pamilya na nagma-manage ng shared money',
+            ceb: 'Couple/pamilya nga nag-manage ug shared money',
+        },
         { value: 'other', en: 'Other', tl: 'Iba pa', ceb: 'Uban pa' },
     ],
     q2: [
         { value: 'single', en: 'Single', tl: 'Single', ceb: 'Single' },
         { value: 'married', en: 'Married', tl: 'Kasal', ceb: 'Minyo' },
-        { value: 'relationship_shared', en: 'In a relationship and sharing expenses', tl: 'May partner at may shared expenses', ceb: 'Naay partner ug nag-share sa expenses' },
-        { value: 'parent', en: 'Parent', tl: 'Magulang/parent', ceb: 'Ginikanan/parent' },
-        { value: 'supporting_family', en: 'Supporting family', tl: 'Sumusuporta sa pamilya', ceb: 'Nagsuporta sa pamilya' },
-        { value: 'living_independently', en: 'Living independently', tl: 'Namumuhay independently', ceb: 'Nagpuyo independently' },
-        { value: 'living_with_family', en: 'Living with family', tl: 'Nakatira kasama ang pamilya', ceb: 'Nagpuyo uban sa pamilya' },
+        {
+            value: 'relationship_shared',
+            en: 'In a relationship and sharing expenses',
+            tl: 'May partner at may shared expenses',
+            ceb: 'Naay partner ug nag-share sa expenses',
+        },
+        {
+            value: 'parent',
+            en: 'Parent',
+            tl: 'Magulang/parent',
+            ceb: 'Ginikanan/parent',
+        },
+        {
+            value: 'supporting_family',
+            en: 'Supporting family',
+            tl: 'Sumusuporta sa pamilya',
+            ceb: 'Nagsuporta sa pamilya',
+        },
+        {
+            value: 'living_independently',
+            en: 'Living independently',
+            tl: 'Namumuhay independently',
+            ceb: 'Nagpuyo independently',
+        },
+        {
+            value: 'living_with_family',
+            en: 'Living with family',
+            tl: 'Nakatira kasama ang pamilya',
+            ceb: 'Nagpuyo uban sa pamilya',
+        },
     ],
     q3: [
         { value: 'none', en: 'None', tl: 'Wala', ceb: 'Wala' },
@@ -32,78 +82,319 @@ const QUESTION_OPTIONS = {
         { value: '6+', en: '6 or more', tl: '6 pataas', ceb: '6 pataas' },
     ],
     q4: [
-        { value: 'pay_bills', en: 'I pay bills', tl: 'Nagbabayad ako ng bills', ceb: 'Mobayad ko sa bills' },
-        { value: 'send_family', en: 'I send money to family', tl: 'Nagpapadala ako sa pamilya', ceb: 'Mopadala ko sa pamilya' },
-        { value: 'set_savings', en: 'I set aside savings', tl: 'Nagtatabi ako para sa savings', ceb: 'Mag-set aside ko para savings' },
-        { value: 'give_tithe', en: 'I give/tithe', tl: 'Nagbibigay/tithe ako', ceb: 'Mohatag/tithe ko' },
-        { value: 'pay_debt', en: 'I pay debt', tl: 'Nagbabayad ako ng utang', ceb: 'Mobayad ko sa utang' },
-        { value: 'spend_first', en: 'I spend first, then plan what remains', tl: 'Gumagastos muna ako, tapos pinaplano ang natira', ceb: 'Mogasto una ko, unya planohon ang mahabilin' },
-        { value: 'no_routine', en: 'I do not have a clear routine yet', tl: 'Wala pa akong malinaw na routine', ceb: 'Wala pa koy klaro nga routine' },
+        {
+            value: 'pay_bills',
+            en: 'I pay bills',
+            tl: 'Nagbabayad ako ng bills',
+            ceb: 'Mobayad ko sa bills',
+        },
+        {
+            value: 'send_family',
+            en: 'I send money to family',
+            tl: 'Nagpapadala ako sa pamilya',
+            ceb: 'Mopadala ko sa pamilya',
+        },
+        {
+            value: 'set_savings',
+            en: 'I set aside savings',
+            tl: 'Nagtatabi ako para sa savings',
+            ceb: 'Mag-set aside ko para savings',
+        },
+        {
+            value: 'give_tithe',
+            en: 'I give/tithe',
+            tl: 'Nagbibigay/tithe ako',
+            ceb: 'Mohatag/tithe ko',
+        },
+        {
+            value: 'pay_debt',
+            en: 'I pay debt',
+            tl: 'Nagbabayad ako ng utang',
+            ceb: 'Mobayad ko sa utang',
+        },
+        {
+            value: 'spend_first',
+            en: 'I spend first, then plan what remains',
+            tl: 'Gumagastos muna ako, tapos pinaplano ang natira',
+            ceb: 'Mogasto una ko, unya planohon ang mahabilin',
+        },
+        {
+            value: 'no_routine',
+            en: 'I do not have a clear routine yet',
+            tl: 'Wala pa akong malinaw na routine',
+            ceb: 'Wala pa koy klaro nga routine',
+        },
     ],
     q5: [
         { value: 'bills', en: 'Bills', tl: 'Bills', ceb: 'Bills' },
         { value: 'rent', en: 'Rent', tl: 'Rent/upahan', ceb: 'Rent/abang' },
-        { value: 'groceries', en: 'Groceries', tl: 'Grocery/pagkain', ceb: 'Grocery/pagkaon' },
-        { value: 'family_support', en: 'Family support', tl: 'Suporta sa pamilya', ceb: 'Suporta sa pamilya' },
-        { value: 'tuition', en: 'Tuition/school expenses', tl: 'Tuition/school expenses', ceb: 'Tuition/school expenses' },
-        { value: 'medicine', en: 'Medicine/health expenses', tl: 'Gamot/health expenses', ceb: 'Tambal/health expenses' },
-        { value: 'debt', en: 'Debt/payment obligations', tl: 'Utang/payment obligations', ceb: 'Utang/payment obligations' },
-        { value: 'church_giving', en: 'Church/tithes/giving', tl: 'Church/tithes/giving', ceb: 'Church/tithes/giving' },
+        {
+            value: 'groceries',
+            en: 'Groceries',
+            tl: 'Grocery/pagkain',
+            ceb: 'Grocery/pagkaon',
+        },
+        {
+            value: 'family_support',
+            en: 'Family support',
+            tl: 'Suporta sa pamilya',
+            ceb: 'Suporta sa pamilya',
+        },
+        {
+            value: 'tuition',
+            en: 'Tuition/school expenses',
+            tl: 'Tuition/school expenses',
+            ceb: 'Tuition/school expenses',
+        },
+        {
+            value: 'medicine',
+            en: 'Medicine/health expenses',
+            tl: 'Gamot/health expenses',
+            ceb: 'Tambal/health expenses',
+        },
+        {
+            value: 'debt',
+            en: 'Debt/payment obligations',
+            tl: 'Utang/payment obligations',
+            ceb: 'Utang/payment obligations',
+        },
+        {
+            value: 'church_giving',
+            en: 'Church/tithes/giving',
+            tl: 'Church/tithes/giving',
+            ceb: 'Church/tithes/giving',
+        },
         { value: 'savings', en: 'Savings', tl: 'Savings', ceb: 'Savings' },
-        { value: 'business_capital', en: 'Business capital', tl: 'Puhunan sa negosyo', ceb: 'Puhunan sa negosyo' },
-        { value: 'personal_goals', en: 'Personal goals', tl: 'Personal goals', ceb: 'Personal goals' },
+        {
+            value: 'business_capital',
+            en: 'Business capital',
+            tl: 'Puhunan sa negosyo',
+            ceb: 'Puhunan sa negosyo',
+        },
+        {
+            value: 'personal_goals',
+            en: 'Personal goals',
+            tl: 'Personal goals',
+            ceb: 'Personal goals',
+        },
     ],
     q6: [
-        { value: 'clear_formula', en: 'Yes, with a clear formula', tl: 'Oo, may malinaw na formula', ceb: 'Oo, naay klaro nga formula' },
-        { value: 'manual', en: 'Yes, but manually', tl: 'Oo, pero manual lang', ceb: 'Oo, pero manual ra' },
+        {
+            value: 'clear_formula',
+            en: 'Yes, with a clear formula',
+            tl: 'Oo, may malinaw na formula',
+            ceb: 'Oo, naay klaro nga formula',
+        },
+        {
+            value: 'manual',
+            en: 'Yes, but manually',
+            tl: 'Oo, pero manual lang',
+            ceb: 'Oo, pero manual ra',
+        },
         { value: 'sometimes', en: 'Sometimes', tl: 'Minsan', ceb: 'Usahay' },
-        { value: 'want_to', en: 'No, but I want to', tl: 'Hindi pa, pero gusto ko', ceb: 'Wala pa, pero gusto ko' },
-        { value: 'not_needed', en: 'No, I do not need this', tl: 'Hindi, hindi ko kailangan', ceb: 'Dili, dili nako kinahanglan' },
+        {
+            value: 'want_to',
+            en: 'No, but I want to',
+            tl: 'Hindi pa, pero gusto ko',
+            ceb: 'Wala pa, pero gusto ko',
+        },
+        {
+            value: 'not_needed',
+            en: 'No, I do not need this',
+            tl: 'Hindi, hindi ko kailangan',
+            ceb: 'Dili, dili nako kinahanglan',
+        },
     ],
     q7: [
-        { value: 'unexpected_family', en: 'Unexpected family needs', tl: 'Biglaang pangangailangan ng pamilya', ceb: 'Kalit nga panginahanglan sa pamilya' },
-        { value: 'impulse_spending', en: 'Impulse spending', tl: 'Impulse spending', ceb: 'Impulse spending' },
+        {
+            value: 'unexpected_family',
+            en: 'Unexpected family needs',
+            tl: 'Biglaang pangangailangan ng pamilya',
+            ceb: 'Kalit nga panginahanglan sa pamilya',
+        },
+        {
+            value: 'impulse_spending',
+            en: 'Impulse spending',
+            tl: 'Impulse spending',
+            ceb: 'Impulse spending',
+        },
         { value: 'debt', en: 'Debt', tl: 'Utang', ceb: 'Utang' },
-        { value: 'low_income', en: 'Low income', tl: 'Mababa ang income', ceb: 'Gamay ang income' },
-        { value: 'irregular_income', en: 'Irregular income', tl: 'Hindi regular ang income', ceb: 'Dili regular ang income' },
-        { value: 'too_many_bills', en: 'Too many bills', tl: 'Sobrang daming bills', ceb: 'Daghan kaayo ug bills' },
-        { value: 'forgetting_transfers', en: 'Forgetting transfers', tl: 'Nakakalimutang mag-transfer', ceb: 'Makalimot ug transfer' },
-        { value: 'no_clear_system', en: 'No clear system', tl: 'Walang malinaw na system', ceb: 'Walay klaro nga system' },
+        {
+            value: 'low_income',
+            en: 'Low income',
+            tl: 'Mababa ang income',
+            ceb: 'Gamay ang income',
+        },
+        {
+            value: 'irregular_income',
+            en: 'Irregular income',
+            tl: 'Hindi regular ang income',
+            ceb: 'Dili regular ang income',
+        },
+        {
+            value: 'too_many_bills',
+            en: 'Too many bills',
+            tl: 'Sobrang daming bills',
+            ceb: 'Daghan kaayo ug bills',
+        },
+        {
+            value: 'forgetting_transfers',
+            en: 'Forgetting transfers',
+            tl: 'Nakakalimutang mag-transfer',
+            ceb: 'Makalimot ug transfer',
+        },
+        {
+            value: 'no_clear_system',
+            en: 'No clear system',
+            tl: 'Walang malinaw na system',
+            ceb: 'Walay klaro nga system',
+        },
     ],
     q8: [
-        { value: 'food_delivery', en: 'Food delivery/eating out', tl: 'Food delivery/kain sa labas', ceb: 'Food delivery/kaon sa gawas' },
+        {
+            value: 'food_delivery',
+            en: 'Food delivery/eating out',
+            tl: 'Food delivery/kain sa labas',
+            ceb: 'Food delivery/kaon sa gawas',
+        },
         { value: 'shopping', en: 'Shopping', tl: 'Shopping', ceb: 'Shopping' },
-        { value: 'online_purchases', en: 'Online purchases', tl: 'Online purchases', ceb: 'Online purchases' },
-        { value: 'games_subscriptions', en: 'Games/apps/subscriptions', tl: 'Games/apps/subscriptions', ceb: 'Games/apps/subscriptions' },
-        { value: 'nightlife', en: 'Nightlife/drinking', tl: 'Nightlife/inom', ceb: 'Nightlife/inom' },
-        { value: 'smoking_vaping', en: 'Smoking/vaping', tl: 'Smoking/vaping', ceb: 'Smoking/vaping' },
-        { value: 'gambling', en: 'Gambling/betting', tl: 'Gambling/betting', ceb: 'Gambling/betting' },
-        { value: 'lending', en: 'Lending money', tl: 'Pagpapautang', ceb: 'Pagpahulam ug kwarta' },
+        {
+            value: 'online_purchases',
+            en: 'Online purchases',
+            tl: 'Online purchases',
+            ceb: 'Online purchases',
+        },
+        {
+            value: 'games_subscriptions',
+            en: 'Games/apps/subscriptions',
+            tl: 'Games/apps/subscriptions',
+            ceb: 'Games/apps/subscriptions',
+        },
+        {
+            value: 'nightlife',
+            en: 'Nightlife/drinking',
+            tl: 'Nightlife/inom',
+            ceb: 'Nightlife/inom',
+        },
+        {
+            value: 'smoking_vaping',
+            en: 'Smoking/vaping',
+            tl: 'Smoking/vaping',
+            ceb: 'Smoking/vaping',
+        },
+        {
+            value: 'gambling',
+            en: 'Gambling/betting',
+            tl: 'Gambling/betting',
+            ceb: 'Gambling/betting',
+        },
+        {
+            value: 'lending',
+            en: 'Lending money',
+            tl: 'Pagpapautang',
+            ceb: 'Pagpahulam ug kwarta',
+        },
         { value: 'none', en: 'None', tl: 'Wala', ceb: 'Wala' },
-        { value: 'prefer_not_to_say', en: 'Prefer not to say', tl: 'Prefer not to say', ceb: 'Prefer not to say' },
+        {
+            value: 'prefer_not_to_say',
+            en: 'Prefer not to say',
+            tl: 'Prefer not to say',
+            ceb: 'Prefer not to say',
+        },
     ],
     q9: [
-        { value: 'split_income', en: 'Split income automatically', tl: 'Awtomatikong hatiin ang income', ceb: 'Automatic nga pagbahin sa income' },
-        { value: 'track_transfers', en: 'Track actual transfers', tl: 'I-track ang actual transfers', ceb: 'I-track ang actual transfers' },
-        { value: 'remind_unpaid', en: 'Remind me what is unpaid or unmoved', tl: 'I-remind ako kung ano ang unpaid o hindi pa naililipat', ceb: 'I-remind ko kung unsa ang unpaid o wala pa natransfer' },
-        { value: 'protect_privacy', en: 'Protect my money privacy', tl: 'Protektahan ang money privacy ko', ceb: 'Protektahan akong money privacy' },
-        { value: 'payday_discipline', en: 'Build payday discipline', tl: 'Tulungan akong maging disciplined tuwing payday', ceb: 'Tabangan ko mahimong disciplined kada payday' },
-        { value: 'family_obligations', en: 'Manage family obligations', tl: 'I-manage ang family obligations', ceb: 'I-manage ang family obligations' },
-        { value: 'plan_giving', en: 'Plan giving/tithes', tl: 'Planuhin ang giving/tithes', ceb: 'Planohon ang giving/tithes' },
-        { value: 'save_goals', en: 'Save for goals', tl: 'Mag-save para sa goals', ceb: 'Mag-save para sa goals' },
+        {
+            value: 'split_income',
+            en: 'Split income automatically',
+            tl: 'Awtomatikong hatiin ang income',
+            ceb: 'Automatic nga pagbahin sa income',
+        },
+        {
+            value: 'track_transfers',
+            en: 'Track actual transfers',
+            tl: 'I-track ang actual transfers',
+            ceb: 'I-track ang actual transfers',
+        },
+        {
+            value: 'remind_unpaid',
+            en: 'Remind me what is unpaid or unmoved',
+            tl: 'I-remind ako kung ano ang unpaid o hindi pa naililipat',
+            ceb: 'I-remind ko kung unsa ang unpaid o wala pa natransfer',
+        },
+        {
+            value: 'protect_privacy',
+            en: 'Protect my money privacy',
+            tl: 'Protektahan ang money privacy ko',
+            ceb: 'Protektahan akong money privacy',
+        },
+        {
+            value: 'payday_discipline',
+            en: 'Build payday discipline',
+            tl: 'Tulungan akong maging disciplined tuwing payday',
+            ceb: 'Tabangan ko mahimong disciplined kada payday',
+        },
+        {
+            value: 'family_obligations',
+            en: 'Manage family obligations',
+            tl: 'I-manage ang family obligations',
+            ceb: 'I-manage ang family obligations',
+        },
+        {
+            value: 'plan_giving',
+            en: 'Plan giving/tithes',
+            tl: 'Planuhin ang giving/tithes',
+            ceb: 'Planohon ang giving/tithes',
+        },
+        {
+            value: 'save_goals',
+            en: 'Save for goals',
+            tl: 'Mag-save para sa goals',
+            ceb: 'Mag-save para sa goals',
+        },
     ],
     q10: [
-        { value: 'early_access', en: 'Yes, I want early access', tl: 'Oo, gusto ko ng early access', ceb: 'Oo, gusto ko ug early access' },
-        { value: 'beta_tester', en: 'Yes, I want to be a beta tester', tl: 'Oo, gusto kong maging beta tester', ceb: 'Oo, gusto ko mahimong beta tester' },
-        { value: 'see_features', en: 'Maybe, I want to see the features first', tl: 'Siguro, gusto ko munang makita ang features', ceb: 'Siguro, gusto sa nako makita ang features' },
-        { value: 'bank_support', en: 'Maybe, if it supports my bank/e-wallet', tl: 'Siguro, kung supported ang bank/e-wallet ko', ceb: 'Siguro, kung supported akong bank/e-wallet' },
-        { value: 'not_interested', en: 'No, not interested', tl: 'Hindi, hindi ako interested', ceb: 'Dili, dili ko interested' },
+        {
+            value: 'early_access',
+            en: 'Yes, I want early access',
+            tl: 'Oo, gusto ko ng early access',
+            ceb: 'Oo, gusto ko ug early access',
+        },
+        {
+            value: 'beta_tester',
+            en: 'Yes, I want to be a beta tester',
+            tl: 'Oo, gusto kong maging beta tester',
+            ceb: 'Oo, gusto ko mahimong beta tester',
+        },
+        {
+            value: 'see_features',
+            en: 'Maybe, I want to see the features first',
+            tl: 'Siguro, gusto ko munang makita ang features',
+            ceb: 'Siguro, gusto sa nako makita ang features',
+        },
+        {
+            value: 'bank_support',
+            en: 'Maybe, if it supports my bank/e-wallet',
+            tl: 'Siguro, kung supported ang bank/e-wallet ko',
+            ceb: 'Siguro, kung supported akong bank/e-wallet',
+        },
+        {
+            value: 'not_interested',
+            en: 'No, not interested',
+            tl: 'Hindi, hindi ako interested',
+            ceb: 'Dili, dili ko interested',
+        },
     ],
 } as const;
 
 const QUESTION_PROMPTS: Record<
     keyof typeof QUESTION_OPTIONS,
-    { en: string; tl: string; ceb: string; type: 'single' | 'multi'; skipNote?: { en: string; tl: string; ceb: string } }
+    {
+        en: string;
+        tl: string;
+        ceb: string;
+        type: 'single' | 'multi';
+        skipNote?: { en: string; tl: string; ceb: string };
+    }
 > = {
     q1: {
         en: 'What best describes you?',
@@ -173,9 +464,12 @@ const QUESTION_PROMPTS: Record<
 };
 
 function buildQuestions(language: SurveyLanguage): SurveyQuestion[] {
-    const langKey = language === 'tl' ? 'tl' : language === 'ceb' ? 'ceb' : 'en';
+    const langKey =
+        language === 'tl' ? 'tl' : language === 'ceb' ? 'ceb' : 'en';
 
-    return (Object.keys(QUESTION_OPTIONS) as Array<keyof typeof QUESTION_OPTIONS>).map((id) => {
+    return (
+        Object.keys(QUESTION_OPTIONS) as Array<keyof typeof QUESTION_OPTIONS>
+    ).map((id) => {
         const meta = QUESTION_PROMPTS[id];
         const options = QUESTION_OPTIONS[id].map((option) => ({
             value: option.value,
@@ -192,7 +486,14 @@ function buildQuestions(language: SurveyLanguage): SurveyQuestion[] {
     });
 }
 
-const RESULTS: Record<ResultSlug, { en: SurveyLanguageContent['results'][ResultSlug]; tl: SurveyLanguageContent['results'][ResultSlug]; ceb: SurveyLanguageContent['results'][ResultSlug] }> = {
+const RESULTS: Record<
+    ResultSlug,
+    {
+        en: SurveyLanguageContent['results'][ResultSlug];
+        tl: SurveyLanguageContent['results'][ResultSlug];
+        ceb: SurveyLanguageContent['results'][ResultSlug];
+    }
+> = {
     'family-first-planner': {
         en: {
             title: 'Family-First Planner',
@@ -320,7 +621,8 @@ const SHARED: Record<
 > = {
     en: {
         intro: 'Answer a few questions and see what kind of payday plan fits your life.',
-        privacyNote: 'Your answers are only used to shape your Kinsenas preview.',
+        privacyNote:
+            'Your answers are only used to shape your Kinsenas preview.',
         progressLabel: (current, total) => `Question ${current} of ${total}`,
         back: 'Back',
         continue: 'Continue',
@@ -328,8 +630,10 @@ const SHARED: Record<
         resultPreviewLabel: 'Your payday preview',
         thankYouTitle: 'Thank you',
         interstitials: {
-            afterQ3: 'Payday is rarely just about one person. For many Filipinos, income already has places to go before it even arrives.',
-            afterQ6: 'Most budgeting apps focus on spending. Kinsenas is more focused on what happens right after income arrives.',
+            afterQ3:
+                'Payday is rarely just about one person. For many Filipinos, income already has places to go before it even arrives.',
+            afterQ6:
+                'Most budgeting apps focus on spending. Kinsenas is more focused on what happens right after income arrives.',
         },
         loadingSteps: [
             'Mapping your income responsibilities...',
@@ -348,11 +652,13 @@ const SHARED: Record<
             emailInvalid: 'Please enter a valid email address.',
             submitError: 'Something went wrong. Please try again.',
         },
-        thankYou: 'Thank you. Your answers help shape Kinsenas around real Filipino payday habits.',
+        thankYou:
+            'Thank you. Your answers help shape Kinsenas around real Filipino payday habits.',
     },
     tl: {
         intro: 'Sagutin ang ilang tanong at tingnan kung anong payday plan ang bagay sa buhay mo.',
-        privacyNote: 'Gagamitin lang ang sagot mo para mabuo ang Kinsenas preview mo.',
+        privacyNote:
+            'Gagamitin lang ang sagot mo para mabuo ang Kinsenas preview mo.',
         progressLabel: (current, total) => `Tanong ${current} ng ${total}`,
         back: 'Bumalik',
         continue: 'Magpatuloy',
@@ -360,8 +666,10 @@ const SHARED: Record<
         resultPreviewLabel: 'Ang payday preview mo',
         thankYouTitle: 'Salamat',
         interstitials: {
-            afterQ3: 'Hindi lang sarili ang iniisip kapag payday. Para sa maraming Pilipino, may pupuntahan na agad ang income bago pa ito dumating.',
-            afterQ6: 'Karamihan ng budgeting apps, spending ang focus. Ang Kinsenas, mas naka-focus sa nangyayari pagkatapos dumating ang income.',
+            afterQ3:
+                'Hindi lang sarili ang iniisip kapag payday. Para sa maraming Pilipino, may pupuntahan na agad ang income bago pa ito dumating.',
+            afterQ6:
+                'Karamihan ng budgeting apps, spending ang focus. Ang Kinsenas, mas naka-focus sa nangyayari pagkatapos dumating ang income.',
         },
         loadingSteps: [
             'Inaayos ang income responsibilities mo...',
@@ -371,7 +679,8 @@ const SHARED: Record<
         loadingTitle: 'Binubuo ang plano mo',
         loadingSubtitle: 'Sandali lang...',
         resultCTA: {
-            headline: 'Gusto mo bang makuha ang Kinsenas payday plan mo kapag bukas na ang early access?',
+            headline:
+                'Gusto mo bang makuha ang Kinsenas payday plan mo kapag bukas na ang early access?',
             emailLabel: 'Email',
             nameLabel: 'Pangalan (optional)',
             namePlaceholder: 'Pangalan mo',
@@ -380,11 +689,13 @@ const SHARED: Record<
             emailInvalid: 'Maglagay ng valid na email address.',
             submitError: 'May nangyaring mali. Subukan ulit.',
         },
-        thankYou: 'Salamat. Makakatulong ang sagot mo para mabuo ang Kinsenas base sa totoong payday habits ng mga Pilipino.',
+        thankYou:
+            'Salamat. Makakatulong ang sagot mo para mabuo ang Kinsenas base sa totoong payday habits ng mga Pilipino.',
     },
     ceb: {
         intro: 'Tubaga ang pipila ka pangutana ug tan-awa unsang payday plan ang bagay sa imong kinabuhi.',
-        privacyNote: 'Ang imong tubag gamiton ra para mahimo ang imong Kinsenas preview.',
+        privacyNote:
+            'Ang imong tubag gamiton ra para mahimo ang imong Kinsenas preview.',
         progressLabel: (current, total) => `Pangutana ${current} sa ${total}`,
         back: 'Balik',
         continue: 'Padayon',
@@ -392,8 +703,10 @@ const SHARED: Record<
         resultPreviewLabel: 'Imong payday preview',
         thankYouTitle: 'Salamat',
         interstitials: {
-            afterQ3: 'Dili lang kaugalingon ang gihunahuna kung payday. Para sa daghang Pilipino, naa nay padulngan ang income bisan wala pa moabot.',
-            afterQ6: 'Kasagaran budgeting apps, spending ang focus. Ang Kinsenas, mas naka-focus sa mahitabo pagkahuman moabot ang income.',
+            afterQ3:
+                'Dili lang kaugalingon ang gihunahuna kung payday. Para sa daghang Pilipino, naa nay padulngan ang income bisan wala pa moabot.',
+            afterQ6:
+                'Kasagaran budgeting apps, spending ang focus. Ang Kinsenas, mas naka-focus sa mahitabo pagkahuman moabot ang income.',
         },
         loadingSteps: [
             'Gi-map ang imong income responsibilities...',
@@ -403,7 +716,8 @@ const SHARED: Record<
         loadingTitle: 'Gihimo ang imong plano',
         loadingSubtitle: 'Hinay lang...',
         resultCTA: {
-            headline: 'Gusto nimo makuha ang imong Kinsenas payday plan kung abli na ang early access?',
+            headline:
+                'Gusto nimo makuha ang imong Kinsenas payday plan kung abli na ang early access?',
             emailLabel: 'Email',
             nameLabel: 'Ngalan (optional)',
             namePlaceholder: 'Imong ngalan',
@@ -412,7 +726,8 @@ const SHARED: Record<
             emailInvalid: 'Ibutang og valid nga email address.',
             submitError: 'Naay sayop. Sulayi pag-usab.',
         },
-        thankYou: 'Salamat. Makatabang imong tubag para mahulma ang Kinsenas base sa tinuod nga payday habits sa mga Pilipino.',
+        thankYou:
+            'Salamat. Makatabang imong tubag para mahulma ang Kinsenas base sa tinuod nga payday habits sa mga Pilipino.',
     },
 };
 
@@ -424,11 +739,16 @@ const LANGUAGE_LABELS: Record<SurveyLanguage, string> = {
 
 export const SURVEY_LANGUAGES: SurveyLanguage[] = ['en', 'tl', 'ceb'];
 
-export function getSurveyContent(language: SurveyLanguage): SurveyLanguageContent {
+export function getSurveyContent(
+    language: SurveyLanguage,
+): SurveyLanguageContent {
     const langKey = language;
 
     const results = Object.fromEntries(
-        (Object.keys(RESULTS) as ResultSlug[]).map((slug) => [slug, RESULTS[slug][langKey]]),
+        (Object.keys(RESULTS) as ResultSlug[]).map((slug) => [
+            slug,
+            RESULTS[slug][langKey],
+        ]),
     ) as Record<ResultSlug, SurveyLanguageContent['results'][ResultSlug]>;
 
     return {
@@ -443,7 +763,10 @@ export function getLanguageDisplayName(language: SurveyLanguage): string {
     return LANGUAGE_LABELS[language];
 }
 
-export const RESULT_ALLOCATION_INDEX: Record<ResultSlug, 1 | 2 | 3 | 4 | 5 | 6> = {
+export const RESULT_ALLOCATION_INDEX: Record<
+    ResultSlug,
+    1 | 2 | 3 | 4 | 5 | 6
+> = {
     'family-first-planner': 4,
     'faith-giving-planner': 3,
     'bills-debt-organizer': 1,

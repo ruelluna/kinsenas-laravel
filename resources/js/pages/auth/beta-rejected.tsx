@@ -9,8 +9,9 @@ export default function BetaRejected() {
 
             <div className="space-y-4 text-center text-sm text-muted-foreground">
                 <p>
-                    Your open beta application was not approved at this time. If you think this was a
-                    mistake, reply to our welcome email or contact support.
+                    Your open beta application was not approved at this time. If
+                    you think this was a mistake, reply to our welcome email or
+                    contact support.
                 </p>
             </div>
 

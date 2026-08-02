@@ -9,10 +9,13 @@ export default function LandingHowItWorks() {
             <LandingSectionHeader title="Give every peso a place before it disappears." />
             <ol className="grid gap-8 md:grid-cols-3 md:gap-6 lg:gap-10">
                 {HOW_IT_WORKS_STEPS.map((step, index) => (
-                    <li key={step.title} className="relative flex flex-col gap-4">
+                    <li
+                        key={step.title}
+                        className="relative flex flex-col gap-4"
+                    >
                         {index < HOW_IT_WORKS_STEPS.length - 1 && (
                             <div
-                                className="pointer-events-none absolute left-5 top-10 hidden h-px w-[calc(100%+1.5rem)] bg-border/60 md:block lg:w-[calc(100%+2.5rem)]"
+                                className="pointer-events-none absolute top-10 left-5 hidden h-px w-[calc(100%+1.5rem)] bg-border/60 md:block lg:w-[calc(100%+2.5rem)]"
                                 aria-hidden
                             />
                         )}

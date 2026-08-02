@@ -27,7 +27,12 @@ export default function SurveyNav({
         <div className="sticky bottom-0 -mx-6 mt-8 border-t border-border/40 bg-background/95 px-6 py-4 backdrop-blur-md">
             <div className="flex gap-3">
                 {showBack && (
-                    <Button type="button" variant="outline" className="h-11 flex-1 rounded-full" onClick={onBack}>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="h-11 flex-1 rounded-full"
+                        onClick={onBack}
+                    >
                         {backLabel}
                     </Button>
                 )}

@@ -5,7 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { RESULT_ALLOCATION_INDEX } from '@/lib/survey/survey-content';
-import type { ResultSlug, SurveyLanguageContent } from '@/lib/survey/survey-types';
+import type {
+    ResultSlug,
+    SurveyLanguageContent,
+} from '@/lib/survey/survey-types';
 import { cn } from '@/lib/utils';
 
 type SurveyResultProps = {
@@ -13,7 +16,10 @@ type SurveyResultProps = {
     content: SurveyLanguageContent;
     processing: boolean;
     submitError: string | null;
-    onSubmit: (payload: { email: string; name: string }) => void | Promise<void>;
+    onSubmit: (payload: {
+        email: string;
+        name: string;
+    }) => void | Promise<void>;
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -62,18 +68,28 @@ export default function SurveyResult({
                     'border-l-4',
                 )}
             >
-                <p className="mb-2 text-sm font-medium text-primary">{content.resultPreviewLabel}</p>
-                <h2 className="text-balance text-2xl font-semibold tracking-tight">{result.title}</h2>
-                <p className="mt-3 text-pretty leading-relaxed text-muted-foreground">{result.description}</p>
+                <p className="mb-2 text-sm font-medium text-primary">
+                    {content.resultPreviewLabel}
+                </p>
+                <h2 className="text-2xl font-semibold tracking-tight text-balance">
+                    {result.title}
+                </h2>
+                <p className="mt-3 leading-relaxed text-pretty text-muted-foreground">
+                    {result.description}
+                </p>
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <div className="space-y-2">
-                    <h3 className="text-balance text-lg font-semibold">{content.resultCTA.headline}</h3>
+                    <h3 className="text-lg font-semibold text-balance">
+                        {content.resultCTA.headline}
+                    </h3>
                 </div>
 
                 <div className="grid gap-2">
-                    <Label htmlFor="survey-email">{content.resultCTA.emailLabel}</Label>
+                    <Label htmlFor="survey-email">
+                        {content.resultCTA.emailLabel}
+                    </Label>
                     <Input
                         id="survey-email"
                         type="email"
@@ -88,12 +104,20 @@ export default function SurveyResult({
                         }}
                         aria-invalid={emailError ? true : undefined}
                     />
-                    {emailError && <p className="text-sm text-destructive">{emailError}</p>}
-                    {submitError && <p className="text-sm text-destructive">{submitError}</p>}
+                    {emailError && (
+                        <p className="text-sm text-destructive">{emailError}</p>
+                    )}
+                    {submitError && (
+                        <p className="text-sm text-destructive">
+                            {submitError}
+                        </p>
+                    )}
                 </div>
 
                 <div className="grid gap-2">
-                    <Label htmlFor="survey-name">{content.resultCTA.nameLabel}</Label>
+                    <Label htmlFor="survey-name">
+                        {content.resultCTA.nameLabel}
+                    </Label>
                     <Input
                         id="survey-name"
                         type="text"
@@ -104,7 +128,12 @@ export default function SurveyResult({
                     />
                 </div>
 
-                <Button type="submit" size="lg" className="mt-2 h-11 rounded-full" disabled={processing}>
+                <Button
+                    type="submit"
+                    size="lg"
+                    className="mt-2 h-11 rounded-full"
+                    disabled={processing}
+                >
                     {processing && <Spinner />}
                     {content.resultCTA.submit}
                 </Button>

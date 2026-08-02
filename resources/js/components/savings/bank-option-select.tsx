@@ -7,7 +7,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { formatBankOptionLabel, groupBankOptions } from '@/lib/format-bank-label';
+import {
+    formatBankOptionLabel,
+    groupBankOptions,
+} from '@/lib/format-bank-label';
 import { cn } from '@/lib/utils';
 import type { BankOption } from '@/types/savings';
 
@@ -26,7 +29,13 @@ type Props = {
     className?: string;
 };
 
-export function BankOptionLogo({ bank, className }: { bank: BankOption; className?: string }) {
+export function BankOptionLogo({
+    bank,
+    className,
+}: {
+    bank: BankOption;
+    className?: string;
+}) {
     if (bank.logoUrl) {
         return (
             <img
@@ -100,17 +109,26 @@ export default function BankOptionSelect({
     return (
         <>
             {name !== undefined && (
-                <input type="hidden" name={name} value={value} required={required && value === ''} />
+                <input
+                    type="hidden"
+                    name={name}
+                    value={value}
+                    required={required && value === ''}
+                />
             )}
             <Select
                 value={selectValue === '' ? undefined : selectValue}
-                onValueChange={(next) => onChange?.(next === NONE_VALUE ? '' : next)}
+                onValueChange={(next) =>
+                    onChange?.(next === NONE_VALUE ? '' : next)
+                }
             >
                 <SelectTrigger id={id} className={cn('w-full', className)}>
                     <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
                 <SelectContent>
-                    {allowEmpty && <SelectItem value={NONE_VALUE}>{emptyLabel}</SelectItem>}
+                    {allowEmpty && (
+                        <SelectItem value={NONE_VALUE}>{emptyLabel}</SelectItem>
+                    )}
                     {renderBankGroups(groups, 'option')}
                 </SelectContent>
             </Select>

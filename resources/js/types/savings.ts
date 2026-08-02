@@ -184,7 +184,11 @@ export type BankBalance = {
     bankName: string;
     logoUrl: string | null;
     total: string;
-    byCategory: Array<{ categoryId: string; categoryName: string; total: string }>;
+    byCategory: Array<{
+        categoryId: string;
+        categoryName: string;
+        total: string;
+    }>;
 };
 
 export type BankOption = {
@@ -214,9 +218,17 @@ export type ReportTotals = {
         bank_name: string;
         logo_url: string | null;
         total: string;
-        by_category: Array<{ category_id: string; category_name: string; total: string }>;
+        by_category: Array<{
+            category_id: string;
+            category_name: string;
+            total: string;
+        }>;
     }>;
-    by_recipient: Array<{ recipient_id: string; recipient_name: string; total: string }>;
+    by_recipient: Array<{
+        recipient_id: string;
+        recipient_name: string;
+        total: string;
+    }>;
     fund_health: Array<{
         category_id: string;
         category_name: string;

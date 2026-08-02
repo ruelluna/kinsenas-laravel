@@ -7,7 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatMoney } from '@/lib/format-money';
 import type { SharedData } from '@/types';
-import type { IncomeFundSummary, IncomePeriodTableRow, IncomePlanCategory } from '@/types/savings';
+import type {
+    IncomeFundSummary,
+    IncomePeriodTableRow,
+    IncomePlanCategory,
+} from '@/types/savings';
 
 type Props = {
     plan: { id: string; name: string };
@@ -40,14 +44,19 @@ function formatPercentLabel(value: string): string {
 
 function categoryHeaderSubtitle(category: IncomePlanCategory): string | null {
     if (category.allocationType === 'deduction') {
-        if (category.deductionMode === 'percent_of_income' && category.deductionValue) {
+        if (
+            category.deductionMode === 'percent_of_income' &&
+            category.deductionValue
+        ) {
             return formatPercentLabel(category.deductionValue);
         }
 
         return 'Custom';
     }
 
-    return category.percentage !== null ? formatPercentLabel(category.percentage) : null;
+    return category.percentage !== null
+        ? formatPercentLabel(category.percentage)
+        : null;
 }
 
 function categoryInlineLabel(category: IncomePlanCategory): string {
@@ -63,7 +72,9 @@ function CategoryHeader({ category }: { category: IncomePlanCategory }) {
         <div className="flex flex-col items-end gap-0.5 leading-tight">
             <span>{category.name}</span>
             {subtitle !== null && (
-                <span className="text-[11px] font-normal text-muted-foreground">{subtitle}</span>
+                <span className="text-[11px] font-normal text-muted-foreground">
+                    {subtitle}
+                </span>
             )}
         </div>
     );
@@ -110,12 +121,17 @@ function IncomePeriodMobileCard({
                             {period.name}
                         </Link>
                         {period.isLocked && (
-                            <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                            <Badge
+                                variant="secondary"
+                                className="px-1 py-0 text-[10px]"
+                            >
                                 Locked
                             </Badge>
                         )}
                     </div>
-                    <p className="mt-0.5 text-[11px] text-muted-foreground">{period.periodStart}</p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                        {period.periodStart}
+                    </p>
                 </div>
                 <p className="shrink-0 text-sm font-semibold tabular-nums">
                     {formatMoney(period.amount)}
@@ -124,10 +140,17 @@ function IncomePeriodMobileCard({
 
             <dl className="mt-3 space-y-1.5 border-t pt-3">
                 {planCategories.map((category) => (
-                    <div key={category.id} className="flex items-baseline justify-between gap-3 text-xs">
-                        <dt className="min-w-0 text-muted-foreground">{categoryInlineLabel(category)}</dt>
+                    <div
+                        key={category.id}
+                        className="flex items-baseline justify-between gap-3 text-xs"
+                    >
+                        <dt className="min-w-0 text-muted-foreground">
+                            {categoryInlineLabel(category)}
+                        </dt>
                         <dd className="shrink-0 tabular-nums">
-                            {formatMoney(period.categoryAmounts[category.id] ?? null)}
+                            {formatMoney(
+                                period.categoryAmounts[category.id] ?? null,
+                            )}
                         </dd>
                     </div>
                 ))}
@@ -135,13 +158,25 @@ function IncomePeriodMobileCard({
 
             <div className="mt-3 flex items-center justify-between gap-2 border-t pt-3">
                 {!period.isLocked && (
-                    <Form action={`/${teamSlug}/savings/income/${period.id}/lock`} method="post">
-                        <Button type="submit" size="sm" className="h-8 px-3 text-xs">
+                    <Form
+                        action={`/${teamSlug}/savings/income/${period.id}/lock`}
+                        method="post"
+                    >
+                        <Button
+                            type="submit"
+                            size="sm"
+                            className="h-8 px-3 text-xs"
+                        >
                             Lock
                         </Button>
                     </Form>
                 )}
-                <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" asChild>
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2 text-xs"
+                    asChild
+                >
                     <Link href={`/${teamSlug}/savings/income/${period.id}`}>
                         View detail
                         <ChevronRight className="size-3.5" />
@@ -173,7 +208,10 @@ function SummarySection({
             </div>
             <dl className="mt-2 space-y-1 pl-3">
                 {planCategories.map((category) => (
-                    <div key={category.id} className="flex items-baseline justify-between gap-3 text-xs">
+                    <div
+                        key={category.id}
+                        className="flex items-baseline justify-between gap-3 text-xs"
+                    >
                         <dt>{categoryInlineLabel(category)}</dt>
                         <dd className="tabular-nums">
                             {formatMoney(categoryAmounts[category.id] ?? null)}
@@ -226,17 +264,28 @@ function IncomeMobileSummary({
     );
 }
 
-export default function IncomeIndex({ plan, planCategories, periods, fundSummary }: Props) {
+export default function IncomeIndex({
+    plan,
+    planCategories,
+    periods,
+    fundSummary,
+}: Props) {
     const { currentTeam } = usePage<SharedData>().props;
     const teamSlug = currentTeam?.slug ?? '';
     const [addModalOpen, setAddModalOpen] = useState(false);
 
     const totals = useMemo(() => {
-        const amountTotal = sumMoneyAmounts(periods.map((period) => period.amount));
+        const amountTotal = sumMoneyAmounts(
+            periods.map((period) => period.amount),
+        );
         const categoryTotals = Object.fromEntries(
             planCategories.map((category) => [
                 category.id,
-                sumMoneyAmounts(periods.map((period) => period.categoryAmounts[category.id] ?? null)),
+                sumMoneyAmounts(
+                    periods.map(
+                        (period) => period.categoryAmounts[category.id] ?? null,
+                    ),
+                ),
             ]),
         );
 
@@ -280,12 +329,18 @@ export default function IncomeIndex({ plan, planCategories, periods, fundSummary
                     title="Income"
                     description={`Enter monthly income for ${plan.name}. Lock to enable spending.`}
                 />
-                <Button onClick={() => setAddModalOpen(true)} className="shrink-0">
+                <Button
+                    onClick={() => setAddModalOpen(true)}
+                    className="shrink-0"
+                >
                     <Plus /> Add income
                 </Button>
             </div>
 
-            <AddIncomeModal open={addModalOpen} onOpenChange={setAddModalOpen} />
+            <AddIncomeModal
+                open={addModalOpen}
+                onOpenChange={setAddModalOpen}
+            />
 
             <div className="mt-8 md:hidden">
                 {periods.length === 0 ? (
@@ -316,17 +371,23 @@ export default function IncomeIndex({ plan, planCategories, periods, fundSummary
                     <thead>
                         <tr className="border-b bg-muted/50 text-left">
                             <th className="px-2 py-1.5 font-medium">Date</th>
-                            <th className="px-2 py-1.5 font-medium">Income name</th>
-                            <th className="px-2 py-1.5 font-medium text-right">Amount</th>
+                            <th className="px-2 py-1.5 font-medium">
+                                Income name
+                            </th>
+                            <th className="px-2 py-1.5 text-right font-medium">
+                                Amount
+                            </th>
                             {planCategories.map((category) => (
                                 <th
                                     key={category.id}
-                                    className="px-2 py-1.5 font-medium text-right align-bottom"
+                                    className="px-2 py-1.5 text-right align-bottom font-medium"
                                 >
                                     <CategoryHeader category={category} />
                                 </th>
                             ))}
-                            <th className="px-2 py-1.5 font-medium text-right">Actions</th>
+                            <th className="px-2 py-1.5 text-right font-medium">
+                                Actions
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -336,12 +397,16 @@ export default function IncomeIndex({ plan, planCategories, periods, fundSummary
                                     colSpan={columnCount}
                                     className="px-2 py-4 text-center text-muted-foreground"
                                 >
-                                    No income recorded yet. Add your first income period.
+                                    No income recorded yet. Add your first
+                                    income period.
                                 </td>
                             </tr>
                         ) : (
                             periods.map((period) => (
-                                <tr key={period.id} className="border-b last:border-b-0">
+                                <tr
+                                    key={period.id}
+                                    className="border-b last:border-b-0"
+                                >
                                     <td className="px-2 py-1.5 whitespace-nowrap">
                                         <Link
                                             href={`/${teamSlug}/savings/income/${period.id}`}
@@ -354,7 +419,10 @@ export default function IncomeIndex({ plan, planCategories, periods, fundSummary
                                         <div className="flex items-center gap-1.5">
                                             <span>{period.name}</span>
                                             {period.isLocked && (
-                                                <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                                                <Badge
+                                                    variant="secondary"
+                                                    className="px-1 py-0 text-[10px]"
+                                                >
                                                     Locked
                                                 </Badge>
                                             )}
@@ -364,8 +432,15 @@ export default function IncomeIndex({ plan, planCategories, periods, fundSummary
                                         {formatMoney(period.amount)}
                                     </td>
                                     {planCategories.map((category) => (
-                                        <td key={category.id} className="px-2 py-1.5 text-right tabular-nums">
-                                            {formatMoney(period.categoryAmounts[category.id] ?? null)}
+                                        <td
+                                            key={category.id}
+                                            className="px-2 py-1.5 text-right tabular-nums"
+                                        >
+                                            {formatMoney(
+                                                period.categoryAmounts[
+                                                    category.id
+                                                ] ?? null,
+                                            )}
                                         </td>
                                     ))}
                                     <td className="px-2 py-1.5 text-right">
@@ -374,7 +449,11 @@ export default function IncomeIndex({ plan, planCategories, periods, fundSummary
                                                 action={`/${teamSlug}/savings/income/${period.id}/lock`}
                                                 method="post"
                                             >
-                                                <Button type="submit" size="sm" className="h-7 px-2 text-xs">
+                                                <Button
+                                                    type="submit"
+                                                    size="sm"
+                                                    className="h-7 px-2 text-xs"
+                                                >
                                                     Lock
                                                 </Button>
                                             </Form>
@@ -397,9 +476,12 @@ export default function IncomeIndex({ plan, planCategories, periods, fundSummary
                                     {planCategories.map((category) => (
                                         <td
                                             key={category.id}
-                                            className="px-2 py-1.5 text-right tabular-nums text-muted-foreground"
+                                            className="px-2 py-1.5 text-right text-muted-foreground tabular-nums"
                                         >
-                                            {formatMoney(fundTotals.spent[category.id] ?? null)}
+                                            {formatMoney(
+                                                fundTotals.spent[category.id] ??
+                                                    null,
+                                            )}
                                         </td>
                                     ))}
                                     <td className="px-2 py-1.5" />
@@ -413,8 +495,14 @@ export default function IncomeIndex({ plan, planCategories, periods, fundSummary
                                     {formatMoney(totals.amount)}
                                 </td>
                                 {planCategories.map((category) => (
-                                    <td key={category.id} className="px-2 py-1.5 text-right tabular-nums">
-                                        {formatMoney(totals.categories[category.id] ?? null)}
+                                    <td
+                                        key={category.id}
+                                        className="px-2 py-1.5 text-right tabular-nums"
+                                    >
+                                        {formatMoney(
+                                            totals.categories[category.id] ??
+                                                null,
+                                        )}
                                     </td>
                                 ))}
                                 <td className="px-2 py-1.5" />
@@ -428,8 +516,15 @@ export default function IncomeIndex({ plan, planCategories, periods, fundSummary
                                         {formatMoney(fundTotals.remainingTotal)}
                                     </td>
                                     {planCategories.map((category) => (
-                                        <td key={category.id} className="px-2 py-1.5 text-right tabular-nums">
-                                            {formatMoney(fundTotals.remaining[category.id] ?? null)}
+                                        <td
+                                            key={category.id}
+                                            className="px-2 py-1.5 text-right tabular-nums"
+                                        >
+                                            {formatMoney(
+                                                fundTotals.remaining[
+                                                    category.id
+                                                ] ?? null,
+                                            )}
                                         </td>
                                     ))}
                                     <td className="px-2 py-1.5" />
@@ -444,5 +539,7 @@ export default function IncomeIndex({ plan, planCategories, periods, fundSummary
 }
 
 IncomeIndex.layout = (props: SharedData) => ({
-    breadcrumbs: [{ title: 'Income', href: `/${props.currentTeam?.slug}/savings/income` }],
+    breadcrumbs: [
+        { title: 'Income', href: `/${props.currentTeam?.slug}/savings/income` },
+    ],
 });

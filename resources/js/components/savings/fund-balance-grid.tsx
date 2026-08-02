@@ -36,7 +36,8 @@ export default function FundBalanceGrid({
     transferredLabel = 'Transferred',
     action,
 }: Props) {
-    const balances = limit !== undefined ? fundBalances.slice(0, limit) : fundBalances;
+    const balances =
+        limit !== undefined ? fundBalances.slice(0, limit) : fundBalances;
 
     if (balances.length === 0) {
         return null;
@@ -55,14 +56,17 @@ export default function FundBalanceGrid({
                 className="mt-3 w-full"
                 onClick={() => onFund(balance.categoryId)}
             >
-                    Add Existing Fund
+                Add Existing Fund
             </Button>
         );
     }
 
     function renderSpendAction(balance: FundBalance) {
         if (canDrawFromFunds && action) {
-            const label = typeof action.label === 'function' ? action.label(balance) : action.label;
+            const label =
+                typeof action.label === 'function'
+                    ? action.label(balance)
+                    : action.label;
 
             return (
                 <Button
@@ -93,7 +97,12 @@ export default function FundBalanceGrid({
 
         if (canDrawFromFunds && spendHref && !onSpendFrom && !action) {
             return (
-                <Button variant="outline" size="sm" className="mt-4 w-full" asChild>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-4 w-full"
+                    asChild
+                >
                     <Link href={spendHref}>Spend from {balance.name}</Link>
                 </Button>
             );
@@ -113,13 +122,19 @@ export default function FundBalanceGrid({
                         <FundCardHeader {...balance} />
                         <div className="mt-3 flex items-end justify-between gap-2">
                             <div>
-                                <p className="text-xs text-muted-foreground">Remaining</p>
-                                <p className={`text-lg font-semibold ${remainingTone(balance.percentUsed)}`}>
+                                <p className="text-xs text-muted-foreground">
+                                    Remaining
+                                </p>
+                                <p
+                                    className={`text-lg font-semibold ${remainingTone(balance.percentUsed)}`}
+                                >
                                     {formatMoney(balance.remaining)}
                                 </p>
                             </div>
                             {balance.percentUsed !== null && (
-                                <Badge variant="outline">{balance.percentUsed}% used</Badge>
+                                <Badge variant="outline">
+                                    {balance.percentUsed}% used
+                                </Badge>
                             )}
                         </div>
                         {renderFundAction(balance)}
@@ -139,24 +154,32 @@ export default function FundBalanceGrid({
                 >
                     <FundCardHeader {...balance} />
                     <dl className="mt-4 space-y-1 text-sm">
-                        {balance.openingBalance !== null
-                            && parseFloat(balance.openingBalance) > 0 && (
-                            <div className="flex justify-between gap-2">
-                                <dt className="text-muted-foreground">Starting balance</dt>
-                                <dd>{formatMoney(balance.openingBalance)}</dd>
-                            </div>
-                        )}
+                        {balance.openingBalance !== null &&
+                            parseFloat(balance.openingBalance) > 0 && (
+                                <div className="flex justify-between gap-2">
+                                    <dt className="text-muted-foreground">
+                                        Starting balance
+                                    </dt>
+                                    <dd>
+                                        {formatMoney(balance.openingBalance)}
+                                    </dd>
+                                </div>
+                            )}
                         <div className="flex justify-between gap-2">
                             <dt className="text-muted-foreground">Allocated</dt>
                             <dd>{formatMoney(balance.allocated)}</dd>
                         </div>
                         <div className="flex justify-between gap-2">
-                            <dt className="text-muted-foreground">{transferredLabel}</dt>
+                            <dt className="text-muted-foreground">
+                                {transferredLabel}
+                            </dt>
                             <dd>{formatMoney(balance.transferred)}</dd>
                         </div>
                         {showReceived && (
                             <div className="flex justify-between gap-2">
-                                <dt className="text-muted-foreground">Received</dt>
+                                <dt className="text-muted-foreground">
+                                    Received
+                                </dt>
                                 <dd>{formatMoney(balance.received)}</dd>
                             </div>
                         )}

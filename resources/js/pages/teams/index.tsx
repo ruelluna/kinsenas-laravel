@@ -54,8 +54,8 @@ export default function TeamsIndex({ teams }: Props) {
 
                 {!canCreateTeam ? (
                     <p className="text-sm text-muted-foreground">
-                        Additional team workspaces are coming soon. Invite members
-                        to collaborate on your current team.
+                        Additional team workspaces are coming soon. Invite
+                        members to collaborate on your current team.
                     </p>
                 ) : null}
 
@@ -87,7 +87,8 @@ export default function TeamsIndex({ teams }: Props) {
                                             {team.subscriptionStatusLabel
                                                 ? ` · ${team.subscriptionStatusLabel}`
                                                 : ''}
-                                            {team.hasSubscriptionAccess === false
+                                            {team.hasSubscriptionAccess ===
+                                            false
                                                 ? ' · Subscription required'
                                                 : ''}
                                         </span>

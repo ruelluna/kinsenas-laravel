@@ -51,11 +51,14 @@ export default function AdminSavingsPlanGuidanceEdit({ guidance }: Props) {
                         placeholder="https://www.youtube.com/watch?v=…"
                     />
                     <p className="text-xs text-muted-foreground">
-                        YouTube or Vimeo watch or embed URL. Leave empty to hide the video.
+                        YouTube or Vimeo watch or embed URL. Leave empty to hide
+                        the video.
                     </p>
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="before_choose_note">Before you choose note</Label>
+                    <Label htmlFor="before_choose_note">
+                        Before you choose note
+                    </Label>
                     <textarea
                         id="before_choose_note"
                         name="before_choose_note"
@@ -65,7 +68,9 @@ export default function AdminSavingsPlanGuidanceEdit({ guidance }: Props) {
                     />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="after_income_rules">After income rules</Label>
+                    <Label htmlFor="after_income_rules">
+                        After income rules
+                    </Label>
                     <textarea
                         id="after_income_rules"
                         name="after_income_rules"
@@ -75,7 +80,9 @@ export default function AdminSavingsPlanGuidanceEdit({ guidance }: Props) {
                     />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="after_income_video_url">After income video URL</Label>
+                    <Label htmlFor="after_income_video_url">
+                        After income video URL
+                    </Label>
                     <Input
                         id="after_income_video_url"
                         name="after_income_video_url"

@@ -46,7 +46,10 @@ function formatCategoryLabel(row: IncomeBreakdownRow): string {
 
 function customAmountInputValue(category: IncomeCustomCategory): string {
     if (category.hasPeriodOverride) {
-        if (category.periodAmount === null || category.periodAmount === '0.00') {
+        if (
+            category.periodAmount === null ||
+            category.periodAmount === '0.00'
+        ) {
             return '';
         }
 
@@ -67,23 +70,30 @@ export default function IncomeShow({
     const teamSlug = currentTeam?.slug ?? '';
 
     const balanceByCategory = useMemo(
-        () => Object.fromEntries(fundBalances.map((balance) => [balance.categoryId, balance])),
+        () =>
+            Object.fromEntries(
+                fundBalances.map((balance) => [balance.categoryId, balance]),
+            ),
         [fundBalances],
     );
 
-    const [customAmounts, setCustomAmounts] = useState<Record<string, string>>(() =>
-        Object.fromEntries(
-            customCategories.map((category) => [
-                category.categoryId,
-                customAmountInputValue(category),
-            ]),
-        ),
+    const [customAmounts, setCustomAmounts] = useState<Record<string, string>>(
+        () =>
+            Object.fromEntries(
+                customCategories.map((category) => [
+                    category.categoryId,
+                    customAmountInputValue(category),
+                ]),
+            ),
     );
 
     const percentageTotal = useMemo(
         () =>
             breakdown.reduce((total, row) => {
-                if (row.allocationType === 'deduction' || row.percentage === null) {
+                if (
+                    row.allocationType === 'deduction' ||
+                    row.percentage === null
+                ) {
                     return total;
                 }
 
@@ -94,7 +104,9 @@ export default function IncomeShow({
         [breakdown],
     );
 
-    const hasDeductions = breakdown.some((row) => row.allocationType === 'deduction');
+    const hasDeductions = breakdown.some(
+        (row) => row.allocationType === 'deduction',
+    );
 
     return (
         <>
@@ -120,7 +132,10 @@ export default function IncomeShow({
                         {period.isLocked ? 'Locked' : 'Preview'}
                     </Badge>
                     {!period.isLocked && (
-                        <Form action={`/${teamSlug}/savings/income/${period.id}/lock`} method="post">
+                        <Form
+                            action={`/${teamSlug}/savings/income/${period.id}/lock`}
+                            method="post"
+                        >
                             <Button type="submit" size="sm">
                                 Lock
                             </Button>
@@ -138,31 +153,41 @@ export default function IncomeShow({
                     <div>
                         <h3 className="font-medium">Custom fund buckets</h3>
                         <p className="mt-1 text-sm text-muted-foreground">
-                            Optional amounts for this income period. Clear a field to skip the
-                            deduction — the fund bucket stays on your plan.
+                            Optional amounts for this income period. Clear a
+                            field to skip the deduction — the fund bucket stays
+                            on your plan.
                         </p>
                     </div>
 
                     {customCategories.map((category, index) => (
-                        <div key={category.categoryId} className="grid gap-2 sm:grid-cols-2">
+                        <div
+                            key={category.categoryId}
+                            className="grid gap-2 sm:grid-cols-2"
+                        >
                             <input
                                 type="hidden"
                                 name={`custom_amounts[${index}][category_id]`}
                                 value={category.categoryId}
                             />
                             <div>
-                                <Label htmlFor={`custom-amount-${category.categoryId}`}>
+                                <Label
+                                    htmlFor={`custom-amount-${category.categoryId}`}
+                                >
                                     {category.name}
                                 </Label>
                                 <p className="text-xs text-muted-foreground">
-                                    From {category.deductFromCategoryName ?? 'source fund bucket'}
+                                    From{' '}
+                                    {category.deductFromCategoryName ??
+                                        'source fund bucket'}
                                     {category.planDefaultAmount
                                         ? ` · plan default ${formatMoney(category.planDefaultAmount)}`
                                         : ''}
                                 </p>
                             </div>
                             <div>
-                                <Label htmlFor={`custom-amount-${category.categoryId}`}>
+                                <Label
+                                    htmlFor={`custom-amount-${category.categoryId}`}
+                                >
                                     Amount this period (₱)
                                 </Label>
                                 <Input
@@ -171,11 +196,14 @@ export default function IncomeShow({
                                     type="number"
                                     step="0.01"
                                     min="0"
-                                    value={customAmounts[category.categoryId] ?? ''}
+                                    value={
+                                        customAmounts[category.categoryId] ?? ''
+                                    }
                                     onChange={(event) =>
                                         setCustomAmounts((current) => ({
                                             ...current,
-                                            [category.categoryId]: event.target.value,
+                                            [category.categoryId]:
+                                                event.target.value,
                                         }))
                                     }
                                     placeholder="Leave blank for no deduction"
@@ -194,11 +222,19 @@ export default function IncomeShow({
                 <table className="w-full text-sm">
                     <thead>
                         <tr className="border-b bg-muted/50 text-left">
-                            <th className="px-4 py-3 font-medium">Fund bucket</th>
-                            <th className="px-4 py-3 font-medium text-right">Allocation</th>
-                            <th className="px-4 py-3 font-medium text-right">Amount</th>
+                            <th className="px-4 py-3 font-medium">
+                                Fund bucket
+                            </th>
+                            <th className="px-4 py-3 text-right font-medium">
+                                Allocation
+                            </th>
+                            <th className="px-4 py-3 text-right font-medium">
+                                Amount
+                            </th>
                             {fundBalances.length > 0 && (
-                                <th className="px-4 py-3 font-medium text-right">Remaining</th>
+                                <th className="px-4 py-3 text-right font-medium">
+                                    Remaining
+                                </th>
                             )}
                         </tr>
                     </thead>
@@ -214,29 +250,45 @@ export default function IncomeShow({
                             </tr>
                         ) : (
                             breakdown.map((row) => {
-                                const fundBalance = balanceByCategory[row.categoryId];
+                                const fundBalance =
+                                    balanceByCategory[row.categoryId];
 
                                 return (
-                                    <tr key={row.categoryId} className="border-b last:border-b-0">
+                                    <tr
+                                        key={row.categoryId}
+                                        className="border-b last:border-b-0"
+                                    >
                                         <td className="px-4 py-3">
                                             <div className="flex items-start justify-between gap-3">
-                                                <span>{formatCategoryLabel(row)}</span>
-                                                {fundBalance?.bankId && fundBalance.bankDisplayName && (
-                                                    <FundBankBadge
-                                                        bankDisplayName={fundBalance.bankDisplayName}
-                                                        bankLogoUrl={fundBalance.bankLogoUrl}
-                                                        layout="inline"
-                                                    />
-                                                )}
+                                                <span>
+                                                    {formatCategoryLabel(row)}
+                                                </span>
+                                                {fundBalance?.bankId &&
+                                                    fundBalance.bankDisplayName && (
+                                                        <FundBankBadge
+                                                            bankDisplayName={
+                                                                fundBalance.bankDisplayName
+                                                            }
+                                                            bankLogoUrl={
+                                                                fundBalance.bankLogoUrl
+                                                            }
+                                                            layout="inline"
+                                                        />
+                                                    )}
                                             </div>
                                         </td>
-                                        <td className="px-4 py-3 text-right">{formatPercentage(row)}</td>
+                                        <td className="px-4 py-3 text-right">
+                                            {formatPercentage(row)}
+                                        </td>
                                         <td className="px-4 py-3 text-right font-medium">
                                             {formatMoney(row.amount)}
                                         </td>
                                         {fundBalances.length > 0 && (
                                             <td className="px-4 py-3 text-right">
-                                                {formatMoney(fundBalance?.remaining ?? null)}
+                                                {formatMoney(
+                                                    fundBalance?.remaining ??
+                                                        null,
+                                                )}
                                             </td>
                                         )}
                                     </tr>
@@ -256,7 +308,9 @@ export default function IncomeShow({
                                 <td className="px-4 py-3 text-right">
                                     {formatMoney(period.amount)}
                                 </td>
-                                {fundBalances.length > 0 && <td className="px-4 py-3" />}
+                                {fundBalances.length > 0 && (
+                                    <td className="px-4 py-3" />
+                                )}
                             </tr>
                         </tfoot>
                     )}
@@ -265,8 +319,12 @@ export default function IncomeShow({
 
             {fundBalances.length > 0 && (
                 <p className="mt-3 text-sm text-muted-foreground">
-                    Remaining balances reflect all locked income minus confirmed spending.{' '}
-                    <Link href={`/${teamSlug}/savings/spending`} className="text-primary underline-offset-4 hover:underline">
+                    Remaining balances reflect all locked income minus confirmed
+                    spending.{' '}
+                    <Link
+                        href={`/${teamSlug}/savings/spending`}
+                        className="text-primary underline-offset-4 hover:underline"
+                    >
                         Record spending →
                     </Link>
                 </p>
@@ -274,7 +332,8 @@ export default function IncomeShow({
 
             {!period.isLocked && breakdown.length > 0 && (
                 <p className="mt-3 text-sm text-muted-foreground">
-                    Preview only — allocations are saved when you lock this period.
+                    Preview only — allocations are saved when you lock this
+                    period.
                 </p>
             )}
         </>

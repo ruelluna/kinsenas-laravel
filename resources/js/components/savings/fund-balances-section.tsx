@@ -37,14 +37,16 @@ export default function FundBalancesSection({
     className,
 }: Props) {
     const [fundModalOpen, setFundModalOpen] = useState(false);
-    const [selectedTarget, setSelectedTarget] = useState<ExistingFundTarget | null>(null);
+    const [selectedTarget, setSelectedTarget] =
+        useState<ExistingFundTarget | null>(null);
 
     if (fundBalances.length === 0) {
         return null;
     }
 
     const handleFund = (categoryId: string) => {
-        const balance = fundBalances.find((row) => row.categoryId === categoryId) ?? null;
+        const balance =
+            fundBalances.find((row) => row.categoryId === categoryId) ?? null;
 
         setSelectedTarget(balance ? toExistingFundTarget(balance) : null);
         setFundModalOpen(true);
@@ -59,7 +61,9 @@ export default function FundBalancesSection({
                     ) : (
                         <h2 className="font-medium">{title}</h2>
                     )}
-                    <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        {description}
+                    </p>
                 </div>
                 {canDrawFromFunds && (
                     <Button variant="outline" size="sm" asChild>
@@ -86,7 +90,11 @@ export default function FundBalancesSection({
     );
 
     if (bordered) {
-        return <div className={cn('rounded-lg border p-4', className)}>{content}</div>;
+        return (
+            <div className={cn('rounded-lg border p-4', className)}>
+                {content}
+            </div>
+        );
     }
 
     return <section className={className}>{content}</section>;

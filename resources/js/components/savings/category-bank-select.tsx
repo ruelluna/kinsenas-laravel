@@ -9,11 +9,17 @@ type Props = {
     namePrefix: string;
 };
 
-export default function CategoryBankSelect({ banks, selectedId, onChange, namePrefix }: Props) {
+export default function CategoryBankSelect({
+    banks,
+    selectedId,
+    onChange,
+    namePrefix,
+}: Props) {
     if (banks.length === 0) {
         return (
             <p className="text-xs text-muted-foreground">
-                Add banks under Banks in the sidebar first, then assign an account to this fund bucket.
+                Add banks under Banks in the sidebar first, then assign an
+                account to this fund bucket.
             </p>
         );
     }
@@ -32,7 +38,8 @@ export default function CategoryBankSelect({ banks, selectedId, onChange, namePr
                 placeholder="Select a bank"
             />
             <p className="text-xs text-muted-foreground">
-                One bank or GoSave space per fund bucket. The same account can be used for multiple fund buckets.
+                One bank or GoSave space per fund bucket. The same account can
+                be used for multiple fund buckets.
             </p>
         </div>
     );

@@ -89,7 +89,10 @@ export function runOnboardingTour({
     destroyActiveDriver({ suppressComplete: true });
 
     const steps = ONBOARDING_TOUR_STEPS;
-    const safeIndex = Math.min(Math.max(startIndex, 0), Math.max(steps.length - 1, 0));
+    const safeIndex = Math.min(
+        Math.max(startIndex, 0),
+        Math.max(steps.length - 1, 0),
+    );
     const current = steps[safeIndex];
 
     if (!current) {
@@ -157,7 +160,10 @@ export function runOnboardingTour({
                 return;
             }
 
-            if (!stepMatchesPath(nextStep, window.location.pathname) && nextStep.navigateTo) {
+            if (
+                !stepMatchesPath(nextStep, window.location.pathname) &&
+                nextStep.navigateTo
+            ) {
                 navigateForStep(teamId, teamSlug, nextIndex, nextStep, forced);
 
                 return;
@@ -175,7 +181,10 @@ export function runOnboardingTour({
                 return;
             }
 
-            if (!stepMatchesPath(prevStep, window.location.pathname) && prevStep.navigateTo) {
+            if (
+                !stepMatchesPath(prevStep, window.location.pathname) &&
+                prevStep.navigateTo
+            ) {
                 navigateForStep(teamId, teamSlug, prevIndex, prevStep, forced);
 
                 return;

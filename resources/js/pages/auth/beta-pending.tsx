@@ -10,12 +10,13 @@ export default function BetaPending() {
 
             <div className="space-y-4 text-center text-sm text-muted-foreground">
                 <p>
-                    Thanks for applying to the Kinsenas public beta. Your application is waiting for
-                    admin review.
+                    Thanks for applying to the Kinsenas public beta. Your
+                    application is waiting for admin review.
                 </p>
                 <p>
-                    Once approved, you can sign in with your real account and use the core savings
-                    planner for free. We will email you when your access is ready.
+                    Once approved, you can sign in with your real account and
+                    use the core savings planner for free. We will email you
+                    when your access is ready.
                 </p>
                 <p className="text-pretty">{BETA_FREE_MESSAGE}</p>
             </div>

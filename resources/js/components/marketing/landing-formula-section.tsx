@@ -66,7 +66,7 @@ export default function LandingFormulaSection() {
                                     {bucket.percentage}% of income
                                 </p>
                             </div>
-                            <p className="shrink-0 text-sm font-semibold tabular-nums text-foreground">
+                            <p className="shrink-0 text-sm font-semibold text-foreground tabular-nums">
                                 {formatMoney(
                                     bucketAmount(
                                         SAMPLE_INCOME,

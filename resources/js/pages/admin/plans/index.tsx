@@ -13,7 +13,11 @@ export default function AdminPlansIndex({ plans }: Props) {
         <>
             <Head title="Admin — Plans" />
             <div className="flex items-center justify-between gap-4">
-                <Heading variant="small" title="Subscription plans" description="Platform admin only." />
+                <Heading
+                    variant="small"
+                    title="Subscription plans"
+                    description="Platform admin only."
+                />
                 <Button asChild>
                     <Link href="/admin/plans/create">Create plan</Link>
                 </Button>
@@ -26,10 +30,14 @@ export default function AdminPlansIndex({ plans }: Props) {
                                 <p className="font-medium">
                                     {plan.name} ({plan.slug})
                                     {!plan.isActive && (
-                                        <span className="ml-2 text-muted-foreground">— inactive</span>
+                                        <span className="ml-2 text-muted-foreground">
+                                            — inactive
+                                        </span>
                                     )}
                                 </p>
-                                <p className="text-muted-foreground">Trial: {plan.trialDays} days</p>
+                                <p className="text-muted-foreground">
+                                    Trial: {plan.trialDays} days
+                                </p>
                                 {plan.features.length > 0 && (
                                     <p className="text-muted-foreground">
                                         Features: {plan.features.join(', ')}
@@ -38,14 +46,17 @@ export default function AdminPlansIndex({ plans }: Props) {
                                 <ul className="mt-2 space-y-1 text-muted-foreground">
                                     {plan.prices.map((price) => (
                                         <li key={price.id ?? price.interval}>
-                                            {price.interval}: {formatMoneyFromCents(price.amount)}
+                                            {price.interval}:{' '}
+                                            {formatMoneyFromCents(price.amount)}
                                             {!price.isActive && ' (inactive)'}
                                         </li>
                                     ))}
                                 </ul>
                             </div>
                             <Button variant="outline" size="sm" asChild>
-                                <Link href={`/admin/plans/${plan.id}/edit`}>Edit</Link>
+                                <Link href={`/admin/plans/${plan.id}/edit`}>
+                                    Edit
+                                </Link>
                             </Button>
                         </div>
                     </li>

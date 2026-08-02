@@ -37,9 +37,15 @@ export default function RecipientsIndex({ recipients, recipientTypes }: Props) {
 
             <ul className="mt-8 space-y-2">
                 {recipients.map((recipient) => (
-                    <li key={recipient.id} className="rounded-lg border p-3 text-sm">
+                    <li
+                        key={recipient.id}
+                        className="rounded-lg border p-3 text-sm"
+                    >
                         <span className="font-medium">{recipient.name}</span>
-                        <span className="text-muted-foreground"> — {recipient.typeLabel}</span>
+                        <span className="text-muted-foreground">
+                            {' '}
+                            — {recipient.typeLabel}
+                        </span>
                     </li>
                 ))}
             </ul>
@@ -48,5 +54,10 @@ export default function RecipientsIndex({ recipients, recipientTypes }: Props) {
 }
 
 RecipientsIndex.layout = (props: SharedData) => ({
-    breadcrumbs: [{ title: 'Recipients', href: `/${props.currentTeam?.slug}/savings/recipients` }],
+    breadcrumbs: [
+        {
+            title: 'Recipients',
+            href: `/${props.currentTeam?.slug}/savings/recipients`,
+        },
+    ],
 });

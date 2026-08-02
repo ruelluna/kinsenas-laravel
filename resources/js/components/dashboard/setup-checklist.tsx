@@ -17,7 +17,9 @@ export default function SetupChecklist({ setup }: Props) {
             >
                 <Check className="size-4 shrink-0 text-success" />
                 <span className="font-medium">All set</span>
-                <span className="text-muted-foreground">Your savings workspace is ready.</span>
+                <span className="text-muted-foreground">
+                    Your savings workspace is ready.
+                </span>
                 <ReplayTourButton className="ms-auto" />
             </div>
         );
@@ -31,7 +33,8 @@ export default function SetupChecklist({ setup }: Props) {
                 <div>
                     <h2 className="font-medium">Get started</h2>
                     <p className="mt-1 text-sm text-muted-foreground">
-                        Start with your banks, then choose a plan and track income.
+                        Start with your banks, then choose a plan and track
+                        income.
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -53,8 +56,11 @@ export default function SetupChecklist({ setup }: Props) {
                             href={step.href}
                             className={cn(
                                 'flex items-start gap-2 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/50',
-                                step.complete && 'border-success/30 bg-success/5',
-                                !step.complete && nextStep?.key === step.key && 'ring-2 ring-primary/20',
+                                step.complete &&
+                                    'border-success/30 bg-success/5',
+                                !step.complete &&
+                                    nextStep?.key === step.key &&
+                                    'ring-2 ring-primary/20',
                             )}
                         >
                             {step.complete ? (
@@ -63,8 +69,16 @@ export default function SetupChecklist({ setup }: Props) {
                                 <Circle className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                             )}
                             <span>
-                                <span className="block text-xs text-muted-foreground">Step {index + 1}</span>
-                                <span className={cn('font-medium', step.complete && 'text-muted-foreground')}>
+                                <span className="block text-xs text-muted-foreground">
+                                    Step {index + 1}
+                                </span>
+                                <span
+                                    className={cn(
+                                        'font-medium',
+                                        step.complete &&
+                                            'text-muted-foreground',
+                                    )}
+                                >
                                     {step.label}
                                 </span>
                             </span>

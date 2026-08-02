@@ -43,7 +43,10 @@ function todayString(): string {
     return new Date().toISOString().slice(0, 10);
 }
 
-function remainingAfterAmount(remaining: string | null, amount: string): string | null {
+function remainingAfterAmount(
+    remaining: string | null,
+    amount: string,
+): string | null {
     if (remaining === null || amount === '') {
         return remaining;
     }
@@ -73,12 +76,18 @@ function AddTransferSession({
     categoryBankMap,
     fundBalances,
 }: SessionProps) {
-    const { currentTeam, errors, name } = usePage<SharedData & { errors: Record<string, string> }>().props;
+    const { currentTeam, errors, name } = usePage<
+        SharedData & { errors: Record<string, string> }
+    >().props;
     const teamSlug = currentTeam?.slug ?? '';
     const submitRef = useRef<HTMLButtonElement>(null);
     const skipBankReminderRef = useRef(false);
     const [fromCategoryId, setFromCategoryId] = useState(
-        () => presetFromCategoryId ?? defaultCategoryId ?? categories[0]?.id ?? '',
+        () =>
+            presetFromCategoryId ??
+            defaultCategoryId ??
+            categories[0]?.id ??
+            '',
     );
     const [toCategoryId, setToCategoryId] = useState('');
     const [amount, setAmount] = useState('');
@@ -95,7 +104,10 @@ function AddTransferSession({
     );
 
     const fromBalance = useMemo(
-        () => fundBalances.find((balance) => balance.categoryId === fromCategoryId) ?? null,
+        () =>
+            fundBalances.find(
+                (balance) => balance.categoryId === fromCategoryId,
+            ) ?? null,
         [fundBalances, fromCategoryId],
     );
 
@@ -106,12 +118,17 @@ function AddTransferSession({
 
     const crossesBanks = useMemo(() => {
         const fromBankId = categoryBankMap[fromCategoryId] ?? null;
-        const toBankId = toCategoryId ? (categoryBankMap[toCategoryId] ?? null) : null;
+        const toBankId = toCategoryId
+            ? (categoryBankMap[toCategoryId] ?? null)
+            : null;
 
         return fromBankId !== toBankId;
     }, [categoryBankMap, fromCategoryId, toCategoryId]);
 
-    const projectedFromRemaining = remainingAfterAmount(fromBalance?.remaining ?? null, amount);
+    const projectedFromRemaining = remainingAfterAmount(
+        fromBalance?.remaining ?? null,
+        amount,
+    );
 
     function confirmCrossBankTransfer() {
         setBankReminderOpen(false);
@@ -144,17 +161,20 @@ function AddTransferSession({
                         <DialogHeader>
                             <DialogTitle>Record transfer</DialogTitle>
                             <DialogDescription>
-                                Move money from one fund to another. When funds use different banks,
-                                move the actual money in your banking app, then confirm here.
+                                Move money from one fund to another. When funds
+                                use different banks, move the actual money in
+                                your banking app, then confirm here.
                             </DialogDescription>
                         </DialogHeader>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="from_category_id">From fund bucket</Label>
+                            <Label htmlFor="from_category_id">
+                                From fund bucket
+                            </Label>
                             <select
                                 id="from_category_id"
                                 name="from_category_id"
-                                className="border-input h-9 rounded-md border px-3 text-sm"
+                                className="h-9 rounded-md border border-input px-3 text-sm"
                                 value={fromCategoryId}
                                 onChange={(event) => {
                                     setFromCategoryId(event.target.value);
@@ -166,9 +186,14 @@ function AddTransferSession({
                                 required
                             >
                                 {categories.map((category) => (
-                                    <option key={category.id} value={category.id}>
+                                    <option
+                                        key={category.id}
+                                        value={category.id}
+                                    >
                                         {category.name}
-                                        {category.bankName ? ` (${category.bankName})` : ''}
+                                        {category.bankName
+                                            ? ` (${category.bankName})`
+                                            : ''}
                                     </option>
                                 ))}
                             </select>
@@ -176,20 +201,29 @@ function AddTransferSession({
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="to_category_id">To fund bucket</Label>
+                            <Label htmlFor="to_category_id">
+                                To fund bucket
+                            </Label>
                             <select
                                 id="to_category_id"
                                 name="to_category_id"
-                                className="border-input h-9 rounded-md border px-3 text-sm"
+                                className="h-9 rounded-md border border-input px-3 text-sm"
                                 value={toCategoryId}
-                                onChange={(event) => setToCategoryId(event.target.value)}
+                                onChange={(event) =>
+                                    setToCategoryId(event.target.value)
+                                }
                                 required
                             >
                                 <option value="">Select a fund</option>
                                 {toCategoryOptions.map((category) => (
-                                    <option key={category.id} value={category.id}>
+                                    <option
+                                        key={category.id}
+                                        value={category.id}
+                                    >
                                         {category.name}
-                                        {category.bankName ? ` (${category.bankName})` : ''}
+                                        {category.bankName
+                                            ? ` (${category.bankName})`
+                                            : ''}
                                     </option>
                                 ))}
                             </select>
@@ -201,13 +235,18 @@ function AddTransferSession({
                                 {crossesBanks ? (
                                     <>
                                         Different banks: move funds from{' '}
-                                        <strong>{bankLabel(fromCategory)}</strong> to{' '}
-                                        <strong>{bankLabel(toCategory)}</strong> in your banking app.
+                                        <strong>
+                                            {bankLabel(fromCategory)}
+                                        </strong>{' '}
+                                        to{' '}
+                                        <strong>{bankLabel(toCategory)}</strong>{' '}
+                                        in your banking app.
                                     </>
                                 ) : (
                                     <>
-                                        Same bank ({bankLabel(fromCategory)}): this transfer will be
-                                        recorded immediately.
+                                        Same bank ({bankLabel(fromCategory)}):
+                                        this transfer will be recorded
+                                        immediately.
                                     </>
                                 )}
                             </p>
@@ -222,20 +261,26 @@ function AddTransferSession({
                                 step="0.01"
                                 min="0.01"
                                 value={amount}
-                                onChange={(event) => setAmount(event.target.value)}
+                                onChange={(event) =>
+                                    setAmount(event.target.value)
+                                }
                                 required
                             />
-                            {fromBalance?.remaining !== null && amount !== '' && (
-                                <p className="text-xs text-muted-foreground">
-                                    After this transfer: {formatMoney(projectedFromRemaining)} remaining
-                                    in {fromBalance?.name}
-                                </p>
-                            )}
+                            {fromBalance?.remaining !== null &&
+                                amount !== '' && (
+                                    <p className="text-xs text-muted-foreground">
+                                        After this transfer:{' '}
+                                        {formatMoney(projectedFromRemaining)}{' '}
+                                        remaining in {fromBalance?.name}
+                                    </p>
+                                )}
                             <InputError message={errors.amount} />
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="description">What was this for?</Label>
+                            <Label htmlFor="description">
+                                What was this for?
+                            </Label>
                             <Input
                                 id="description"
                                 name="description"
@@ -287,8 +332,9 @@ function AddTransferSession({
                             Before confirming in {name}, transfer{' '}
                             {amount ? formatMoney(amount) : 'this amount'} from{' '}
                             <strong>{bankLabel(fromCategory)}</strong> to{' '}
-                            <strong>{bankLabel(toCategory)}</strong> in your banking app. This record
-                            stays pending until you confirm the money has moved.
+                            <strong>{bankLabel(toCategory)}</strong> in your
+                            banking app. This record stays pending until you
+                            confirm the money has moved.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
@@ -299,7 +345,10 @@ function AddTransferSession({
                         >
                             Cancel
                         </Button>
-                        <Button type="button" onClick={confirmCrossBankTransfer}>
+                        <Button
+                            type="button"
+                            onClick={confirmCrossBankTransfer}
+                        >
                             I&apos;ll move the funds — record transfer
                         </Button>
                     </DialogFooter>

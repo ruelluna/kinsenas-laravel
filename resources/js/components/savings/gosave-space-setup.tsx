@@ -25,7 +25,9 @@ export default function GoSaveSpaceSetup({
 }: Props) {
     const updateSpace = (index: number, patch: Partial<SpaceRow>) => {
         onSpacesChange(
-            spaces.map((space, spaceIndex) => (spaceIndex === index ? { ...space, ...patch } : space)),
+            spaces.map((space, spaceIndex) =>
+                spaceIndex === index ? { ...space, ...patch } : space,
+            ),
         );
     };
 
@@ -34,8 +36,8 @@ export default function GoSaveSpaceSetup({
             <div>
                 <p className="text-sm font-medium">GoSave spaces</p>
                 <p className="text-xs text-muted-foreground">
-                    GoTyme includes one main account and up to {config.max} GoSave spaces. Match the names you use in
-                    the GoTyme app.
+                    GoTyme includes one main account and up to {config.max}{' '}
+                    GoSave spaces. Match the names you use in the GoTyme app.
                 </p>
             </div>
 
@@ -55,16 +57,26 @@ export default function GoSaveSpaceSetup({
                     <div key={index} className="flex items-center gap-3">
                         <Checkbox
                             checked={space.enabled}
-                            onCheckedChange={(value) => updateSpace(index, { enabled: value === true })}
+                            onCheckedChange={(value) =>
+                                updateSpace(index, { enabled: value === true })
+                            }
                         />
                         <Input
                             name={`spaces[${index}][label]`}
                             value={space.label}
-                            onChange={(event) => updateSpace(index, { label: event.target.value })}
+                            onChange={(event) =>
+                                updateSpace(index, {
+                                    label: event.target.value,
+                                })
+                            }
                             disabled={!space.enabled}
                             placeholder={`${config.spaceLabelPrefix} ${index + 1}`}
                         />
-                        <input type="hidden" name={`spaces[${index}][enabled]`} value={space.enabled ? '1' : '0'} />
+                        <input
+                            type="hidden"
+                            name={`spaces[${index}][enabled]`}
+                            value={space.enabled ? '1' : '0'}
+                        />
                     </div>
                 ))}
             </div>
@@ -72,7 +84,9 @@ export default function GoSaveSpaceSetup({
     );
 }
 
-export function createDefaultGoSaveSpaces(config: BankInstitutionSavingsSpaces): SpaceRow[] {
+export function createDefaultGoSaveSpaces(
+    config: BankInstitutionSavingsSpaces,
+): SpaceRow[] {
     return Array.from({ length: config.max }, (_, index) => ({
         label: `${config.spaceLabelPrefix} ${index + 1}`,
         enabled: false,

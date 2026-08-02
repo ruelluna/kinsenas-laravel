@@ -23,12 +23,16 @@ function TemplatePickerCard({
         >
             <h3 className="font-medium">{template.name}</h3>
             {template.description && (
-                <p className="mt-1 text-sm text-muted-foreground">{template.description}</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                    {template.description}
+                </p>
             )}
             {template.bestFor && (
                 <p className="mt-2 text-sm">
                     <span className="font-medium">Best for: </span>
-                    <span className="text-muted-foreground">{template.bestFor}</span>
+                    <span className="text-muted-foreground">
+                        {template.bestFor}
+                    </span>
                 </p>
             )}
 
@@ -106,13 +110,19 @@ export default function SavingsPlanTemplatePicker({
                             {pageGuidance.chooserIntro}
                         </p>
                     )}
-                    <VideoEmbed url={pageGuidance.chooserVideoUrl} title="Choosing a savings formula" />
+                    <VideoEmbed
+                        url={pageGuidance.chooserVideoUrl}
+                        title="Choosing a savings formula"
+                    />
                 </div>
             )}
 
             <BeforeChooseAlert note={pageGuidance.beforeChooseNote} />
 
-            <div className="grid gap-4 lg:grid-cols-2" data-tour="plan-templates">
+            <div
+                className="grid gap-4 lg:grid-cols-2"
+                data-tour="plan-templates"
+            >
                 {templates.map((template) => (
                     <TemplatePickerCard
                         key={template.id}

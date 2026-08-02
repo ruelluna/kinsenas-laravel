@@ -41,10 +41,19 @@ export default function AdminPlatformUsersIndex({
                 description={`Manage platform admins and remove user accounts. ${platformAdminCount} platform admin(s).`}
             />
 
-            <Form method="get" action="/admin/platform-users" className="mt-6 flex flex-wrap gap-3">
+            <Form
+                method="get"
+                action="/admin/platform-users"
+                className="mt-6 flex flex-wrap gap-3"
+            >
                 <div className="grid gap-2">
                     <Label htmlFor="search">Search</Label>
-                    <Input id="search" name="search" defaultValue={filters.search ?? ''} placeholder="Name or email" />
+                    <Input
+                        id="search"
+                        name="search"
+                        defaultValue={filters.search ?? ''}
+                        placeholder="Name or email"
+                    />
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="admin">Admin filter</Label>
@@ -52,7 +61,7 @@ export default function AdminPlatformUsersIndex({
                         id="admin"
                         name="admin"
                         defaultValue={filters.admin ?? ''}
-                        className="border-input h-9 rounded-md border px-3 text-sm"
+                        className="h-9 rounded-md border border-input px-3 text-sm"
                     >
                         <option value="">All users</option>
                         <option value="yes">Platform admins only</option>
@@ -69,22 +78,31 @@ export default function AdminPlatformUsersIndex({
             <div className="mt-6 space-y-3">
                 {users.data.map((user) => {
                     const isSelf = user.id === currentUserId;
-                    const isLastAdmin = user.isPlatformAdmin && platformAdminCount <= 1;
+                    const isLastAdmin =
+                        user.isPlatformAdmin && platformAdminCount <= 1;
                     const canDelete = user.deleteBlockReason === null;
 
                     return (
-                        <div key={user.id} className="rounded-lg border p-4 text-sm">
+                        <div
+                            key={user.id}
+                            className="rounded-lg border p-4 text-sm"
+                        >
                             <div className="flex flex-wrap items-start justify-between gap-3">
                                 <div>
                                     <p className="font-medium">
                                         {user.name}
                                         {isSelf && (
-                                            <span className="ml-2 text-muted-foreground">(you)</span>
+                                            <span className="ml-2 text-muted-foreground">
+                                                (you)
+                                            </span>
                                         )}
                                     </p>
-                                    <p className="text-muted-foreground">{user.email}</p>
+                                    <p className="text-muted-foreground">
+                                        {user.email}
+                                    </p>
                                     <p className="mt-1 text-muted-foreground">
-                                        Subscription: {user.subscriptionStatusLabel ?? 'None'}
+                                        Subscription:{' '}
+                                        {user.subscriptionStatusLabel ?? 'None'}
                                     </p>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-2">
@@ -93,19 +111,31 @@ export default function AdminPlatformUsersIndex({
                                         method="post"
                                         className="flex items-center gap-2"
                                     >
-                                        <input type="hidden" name="_method" value="patch" />
+                                        <input
+                                            type="hidden"
+                                            name="_method"
+                                            value="patch"
+                                        />
                                         <input
                                             type="hidden"
                                             name="is_platform_admin"
-                                            value={user.isPlatformAdmin ? '0' : '1'}
+                                            value={
+                                                user.isPlatformAdmin ? '0' : '1'
+                                            }
                                         />
                                         <Button
                                             type="submit"
                                             size="sm"
-                                            variant={user.isPlatformAdmin ? 'outline' : 'default'}
+                                            variant={
+                                                user.isPlatformAdmin
+                                                    ? 'outline'
+                                                    : 'default'
+                                            }
                                             disabled={isSelf || isLastAdmin}
                                         >
-                                            {user.isPlatformAdmin ? 'Revoke admin' : 'Grant admin'}
+                                            {user.isPlatformAdmin
+                                                ? 'Revoke admin'
+                                                : 'Grant admin'}
                                         </Button>
                                     </Form>
                                     <Button
@@ -120,18 +150,23 @@ export default function AdminPlatformUsersIndex({
                                     </Button>
                                 </div>
                             </div>
-                            {(isSelf || isLastAdmin) && user.isPlatformAdmin && (
-                                <p className="mt-2 text-xs text-muted-foreground">
-                                    {isSelf
-                                        ? 'You cannot revoke your own platform admin access.'
-                                        : 'At least one platform admin must remain.'}
-                                </p>
-                            )}
-                            {user.deleteBlockReason && !((isSelf || isLastAdmin) && user.isPlatformAdmin) && (
-                                <p className="mt-2 text-xs text-muted-foreground">
-                                    {user.deleteBlockReason}
-                                </p>
-                            )}
+                            {(isSelf || isLastAdmin) &&
+                                user.isPlatformAdmin && (
+                                    <p className="mt-2 text-xs text-muted-foreground">
+                                        {isSelf
+                                            ? 'You cannot revoke your own platform admin access.'
+                                            : 'At least one platform admin must remain.'}
+                                    </p>
+                                )}
+                            {user.deleteBlockReason &&
+                                !(
+                                    (isSelf || isLastAdmin) &&
+                                    user.isPlatformAdmin
+                                ) && (
+                                    <p className="mt-2 text-xs text-muted-foreground">
+                                        {user.deleteBlockReason}
+                                    </p>
+                                )}
                         </div>
                     );
                 })}

@@ -6,7 +6,11 @@ type VideoEmbedProps = {
     className?: string;
 };
 
-export default function VideoEmbed({ url, title = 'Video', className }: VideoEmbedProps) {
+export default function VideoEmbed({
+    url,
+    title = 'Video',
+    className,
+}: VideoEmbedProps) {
     const embedUrl = normalizeVideoEmbedUrl(url);
 
     if (!embedUrl) {
