@@ -14,17 +14,33 @@ class ActivationGhlTagService
         private ActivationGhlTagGuard $activationGhlTagGuard,
     ) {}
 
-    public function syncPlanCreated(User $user, Team $team): void
+    public function syncPlanCreated(User $user, Team $team, string $planTypeSlug): void
     {
         if (! $this->activationGhlTagGuard->isFirstPlanForTeam($team)) {
             return;
         }
 
+        $chosenTag = GhlTagCatalog::planChosenTagForTemplateSlug($planTypeSlug);
+
+        $tagsToAdd = [GhlTagCatalog::PLAN_CREATED];
+
+        if ($chosenTag !== null) {
+            $tagsToAdd[] = $chosenTag;
+        }
+
+        $tagsToRemove = $chosenTag !== null
+            ? GhlTagCatalog::siblingPlanChosenTags($chosenTag)
+            : [];
+
         $this->ghlUserTagService->dispatch(
             $user,
-            [GhlTagCatalog::PLAN_CREATED],
-            [],
-            ['event' => 'plan_created', 'team_id' => $team->id],
+            $tagsToAdd,
+            $tagsToRemove,
+            [
+                'event' => 'plan_created',
+                'plan_type' => $planTypeSlug,
+                'team_id' => $team->id,
+            ],
         );
     }
 

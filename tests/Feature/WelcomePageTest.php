@@ -15,7 +15,8 @@ it('shows the hero headline on the landing page', function () {
     $response = $this->get(route('home'));
 
     $response->assertOk();
-    $response->assertSee('Sweldo ngayon. May matitira bukas.', false);
+    $response->assertSee('Not how big you save —', false);
+    $response->assertSee('but the habit of saving!', false);
 });
 
 it('shows how it works section anchor', function () {

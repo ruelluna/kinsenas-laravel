@@ -1,8 +1,12 @@
 <?php
 
+use App\Enums\SubscriptionStatus;
 use App\Models\IncomePeriod;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlan;
+use App\Models\Subscription;
+use App\Models\SubscriptionPlan;
+use App\Models\Team;
 use App\Models\User;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -31,6 +35,21 @@ function skipUnlessFortifyHas(string $feature, ?string $message = null): void
     if (! Features::enabled($feature)) {
         test()->markTestSkipped($message ?? "Fortify feature [{$feature}] is not enabled.");
     }
+}
+
+function grantTeamSubscriptionAccess(Team $team): Subscription
+{
+    $plan = SubscriptionPlan::query()->firstOrFail();
+
+    return Subscription::query()->updateOrCreate(
+        ['team_id' => $team->id],
+        [
+            'plan_id' => $plan->id,
+            'status' => SubscriptionStatus::Active,
+            'trial_ends_at' => null,
+            'current_period_ends_at' => now()->addMonth(),
+        ],
+    );
 }
 
 function fakeGhlApi(string $contactId = 'ct_test_123'): void

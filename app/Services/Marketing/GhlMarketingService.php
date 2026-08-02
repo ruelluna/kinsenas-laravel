@@ -13,20 +13,52 @@ class GhlMarketingService
 {
     public function isEnabled(): bool
     {
+        return $this->disabledReason() === null;
+    }
+
+    public function disabledReason(): ?string
+    {
         if (! (bool) config('services.ghl.enabled', false)) {
-            return false;
+            return 'enabled=false';
         }
 
         $pit = config('services.ghl.pit');
+
+        if (! is_string($pit) || $pit === '') {
+            return 'missing_pit';
+        }
+
         $locationId = config('services.ghl.location_id');
 
-        return is_string($pit) && $pit !== ''
-            && is_string($locationId) && $locationId !== '';
+        if (! is_string($locationId) || $locationId === '') {
+            return 'missing_location_id';
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $context
+     */
+    private function guardEnabled(array $context): bool
+    {
+        $reason = $this->disabledReason();
+
+        if ($reason === null) {
+            return true;
+        }
+
+        Log::info('GHL sync skipped', [
+            ...$context,
+            'reason' => $reason,
+        ]);
+
+        return false;
     }
 
     public function syncApplicationEvent(User $user, string $event): void
     {
-        if (! $this->isEnabled()) {
+        if (! $this->guardEnabled(['event' => $event, 'user_id' => $user->id])) {
             return;
         }
 
@@ -57,7 +89,10 @@ class GhlMarketingService
 
     public function syncSurveyResponse(SurveyResponse $surveyResponse): void
     {
-        if (! $this->isEnabled()) {
+        if (! $this->guardEnabled([
+            'event' => 'survey_completed',
+            'survey_response_id' => $surveyResponse->id,
+        ])) {
             return;
         }
 
@@ -75,7 +110,7 @@ class GhlMarketingService
 
     public function syncUserTags(User $user, array $tagsToAdd = [], array $tagsToRemove = [], array $context = []): void
     {
-        if (! $this->isEnabled()) {
+        if (! $this->guardEnabled(array_merge($context, ['user_id' => $user->id]))) {
             return;
         }
 
@@ -100,7 +135,7 @@ class GhlMarketingService
         array $tagsToRemove = [],
         array $context = [],
     ): void {
-        if (! $this->isEnabled()) {
+        if (! $this->guardEnabled($context)) {
             return;
         }
 
@@ -172,7 +207,17 @@ class GhlMarketingService
                 return null;
             }
 
-            return $this->extractContactId($response->json());
+            $contactId = $this->extractContactId($response->json());
+
+            if ($contactId === null) {
+                Log::warning('GHL contact upsert succeeded but contact id missing', [
+                    ...$context,
+                    'email' => $email,
+                    'body' => $response->body(),
+                ]);
+            }
+
+            return $contactId;
         } catch (\Throwable $exception) {
             Log::error('GHL contact upsert request failed', [
                 ...$context,

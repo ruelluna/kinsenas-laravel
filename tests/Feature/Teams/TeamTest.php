@@ -3,10 +3,15 @@
 use App\Enums\TeamRole;
 use App\Models\Team;
 use App\Models\User;
+use Database\Seeders\BillingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    $this->seed(BillingSeeder::class);
+});
 
 it('the teams index page can be rendered', function () {
     $user = User::factory()->create();

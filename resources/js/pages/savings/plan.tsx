@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import CategoryBankSelect from '@/components/savings/category-bank-select';
-import FundBalanceGrid from '@/components/savings/fund-balance-grid';
+import FundBalancesSection from '@/components/savings/fund-balances-section';
 import {
     BeforeChooseAlert,
     PlanEditRulesPanel,
@@ -344,24 +344,15 @@ function SavingsPlanEditor({
 
             {plan.hasIncome && <PlanEditRulesPanel pageGuidance={pageGuidance} />}
 
-            {fundBalances.length > 0 && (
-                <div className="mt-6 rounded-lg border p-4">
-                    <div className="flex items-center justify-between gap-4">
-                        <div>
-                            <h3 className="font-medium">Fund balances</h3>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                Running totals from locked income minus transfers and spending.
-                            </p>
-                        </div>
-                        <Button variant="outline" size="sm" asChild>
-                            <Link href={`/${teamSlug}/savings/spending`}>Record spending</Link>
-                        </Button>
-                    </div>
-                    <div className="mt-4">
-                        <FundBalanceGrid fundBalances={fundBalances} variant="compact" limit={6} />
-                    </div>
-                </div>
-            )}
+            <FundBalancesSection
+                className="mt-6"
+                title="Fund balances"
+                description="Running totals from locked income minus transfers and spending."
+                fundBalances={fundBalances}
+                spendHref={`/${teamSlug}/savings/spending`}
+                limit={6}
+                bordered
+            />
 
             {plan.hasIncome && (
                 <Alert className="mt-6">

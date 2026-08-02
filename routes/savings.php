@@ -15,6 +15,7 @@ Route::prefix('savings')
         Route::middleware('subscribed.feature:savings_plan')->group(function () {
             Route::get('plan', [SavingsPlanController::class, 'show'])->name('plan.show');
             Route::post('plan/from-template/{template}', [SavingsPlanController::class, 'storeFromTemplate'])->name('plan.from-template');
+            Route::post('plan/custom', [SavingsPlanController::class, 'storeCustom'])->name('plan.custom');
             Route::put('plan', [SavingsPlanController::class, 'update'])->name('plan.update');
 
             Route::get('income', [IncomePeriodController::class, 'index'])->name('income.index');

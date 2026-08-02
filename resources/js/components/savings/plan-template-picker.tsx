@@ -54,6 +54,36 @@ function TemplatePickerCard({
     );
 }
 
+function CustomPlanCard({ teamSlug }: { teamSlug: string }) {
+    return (
+        <Form
+            action={`/${teamSlug}/savings/plan/custom`}
+            method="post"
+            className="flex flex-col rounded-lg border p-4"
+        >
+            <h3 className="font-medium">Build your own</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+                Define your own fund names and percentage split from scratch.
+            </p>
+            <p className="mt-2 text-sm">
+                <span className="font-medium">Best for: </span>
+                <span className="text-muted-foreground">
+                    Members who already know how they want to divide income, or
+                    want a layout that does not match Abundant or TRC.
+                </span>
+            </p>
+
+            <div className="mt-6 flex flex-1 flex-col justify-end">
+                <div className="flex justify-center">
+                    <Button type="submit" variant="outline" className="w-fit">
+                        Start custom plan
+                    </Button>
+                </div>
+            </div>
+        </Form>
+    );
+}
+
 export default function SavingsPlanTemplatePicker({
     templates,
     pageGuidance,
@@ -90,6 +120,7 @@ export default function SavingsPlanTemplatePicker({
                         teamSlug={teamSlug}
                     />
                 ))}
+                <CustomPlanCard teamSlug={teamSlug} />
             </div>
         </div>
     );

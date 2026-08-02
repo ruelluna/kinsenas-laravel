@@ -181,3 +181,50 @@ it('lists everyday fund first on transfer and spending views for trc plans', fun
         ->and($orderedBalances[0]['categoryId'])->toBe($everyday->id)
         ->and($orderedCategories->first()?->name)->toBe('Everyday Fund');
 });
+
+it('includes bank metadata on fund balances when a category is assigned', function () {
+    $user = User::factory()->create();
+    $plan = setupLockedPlan($user, '50000.00');
+    $everydayCategory = $plan->categories->firstWhere('name', 'Everyday Fund');
+    $empowerCategory = $plan->categories->firstWhere('name', 'Empower Fund');
+    $bank = Bank::factory()->create([
+        'team_id' => $user->currentTeam->id,
+        'name' => 'BPI',
+        'account_label' => 'Payroll',
+    ]);
+
+    $everydayCategory->update(['bank_id' => $bank->id]);
+
+    $service = app(FundBalanceService::class);
+    $balances = $service->balancesForPlan($plan->fresh('categories'));
+    $everyday = collect($balances)->firstWhere('name', 'Everyday Fund');
+    $empower = collect($balances)->firstWhere('name', 'Empower Fund');
+
+    expect($everyday['bankId'])->toBe($bank->id)
+        ->and($everyday['bankDisplayName'])->toBe('BPI — Payroll')
+        ->and($everyday['bankLogoUrl'])->toBeNull()
+        ->and($empower['bankId'])->toBeNull()
+        ->and($empower['bankDisplayName'])->toBeNull()
+        ->and($empower['bankLogoUrl'])->toBeNull();
+});
+
+it('includes bank metadata on report fund health rows', function () {
+    $user = User::factory()->create();
+    $plan = setupLockedPlan($user, '50000.00');
+    $everydayCategory = $plan->categories->firstWhere('name', 'Everyday Fund');
+    $bank = Bank::factory()->create([
+        'team_id' => $user->currentTeam->id,
+        'name' => 'BDO',
+        'account_label' => null,
+    ]);
+
+    $everydayCategory->update(['bank_id' => $bank->id]);
+
+    $service = app(FundBalanceService::class);
+    $totals = $service->reportTotals($plan->fresh('categories'), collect());
+    $everydayHealth = collect($totals['fund_health'])->firstWhere('category_name', 'Everyday Fund');
+
+    expect($everydayHealth['bank_id'])->toBe($bank->id)
+        ->and($everydayHealth['bank_display_name'])->toBe('BDO')
+        ->and($everydayHealth['bank_logo_url'])->toBeNull();
+});

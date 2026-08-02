@@ -3,9 +3,14 @@
 use App\Enums\TeamRole;
 use App\Models\Team;
 use App\Models\User;
+use Database\Seeders\BillingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    $this->seed(BillingSeeder::class);
+});
 
 it('team member roles can be updated by owners', function () {
     $owner = User::factory()->create();

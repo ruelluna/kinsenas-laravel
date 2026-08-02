@@ -200,6 +200,27 @@ it('dashboard summary includes fund totals after locked income', function () {
     );
 });
 
+it('dashboard fund balances include bank metadata when assigned', function () {
+    [$user, $plan, $everydayCategory] = createUserWithLockedIncome();
+
+    $bank = Bank::factory()->create([
+        'team_id' => $user->currentTeam->id,
+        'name' => 'BPI',
+        'account_label' => 'Main',
+    ]);
+
+    $everydayCategory->update(['bank_id' => $bank->id]);
+
+    $response = $this->actingAs($user)->get(dashboardRoute($user));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('dashboard')
+        ->where('fundBalances.0.bankId', $bank->id)
+        ->where('fundBalances.0.bankDisplayName', 'BPI — Main'),
+    );
+});
+
 it('dashboard includes pending spend confirmations and recent activity', function () {
     [$user, $plan, $everydayCategory] = createUserWithLockedIncome();
 

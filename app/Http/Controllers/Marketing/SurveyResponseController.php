@@ -30,7 +30,7 @@ class SurveyResponseController extends Controller
             'email' => $surveyResponse->email,
         ]);
 
-        SyncSurveyResponseToGhl::dispatch($surveyResponse);
+        SyncSurveyResponseToGhl::dispatch($surveyResponse)->afterCommit();
 
         return response()->json([
             'id' => $surveyResponse->id,

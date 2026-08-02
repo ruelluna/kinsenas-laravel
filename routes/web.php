@@ -24,7 +24,7 @@ Route::middleware(['auth', 'verified', 'beta.approved', 'subscribed'])->group(fu
 });
 
 Route::prefix('{current_team}')
-    ->middleware(['auth', 'verified', 'beta.approved', EnsureTeamMembership::class, 'vault.unlocked', 'subscribed'])
+    ->middleware(['auth', 'verified', 'beta.approved', EnsureTeamMembership::class, 'subscribed', 'vault.unlocked'])
     ->group(function () {
         Route::get('dashboard', DashboardController::class)->name('dashboard');
 

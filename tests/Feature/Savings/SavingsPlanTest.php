@@ -102,6 +102,24 @@ it('allows user to create savings plan from template', function () {
     $this->assertDatabaseCount('savings_categories', 7);
 });
 
+it('allows user to create a custom savings plan without template categories', function () {
+    $user = User::factory()->create();
+    test()->unlockVaultFor($user);
+
+    $response = $this
+        ->actingAs($user)
+        ->post(route('savings.plan.custom', [
+            'current_team' => $user->currentTeam->slug,
+        ]));
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('savings_plans', [
+        'team_id' => $user->currentTeam->id,
+        'created_by_user_id' => $user->id,
+    ]);
+    $this->assertDatabaseCount('savings_categories', 0);
+});
+
 it('plan chooser includes empty team banks for banks-first soft gate', function () {
     $user = User::factory()->create();
     test()->unlockVaultFor($user);

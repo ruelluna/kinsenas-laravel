@@ -5,7 +5,7 @@ import RecentActivityFeed from '@/components/dashboard/recent-activity-feed';
 import SetupChecklist from '@/components/dashboard/setup-checklist';
 import SummaryStatCards from '@/components/dashboard/summary-stat-cards';
 import PendingInvitationsModal from '@/components/pending-invitations-modal';
-import FundBalanceGrid from '@/components/savings/fund-balance-grid';
+import FundBalancesSection from '@/components/savings/fund-balances-section';
 import { Button } from '@/components/ui/button';
 import { requestOnboardingTourAutoStart } from '@/lib/onboarding-tour/storage';
 import { dashboard } from '@/routes';
@@ -67,43 +67,29 @@ export default function Dashboard({
 
                 {showFinancialSections && (
                     <>
-                        <section>
-                            <div className="flex flex-wrap items-center justify-between gap-3">
-                                <div>
-                                    <h2 className="font-medium">{plan?.name ?? 'Fund balances'}</h2>
-                                    <p className="mt-1 text-sm text-muted-foreground">
-                                        Running totals from locked income minus transfers and spending.
-                                    </p>
-                                </div>
-                                <Button variant="outline" size="sm" asChild>
-                                    <Link href={quickLinks.spending}>Record spending</Link>
-                                </Button>
-                            </div>
-                            <div className="mt-4">
-                                <FundBalanceGrid
-                                    fundBalances={fundBalances}
-                                    variant="compact"
-                                    hasLockedIncome={plan?.hasLockedIncome ?? false}
-                                    spendHref={quickLinks.spending}
-                                />
-                            </div>
-                            <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
-                                <Link href={quickLinks.plan} className="text-primary underline-offset-4 hover:underline">
-                                    Savings Plan
+                        <FundBalancesSection
+                            title={plan?.name ?? 'Fund balances'}
+                            description="Running totals from locked income minus transfers and spending."
+                            fundBalances={fundBalances}
+                            spendHref={quickLinks.spending}
+                            hasLockedIncome={plan?.hasLockedIncome ?? false}
+                        />
+                        <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
+                            <Link href={quickLinks.plan} className="text-primary underline-offset-4 hover:underline">
+                                Savings Plan
+                            </Link>
+                            <Link href={quickLinks.income} className="text-primary underline-offset-4 hover:underline">
+                                Income
+                            </Link>
+                            {features.reports && (
+                                <Link
+                                    href={quickLinks.reports}
+                                    className="text-primary underline-offset-4 hover:underline"
+                                >
+                                    Reports
                                 </Link>
-                                <Link href={quickLinks.income} className="text-primary underline-offset-4 hover:underline">
-                                    Income
-                                </Link>
-                                {features.reports && (
-                                    <Link
-                                        href={quickLinks.reports}
-                                        className="text-primary underline-offset-4 hover:underline"
-                                    >
-                                        Reports
-                                    </Link>
-                                )}
-                            </div>
-                        </section>
+                            )}
+                        </div>
 
                         <div className="grid gap-6 lg:grid-cols-2">
                             <PendingActionsPanel

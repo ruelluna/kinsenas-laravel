@@ -28,6 +28,14 @@ final class GhlTagCatalog
 
     public const PLAN_CREATED = 'plan-created';
 
+    public const ABUNDANT_PLAN_CHOSEN = 'abundant-plan-chosen';
+
+    public const TRC_PLAN_CHOSEN = 'trc-plan-chosen';
+
+    public const CUSTOM_PLAN_CHOSEN = 'custom-plan-chosen';
+
+    public const CUSTOM_PLAN_SLUG = 'custom';
+
     public const FIRST_INCOME_ENTERED = 'first-income-entered';
 
     public const INCOME_LOCKED = 'income-locked';
@@ -88,6 +96,39 @@ final class GhlTagCatalog
         return 'beta-feedback-'.$category;
     }
 
+    public static function planChosenTagForTemplateSlug(string $slug): ?string
+    {
+        return match ($slug) {
+            'abundant-formula' => self::ABUNDANT_PLAN_CHOSEN,
+            'trc-savings' => self::TRC_PLAN_CHOSEN,
+            self::CUSTOM_PLAN_SLUG => self::CUSTOM_PLAN_CHOSEN,
+            default => null,
+        };
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function allPlanChosenTags(): array
+    {
+        return [
+            self::ABUNDANT_PLAN_CHOSEN,
+            self::TRC_PLAN_CHOSEN,
+            self::CUSTOM_PLAN_CHOSEN,
+        ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function siblingPlanChosenTags(string $chosenTag): array
+    {
+        return array_values(array_filter(
+            self::allPlanChosenTags(),
+            fn (string $tag) => $tag !== $chosenTag,
+        ));
+    }
+
     /**
      * @return list<string>
      */
@@ -106,6 +147,9 @@ final class GhlTagCatalog
             self::BANK_ADDED,
             self::GOTYME_GOSAVE_SETUP,
             self::PLAN_CREATED,
+            self::ABUNDANT_PLAN_CHOSEN,
+            self::TRC_PLAN_CHOSEN,
+            self::CUSTOM_PLAN_CHOSEN,
             self::FIRST_INCOME_ENTERED,
             self::INCOME_LOCKED,
             self::ACTIVATED_USER,

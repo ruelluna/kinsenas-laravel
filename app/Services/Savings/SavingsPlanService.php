@@ -60,6 +60,23 @@ class SavingsPlanService
         });
     }
 
+    public function createCustom(Team $team, User $user): SavingsPlan
+    {
+        if ($this->forTeam($team, $user) !== null) {
+            throw ValidationException::withMessages([
+                'plan' => __('A savings plan already exists for this team.'),
+            ]);
+        }
+
+        return SavingsPlan::query()->create([
+            'team_id' => $team->id,
+            'created_by_user_id' => $user->id,
+            'name' => __('Custom savings plan'),
+            'currency' => 'PHP',
+            'is_shared_with_team' => false,
+        ])->load(['categories.deductFromCategory']);
+    }
+
     /**
      * @param  list<array{
      *     id?: string|null,

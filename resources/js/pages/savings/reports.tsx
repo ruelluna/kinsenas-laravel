@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import Heading from '@/components/heading';
+import FundBankBadge from '@/components/savings/fund-bank-badge';
 import { BankLogo } from '@/components/savings/bank-select';
 import { formatMoney } from '@/lib/format-money';
 import type { SharedData } from '@/types';
@@ -44,7 +45,18 @@ export default function SavingsReports({ totals }: Props) {
                             ) : (
                                 totals.fund_health.map((row) => (
                                     <tr key={row.category_id} className="border-b last:border-b-0">
-                                        <td className="px-4 py-3">{row.category_name}</td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-start justify-between gap-3">
+                                                <span>{row.category_name}</span>
+                                                {row.bank_id && row.bank_display_name && (
+                                                    <FundBankBadge
+                                                        bankDisplayName={row.bank_display_name}
+                                                        bankLogoUrl={row.bank_logo_url}
+                                                        layout="inline"
+                                                    />
+                                                )}
+                                            </div>
+                                        </td>
                                         <td className="px-4 py-3 text-right">{formatMoney(row.allocated)}</td>
                                         <td className="px-4 py-3 text-right">{formatMoney(row.transferred)}</td>
                                         <td className="px-4 py-3 text-right">{formatMoney(row.spent)}</td>

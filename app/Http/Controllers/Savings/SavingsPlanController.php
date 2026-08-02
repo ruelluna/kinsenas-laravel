@@ -97,9 +97,28 @@ class SavingsPlanController extends Controller
             $template->name,
         );
 
-        $this->activationGhlTagService->syncPlanCreated($request->user(), $current_team);
+        $this->activationGhlTagService->syncPlanCreated(
+            $request->user(),
+            $current_team,
+            $template->slug,
+        );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Savings plan created.')]);
+
+        return back();
+    }
+
+    public function storeCustom(Request $request, Team $current_team): RedirectResponse
+    {
+        $this->planService->createCustom($current_team, $request->user());
+
+        $this->activationGhlTagService->syncPlanCreated(
+            $request->user(),
+            $current_team,
+            'custom',
+        );
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Custom savings plan created.')]);
 
         return back();
     }

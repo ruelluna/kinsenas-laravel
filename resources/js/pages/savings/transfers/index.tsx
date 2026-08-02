@@ -3,10 +3,9 @@ import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import Heading from '@/components/heading';
 import AddTransferModal from '@/components/savings/add-transfer-modal';
-import { Badge } from '@/components/ui/badge';
+import FundBalanceGrid from '@/components/savings/fund-balance-grid';
 import { Button } from '@/components/ui/button';
 import { formatMoney } from '@/lib/format-money';
-import { remainingTone } from '@/lib/fund-balance-tone';
 import type { SharedData } from '@/types';
 import type { CategoryBankMap, FundBalance, FundTransfer } from '@/types/savings';
 
@@ -80,58 +79,18 @@ export default function TransfersIndex({
             )}
 
             {fundBalances.length > 0 && (
-                <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    {fundBalances.map((balance) => (
-                        <div
-                            key={balance.categoryId}
-                            className={`rounded-lg border p-4 ${balance.isDefault ? 'ring-2 ring-primary/20' : ''}`}
-                        >
-                            <div className="flex items-start justify-between gap-2">
-                                <div>
-                                    <p className="font-medium">{balance.name}</p>
-                                    {balance.hint && (
-                                        <p className="mt-0.5 text-xs text-muted-foreground">{balance.hint}</p>
-                                    )}
-                                </div>
-                                {balance.isDefault && <Badge variant="secondary">Default</Badge>}
-                            </div>
-                            <dl className="mt-4 space-y-1 text-sm">
-                                <div className="flex justify-between gap-2">
-                                    <dt className="text-muted-foreground">Allocated</dt>
-                                    <dd>{formatMoney(balance.allocated)}</dd>
-                                </div>
-                                <div className="flex justify-between gap-2">
-                                    <dt className="text-muted-foreground">Transferred out</dt>
-                                    <dd>{formatMoney(balance.transferred)}</dd>
-                                </div>
-                                <div className="flex justify-between gap-2">
-                                    <dt className="text-muted-foreground">Received</dt>
-                                    <dd>{formatMoney(balance.received)}</dd>
-                                </div>
-                                <div className="flex justify-between gap-2">
-                                    <dt className="text-muted-foreground">Spent</dt>
-                                    <dd>{formatMoney(balance.spent)}</dd>
-                                </div>
-                                <div className="flex justify-between gap-2 font-medium">
-                                    <dt>Remaining</dt>
-                                    <dd className={remainingTone(balance.percentUsed)}>
-                                        {formatMoney(balance.remaining)}
-                                    </dd>
-                                </div>
-                            </dl>
-                            {plan.hasLockedIncome && (
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    className="mt-4 w-full"
-                                    onClick={() => openAddModal(balance.categoryId)}
-                                >
-                                    Transfer from {balance.name}
-                                </Button>
-                            )}
-                        </div>
-                    ))}
+                <div className="mt-6">
+                    <FundBalanceGrid
+                        fundBalances={fundBalances}
+                        variant="detailed"
+                        showReceived
+                        transferredLabel="Transferred out"
+                        hasLockedIncome={plan.hasLockedIncome}
+                        action={{
+                            label: (balance) => `Transfer from ${balance.name}`,
+                            onClick: openAddModal,
+                        }}
+                    />
                 </div>
             )}
 

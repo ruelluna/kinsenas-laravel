@@ -33,12 +33,15 @@ class FundBalanceService
      *     received: string|null,
      *     spent: string|null,
      *     remaining: string|null,
-     *     percentUsed: float|null
+     *     percentUsed: float|null,
+     *     bankId: string|null,
+     *     bankDisplayName: string|null,
+     *     bankLogoUrl: string|null
      * }>
      */
     public function balancesForPlan(SavingsPlan $plan): array
     {
-        $plan->loadMissing('categories');
+        $plan->loadMissing('categories.bank.institution');
         $dek = $this->vaultKeyManager->userDek();
         $allocatedByCategory = $this->allocatedTotalsByCategory($plan, $dek);
         $transferredOutByCategory = $this->transferredOutTotalsByCategory($plan, $dek);
@@ -75,6 +78,8 @@ class FundBalanceService
                     $percentUsed = round((float) bcdiv(bcmul($drawn, '100', 4), $allocated, 2), 1);
                 }
 
+                $bank = $category->bank;
+
                 return [
                     'categoryId' => $category->id,
                     'name' => $category->name,
@@ -86,6 +91,9 @@ class FundBalanceService
                     'spent' => $dek === null ? null : $spent,
                     'remaining' => $remaining,
                     'percentUsed' => $percentUsed,
+                    'bankId' => $bank?->id,
+                    'bankDisplayName' => $bank !== null ? $bank->displayLabel() : null,
+                    'bankLogoUrl' => $bank?->institution?->logo_url,
                 ];
             })
             ->all();
@@ -330,7 +338,10 @@ class FundBalanceService
      *         transferred: string,
      *         spent: string,
      *         remaining: string,
-     *         percent_used: float
+     *         percent_used: float,
+     *         bank_id: string|null,
+     *         bank_display_name: string|null,
+     *         bank_logo_url: string|null
      *     }>
      * }
      */
@@ -378,6 +389,9 @@ class FundBalanceService
                     'spent' => $balance['spent'] ?? '0.00',
                     'remaining' => $balance['remaining'] ?? '0.00',
                     'percent_used' => $balance['percentUsed'] ?? 0.0,
+                    'bank_id' => $balance['bankId'],
+                    'bank_display_name' => $balance['bankDisplayName'],
+                    'bank_logo_url' => $balance['bankLogoUrl'],
                 ])
                 ->values()
                 ->all(),
@@ -404,7 +418,10 @@ class FundBalanceService
      *     received: string|null,
      *     spent: string|null,
      *     remaining: string|null,
-     *     percentUsed: float|null
+     *     percentUsed: float|null,
+     *     bankId: string|null,
+     *     bankDisplayName: string|null,
+     *     bankLogoUrl: string|null
      * }>
      */
     public function balancesWithDefaultFirst(SavingsPlan $plan): array

@@ -61,6 +61,9 @@ export type FundBalance = {
     spent: string | null;
     remaining: string | null;
     percentUsed: number | null;
+    bankId: string | null;
+    bankDisplayName: string | null;
+    bankLogoUrl: string | null;
 };
 
 export type FundTransfer = {
@@ -218,5 +221,8 @@ export type ReportTotals = {
         spent: string;
         remaining: string;
         percent_used: number;
+        bank_id: string | null;
+        bank_display_name: string | null;
+        bank_logo_url: string | null;
     }>;
 };

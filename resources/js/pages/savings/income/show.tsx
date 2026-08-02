@@ -2,6 +2,7 @@ import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import Heading from '@/components/heading';
+import FundBankBadge from '@/components/savings/fund-bank-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -212,20 +213,35 @@ export default function IncomeShow({
                                 </td>
                             </tr>
                         ) : (
-                            breakdown.map((row) => (
-                                <tr key={row.categoryId} className="border-b last:border-b-0">
-                                    <td className="px-4 py-3">{formatCategoryLabel(row)}</td>
-                                    <td className="px-4 py-3 text-right">{formatPercentage(row)}</td>
-                                    <td className="px-4 py-3 text-right font-medium">
-                                        {formatMoney(row.amount)}
-                                    </td>
-                                    {fundBalances.length > 0 && (
-                                        <td className="px-4 py-3 text-right">
-                                            {formatMoney(balanceByCategory[row.categoryId]?.remaining ?? null)}
+                            breakdown.map((row) => {
+                                const fundBalance = balanceByCategory[row.categoryId];
+
+                                return (
+                                    <tr key={row.categoryId} className="border-b last:border-b-0">
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-start justify-between gap-3">
+                                                <span>{formatCategoryLabel(row)}</span>
+                                                {fundBalance?.bankId && fundBalance.bankDisplayName && (
+                                                    <FundBankBadge
+                                                        bankDisplayName={fundBalance.bankDisplayName}
+                                                        bankLogoUrl={fundBalance.bankLogoUrl}
+                                                        layout="inline"
+                                                    />
+                                                )}
+                                            </div>
                                         </td>
-                                    )}
-                                </tr>
-                            ))
+                                        <td className="px-4 py-3 text-right">{formatPercentage(row)}</td>
+                                        <td className="px-4 py-3 text-right font-medium">
+                                            {formatMoney(row.amount)}
+                                        </td>
+                                        {fundBalances.length > 0 && (
+                                            <td className="px-4 py-3 text-right">
+                                                {formatMoney(fundBalance?.remaining ?? null)}
+                                            </td>
+                                        )}
+                                    </tr>
+                                );
+                            })
                         )}
                     </tbody>
                     {breakdown.length > 0 && (

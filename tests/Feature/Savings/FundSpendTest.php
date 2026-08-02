@@ -233,6 +233,13 @@ it('blocks unlocking income when spending exceeds remaining allocation', functio
 it('includes fund health on reports page', function () {
     [$user, , $everydayCategory] = createUserWithLockedIncome();
 
+    $bank = Bank::factory()->create([
+        'team_id' => $user->currentTeam->id,
+        'name' => 'BPI',
+    ]);
+
+    $everydayCategory->update(['bank_id' => $bank->id]);
+
     $this->actingAs($user)->post(route('savings.spending.store', [
         'current_team' => $user->currentTeam->slug,
     ]), [
@@ -250,7 +257,9 @@ it('includes fund health on reports page', function () {
         ->has('totals.fund_health', 3)
         ->where('totals.fund_health.0.category_name', 'Everyday Fund')
         ->where('totals.fund_health.0.spent', '2500.00')
-        ->where('totals.fund_health.0.remaining', '32500.00'),
+        ->where('totals.fund_health.0.remaining', '32500.00')
+        ->where('totals.fund_health.0.bank_id', $bank->id)
+        ->where('totals.fund_health.0.bank_display_name', 'BPI'),
     );
 });
 

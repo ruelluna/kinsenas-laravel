@@ -26,7 +26,7 @@ class BetaApplicationService
             'beta_application_status' => BetaApplicationStatus::Pending,
         ])->save();
 
-        SyncBetaApplicationToGhl::dispatch($user, 'application_submitted');
+        SyncBetaApplicationToGhl::dispatch($user, 'application_submitted')->afterCommit();
 
         Log::info('Beta application submitted', [
             'user_id' => $user->id,
@@ -48,7 +48,7 @@ class BetaApplicationService
 
         $this->grantLaunchDiscountIfEligible($user);
 
-        SyncBetaApplicationToGhl::dispatch($user->fresh(), 'application_approved');
+        SyncBetaApplicationToGhl::dispatch($user->fresh(), 'application_approved')->afterCommit();
 
         Log::info('Beta application approved', [
             'user_id' => $user->id,
@@ -68,7 +68,7 @@ class BetaApplicationService
             'beta_approved_by' => $admin->id,
         ])->save();
 
-        SyncBetaApplicationToGhl::dispatch($user->fresh(), 'application_rejected');
+        SyncBetaApplicationToGhl::dispatch($user->fresh(), 'application_rejected')->afterCommit();
 
         Log::info('Beta application rejected', [
             'user_id' => $user->id,

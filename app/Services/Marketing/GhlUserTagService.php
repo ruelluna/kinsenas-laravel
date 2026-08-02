@@ -18,6 +18,6 @@ class GhlUserTagService
             return;
         }
 
-        SyncUserTagsToGhl::dispatch($user, $tagsToAdd, $tagsToRemove, $context);
+        SyncUserTagsToGhl::dispatch($user, $tagsToAdd, $tagsToRemove, $context)->afterCommit();
     }
 }
