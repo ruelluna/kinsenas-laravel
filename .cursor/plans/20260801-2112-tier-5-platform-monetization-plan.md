@@ -115,11 +115,14 @@ Open beta shows **"Pricing: coming soon"** on [`register.tsx`](../../resources/j
 
 ## 5.4 Mobile PWA / quick-add spend
 
+Detailed plan: [20260801-2115-pwa-mobile-exploration-plan.md](./20260801-2115-pwa-mobile-exploration-plan.md)
+
 ### PWA
 
 - `manifest.json` + service worker via Vite plugin
 - Install prompt on mobile browsers
 - Icons and theme color matching brand
+- Full mobile polish (sidebar, safe-area, key page layouts) before install prompt
 
 ### Quick-add FAB
 

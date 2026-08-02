@@ -182,7 +182,7 @@ export default function SavingsPlanPage({ plan, templates, fundBalances, pageGui
 
     if (!plan) {
         return (
-            <>
+            <div data-tour="plan-main">
                 <Head title="Savings Plan" />
                 <Heading
                     variant="small"
@@ -193,8 +193,9 @@ export default function SavingsPlanPage({ plan, templates, fundBalances, pageGui
                     templates={templates}
                     pageGuidance={pageGuidance}
                     teamSlug={teamSlug}
+                    hasBanks={teamBanks.length > 0}
                 />
-            </>
+            </div>
         );
     }
 
@@ -333,7 +334,7 @@ function SavingsPlanEditor({
         : 'Percentage categories must total 100%. Custom categories can use optional defaults or amounts set per income.';
 
     return (
-        <>
+        <div data-tour="plan-main">
             <Head title="Savings Plan" />
             <Heading variant="small" title={plan.name} description={planDescription} />
 
@@ -730,7 +731,7 @@ function SavingsPlanEditor({
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </>
+        </div>
     );
 }
 

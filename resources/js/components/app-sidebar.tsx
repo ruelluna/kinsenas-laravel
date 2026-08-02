@@ -44,29 +44,34 @@ export function AppSidebar() {
             icon: LayoutGrid,
         },
         {
+            title: 'Banks',
+            href: `${savingsBase}/banks`,
+            icon: Landmark,
+            tourId: 'nav-banks',
+        },
+        {
             title: 'Savings Plan',
             href: `${savingsBase}/plan`,
             icon: PiggyBank,
+            tourId: 'nav-plan',
         },
         {
             title: 'Income',
             href: `${savingsBase}/income`,
             icon: Wallet,
+            tourId: 'nav-income',
         },
         {
             title: 'Transfers',
             href: `${savingsBase}/transfers`,
             icon: ArrowRightLeft,
+            tourId: 'nav-transfers',
         },
         {
             title: 'Spending',
             href: `${savingsBase}/spending`,
             icon: ShoppingBag,
-        },
-        {
-            title: 'Banks',
-            href: `${savingsBase}/banks`,
-            icon: Landmark,
+            tourId: 'nav-spending',
         },
         {
             title: 'Recipients',

@@ -188,3 +188,66 @@
         @apply bg-background text-foreground;
     }
 }
+
+/* Driver.js — match Kinsenas tokens (avoid default purple) */
+.kinsenas-driver-popover.driver-popover {
+    background-color: var(--background);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 10px 40px oklch(0.2 0.02 200 / 0.18);
+    max-width: 320px;
+}
+
+.kinsenas-driver-popover .driver-popover-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.kinsenas-driver-popover .driver-popover-description {
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--muted-foreground);
+}
+
+.kinsenas-driver-popover .driver-popover-progress-text {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+}
+
+.kinsenas-driver-popover .driver-popover-navigation-btns {
+    gap: 0.5rem;
+}
+
+.kinsenas-driver-popover .driver-popover-prev-btn {
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) - 2px);
+    text-shadow: none;
+}
+
+.kinsenas-driver-popover .driver-popover-next-btn,
+.kinsenas-driver-popover .driver-popover-close-btn {
+    text-shadow: none;
+}
+
+.kinsenas-driver-popover .driver-popover-next-btn {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    border: 1px solid transparent;
+    border-radius: calc(var(--radius) - 2px);
+}
+
+.kinsenas-driver-popover .driver-popover-close-btn {
+    color: var(--muted-foreground);
+}
+
+.kinsenas-driver-popover .driver-popover-arrow-side-left,
+.kinsenas-driver-popover .driver-popover-arrow-side-right,
+.kinsenas-driver-popover .driver-popover-arrow-side-top,
+.kinsenas-driver-popover .driver-popover-arrow-side-bottom {
+    background: var(--background);
+    border-color: var(--border);
+}

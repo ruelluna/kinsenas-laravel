@@ -1,6 +1,8 @@
-import { Info } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import { Info, Landmark } from 'lucide-react';
 import VideoEmbed from '@/components/savings/video-embed';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import type { SavingsPlanPageGuidance } from '@/types/savings';
 
 const editRulesRows = [
@@ -81,6 +83,35 @@ export function BeforeChooseAlert({
             <Info className="text-primary" />
             <AlertTitle>Before you choose</AlertTitle>
             <AlertDescription className="whitespace-pre-wrap">{note}</AlertDescription>
+        </Alert>
+    );
+}
+
+export function BanksFirstAlert({
+    teamSlug,
+    hasBanks,
+}: {
+    teamSlug: string;
+    hasBanks: boolean;
+}) {
+    if (hasBanks || teamSlug === '') {
+        return null;
+    }
+
+    return (
+        <Alert variant="warning" className="mt-6" data-tour="banks-first">
+            <Landmark />
+            <AlertTitle>Add your banks first</AlertTitle>
+            <AlertDescription className="space-y-3">
+                <p>
+                    Add the bank accounts you use before picking a formula. After you choose a plan,
+                    you&apos;ll assign each fund to one of those accounts. You can still pick a plan
+                    now, but bank assignment will be empty until you add banks.
+                </p>
+                <Button variant="outline" size="sm" asChild>
+                    <Link href={`/${teamSlug}/savings/banks`}>Go to Banks</Link>
+                </Button>
+            </AlertDescription>
         </Alert>
     );
 }

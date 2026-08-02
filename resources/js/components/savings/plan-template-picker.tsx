@@ -1,5 +1,8 @@
 import { Form } from '@inertiajs/react';
-import { BeforeChooseAlert } from '@/components/savings/plan-guidance-panels';
+import {
+    BanksFirstAlert,
+    BeforeChooseAlert,
+} from '@/components/savings/plan-guidance-panels';
 import TemplateAllocationPieChart from '@/components/savings/template-allocation-pie-chart';
 import VideoEmbed from '@/components/savings/video-embed';
 import { Button } from '@/components/ui/button';
@@ -55,13 +58,17 @@ export default function SavingsPlanTemplatePicker({
     templates,
     pageGuidance,
     teamSlug,
+    hasBanks,
 }: {
     templates: FormulaTemplate[];
     pageGuidance: SavingsPlanPageGuidance;
     teamSlug: string;
+    hasBanks: boolean;
 }) {
     return (
         <div className="mt-6 space-y-6">
+            <BanksFirstAlert teamSlug={teamSlug} hasBanks={hasBanks} />
+
             {(pageGuidance.chooserIntro || pageGuidance.chooserVideoUrl) && (
                 <div className="space-y-4 rounded-lg border bg-muted/20 p-4">
                     {pageGuidance.chooserIntro && (
@@ -75,7 +82,7 @@ export default function SavingsPlanTemplatePicker({
 
             <BeforeChooseAlert note={pageGuidance.beforeChooseNote} />
 
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 lg:grid-cols-2" data-tour="plan-templates">
                 {templates.map((template) => (
                     <TemplatePickerCard
                         key={template.id}
