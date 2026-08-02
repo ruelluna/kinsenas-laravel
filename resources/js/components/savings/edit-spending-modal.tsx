@@ -1,5 +1,5 @@
 import { Form, usePage } from '@inertiajs/react';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import InputError from '@/components/input-error';
 import ReceiptUploadField from '@/components/savings/receipt-upload-field';
 import { Button } from '@/components/ui/button';
