@@ -41,6 +41,7 @@ Route::prefix('admin')
 
         Route::get('platform-users', [AdminPlatformUserController::class, 'index'])->name('platform-users.index');
         Route::patch('platform-users/{user}', [AdminPlatformUserController::class, 'update'])->name('platform-users.update');
+        Route::delete('platform-users/{user}', [AdminPlatformUserController::class, 'destroy'])->name('platform-users.destroy');
 
         Route::get('savings-plan-guidance', [AdminSavingsPlanPageGuidanceController::class, 'edit'])->name('savings-plan-guidance.edit');
         Route::put('savings-plan-guidance', [AdminSavingsPlanPageGuidanceController::class, 'update'])->name('savings-plan-guidance.update');

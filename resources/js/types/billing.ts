@@ -125,6 +125,7 @@ export type AdminPlatformUser = {
     isPlatformAdmin: boolean;
     subscriptionStatus: string | null;
     subscriptionStatusLabel: string | null;
+    deleteBlockReason: string | null;
 };
 
 export type FilterOption = {

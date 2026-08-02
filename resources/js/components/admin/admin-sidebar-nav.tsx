@@ -24,7 +24,7 @@ const adminNavItems: NavItem[] = [
     { title: 'Beta applications', href: '/admin/beta-applications', icon: ClipboardList },
     { title: 'Beta feedback', href: '/admin/beta-feedback', icon: MessageSquare },
     { title: 'Payment QR', href: '/admin/payment-qr', icon: QrCode },
-    { title: 'Platform admins', href: '/admin/platform-users', icon: Shield },
+    { title: 'Users', href: '/admin/platform-users', icon: Shield },
     { title: 'Formula templates', href: '/admin/formula-templates', icon: UserCog },
     { title: 'Savings guidance', href: '/admin/savings-plan-guidance', icon: UserCog },
 ];

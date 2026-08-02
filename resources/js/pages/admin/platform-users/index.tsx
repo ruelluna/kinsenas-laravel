@@ -1,4 +1,6 @@
 import { Form, Head } from '@inertiajs/react';
+import { useState } from 'react';
+import DeletePlatformUserModal from '@/components/admin/delete-platform-user-modal';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,13 +28,17 @@ export default function AdminPlatformUsersIndex({
     currentUserId,
     platformAdminCount,
 }: Props) {
+    const [userToDelete, setUserToDelete] = useState<AdminPlatformUser | null>(
+        null,
+    );
+
     return (
         <>
-            <Head title="Admin — Platform users" />
+            <Head title="Admin — Users" />
             <Heading
                 variant="small"
-                title="Platform admins"
-                description={`${platformAdminCount} platform admin(s). Grant or revoke access.`}
+                title="Users"
+                description={`Manage platform admins and remove user accounts. ${platformAdminCount} platform admin(s).`}
             />
 
             <Form method="get" action="/admin/platform-users" className="mt-6 flex flex-wrap gap-3">
@@ -64,6 +70,7 @@ export default function AdminPlatformUsersIndex({
                 {users.data.map((user) => {
                     const isSelf = user.id === currentUserId;
                     const isLastAdmin = user.isPlatformAdmin && platformAdminCount <= 1;
+                    const canDelete = user.deleteBlockReason === null;
 
                     return (
                         <div key={user.id} className="rounded-lg border p-4 text-sm">
@@ -80,26 +87,38 @@ export default function AdminPlatformUsersIndex({
                                         Subscription: {user.subscriptionStatusLabel ?? 'None'}
                                     </p>
                                 </div>
-                                <Form
-                                    action={`/admin/platform-users/${user.id}`}
-                                    method="post"
-                                    className="flex items-center gap-2"
-                                >
-                                    <input type="hidden" name="_method" value="patch" />
-                                    <input
-                                        type="hidden"
-                                        name="is_platform_admin"
-                                        value={user.isPlatformAdmin ? '0' : '1'}
-                                    />
-                                    <Button
-                                        type="submit"
-                                        size="sm"
-                                        variant={user.isPlatformAdmin ? 'outline' : 'default'}
-                                        disabled={isSelf || isLastAdmin}
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <Form
+                                        action={`/admin/platform-users/${user.id}`}
+                                        method="post"
+                                        className="flex items-center gap-2"
                                     >
-                                        {user.isPlatformAdmin ? 'Revoke admin' : 'Grant admin'}
+                                        <input type="hidden" name="_method" value="patch" />
+                                        <input
+                                            type="hidden"
+                                            name="is_platform_admin"
+                                            value={user.isPlatformAdmin ? '0' : '1'}
+                                        />
+                                        <Button
+                                            type="submit"
+                                            size="sm"
+                                            variant={user.isPlatformAdmin ? 'outline' : 'default'}
+                                            disabled={isSelf || isLastAdmin}
+                                        >
+                                            {user.isPlatformAdmin ? 'Revoke admin' : 'Grant admin'}
+                                        </Button>
+                                    </Form>
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="destructive"
+                                        disabled={!canDelete}
+                                        data-test="delete-user-button"
+                                        onClick={() => setUserToDelete(user)}
+                                    >
+                                        Remove user
                                     </Button>
-                                </Form>
+                                </div>
                             </div>
                             {(isSelf || isLastAdmin) && user.isPlatformAdmin && (
                                 <p className="mt-2 text-xs text-muted-foreground">
@@ -108,10 +127,27 @@ export default function AdminPlatformUsersIndex({
                                         : 'At least one platform admin must remain.'}
                                 </p>
                             )}
+                            {user.deleteBlockReason && !((isSelf || isLastAdmin) && user.isPlatformAdmin) && (
+                                <p className="mt-2 text-xs text-muted-foreground">
+                                    {user.deleteBlockReason}
+                                </p>
+                            )}
                         </div>
                     );
                 })}
             </div>
+
+            {userToDelete && (
+                <DeletePlatformUserModal
+                    user={userToDelete}
+                    open={userToDelete !== null}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            setUserToDelete(null);
+                        }
+                    }}
+                />
+            )}
         </>
     );
 }

@@ -87,4 +87,39 @@ final class GhlTagCatalog
     {
         return 'beta-feedback-'.$category;
     }
+
+    /**
+     * @return list<string>
+     */
+    public static function allStaticTags(): array
+    {
+        return [
+            self::KINSENAS_USER,
+            self::KINSENAS_BETA,
+            self::KINSENAS_SURVEY,
+            self::REGISTERED,
+            self::EMAIL_VERIFIED,
+            self::BETA_PENDING,
+            self::BETA_APPROVED,
+            self::BETA_REJECTED,
+            self::BETA_LAUNCH_DISCOUNT_ELIGIBLE,
+            self::BANK_ADDED,
+            self::GOTYME_GOSAVE_SETUP,
+            self::PLAN_CREATED,
+            self::FIRST_INCOME_ENTERED,
+            self::INCOME_LOCKED,
+            self::ACTIVATED_USER,
+            self::FIRST_TRANSFER,
+            self::FIRST_SPEND,
+            self::VAULT_UNLOCKED,
+            self::BETA_FEEDBACK,
+            self::PAYMENT_SUBMITTED,
+            self::SUBSCRIPTION_ACTIVE,
+            self::TRIAL_ACTIVE,
+            self::SUBSCRIPTION_CANCELLED,
+            self::TEAM_INVITE_SENT,
+            self::TEAM_MEMBER,
+            self::TEAM_CREATED,
+        ];
+    }
 }

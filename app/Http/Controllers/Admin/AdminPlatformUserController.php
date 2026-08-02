@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\DeletePlatformUserRequest;
 use App\Http\Requests\Admin\UpdatePlatformAdminRequest;
 use App\Models\User;
+use App\Services\Users\UserDeletionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -13,6 +15,8 @@ use Inertia\Response;
 
 class AdminPlatformUserController extends Controller
 {
+    public function __construct(private UserDeletionService $userDeletionService) {}
+
     public function index(Request $request): Response
     {
         $search = $request->query('search');
@@ -33,6 +37,8 @@ class AdminPlatformUserController extends Controller
             ->paginate(20)
             ->withQueryString();
 
+        $actor = $request->user();
+
         return Inertia::render('admin/platform-users/index', [
             'users' => $users->through(fn (User $user) => [
                 'id' => $user->id,
@@ -41,6 +47,7 @@ class AdminPlatformUserController extends Controller
                 'isPlatformAdmin' => $user->isPlatformAdmin(),
                 'subscriptionStatus' => $user->currentTeam?->subscription?->status->value,
                 'subscriptionStatusLabel' => $user->currentTeam?->subscription?->status?->label(),
+                'deleteBlockReason' => $this->userDeletionService->deleteBlockReason($actor, $user),
             ]),
             'filters' => [
                 'search' => $search,
@@ -82,5 +89,17 @@ class AdminPlatformUserController extends Controller
         ]);
 
         return back();
+    }
+
+    public function destroy(DeletePlatformUserRequest $request, User $user): RedirectResponse
+    {
+        $this->userDeletionService->delete($request->user(), $user);
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => __('User account removed.'),
+        ]);
+
+        return to_route('admin.platform-users.index');
     }
 }
