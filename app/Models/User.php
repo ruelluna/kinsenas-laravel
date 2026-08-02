@@ -37,6 +37,8 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $beta_approved_at
  * @property int|null $beta_approved_by
  * @property bool $beta_launch_discount_eligible
+ * @property bool $marketing_emails_opt_in
+ * @property Carbon|null $marketing_emails_opted_in_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Team|null $currentTeam
@@ -44,7 +46,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property-read Collection<int, Membership> $teamMemberships
  * @property-read Collection<int, Team> $teams
  */
-#[Fillable(['name', 'email', 'password', 'current_team_id', 'is_platform_admin', 'beta_enrolled_at', 'beta_application_status', 'beta_approved_at', 'beta_approved_by', 'beta_launch_discount_eligible'])]
+#[Fillable(['name', 'email', 'password', 'current_team_id', 'is_platform_admin', 'beta_enrolled_at', 'beta_application_status', 'beta_approved_at', 'beta_approved_by', 'beta_launch_discount_eligible', 'marketing_emails_opt_in', 'marketing_emails_opted_in_at'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
@@ -66,6 +68,8 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
             'beta_application_status' => BetaApplicationStatus::class,
             'beta_approved_at' => 'datetime',
             'beta_launch_discount_eligible' => 'boolean',
+            'marketing_emails_opt_in' => 'boolean',
+            'marketing_emails_opted_in_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
         ];
     }

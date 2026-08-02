@@ -43,7 +43,25 @@ it('creates a pending beta application on registration', function () {
 
     expect($user->beta_enrolled_at)->not->toBeNull()
         ->and($user->beta_application_status)->toBe(BetaApplicationStatus::Pending)
-        ->and($user->personalTeam()->subscription->status)->toBe(SubscriptionStatus::OpenBeta);
+        ->and($user->personalTeam()->subscription->status)->toBe(SubscriptionStatus::OpenBeta)
+        ->and($user->marketing_emails_opt_in)->toBeFalse();
+});
+
+it('stores marketing email opt-in on open beta registration', function () {
+    Queue::fake();
+
+    $this->post(route('register.store'), [
+        'name' => 'Beta Opt In',
+        'email' => 'beta-opt-in@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+        'marketing_emails_opt_in' => '1',
+    ]);
+
+    $user = User::where('email', 'beta-opt-in@example.com')->firstOrFail();
+
+    expect($user->marketing_emails_opt_in)->toBeTrue()
+        ->and($user->marketing_emails_opted_in_at)->not->toBeNull();
 });
 
 it('redirects pending applicants to the beta pending page after login', function () {

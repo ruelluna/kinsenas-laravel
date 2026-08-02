@@ -148,10 +148,33 @@ export default function Register({ passwordRules, teamInvitation, trialOffer, op
                                 />
                             </div>
 
+                            <div className="flex items-start gap-3">
+                                <input
+                                    type="checkbox"
+                                    id="marketing_emails_opt_in"
+                                    name="marketing_emails_opt_in"
+                                    value="1"
+                                    tabIndex={5}
+                                    className="mt-1 size-4 shrink-0 rounded border border-input shadow-xs"
+                                />
+                                <div className="grid gap-1">
+                                    <Label
+                                        htmlFor="marketing_emails_opt_in"
+                                        className="font-normal leading-snug"
+                                    >
+                                        Send me helpful emails from Kinsenas
+                                    </Label>
+                                    <p className="text-sm text-muted-foreground">
+                                        Occasional tips, product updates, and beta news.
+                                        Not promotional spam — unsubscribe anytime.
+                                    </p>
+                                </div>
+                            </div>
+
                             <Button
                                 type="submit"
                                 className="mt-2 w-full"
-                                tabIndex={5}
+                                tabIndex={6}
                                 data-test="register-user-button"
                             >
                                 {processing && <Spinner />}
@@ -173,7 +196,7 @@ export default function Register({ passwordRules, teamInvitation, trialOffer, op
                                         : login()
                                 }
                                 data-test="team-invitation-login-link"
-                                tabIndex={6}
+                                tabIndex={7}
                             >
                                 Log in
                             </TextLink>

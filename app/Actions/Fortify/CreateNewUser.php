@@ -39,13 +39,18 @@ class CreateNewUser implements CreatesNewUsers
         Validator::make($input, [
             ...$this->profileRules(),
             'password' => $this->passwordRules(),
+            'marketing_emails_opt_in' => ['sometimes', 'boolean'],
         ])->validate();
 
-        return DB::transaction(function () use ($input) {
+        $marketingEmailsOptIn = filter_var($input['marketing_emails_opt_in'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+        return DB::transaction(function () use ($input, $marketingEmailsOptIn) {
             $user = User::create([
                 'name' => $input['name'],
                 'email' => $input['email'],
                 'password' => $input['password'],
+                'marketing_emails_opt_in' => $marketingEmailsOptIn,
+                'marketing_emails_opted_in_at' => $marketingEmailsOptIn ? now() : null,
             ]);
 
             $this->createTeam->handle($user, isPersonal: true);

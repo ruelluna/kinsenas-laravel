@@ -81,6 +81,35 @@ it('new users can register', function () {
     $response->assertRedirect(route('verification.notice', absolute: false));
 });
 
+it('defaults marketing email opt-in to false when checkbox is not checked', function () {
+    $this->post(route('register.store'), [
+        'name' => 'Opt Out User',
+        'email' => 'opt-out@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ]);
+
+    $user = User::where('email', 'opt-out@example.com')->firstOrFail();
+
+    expect($user->marketing_emails_opt_in)->toBeFalse()
+        ->and($user->marketing_emails_opted_in_at)->toBeNull();
+});
+
+it('stores marketing email opt-in when checkbox is checked', function () {
+    $this->post(route('register.store'), [
+        'name' => 'Opt In User',
+        'email' => 'opt-in@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+        'marketing_emails_opt_in' => '1',
+    ]);
+
+    $user = User::where('email', 'opt-in@example.com')->firstOrFail();
+
+    expect($user->marketing_emails_opt_in)->toBeTrue()
+        ->and($user->marketing_emails_opted_in_at)->not->toBeNull();
+});
+
 it('registration creates a user named default workspace', function () {
     $this->post(route('register.store'), [
         'name' => 'Ruel Luna',
