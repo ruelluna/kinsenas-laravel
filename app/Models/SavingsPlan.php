@@ -75,11 +75,11 @@ class SavingsPlan extends Model
 
     public function shouldShowFundBalances(): bool
     {
-        return $this->hasLockedIncomePeriod() || $this->hasOpeningBalances();
+        return $this->categories()->exists();
     }
 
     public function canDrawFromFunds(): bool
     {
-        return $this->shouldShowFundBalances();
+        return $this->hasOpeningBalances() || $this->hasLockedIncomePeriod();
     }
 }

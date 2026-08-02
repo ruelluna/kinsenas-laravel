@@ -1,8 +1,9 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import Heading from '@/components/heading';
+import { PublicBetaAlert } from '@/components/public-beta-alert';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { BETA_FREE_MESSAGE, BETA_PRICING_COMING_SOON_LABEL } from '@/lib/beta-copy';
+import { BETA_PRICING_COMING_SOON_LABEL } from '@/lib/beta-copy';
 import { formatMoneyFromCents } from '@/lib/format-money';
 import type { SharedData } from '@/types';
 
@@ -57,22 +58,18 @@ export default function BillingSettings({ team, canManageBilling, subscription, 
             />
 
             {openBeta.isActive && (
-                <Alert variant="info" className="mt-6">
-                    <AlertTitle>Public beta — free access</AlertTitle>
-                    <AlertDescription className="space-y-2">
-                        <p>{BETA_FREE_MESSAGE}</p>
-                        <p>
-                            {team.name} has full access to the core savings planner at no cost. We are not
-                            collecting payments during beta.
-                        </p>
-                        <p>
-                            <Link href="/settings/feedback" className="font-medium underline underline-offset-4">
-                                Send beta feedback
-                            </Link>{' '}
-                            anytime — it helps shape what we ship next.
-                        </p>
-                    </AlertDescription>
-                </Alert>
+                <PublicBetaAlert className="mt-6">
+                    <p>
+                        {team.name} has full access to the core savings planner at no cost. We are not
+                        collecting payments during beta.
+                    </p>
+                    <p>
+                        <Link href="/settings/feedback" className="font-medium underline underline-offset-4">
+                            Send beta feedback
+                        </Link>{' '}
+                        anytime — it helps shape what we ship next.
+                    </p>
+                </PublicBetaAlert>
             )}
 
             {isLockedOut && (

@@ -106,12 +106,21 @@ class SavingsPlanService
     private function replaceAllCategories(SavingsPlan $plan, array $categories): SavingsPlan
     {
         return DB::transaction(function () use ($plan, $categories) {
+            $existingCategories = $plan->categories()->get()->keyBy('id');
+
             $plan->categories()->delete();
 
             $created = [];
 
             foreach ($categories as $index => $category) {
                 $allocationType = CategoryAllocationType::from($category['allocation_type']);
+                $existingCategoryId = $category['id'] ?? null;
+                $existingOpeningBalance = $existingCategoryId !== null && $existingCategoryId !== ''
+                    ? $existingCategories->get($existingCategoryId)?->opening_balance_encrypted
+                    : null;
+                $submittedOpeningBalance = array_key_exists('opening_balance', $category)
+                    ? $this->normalizeOpeningBalance($category['opening_balance'])
+                    : $existingOpeningBalance;
 
                 $created[$index] = SavingsCategory::query()->create([
                     'plan_id' => $plan->id,
@@ -129,9 +138,7 @@ class SavingsPlanService
                         && $category['deduction_value'] !== ''
                         ? $category['deduction_value']
                         : null,
-                    'opening_balance_encrypted' => $allocationType === CategoryAllocationType::Percentage
-                        ? $this->normalizeOpeningBalance($category['opening_balance'] ?? null)
-                        : null,
+                    'opening_balance_encrypted' => $submittedOpeningBalance,
                     'sort_order' => $index,
                 ]);
             }
@@ -291,12 +298,12 @@ class SavingsPlanService
                 continue;
             }
 
-            if (CategoryAllocationType::from($category['allocation_type']) !== CategoryAllocationType::Percentage) {
+            if (! array_key_exists('opening_balance', $category)) {
                 continue;
             }
 
             $indexedCategories[$index]->update([
-                'opening_balance_encrypted' => $this->normalizeOpeningBalance($category['opening_balance'] ?? null),
+                'opening_balance_encrypted' => $this->normalizeOpeningBalance($category['opening_balance']),
             ]);
         }
     }
@@ -314,6 +321,24 @@ class SavingsPlanService
         }
 
         return $normalized;
+    }
+
+    public function addOpeningBalance(SavingsPlan $plan, SavingsCategory $category, string $amount): SavingsCategory
+    {
+        if ($category->plan_id !== $plan->id) {
+            abort(404);
+        }
+
+        $existing = $category->opening_balance_encrypted !== null
+            ? number_format((float) $category->opening_balance_encrypted, 2, '.', '')
+            : '0.00';
+        $newTotal = bcadd($existing, number_format((float) $amount, 2, '.', ''), 2);
+
+        $category->update([
+            'opening_balance_encrypted' => $this->normalizeOpeningBalance($newTotal),
+        ]);
+
+        return $category->fresh();
     }
 
     /**

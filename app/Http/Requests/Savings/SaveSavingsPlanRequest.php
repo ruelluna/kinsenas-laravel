@@ -55,7 +55,7 @@ class SaveSavingsPlanRequest extends FormRequest
                 $categories[$index]['bank_id'] = null;
             }
 
-            if (($category['opening_balance'] ?? '') === '') {
+            if (array_key_exists('opening_balance', $category) && ($category['opening_balance'] ?? '') === '') {
                 $categories[$index]['opening_balance'] = null;
             }
         }

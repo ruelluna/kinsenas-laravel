@@ -22,6 +22,7 @@ export type DashboardPlan = {
     id: string;
     name: string;
     hasLockedIncome: boolean;
+    hasIncome: boolean;
     canDrawFromFunds: boolean;
 };
 

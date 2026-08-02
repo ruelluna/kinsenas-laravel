@@ -79,8 +79,8 @@ export function BeforeChooseAlert({
     }
 
     return (
-        <Alert className="mt-6">
-            <Info className="text-primary" />
+        <Alert variant="guidance" className="mt-6">
+            <Info />
             <AlertTitle>Before you choose</AlertTitle>
             <AlertDescription className="whitespace-pre-wrap">{note}</AlertDescription>
         </Alert>

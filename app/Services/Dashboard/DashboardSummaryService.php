@@ -93,11 +93,11 @@ class DashboardSummaryService
 
         $setupComplete = collect($steps)->every(fn (array $step) => $step['complete']);
 
-        $fundBalances = $plan !== null && $plan->shouldShowFundBalances()
+        $fundBalances = $plan !== null
             ? $this->balanceService->balancesWithDefaultFirst($plan)
             : [];
 
-        $bankBalances = $plan !== null && $plan->shouldShowFundBalances()
+        $bankBalances = $plan !== null && ($plan->canDrawFromFunds() || $plan->hasOpeningBalances())
             ? $this->balanceService->bankBalancesForTeam($team, $plan)
             : [];
 
@@ -129,6 +129,7 @@ class DashboardSummaryService
                 'id' => $plan->id,
                 'name' => $plan->name,
                 'hasLockedIncome' => $hasLockedIncome,
+                'hasIncome' => $hasIncome,
                 'canDrawFromFunds' => $plan->canDrawFromFunds(),
             ] : null,
             'summary' => $summary,

@@ -50,7 +50,7 @@ export default function Register({
                         )}
 
                         {openBetaOffer && (
-                            <Alert>
+                            <Alert variant="brand">
                                 <AlertTitle>Apply for public beta access</AlertTitle>
                                 <AlertDescription className="space-y-2">
                                     <p>
@@ -77,7 +77,7 @@ export default function Register({
                         )}
 
                         {trialOffer && (
-                            <Alert>
+                            <Alert variant="guidance">
                                 <AlertTitle>
                                     Start your {trialOffer.trialDays}-day free trial
                                 </AlertTitle>

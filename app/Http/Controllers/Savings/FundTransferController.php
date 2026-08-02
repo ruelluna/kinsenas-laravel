@@ -29,7 +29,6 @@ class FundTransferController extends Controller
     public function index(Request $request, Team $current_team): Response
     {
         $plan = $this->planService->forTeam($current_team, $request->user());
-        abort_if($plan === null, 404);
 
         $plan->load('categories.bank.institution');
         $transfers = $this->fundTransferService->recentForPlan($plan);
@@ -62,7 +61,6 @@ class FundTransferController extends Controller
     public function store(SaveFundTransferRequest $request, Team $current_team): RedirectResponse
     {
         $plan = $this->planService->forTeam($current_team, $request->user());
-        abort_if($plan === null, 404);
 
         $fromCategoryId = $request->validated('from_category_id');
         $toCategoryId = $request->validated('to_category_id');
@@ -93,7 +91,6 @@ class FundTransferController extends Controller
     public function confirm(Request $request, Team $current_team, FundTransfer $fundTransfer): RedirectResponse
     {
         $plan = $this->planService->forTeam($current_team, $request->user());
-        abort_if($plan === null, 404);
         abort_if($fundTransfer->savings_plan_id !== $plan->id, 404);
 
         $this->fundTransferService->confirm($fundTransfer, $request->user());

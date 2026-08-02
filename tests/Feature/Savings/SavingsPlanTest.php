@@ -588,6 +588,151 @@ it('rejects opening balance changes after income is recorded', function () {
     $response->assertSessionHasErrors('categories.0.opening_balance');
 });
 
+it('adds opening balance to a fund bucket before income', function () {
+    $user = User::factory()->create();
+    test()->unlockVaultFor($user);
+    $template = SavingsFormulaTemplate::query()->where('slug', 'abundant-formula')->firstOrFail();
+
+    $this->actingAs($user)->post(route('savings.plan.from-template', [
+        'current_team' => $user->currentTeam->slug,
+        'template' => $template->id,
+    ]));
+
+    $plan = SavingsPlan::query()->with('categories')->firstOrFail();
+    $everyday = $plan->categories->firstWhere('name', 'Everyday Fund');
+
+    $response = $this->actingAs($user)->patch(route('savings.plan.category.opening-balance', [
+        'current_team' => $user->currentTeam->slug,
+        'category' => $everyday->id,
+    ]), [
+        'amount' => '5000.00',
+    ]);
+
+    $response->assertRedirect();
+
+    expect($everyday->fresh()->opening_balance_encrypted)->toBe('5000.00');
+});
+
+it('preserves opening balances when saving the plan without resubmitting them', function () {
+    $user = User::factory()->create();
+    test()->unlockVaultFor($user);
+    $template = SavingsFormulaTemplate::query()->where('slug', 'abundant-formula')->firstOrFail();
+
+    $this->actingAs($user)->post(route('savings.plan.from-template', [
+        'current_team' => $user->currentTeam->slug,
+        'template' => $template->id,
+    ]));
+
+    $plan = SavingsPlan::query()->with('categories')->firstOrFail();
+    $everyday = $plan->categories->firstWhere('name', 'Everyday Fund');
+
+    $this->actingAs($user)->patch(route('savings.plan.category.opening-balance', [
+        'current_team' => $user->currentTeam->slug,
+        'category' => $everyday->id,
+    ]), [
+        'amount' => '5000.00',
+    ]);
+
+    $payload = categoriesPayload($plan->fresh('categories'));
+
+    $response = $this->actingAs($user)->put(route('savings.plan.update', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'categories' => $payload,
+    ]);
+
+    $response->assertRedirect();
+
+    $updatedEveryday = SavingsPlan::query()->firstOrFail()
+        ->categories()
+        ->where('name', 'Everyday Fund')
+        ->firstOrFail();
+
+    expect($updatedEveryday->opening_balance_encrypted)->toBe('5000.00');
+});
+
+it('shows fund balances on plan page before opening balances are added', function () {
+    $user = User::factory()->create();
+    test()->unlockVaultFor($user);
+    $template = SavingsFormulaTemplate::query()->where('slug', 'abundant-formula')->firstOrFail();
+
+    $this->actingAs($user)->post(route('savings.plan.from-template', [
+        'current_team' => $user->currentTeam->slug,
+        'template' => $template->id,
+    ]));
+
+    $response = $this->actingAs($user)->get(route('savings.plan.show', [
+        'current_team' => $user->currentTeam->slug,
+    ]));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->has('fundBalances', 3)
+        ->where('fundBalances.0.canFund', true)
+        ->where('fundBalances.0.remaining', '0.00'),
+    );
+});
+
+it('adds opening balance to a fund bucket after income is recorded', function () {
+    [$user, $plan] = createUserWithSavingsPlanAndIncome();
+    $everyday = $plan->categories->firstWhere('name', 'Everyday Fund');
+
+    $response = $this->actingAs($user)->patch(route('savings.plan.category.opening-balance', [
+        'current_team' => $user->currentTeam->slug,
+        'category' => $everyday->id,
+    ]), [
+        'amount' => '3000.00',
+    ]);
+
+    $response->assertRedirect();
+
+    expect($everyday->fresh()->opening_balance_encrypted)->toBe('3000.00');
+});
+
+it('adds opening balance to a custom deduction fund bucket', function () {
+    $user = User::factory()->create();
+    test()->unlockVaultFor($user);
+    $template = SavingsFormulaTemplate::query()->where('slug', 'abundant-formula')->firstOrFail();
+
+    $this->actingAs($user)->post(route('savings.plan.from-template', [
+        'current_team' => $user->currentTeam->slug,
+        'template' => $template->id,
+    ]));
+
+    $this->actingAs($user)->put(route('savings.plan.update', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'categories' => [
+            ['name' => 'Everyday Fund', 'allocation_type' => 'percentage', 'percentage' => 50],
+            ['name' => 'Savings', 'allocation_type' => 'percentage', 'percentage' => 30],
+            ['name' => 'Tithe', 'allocation_type' => 'percentage', 'percentage' => 20],
+            [
+                'name' => 'College Fund',
+                'allocation_type' => 'deduction',
+                'deduction_mode' => 'fixed',
+                'deduction_value' => 1000,
+                'deduct_from_index' => 0,
+            ],
+        ],
+    ]);
+
+    $collegeFund = SavingsPlan::query()->firstOrFail()
+        ->categories()
+        ->where('name', 'College Fund')
+        ->firstOrFail();
+
+    $response = $this->actingAs($user)->patch(route('savings.plan.category.opening-balance', [
+        'current_team' => $user->currentTeam->slug,
+        'category' => $collegeFund->id,
+    ]), [
+        'amount' => '2500.00',
+    ]);
+
+    $response->assertRedirect();
+
+    expect($collegeFund->fresh()->opening_balance_encrypted)->toBe('2500.00');
+});
+
 it('allows discarding plan before income to return to formula chooser', function () {
     $user = User::factory()->create();
     test()->unlockVaultFor($user);

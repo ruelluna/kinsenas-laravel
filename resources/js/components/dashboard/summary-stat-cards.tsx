@@ -15,21 +15,6 @@ export default function SummaryStatCards({ setup, summary, quickLinks }: Props) 
         return null;
     }
 
-    if (!setup.hasLockedIncome && !setup.hasOpeningBalances) {
-        return (
-            <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                Lock income or add existing savings on your plan to see balances.{' '}
-                <Link href={quickLinks.plan} className="text-primary underline-offset-4 hover:underline">
-                    Savings Plan
-                </Link>
-                {' · '}
-                <Link href={quickLinks.income} className="text-primary underline-offset-4 hover:underline">
-                    Income
-                </Link>
-            </div>
-        );
-    }
-
     return (
         <div className="grid gap-4 md:grid-cols-3">
             <StatCard
@@ -43,9 +28,13 @@ export default function SummaryStatCards({ setup, summary, quickLinks }: Props) 
                 title="In banks"
                 value={formatMoney(summary.totalInBanks)}
                 description={
-                    <Link href={quickLinks.banks} className="text-primary underline-offset-4 hover:underline">
-                        View banks
-                    </Link>
+                    setup.hasLockedIncome || setup.hasOpeningBalances ? (
+                        <Link href={quickLinks.banks} className="text-primary underline-offset-4 hover:underline">
+                            View banks
+                        </Link>
+                    ) : (
+                        'Assign banks on your savings plan'
+                    )
                 }
             />
             <StatCard

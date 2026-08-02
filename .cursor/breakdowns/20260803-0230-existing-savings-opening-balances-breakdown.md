@@ -16,6 +16,15 @@ Users can optionally enter how much they already have saved in each percentage f
 - Post-create toast nudges users to add existing savings
 - Opening balances lock after first income entry (server-validated)
 
+## Changelog — 2026-08-03 (Add Existing Fund on every bucket)
+
+- **Add Existing Fund** button on every saved fund bucket card on Savings Plan (percentage and custom)
+- Same button on Dashboard and plan **Fund balances** grid cards
+- Funding works **any time**, including after income locks percentage splits
+- Plan save form still blocks opening-balance edits after income; dedicated PATCH adds funds additively
+- Custom deduction buckets support `opening_balance_encrypted` same as percentage buckets
+- `canFund` true for all categories when vault is unlocked; spending UI gated by `canDrawFromFunds`
+
 ## Files touched
 
 ### Backend
@@ -37,13 +46,18 @@ Users can optionally enter how much they already have saved in each percentage f
 - `resources/js/pages/dashboard.tsx`
 - `resources/js/pages/savings/spending/index.tsx`, `transfers/index.tsx`
 - `resources/js/components/savings/fund-balance-grid.tsx`
+- `resources/js/components/savings/fund-balances-section.tsx`
+- `resources/js/components/savings/add-fund-balance-modal.tsx`
 - `resources/js/components/dashboard/summary-stat-cards.tsx`
+
+- `routes/savings.php`
 
 ### Tests
 
 - `tests/Feature/Savings/SavingsPlanTest.php`
 - `tests/Feature/Savings/FundBalanceServiceTest.php`
 - `tests/Feature/Savings/FundSpendTest.php`
+- `tests/Feature/DashboardTest.php`
 
 ## Deploy steps
 
@@ -70,14 +84,13 @@ vendor/bin/pint --dirty
 ### Happy path
 
 1. Log in as a subscribed user with banks added
-2. Open **Savings Plan** → pick **TRC Savings** (or Abundant)
-3. Confirm toast mentions adding existing savings
-4. On plan editor, find **Existing savings** panel and **Already saving?** alert
-5. Enter amounts (e.g. Everyday ₱25,000), **Save plan**
-6. Confirm **Fund balances** shows remaining without locked income
-7. Open **Spending** → record a spend → remaining decreases
-8. Add first income → confirm opening balance fields are hidden
-9. Attempt to change opening balances via API after income → validation error
+2. Open **Savings Plan** → pick a formula
+3. Confirm **each fund bucket card** shows **Add Existing Fund**
+4. Click **Add Existing Fund** on one bucket → add ₱5,000 → confirm remaining updates
+5. Add income and lock percentages → **Add Existing Fund** still works on locked cards
+6. Custom fund buckets also show **Add Existing Fund**
+7. Dashboard fund cards show **Add Existing Fund**
+8. **Record spending** enabled only after a bucket has remaining &gt; 0
 
 ### Checks
 
@@ -94,11 +107,12 @@ vendor/bin/pint --dirty
 ## Suggested application commit
 
 ```
-Summary: Add optional existing savings per fund bucket at plan setup
+Summary: Add Existing Fund button on every fund bucket anytime
 
-Users joining mid-cycle can enter encrypted opening balances per percentage
-fund before first income. Balances feed remaining calculations and enable
-spending before income lock; amounts lock after first income entry.
+Users can add existing savings to any fund bucket (percentage or custom) via
+Add Existing Fund on plan cards and balance grids, before or after income lock.
+Plan save still blocks opening-balance edits after income; PATCH endpoint adds
+funds additively.
 ```
 
 ## Implementation summary

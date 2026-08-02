@@ -32,7 +32,6 @@ class FundSpendController extends Controller
     public function index(Request $request, Team $current_team): Response
     {
         $plan = $this->planService->forTeam($current_team, $request->user());
-        abort_if($plan === null, 404);
 
         $plan->load('categories.bank');
         $spends = $this->fundSpendService->recentForPlan($plan);
@@ -64,7 +63,6 @@ class FundSpendController extends Controller
     public function store(SaveFundSpendRequest $request, Team $current_team): RedirectResponse
     {
         $plan = $this->planService->forTeam($current_team, $request->user());
-        abort_if($plan === null, 404);
 
         $categoryId = $request->validated('category_id');
         $this->assertCategoryBelongsToPlan($plan->id, $categoryId);
@@ -102,7 +100,6 @@ class FundSpendController extends Controller
     public function update(UpdateFundSpendRequest $request, Team $current_team, FundSpend $fundSpend): RedirectResponse
     {
         $plan = $this->planService->forTeam($current_team, $request->user());
-        abort_if($plan === null, 404);
         abort_if($fundSpend->savings_plan_id !== $plan->id, 404);
 
         $categoryId = $request->validated('category_id');
@@ -130,7 +127,6 @@ class FundSpendController extends Controller
     public function destroy(Request $request, Team $current_team, FundSpend $fundSpend): RedirectResponse
     {
         $plan = $this->planService->forTeam($current_team, $request->user());
-        abort_if($plan === null, 404);
         abort_if($fundSpend->savings_plan_id !== $plan->id, 404);
 
         $this->fundSpendService->delete($fundSpend, $plan);
@@ -143,7 +139,6 @@ class FundSpendController extends Controller
     public function confirm(Request $request, Team $current_team, FundSpend $fundSpend): RedirectResponse
     {
         $plan = $this->planService->forTeam($current_team, $request->user());
-        abort_if($plan === null, 404);
         abort_if($fundSpend->savings_plan_id !== $plan->id, 404);
 
         $this->fundSpendService->confirm($fundSpend, $request->user());

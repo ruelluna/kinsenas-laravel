@@ -68,7 +68,7 @@ export default function SpendingIndex({
 
             {!plan.canDrawFromFunds && (
                 <p className="mt-4 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                    Lock at least one income period or add existing savings on your plan before
+                    Lock at least one income period or add a current balance on your savings plan before
                     recording spending.
                 </p>
             )}
@@ -100,7 +100,7 @@ export default function SpendingIndex({
                     <FundBalanceGrid
                         fundBalances={fundBalances}
                         variant="detailed"
-                        hasLockedIncome={plan.canDrawFromFunds}
+                        canDrawFromFunds={plan.canDrawFromFunds}
                         onSpendFrom={openAddModal}
                     />
                 </div>

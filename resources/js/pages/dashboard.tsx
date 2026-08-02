@@ -34,8 +34,7 @@ export default function Dashboard({
     const recoveryKey = page.props.registrationRecoveryKey;
     const teamId = page.props.currentTeam?.id;
 
-    const showFinancialSections =
-        setup.hasPlan && (setup.hasLockedIncome || setup.hasOpeningBalances);
+    const showFinancialSections = setup.hasPlan;
 
     useEffect(() => {
         if (teamId && !setup.complete) {
@@ -72,12 +71,12 @@ export default function Dashboard({
                             title={plan?.name ?? 'Fund balances'}
                             description={
                                 setup.hasLockedIncome
-                                    ? 'Running totals from locked income minus transfers and spending.'
-                                    : 'Balances from your existing savings. Lock income to add payday allocations.'
+                                    ? 'Running totals from existing funds and locked income minus transfers and spending.'
+                                    : 'Add existing savings to any fund bucket anytime. Locked income adds payday allocations on top.'
                             }
                             fundBalances={fundBalances}
                             spendHref={quickLinks.spending}
-                            hasLockedIncome={plan?.canDrawFromFunds ?? false}
+                            canDrawFromFunds={plan?.canDrawFromFunds ?? false}
                         />
                         <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
                             <Link href={quickLinks.plan} className="text-primary underline-offset-4 hover:underline">

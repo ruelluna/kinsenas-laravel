@@ -25,6 +25,7 @@ export type SavingsPlan = {
     hasLockedIncome: boolean;
     hasIncome: boolean;
     percentagesLocked: boolean;
+    canDrawFromFunds: boolean;
 };
 
 export type FormulaTemplateCategory = {
@@ -62,6 +63,7 @@ export type FundBalance = {
     spent: string | null;
     remaining: string | null;
     openingBalance: string | null;
+    canFund: boolean;
     percentUsed: number | null;
     bankId: string | null;
     bankDisplayName: string | null;

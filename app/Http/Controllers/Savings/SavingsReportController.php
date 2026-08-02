@@ -21,7 +21,6 @@ class SavingsReportController extends Controller
     public function __invoke(Request $request, Team $current_team): Response
     {
         $plan = $this->planService->forTeam($current_team, $request->user());
-        abort_if($plan === null, 404);
 
         $spends = FundSpend::query()
             ->where('savings_plan_id', $plan->id)

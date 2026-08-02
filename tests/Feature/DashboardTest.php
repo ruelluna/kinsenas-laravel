@@ -4,6 +4,7 @@ use App\Enums\TeamRole;
 use App\Models\Bank;
 use App\Models\FundSpend;
 use App\Models\FundTransfer;
+use App\Models\SavingsFormulaTemplate;
 use App\Models\Team;
 use App\Models\TeamInvitation;
 use App\Models\User;
@@ -179,6 +180,28 @@ it('dashboard setup shows incomplete steps for a new team without a plan', funct
         ->where('setup.steps.1.key', 'plan')
         ->where('plan', null)
         ->has('fundBalances', 0),
+    );
+});
+
+it('dashboard shows fund buckets after plan is chosen', function () {
+    $user = User::factory()->create();
+    test()->unlockVaultFor($user);
+    $template = SavingsFormulaTemplate::query()->where('slug', 'abundant-formula')->firstOrFail();
+
+    $this->actingAs($user)->post(route('savings.plan.from-template', [
+        'current_team' => $user->currentTeam->slug,
+        'template' => $template->id,
+    ]));
+
+    $response = $this->actingAs($user)->get(dashboardRoute($user));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->where('setup.hasPlan', true)
+        ->where('setup.hasOpeningBalances', false)
+        ->has('fundBalances', 3)
+        ->where('fundBalances.0.canFund', true)
+        ->where('fundBalances.0.remaining', '0.00'),
     );
 });
 

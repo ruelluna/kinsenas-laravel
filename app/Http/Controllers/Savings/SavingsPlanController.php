@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Savings;
 
 use App\Enums\TeamPermission;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Savings\AddCategoryOpeningBalanceRequest;
 use App\Http\Requests\Savings\SaveSavingsPlanRequest;
+use App\Models\SavingsCategory;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlanPageGuidance;
 use App\Models\Team;
@@ -70,8 +72,9 @@ class SavingsPlanController extends Controller
                 'hasLockedIncome' => $plan->hasLockedIncomePeriod(),
                 'hasIncome' => $plan->hasIncomePeriod(),
                 'percentagesLocked' => $plan->hasIncomePeriod(),
+                'canDrawFromFunds' => $plan->canDrawFromFunds(),
             ] : null,
-            'fundBalances' => $plan && $plan->shouldShowFundBalances()
+            'fundBalances' => $plan
                 ? $this->fundBalanceService->balancesForPlan($plan)
                 : [],
             'templates' => $templates->map(fn ($t) => [
@@ -106,7 +109,7 @@ class SavingsPlanController extends Controller
             $template->slug,
         );
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Savings plan created. Add any existing savings on this page before your first income.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Savings plan created.')]);
 
         return back();
     }
@@ -121,7 +124,7 @@ class SavingsPlanController extends Controller
             'custom',
         );
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Custom savings plan created. Add any existing savings on this page before your first income.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Custom savings plan created.')]);
 
         return back();
     }
@@ -147,6 +150,26 @@ class SavingsPlanController extends Controller
         }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Savings plan updated.')]);
+
+        return back();
+    }
+
+    public function addOpeningBalance(
+        AddCategoryOpeningBalanceRequest $request,
+        Team $current_team,
+        SavingsCategory $category,
+    ): RedirectResponse {
+        $plan = $this->planService->forTeam($current_team, $request->user());
+
+        abort_if($plan === null, 404);
+
+        if ($plan->created_by_user_id !== $request->user()->id && ! ($plan->is_shared_with_team && $request->user()->hasTeamPermission($current_team, TeamPermission::UpdateTeam))) {
+            abort(403);
+        }
+
+        $this->planService->addOpeningBalance($plan, $category, $request->validated('amount'));
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Existing fund added.')]);
 
         return back();
     }

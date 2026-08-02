@@ -67,7 +67,7 @@ export default function TransfersIndex({
 
             {!plan.canDrawFromFunds && (
                 <p className="mt-4 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                    Lock at least one income period or add existing savings on your plan before
+                    Lock at least one income period or add a current balance on your savings plan before
                     recording transfers.
                 </p>
             )}
@@ -91,7 +91,7 @@ export default function TransfersIndex({
                         variant="detailed"
                         showReceived
                         transferredLabel="Transferred out"
-                        hasLockedIncome={plan.canDrawFromFunds}
+                        canDrawFromFunds={plan.canDrawFromFunds}
                         action={{
                             label: (balance) => `Transfer from ${balance.name}`,
                             onClick: openAddModal,

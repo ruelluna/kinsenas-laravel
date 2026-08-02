@@ -14,9 +14,10 @@ type FundAction = {
 type Props = {
     fundBalances: FundBalance[];
     variant?: 'compact' | 'detailed';
-    hasLockedIncome?: boolean;
+    canDrawFromFunds?: boolean;
     spendHref?: string;
     onSpendFrom?: (categoryId: string) => void;
+    onFund?: (categoryId: string) => void;
     limit?: number;
     showReceived?: boolean;
     transferredLabel?: string;
@@ -26,9 +27,10 @@ type Props = {
 export default function FundBalanceGrid({
     fundBalances,
     variant = 'compact',
-    hasLockedIncome = false,
+    canDrawFromFunds = false,
     spendHref,
     onSpendFrom,
+    onFund,
     limit,
     showReceived = false,
     transferredLabel = 'Transferred',
@@ -40,8 +42,26 @@ export default function FundBalanceGrid({
         return null;
     }
 
-    function renderAction(balance: FundBalance) {
-        if (hasLockedIncome && action) {
+    function renderFundAction(balance: FundBalance) {
+        if (!balance.canFund || !onFund) {
+            return null;
+        }
+
+        return (
+            <Button
+                type="button"
+                variant="default"
+                size="sm"
+                className="mt-3 w-full"
+                onClick={() => onFund(balance.categoryId)}
+            >
+                    Add Existing Fund
+            </Button>
+        );
+    }
+
+    function renderSpendAction(balance: FundBalance) {
+        if (canDrawFromFunds && action) {
             const label = typeof action.label === 'function' ? action.label(balance) : action.label;
 
             return (
@@ -57,7 +77,7 @@ export default function FundBalanceGrid({
             );
         }
 
-        if (hasLockedIncome && onSpendFrom) {
+        if (canDrawFromFunds && onSpendFrom) {
             return (
                 <Button
                     type="button"
@@ -71,7 +91,7 @@ export default function FundBalanceGrid({
             );
         }
 
-        if (hasLockedIncome && spendHref && !onSpendFrom && !action) {
+        if (canDrawFromFunds && spendHref && !onSpendFrom && !action) {
             return (
                 <Button variant="outline" size="sm" className="mt-4 w-full" asChild>
                     <Link href={spendHref}>Spend from {balance.name}</Link>
@@ -102,6 +122,8 @@ export default function FundBalanceGrid({
                                 <Badge variant="outline">{balance.percentUsed}% used</Badge>
                             )}
                         </div>
+                        {renderFundAction(balance)}
+                        {renderSpendAction(balance)}
                     </li>
                 ))}
             </ul>
@@ -120,7 +142,7 @@ export default function FundBalanceGrid({
                         {balance.openingBalance !== null
                             && parseFloat(balance.openingBalance) > 0 && (
                             <div className="flex justify-between gap-2">
-                                <dt className="text-muted-foreground">Existing savings</dt>
+                                <dt className="text-muted-foreground">Starting balance</dt>
                                 <dd>{formatMoney(balance.openingBalance)}</dd>
                             </div>
                         )}
@@ -149,7 +171,8 @@ export default function FundBalanceGrid({
                             </dd>
                         </div>
                     </dl>
-                    {renderAction(balance)}
+                    {renderFundAction(balance)}
+                    {renderSpendAction(balance)}
                 </div>
             ))}
         </div>

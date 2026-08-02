@@ -30,8 +30,6 @@ class IncomePeriodController extends Controller
     {
         $plan = $this->planService->forTeam($current_team, $request->user());
 
-        abort_if($plan === null, 404);
-
         $plan->load(['categories.deductFromCategory']);
 
         $periods = $plan->incomePeriods()
@@ -85,8 +83,6 @@ class IncomePeriodController extends Controller
     public function show(Request $request, Team $current_team, IncomePeriod $incomePeriod): Response
     {
         $plan = $this->planService->forTeam($current_team, $request->user());
-
-        abort_if($plan === null, 404);
         abort_if($incomePeriod->plan_id !== $plan->id, 404);
 
         $incomePeriod->load(['plan', 'allocations.category']);
@@ -119,7 +115,6 @@ class IncomePeriodController extends Controller
     public function store(SaveIncomePeriodRequest $request, Team $current_team): RedirectResponse
     {
         $plan = $this->planService->forTeam($current_team, $request->user());
-        abort_if($plan === null, 404);
 
         $this->incomeService->create(
             $plan,

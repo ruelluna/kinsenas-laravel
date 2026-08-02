@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureBetaApproved;
 use App\Http\Middleware\EnsurePlatformAdmin;
+use App\Http\Middleware\EnsureSavingsPlan;
 use App\Http\Middleware\EnsureSubscribedOrTrialing;
 use App\Http\Middleware\EnsureSubscriptionFeature;
 use App\Http\Middleware\EnsureVaultUnlocked;
@@ -27,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'vault.unlocked' => EnsureVaultUnlocked::class,
             'subscribed' => EnsureSubscribedOrTrialing::class,
             'subscribed.feature' => EnsureSubscriptionFeature::class,
+            'savings.plan.required' => EnsureSavingsPlan::class,
             'platform.admin' => EnsurePlatformAdmin::class,
             'beta.approved' => EnsureBetaApproved::class,
         ]);
