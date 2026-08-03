@@ -85,6 +85,7 @@ it('deletes a recipient and nulls linked spending', function () {
 
     $recipient = Recipient::query()->create([
         'team_id' => $user->currentTeam->id,
+        'type' => RecipientType::Person,
         'name' => 'Mechanic',
     ]);
 
