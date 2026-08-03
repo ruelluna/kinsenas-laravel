@@ -7,6 +7,7 @@ use App\Models\FundSpend;
 use App\Models\Team;
 use App\Notifications\Concerns\FormatsDatabaseNotification;
 use App\Services\Notifications\NotificationPreferenceService;
+use App\Support\Notifications\NotificationActionUrl;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -39,7 +40,7 @@ class PendingSpendConfirmation extends Notification implements ShouldQueue
             NotificationKind::PendingSpendConfirmation,
             __('Pending spending needs confirmation'),
             __('A bank-linked spend is waiting for confirmation.'),
-            $team !== null ? "/{$team->slug}/savings/spending" : '/dashboard',
+            $team !== null ? "/{$team->slug}/savings/spending" : NotificationActionUrl::LAUNCH,
             [
                 'spendId' => $this->spend->id,
                 'teamId' => $team?->id,
@@ -59,7 +60,7 @@ class PendingSpendConfirmation extends Notification implements ShouldQueue
             ]))
             ->action(
                 __('Review spending'),
-                url($team !== null ? "/{$team->slug}/savings/spending" : '/dashboard'),
+                url($team !== null ? "/{$team->slug}/savings/spending" : NotificationActionUrl::LAUNCH),
             );
     }
 

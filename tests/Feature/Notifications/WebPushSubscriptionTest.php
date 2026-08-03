@@ -22,7 +22,7 @@ it('stores a push subscription for the authenticated user', function () {
                 'p256dh' => 'test-public-key',
                 'auth' => 'test-auth-token',
             ],
-            'contentEncoding' => 'aesgcm',
+            'contentEncoding' => 'aes128gcm',
         ])
         ->assertOk()
         ->assertJsonPath('pushEnabled', true);
@@ -31,16 +31,38 @@ it('stores a push subscription for the authenticated user', function () {
         'endpoint' => $endpoint,
         'subscribable_type' => User::class,
         'subscribable_id' => $user->id,
+        'content_encoding' => 'aes128gcm',
     ]);
 
     expect($user->notificationPreferences()->first()->push_enabled)->toBeTrue();
+});
+
+it('defaults content encoding to aes128gcm when omitted', function () {
+    $user = User::factory()->create();
+
+    $endpoint = 'https://fcm.googleapis.com/fcm/send/example-token';
+
+    $this->actingAs($user)
+        ->postJson(route('settings.notifications.push-subscription.store'), [
+            'endpoint' => $endpoint,
+            'keys' => [
+                'p256dh' => 'test-public-key',
+                'auth' => 'test-auth-token',
+            ],
+        ])
+        ->assertOk();
+
+    $this->assertDatabaseHas('push_subscriptions', [
+        'endpoint' => $endpoint,
+        'content_encoding' => 'aes128gcm',
+    ]);
 });
 
 it('deletes a push subscription by endpoint', function () {
     $user = User::factory()->create();
     $endpoint = 'https://push.example.test/subscription/def';
 
-    $user->updatePushSubscription($endpoint, 'public-key', 'auth-token', 'aesgcm');
+    $user->updatePushSubscription($endpoint, 'public-key', 'auth-token', 'aes128gcm');
     $user->notificationPreferences()->update(['push_enabled' => true]);
 
     $this->actingAs($user)

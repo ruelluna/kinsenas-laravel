@@ -5,6 +5,7 @@ namespace App\Notifications\Billing;
 use App\Enums\NotificationKind;
 use App\Notifications\Concerns\FormatsDatabaseNotification;
 use App\Services\Notifications\NotificationPreferenceService;
+use App\Support\Notifications\NotificationActionUrl;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -32,7 +33,7 @@ class BetaApproved extends Notification implements ShouldQueue
             NotificationKind::BetaApproved,
             __('Beta access approved'),
             __('Your Kinsenas beta application was approved. You now have full access.'),
-            '/dashboard',
+            NotificationActionUrl::LAUNCH,
             [],
         );
     }

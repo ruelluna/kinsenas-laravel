@@ -1,3 +1,7 @@
+import { ensureServiceWorkerRegistered } from '@/lib/register-pwa';
+
+export type PushContentEncoding = 'aes128gcm' | 'aesgcm';
+
 function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding)
@@ -25,9 +29,26 @@ function csrfToken(): string {
     return token;
 }
 
+export function resolvePushContentEncoding(
+    subscription: PushSubscription,
+): PushContentEncoding {
+    if (
+        subscription.endpoint.includes('mozilla.com') ||
+        subscription.endpoint.includes('push.services.mozilla.com')
+    ) {
+        return 'aesgcm';
+    }
+
+    return 'aes128gcm';
+}
+
 export async function subscribeToWebPush(vapidPublicKey: string): Promise<void> {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
         throw new Error('Push notifications are not supported in this browser.');
+    }
+
+    if (!vapidPublicKey) {
+        throw new Error('Push notifications are not configured on this server.');
     }
 
     const permission = await Notification.requestPermission();
@@ -36,7 +57,16 @@ export async function subscribeToWebPush(vapidPublicKey: string): Promise<void> 
         throw new Error('Notification permission was not granted.');
     }
 
+    await ensureServiceWorkerRegistered();
+
     const registration = await navigator.serviceWorker.ready;
+    const existingSubscription =
+        await registration.pushManager.getSubscription();
+
+    if (existingSubscription) {
+        await existingSubscription.unsubscribe();
+    }
+
     const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
@@ -47,6 +77,8 @@ export async function subscribeToWebPush(vapidPublicKey: string): Promise<void> 
     if (!json.endpoint || !json.keys?.p256dh || !json.keys.auth) {
         throw new Error('Invalid push subscription payload.');
     }
+
+    const contentEncoding = resolvePushContentEncoding(subscription);
 
     const response = await fetch('/settings/notifications/push-subscription', {
         method: 'POST',
@@ -63,7 +95,7 @@ export async function subscribeToWebPush(vapidPublicKey: string): Promise<void> 
                 p256dh: json.keys.p256dh,
                 auth: json.keys.auth,
             },
-            contentEncoding: 'aesgcm',
+            contentEncoding,
         }),
     });
 

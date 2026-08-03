@@ -1,5 +1,6 @@
 import { Form, Head } from '@inertiajs/react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -59,6 +60,9 @@ export default function NotificationsSettings({
     const [hasPushSubscription, setHasPushSubscription] = useState(
         pushSubscriptionCount > 0,
     );
+    const [pushEnabledOnServer, setPushEnabledOnServer] = useState(
+        preferences.pushEnabled,
+    );
 
     const pushSupported = isWebPushSupported();
 
@@ -76,9 +80,16 @@ export default function NotificationsSettings({
             if (enabled) {
                 await subscribeToWebPush(vapidPublicKey);
                 setHasPushSubscription(true);
+                setPushEnabledOnServer(true);
+                toast.success('Browser push enabled', {
+                    description:
+                        'Save preferences below to choose which events send push notifications.',
+                });
             } else {
                 await unsubscribeFromWebPush();
                 setHasPushSubscription(false);
+                setPushEnabledOnServer(false);
+                toast.success('Browser push disabled');
             }
         } catch (error) {
             setPushError(
@@ -255,26 +266,49 @@ export default function NotificationsSettings({
                                 }
                             />
                             {pushSupported && (
-                                <div className="flex flex-wrap items-center gap-3">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        disabled={pushBusy || !vapidPublicKey}
-                                        onClick={() =>
-                                            void handlePushToggle(
-                                                !hasPushSubscription,
-                                            )
-                                        }
-                                    >
-                                        {hasPushSubscription
-                                            ? 'Disable browser push'
-                                            : 'Enable browser push'}
-                                    </Button>
-                                    <span className="text-sm text-muted-foreground">
-                                        {hasPushSubscription
-                                            ? 'This device is subscribed.'
-                                            : 'Allow notifications when prompted.'}
-                                    </span>
+                                <div className="space-y-2 rounded-lg border p-4">
+                                    <div className="flex flex-wrap items-center gap-3">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            disabled={
+                                                pushBusy || !vapidPublicKey
+                                            }
+                                            onClick={() =>
+                                                void handlePushToggle(
+                                                    !hasPushSubscription,
+                                                )
+                                            }
+                                        >
+                                            {hasPushSubscription
+                                                ? 'Disable browser push'
+                                                : 'Enable browser push'}
+                                        </Button>
+                                    </div>
+                                    <ul className="space-y-1 text-sm text-muted-foreground">
+                                        <li>
+                                            Device subscribed:{' '}
+                                            {hasPushSubscription
+                                                ? 'Yes'
+                                                : 'No'}
+                                        </li>
+                                        <li>
+                                            Server push enabled:{' '}
+                                            {pushEnabledOnServer
+                                                ? 'Yes'
+                                                : 'No'}
+                                        </li>
+                                        <li>
+                                            Saved subscriptions on this
+                                            account: {pushSubscriptionCount}
+                                        </li>
+                                    </ul>
+                                    {!hasPushSubscription && (
+                                        <p className="text-sm text-muted-foreground">
+                                            Enable browser push first, then
+                                            save your per-event toggles below.
+                                        </p>
+                                    )}
                                 </div>
                             )}
                             {pushError && (

@@ -6,6 +6,7 @@ use App\Enums\NotificationKind;
 use App\Models\TeamInvitation as TeamInvitationModel;
 use App\Notifications\Concerns\FormatsDatabaseNotification;
 use App\Services\Notifications\NotificationPreferenceService;
+use App\Support\Notifications\NotificationActionUrl;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -64,7 +65,7 @@ class TeamInvitation extends Notification implements ShouldQueue
                 'inviter' => $this->invitation->inviter->name,
                 'team' => $team->name,
             ]),
-            '/dashboard',
+            NotificationActionUrl::LAUNCH,
             [
                 'invitationId' => $this->invitation->id,
                 'teamId' => $team->id,

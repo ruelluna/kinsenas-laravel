@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\SendTestPushRequest;
 use App\Models\User;
 use App\Notifications\System\TestPushNotification;
+use App\Services\Notifications\PushNotificationDiagnostics;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,15 +14,20 @@ use Inertia\Response;
 
 class AdminNotificationTestController extends Controller
 {
+    public function __construct(private PushNotificationDiagnostics $diagnostics) {}
+
     public function index(Request $request): Response
     {
-        $subscriberCount = User::query()
-            ->whereHas('pushSubscriptions')
-            ->whereHas('notificationPreferences', fn ($query) => $query->where('push_enabled', true))
-            ->count();
+        $user = $request->user();
 
         return Inertia::render('admin/notifications-test/index', [
-            'subscriberCount' => $subscriberCount,
+            'subscriberCount' => User::query()
+                ->whereHas('pushSubscriptions')
+                ->whereHas('notificationPreferences', fn ($query) => $query->where('push_enabled', true))
+                ->count(),
+            'serverStatus' => $this->diagnostics->serverStatus(),
+            'userStatus' => $user !== null ? $this->diagnostics->forUser($user) : null,
+            'checklist' => $user !== null ? $this->diagnostics->checklistForUser($user) : [],
         ]);
     }
 
@@ -62,7 +68,10 @@ class AdminNotificationTestController extends Controller
             $sent = 1;
         }
 
+        $message = __('Sent :count test push notification(s).', ['count' => $sent]);
+        $hint = __('Check the bell inbox on the target account. An OS notification confirms the service worker received the push.');
+
         return to_route('admin.notifications-test.index')
-            ->with('success', __('Sent :count test push notification(s).', ['count' => $sent]));
+            ->with('success', "{$message} {$hint}");
     }
 }

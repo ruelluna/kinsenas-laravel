@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\Vault\VaultKeyStore;
 use App\Listeners\ClearVaultOnLogout;
+use App\Listeners\LogWebPushNotificationFailed;
 use App\Services\Vault\SessionVaultKeyStore;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Logout;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use NotificationChannels\WebPush\Events\NotificationFailed;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Event::listen(Logout::class, ClearVaultOnLogout::class);
+        Event::listen(NotificationFailed::class, LogWebPushNotificationFailed::class);
 
         $this->configureDefaults();
     }

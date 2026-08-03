@@ -18,7 +18,7 @@ class TestPushNotification extends Notification implements ShouldQueue
     public function __construct(
         public string $title,
         public string $body,
-        public string $actionUrl = '/dashboard',
+        public string $actionUrl = '/launch',
     ) {}
 
     /**

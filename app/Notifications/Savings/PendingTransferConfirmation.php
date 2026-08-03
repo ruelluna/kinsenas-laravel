@@ -7,6 +7,7 @@ use App\Models\FundTransfer;
 use App\Models\Team;
 use App\Notifications\Concerns\FormatsDatabaseNotification;
 use App\Services\Notifications\NotificationPreferenceService;
+use App\Support\Notifications\NotificationActionUrl;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -39,7 +40,7 @@ class PendingTransferConfirmation extends Notification implements ShouldQueue
             NotificationKind::PendingTransferConfirmation,
             __('Pending transfer needs confirmation'),
             __('A cross-bank transfer is waiting for confirmation.'),
-            $team !== null ? "/{$team->slug}/savings/transfers" : '/dashboard',
+            $team !== null ? "/{$team->slug}/savings/transfers" : NotificationActionUrl::LAUNCH,
             [
                 'transferId' => $this->transfer->id,
                 'teamId' => $team?->id,
@@ -59,7 +60,7 @@ class PendingTransferConfirmation extends Notification implements ShouldQueue
             ]))
             ->action(
                 __('Review transfers'),
-                url($team !== null ? "/{$team->slug}/savings/transfers" : '/dashboard'),
+                url($team !== null ? "/{$team->slug}/savings/transfers" : NotificationActionUrl::LAUNCH),
             );
     }
 

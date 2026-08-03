@@ -8,6 +8,7 @@ use App\Models\FundTransfer;
 use App\Models\Team;
 use App\Notifications\Concerns\FormatsDatabaseNotification;
 use App\Services\Notifications\NotificationPreferenceService;
+use App\Support\Notifications\NotificationActionUrl;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -47,7 +48,7 @@ class PendingActionConfirmed extends Notification implements ShouldQueue
                 : __('Your pending transfer was confirmed.'),
             $team !== null
                 ? ($isSpend ? "/{$team->slug}/savings/spending" : "/{$team->slug}/savings/transfers")
-                : '/dashboard',
+                : NotificationActionUrl::LAUNCH,
             [
                 'actionType' => $this->actionType,
                 'spendId' => $isSpend ? $this->action->id : null,

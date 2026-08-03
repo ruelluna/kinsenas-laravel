@@ -1,12 +1,26 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
+type ServerStatus = {
+    vapidConfigured: boolean;
+    vapidSubjectConfigured: boolean;
+};
+
+type UserStatus = {
+    pushEnabled: boolean;
+    subscriptionCount: number;
+    contentEncodings: string[];
+};
+
 type Props = {
     subscriberCount: number;
+    serverStatus: ServerStatus;
+    userStatus: UserStatus | null;
+    checklist: string[];
     errors?: {
         title?: string;
         body?: string;
@@ -18,8 +32,13 @@ type Props = {
 
 export default function AdminNotificationsTestIndex({
     subscriberCount = 0,
+    serverStatus,
+    userStatus,
+    checklist,
     errors = {},
 }: Props) {
+    const flash = usePage<{ flash?: { success?: string } }>().props.flash;
+
     return (
         <>
             <Head title="Admin — Push test" />
@@ -29,9 +48,49 @@ export default function AdminNotificationsTestIndex({
                 description="Send a test Web Push to yourself, a user email, or all subscribers."
             />
 
-            <p className="mt-4 text-sm text-muted-foreground">
-                Active push subscribers: {subscriberCount}
-            </p>
+            {flash?.success && (
+                <p className="mt-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900 dark:border-green-900 dark:bg-green-950 dark:text-green-100">
+                    {flash.success}
+                </p>
+            )}
+
+            <div className="mt-4 space-y-4 rounded-lg border p-4 text-sm">
+                <p>
+                    Active push subscribers (all users):{' '}
+                    <strong>{subscriberCount}</strong>
+                </p>
+                <p>
+                    VAPID configured:{' '}
+                    <strong>
+                        {serverStatus.vapidConfigured ? 'Yes' : 'No'}
+                    </strong>
+                </p>
+                {userStatus && (
+                    <>
+                        <p>
+                            Your account — push enabled:{' '}
+                            <strong>
+                                {userStatus.pushEnabled ? 'Yes' : 'No'}
+                            </strong>
+                            , subscriptions:{' '}
+                            <strong>{userStatus.subscriptionCount}</strong>
+                        </p>
+                        {userStatus.contentEncodings.length > 0 && (
+                            <p>
+                                Encoding(s):{' '}
+                                {userStatus.contentEncodings.join(', ')}
+                            </p>
+                        )}
+                    </>
+                )}
+                {checklist.length > 0 && (
+                    <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
+                        {checklist.map((item) => (
+                            <li key={item}>{item}</li>
+                        ))}
+                    </ul>
+                )}
+            </div>
 
             <Form
                 method="post"
@@ -65,7 +124,7 @@ export default function AdminNotificationsTestIndex({
                     <Input
                         id="actionUrl"
                         name="actionUrl"
-                        defaultValue="/dashboard"
+                        defaultValue="/launch"
                         required
                     />
                     <InputError message={errors.actionUrl} />
@@ -87,7 +146,9 @@ export default function AdminNotificationsTestIndex({
                 </div>
 
                 <div className="grid gap-2">
-                    <Label htmlFor="targetEmail">User email (when target is email)</Label>
+                    <Label htmlFor="targetEmail">
+                        User email (when target is email)
+                    </Label>
                     <Input
                         id="targetEmail"
                         name="targetEmail"

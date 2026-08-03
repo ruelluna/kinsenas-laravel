@@ -4,6 +4,7 @@ namespace App\Console\Commands\Notifications;
 
 use App\Models\User;
 use App\Notifications\System\TestPushNotification;
+use App\Services\Notifications\PushNotificationDiagnostics;
 use Illuminate\Console\Command;
 
 class SendTestPushCommand extends Command
@@ -13,11 +14,11 @@ class SendTestPushCommand extends Command
                             {--all : Send to all push subscribers}
                             {--title= : Notification title}
                             {--body= : Notification body}
-                            {--url=/dashboard : Action URL when the notification is clicked}';
+                            {--url=/launch : Action URL when the notification is clicked}';
 
     protected $description = 'Send a test Web Push notification (platform admins only)';
 
-    public function handle(): int
+    public function handle(PushNotificationDiagnostics $diagnostics): int
     {
         $admin = auth()->user();
 
@@ -27,9 +28,14 @@ class SendTestPushCommand extends Command
             return self::FAILURE;
         }
 
+        $server = $diagnostics->serverStatus();
+
+        $this->info('Server push checklist:');
+        $this->line($server['vapidConfigured'] ? '  [ok] VAPID keys configured' : '  [!!] VAPID keys missing in .env');
+
         $title = (string) ($this->option('title') ?: 'Kinsenas test push');
         $body = (string) ($this->option('body') ?: 'If you see this, Web Push is working.');
-        $actionUrl = (string) ($this->option('url') ?: '/dashboard');
+        $actionUrl = (string) ($this->option('url') ?: '/launch');
 
         $notification = new TestPushNotification($title, $body, $actionUrl);
 
@@ -51,6 +57,7 @@ class SendTestPushCommand extends Command
                 });
 
             $this->info("Sent {$sent} test push notification(s).");
+            $this->line('Inbox entry = job ran. OS popup = service worker + encoding + browser permission.');
 
             return self::SUCCESS;
         }
@@ -65,13 +72,21 @@ class SendTestPushCommand extends Command
             return self::FAILURE;
         }
 
+        $this->newLine();
+        $this->info("Target checklist for {$target->email}:");
+        foreach ($diagnostics->checklistForUser($target) as $item) {
+            $this->line("  - {$item}");
+        }
+        $this->newLine();
+
         if ($target->pushSubscriptions()->doesntExist()) {
-            $this->warn("User [{$email}] has no push subscription. Notification will still be stored in the inbox.");
+            $this->warn('No push subscription on file — inbox notification will still be queued.');
         }
 
         $target->notify($notification);
 
-        $this->info("Test push sent to {$target->email}.");
+        $this->info("Test push queued for {$target->email}.");
+        $this->line('Check bell inbox on that account. OS notification confirms Web Push delivery.');
 
         return self::SUCCESS;
     }

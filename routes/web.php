@@ -16,6 +16,10 @@ Route::post('survey/responses', [SurveyResponseController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('survey.responses.store');
 
+Route::middleware(['auth'])->get('dashboard', function () {
+    return redirect()->route('pwa.launch');
+});
+
 Route::middleware(['auth', 'verified', 'beta.approved'])->group(function () {
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('notifications/recent', [NotificationController::class, 'recent'])->name('notifications.recent');

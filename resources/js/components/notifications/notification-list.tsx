@@ -1,5 +1,6 @@
 import { Link, router } from '@inertiajs/react';
 import { formatNotificationTime } from '@/lib/format-notification-time';
+import { resolveNotificationActionUrl } from '@/lib/notification-action-url';
 import { cn } from '@/lib/utils';
 import type { NotificationItem } from '@/types/notifications';
 
@@ -29,7 +30,13 @@ export function NotificationItemRow({
         onNavigate?.();
 
         if (notification.actionUrl) {
-            router.visit(notification.actionUrl);
+            const destination = resolveNotificationActionUrl(
+                notification.actionUrl,
+            );
+
+            if (destination) {
+                router.visit(destination);
+            }
         }
     };
 

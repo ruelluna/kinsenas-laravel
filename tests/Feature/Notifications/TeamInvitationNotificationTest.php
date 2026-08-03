@@ -48,5 +48,5 @@ it('includes database payload for team invitations', function () {
 
     expect($payload['kind'])->toBe('team_invitation')
         ->and($payload['title'])->not->toBeEmpty()
-        ->and($payload['actionUrl'])->toBe('/dashboard');
+        ->and($payload['actionUrl'])->toBe('/launch');
 });

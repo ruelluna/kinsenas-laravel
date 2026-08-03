@@ -66,6 +66,7 @@ class HandleInertiaRequests extends Middleware
             'registrationRecoveryKey' => fn () => session('registration.recovery_key'),
             'flash' => fn () => [
                 'error' => $request->session()->get('error'),
+                'success' => $request->session()->get('success'),
             ],
             'notifications' => fn () => $user ? [
                 'unreadCount' => $user->unreadNotifications()->count(),

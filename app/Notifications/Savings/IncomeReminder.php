@@ -7,6 +7,7 @@ use App\Models\SavingsPlan;
 use App\Models\Team;
 use App\Notifications\Concerns\FormatsDatabaseNotification;
 use App\Services\Notifications\NotificationPreferenceService;
+use App\Support\Notifications\NotificationActionUrl;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -38,7 +39,7 @@ class IncomeReminder extends Notification implements ShouldQueue
             NotificationKind::IncomeReminder,
             __('Log your income'),
             __('It looks like you have not logged income for this month yet.'),
-            $team !== null ? "/{$team->slug}/savings/income" : '/dashboard',
+            $team !== null ? "/{$team->slug}/savings/income" : NotificationActionUrl::LAUNCH,
             [
                 'planId' => $this->plan->id,
                 'teamId' => $team?->id,

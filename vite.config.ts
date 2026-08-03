@@ -43,6 +43,7 @@ export default defineConfig(({ mode }) => ({
         }),
         VitePWA({
             registerType: 'prompt',
+            injectRegister: null,
             scope: '/',
             buildBase: '/build/',
             includeAssets: [
@@ -85,6 +86,7 @@ export default defineConfig(({ mode }) => ({
             },
             workbox: {
                 navigateFallback: null,
+                globIgnores: ['**/registerSW.js'],
                 importScripts: ['/sw-push.js'],
                 runtimeCaching: [
                     {

@@ -37,3 +37,11 @@ it('redirects authenticated users without a current team to teams settings', fun
         ->get(route('pwa.launch'))
         ->assertRedirect(route('teams.index'));
 });
+
+it('redirects legacy dashboard shortcut to launch', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->get('/dashboard')
+        ->assertRedirect(route('pwa.launch'));
+});

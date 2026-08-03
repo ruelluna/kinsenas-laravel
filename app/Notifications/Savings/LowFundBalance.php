@@ -7,6 +7,7 @@ use App\Models\SavingsCategory;
 use App\Models\Team;
 use App\Notifications\Concerns\FormatsDatabaseNotification;
 use App\Services\Notifications\NotificationPreferenceService;
+use App\Support\Notifications\NotificationActionUrl;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -44,7 +45,7 @@ class LowFundBalance extends Notification implements ShouldQueue
                 'fund' => $this->category->name,
                 'percent' => $this->percentUsed,
             ]),
-            $team !== null ? "/{$team->slug}/dashboard" : '/dashboard',
+            NotificationActionUrl::teamDashboard($team),
             [
                 'categoryId' => $this->category->id,
                 'teamId' => $team?->id,

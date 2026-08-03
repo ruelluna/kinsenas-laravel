@@ -1,11 +1,10 @@
 import { toast } from 'sonner';
 
-export function registerPwaServiceWorker(): void {
-    if (!import.meta.env.PROD || !('serviceWorker' in navigator)) {
-        return;
-    }
+let serviceWorkerRegistrationPromise: Promise<ServiceWorkerRegistration> | null =
+    null;
 
-    void import('workbox-window').then(({ Workbox }) => {
+function createWorkboxRegistration(): Promise<ServiceWorkerRegistration> {
+    return import('workbox-window').then(({ Workbox }) => {
         const workbox = new Workbox('/sw.js', {
             scope: '/',
             type: 'classic',
@@ -28,8 +27,37 @@ export function registerPwaServiceWorker(): void {
             window.location.reload();
         });
 
-        void workbox.register().catch(() => {
-            // SW unavailable — install prompt may still work on some browsers.
-        });
+        return workbox.register();
     });
+}
+
+export function registerPwaServiceWorker(): void {
+    if (!import.meta.env.PROD || !('serviceWorker' in navigator)) {
+        return;
+    }
+
+    void ensureServiceWorkerRegistered().catch(() => {
+        // SW unavailable — install prompt may still work on some browsers.
+    });
+}
+
+export async function ensureServiceWorkerRegistered(): Promise<ServiceWorkerRegistration> {
+    if (!('serviceWorker' in navigator)) {
+        throw new Error('Service workers are not supported in this browser.');
+    }
+
+    const canRegisterInDev =
+        import.meta.env.DEV && import.meta.env.VITE_PWA_DEV === 'true';
+
+    if (!import.meta.env.PROD && !canRegisterInDev) {
+        throw new Error(
+            'Push requires a production build. Run npm run build or set VITE_PWA_DEV=true for local testing.',
+        );
+    }
+
+    if (!serviceWorkerRegistrationPromise) {
+        serviceWorkerRegistrationPromise = createWorkboxRegistration();
+    }
+
+    return serviceWorkerRegistrationPromise;
 }
