@@ -22,6 +22,24 @@ export function isAuthInstallPage(component: string): boolean {
     return component === 'auth/register' || component === 'auth/login';
 }
 
+export function isMobileInstallDevice(): boolean {
+    if (typeof navigator === 'undefined') {
+        return false;
+    }
+
+    const ua = navigator.userAgent;
+
+    if (/Android|iPhone|iPod|iPad|Mobile/i.test(ua)) {
+        return true;
+    }
+
+    if (typeof window === 'undefined') {
+        return false;
+    }
+
+    return window.matchMedia('(max-width: 767px)').matches;
+}
+
 export function isIosSafari(): boolean {
     if (typeof navigator === 'undefined') {
         return false;

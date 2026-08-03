@@ -12,10 +12,12 @@ import {
     dismissBanner,
     isBannerDismissed,
 } from '@/lib/dismissible-banner';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
     getInstallGuideVariant,
     isAuthInstallPage,
     isIosSafari,
+    isMobileInstallDevice,
     isPwaInstalled,
     markPwaInstalled,
     PWA_INSTALL_DISMISS_KEY,
@@ -46,6 +48,8 @@ export function PwaInstallProvider({ children }: { children: ReactNode }) {
     const { auth } = page.props;
     const isLoggedIn = auth.user !== null;
     const onAuthInstallPage = isAuthInstallPage(page.component);
+    const isLayoutMobile = useIsMobile();
+    const isMobileInstall = isLayoutMobile || isMobileInstallDevice();
 
     const [deferredPrompt, setDeferredPrompt] =
         useState<BeforeInstallPromptEvent | null>(null);
@@ -103,7 +107,7 @@ export function PwaInstallProvider({ children }: { children: ReactNode }) {
     }, [applyInstalledState]);
 
     useEffect(() => {
-        if (installed) {
+        if (installed || !isMobileInstall) {
             return;
         }
 
@@ -120,10 +124,12 @@ export function PwaInstallProvider({ children }: { children: ReactNode }) {
                 handleBeforeInstall,
             );
         };
-    }, [installed]);
+    }, [installed, isMobileInstall]);
 
     const canOfferInstall =
-        !installed && (onAuthInstallPage || isLoggedIn);
+        !installed &&
+        isMobileInstall &&
+        (onAuthInstallPage || isLoggedIn);
 
     const showInstallPrompt = canOfferInstall && !bannerDismissed;
 
