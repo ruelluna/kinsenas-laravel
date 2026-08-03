@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Contracts\Vault\VaultKeyStore;
 use App\Listeners\ClearVaultOnLogout;
+use App\Services\Vault\SessionVaultKeyStore;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Support\Facades\Date;
@@ -13,12 +15,13 @@ use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        //
+        $this->app->singleton(SessionVaultKeyStore::class);
+
+        $this->app->bind(VaultKeyStore::class, function ($app) {
+            return $app->make(SessionVaultKeyStore::class);
+        });
     }
 
     /**

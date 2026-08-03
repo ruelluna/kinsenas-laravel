@@ -5,6 +5,7 @@ import Heading from '@/components/heading';
 import AddIncomeModal from '@/components/savings/add-income-modal';
 import DeleteIncomeModal from '@/components/savings/delete-income-modal';
 import { Button } from '@/components/ui/button';
+import { useRegisterMobileNavAction } from '@/hooks/use-register-mobile-nav-action';
 import { formatMoney } from '@/lib/format-money';
 import type { SharedData } from '@/types';
 import type {
@@ -310,6 +311,18 @@ export default function IncomeIndex({
 
     const columnCount = 3 + planCategories.length + 1;
 
+    const mobileNavAction = useMemo(
+        () => ({
+            label: 'Add income',
+            ariaLabel: 'Add income',
+            icon: Plus,
+            onClick: () => setAddModalOpen(true),
+        }),
+        [],
+    );
+
+    useRegisterMobileNavAction(mobileNavAction);
+
     return (
         <>
             <Head title="Income" />
@@ -321,7 +334,7 @@ export default function IncomeIndex({
                 />
                 <Button
                     onClick={() => setAddModalOpen(true)}
-                    className="shrink-0"
+                    className="hidden shrink-0 md:inline-flex"
                 >
                     <Plus /> Add income
                 </Button>

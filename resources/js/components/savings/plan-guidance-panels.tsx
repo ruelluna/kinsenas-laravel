@@ -49,8 +49,23 @@ export function PlanEditRulesPanel({
                 title="After income rules"
             />
 
-            <div className="overflow-x-auto rounded-md border bg-background">
-                <table className="w-full min-w-[320px] text-left text-sm">
+            <div className="overflow-x-auto rounded-md border bg-background md:hidden">
+                <div className="divide-y">
+                    {editRulesRows.map((row) => (
+                        <div key={row.categoryType} className="space-y-1 p-3">
+                            <p className="text-sm font-medium">
+                                {row.categoryType}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                                {row.afterFirstIncome}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="hidden overflow-x-auto rounded-md border bg-background md:block">
+                <table className="w-full text-left text-sm">
                     <thead>
                         <tr className="border-b bg-muted/40">
                             <th className="px-3 py-2 font-medium">

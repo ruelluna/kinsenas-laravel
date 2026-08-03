@@ -44,16 +44,16 @@ export default function PendingActionsPanel({
                     items.map((item) => (
                         <div
                             key={`${item.type}-${item.id}`}
-                            className="flex items-center justify-between gap-3 rounded-md border p-3 text-sm"
+                            className="flex flex-col gap-3 rounded-md border p-3 text-sm sm:flex-row sm:items-center sm:justify-between"
                         >
-                            <div className="flex items-start gap-3">
+                            <div className="flex min-w-0 items-start gap-3">
                                 {item.type === 'transfer' ? (
                                     <ArrowRightLeft className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                                 ) : (
                                     <ShoppingBag className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                                 )}
-                                <div>
-                                    <p className="font-medium">
+                                <div className="min-w-0">
+                                    <p className="font-medium break-words">
                                         {formatMoney(item.amount)}
                                         {item.description
                                             ? ` · ${item.description}`
@@ -64,11 +64,16 @@ export default function PendingActionsPanel({
                                     </p>
                                 </div>
                             </div>
-                            <Form action={item.confirmHref} method="post">
+                            <Form
+                                action={item.confirmHref}
+                                method="post"
+                                className="shrink-0 sm:ml-auto"
+                            >
                                 <Button
                                     type="submit"
                                     size="sm"
                                     variant="outline"
+                                    className="w-full sm:w-auto"
                                 >
                                     Confirm
                                 </Button>

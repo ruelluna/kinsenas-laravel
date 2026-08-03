@@ -1,12 +1,15 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { Plus } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import PendingActionsPanel from '@/components/dashboard/pending-actions-panel';
 import RecentActivityFeed from '@/components/dashboard/recent-activity-feed';
 import SetupChecklist from '@/components/dashboard/setup-checklist';
 import SummaryStatCards from '@/components/dashboard/summary-stat-cards';
 import PendingInvitationsModal from '@/components/pending-invitations-modal';
+import AddSpendingModal from '@/components/savings/add-spending-modal';
 import FundBalancesSection from '@/components/savings/fund-balances-section';
 import { Button } from '@/components/ui/button';
+import { useRegisterMobileNavAction } from '@/hooks/use-register-mobile-nav-action';
 import { requestOnboardingTourAutoStart } from '@/lib/onboarding-tour/storage';
 import { dashboard } from '@/routes';
 import type { DashboardInvitation, SharedData } from '@/types';
@@ -26,10 +29,12 @@ export default function Dashboard({
     recentActivity,
     features,
     quickLinks,
+    quickSpend,
 }: Props) {
     const [showInvitations, setShowInvitations] = useState(
         pendingInvitations.length > 0,
     );
+    const [addSpendOpen, setAddSpendOpen] = useState(false);
     const page = usePage<
         SharedData & { registrationRecoveryKey?: string | null }
     >();
@@ -43,6 +48,21 @@ export default function Dashboard({
             requestOnboardingTourAutoStart(teamId);
         }
     }, [teamId, setup.complete]);
+
+    const mobileNavAction = useMemo(
+        () =>
+            quickSpend && setup.canDrawFromFunds
+                ? {
+                      label: 'Add spending',
+                      ariaLabel: 'Add spending',
+                      icon: Plus,
+                      onClick: () => setAddSpendOpen(true),
+                  }
+                : null,
+        [quickSpend, setup.canDrawFromFunds],
+    );
+
+    useRegisterMobileNavAction(mobileNavAction);
 
     return (
         <>
@@ -65,7 +85,19 @@ export default function Dashboard({
                 onOpenChange={setShowInvitations}
             />
 
-            <div className="flex flex-col gap-6">
+            {quickSpend && setup.canDrawFromFunds && (
+                <AddSpendingModal
+                    open={addSpendOpen}
+                    onOpenChange={setAddSpendOpen}
+                    presetCategoryId={quickSpend.defaultCategoryId}
+                    defaultCategoryId={quickSpend.defaultCategoryId}
+                    categories={quickSpend.categories}
+                    fundBalances={fundBalances}
+                    recipients={quickSpend.recipients}
+                />
+            )}
+
+            <div className="flex flex-col gap-4 md:gap-6">
                 <SetupChecklist setup={setup} />
 
                 <SummaryStatCards

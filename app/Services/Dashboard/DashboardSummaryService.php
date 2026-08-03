@@ -94,6 +94,21 @@ class DashboardSummaryService
             ? $this->recentActivity($plan)
             : [];
 
+        $quickSpend = $plan !== null && $canDrawFromFunds
+            ? [
+                'defaultCategoryId' => $this->balanceService->defaultCategoryId($plan),
+                'categories' => $this->balanceService->categoriesWithDefaultFirst($plan)
+                    ->map(fn ($category) => [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                        'bankId' => $category->bank_id,
+                    ])
+                    ->values()
+                    ->all(),
+                'recipients' => $team->recipients()->get(['id', 'name'])->all(),
+            ]
+            : null;
+
         return [
             'setup' => [
                 'hasPlan' => $hasPlan,
@@ -128,6 +143,7 @@ class DashboardSummaryService
                 'plan' => "{$savingsBase}/plan",
                 'reports' => "{$savingsBase}/reports",
             ],
+            'quickSpend' => $quickSpend,
         ];
     }
 

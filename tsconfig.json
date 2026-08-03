@@ -109,13 +109,20 @@
         "skipLibCheck": true /* Skip type checking all .d.ts files. */,
         "baseUrl": ".",
         "paths": {
-            "@/*": ["./resources/js/*"]
+            "@/*": ["./resources/js/*"],
+            "@kinsenas/shared": ["./packages/shared/src/index.ts"],
+            "@kinsenas/shared/*": ["./packages/shared/src/*"],
+            "@kinsenas/ui": ["./packages/ui/src/index.ts"],
+            "@kinsenas/ui/*": ["./packages/ui/src/*"]
         },
         "jsx": "react-jsx"
     },
     "include": [
         "resources/js/**/*.ts",
         "resources/js/**/*.d.ts",
-        "resources/js/**/*.tsx"
+        "resources/js/**/*.tsx",
+        "packages/shared/src/**/*.ts",
+        "packages/ui/src/**/*.ts",
+        "packages/ui/src/**/*.tsx"
     ]
 }

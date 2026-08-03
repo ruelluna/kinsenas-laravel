@@ -1,5 +1,9 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import Heading from '@/components/heading';
+import {
+    MobileMetricCard,
+    MobileMetricCardList,
+} from '@/components/mobile/mobile-metric-card';
 import { BankLogo } from '@/components/savings/bank-select';
 import FundBankBadge from '@/components/savings/fund-bank-badge';
 import { formatMoney } from '@/lib/format-money';
@@ -23,8 +27,62 @@ export default function SavingsReports({ totals }: Props) {
 
             <div className="mt-6">
                 <h3 className="font-medium">Fund health</h3>
-                <div className="mt-3 overflow-hidden rounded-lg border">
-                    <table className="w-full text-sm">
+
+                <div className="mt-3 md:hidden">
+                    {totals.fund_health.length === 0 ? (
+                        <p className="rounded-lg border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
+                            Add income and record transfers or spending to see
+                            fund health.
+                        </p>
+                    ) : (
+                        <MobileMetricCardList>
+                            {totals.fund_health.map((row) => (
+                                <MobileMetricCard
+                                    key={row.category_id}
+                                    title={row.category_name}
+                                    trailing={
+                                        row.bank_id &&
+                                        row.bank_display_name ? (
+                                            <FundBankBadge
+                                                bankDisplayName={
+                                                    row.bank_display_name
+                                                }
+                                                bankLogoUrl={row.bank_logo_url}
+                                                layout="inline"
+                                            />
+                                        ) : undefined
+                                    }
+                                    rows={[
+                                        {
+                                            label: 'Allocated',
+                                            value: formatMoney(row.allocated),
+                                        },
+                                        {
+                                            label: 'Transferred',
+                                            value: formatMoney(row.transferred),
+                                        },
+                                        {
+                                            label: 'Spent',
+                                            value: formatMoney(row.spent),
+                                        },
+                                        {
+                                            label: 'Remaining',
+                                            value: formatMoney(row.remaining),
+                                            strong: true,
+                                        },
+                                        {
+                                            label: 'Used',
+                                            value: `${row.percent_used}%`,
+                                        },
+                                    ]}
+                                />
+                            ))}
+                        </MobileMetricCardList>
+                    )}
+                </div>
+
+                <div className="mt-3 hidden overflow-x-auto rounded-lg border md:block">
+                    <table className="w-full min-w-[640px] text-sm">
                         <thead>
                             <tr className="border-b bg-muted/50 text-left">
                                 <th className="px-4 py-3 font-medium">
@@ -104,7 +162,7 @@ export default function SavingsReports({ totals }: Props) {
                 </div>
             </div>
 
-            <div className="mt-8 grid gap-6 md:grid-cols-2">
+            <div className="mt-8 grid gap-4 md:grid-cols-2 md:gap-6">
                 <div className="rounded-lg border p-4">
                     <h3 className="font-medium">By bank</h3>
                     {totals.by_bank.length === 0 ? (
@@ -116,28 +174,30 @@ export default function SavingsReports({ totals }: Props) {
                             {totals.by_bank.map((row) => (
                                 <li key={row.bank_id}>
                                     <div className="flex items-center justify-between gap-3">
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex min-w-0 items-center gap-2">
                                             <BankLogo
                                                 logoUrl={row.logo_url}
                                                 name={row.bank_name}
                                             />
-                                            <span className="font-medium">
+                                            <span className="truncate font-medium">
                                                 {row.bank_name}
                                             </span>
                                         </div>
-                                        <span>{formatMoney(row.total)}</span>
+                                        <span className="shrink-0 tabular-nums">
+                                            {formatMoney(row.total)}
+                                        </span>
                                     </div>
                                     {row.by_category.length > 0 && (
                                         <ul className="mt-2 space-y-1 border-l pl-4 text-muted-foreground">
                                             {row.by_category.map((category) => (
                                                 <li
                                                     key={category.category_id}
-                                                    className="flex justify-between gap-2"
+                                                    className="flex justify-between gap-2 text-xs sm:text-sm"
                                                 >
-                                                    <span>
+                                                    <span className="min-w-0 truncate">
                                                         {category.category_name}
                                                     </span>
-                                                    <span>
+                                                    <span className="shrink-0 tabular-nums">
                                                         {formatMoney(
                                                             category.total,
                                                         )}
@@ -200,8 +260,8 @@ function ReportSection({
                             key={item.label}
                             className="flex justify-between gap-2"
                         >
-                            <span>{item.label}</span>
-                            <span className="font-medium">
+                            <span className="min-w-0 truncate">{item.label}</span>
+                            <span className="shrink-0 font-medium tabular-nums">
                                 {formatMoney(item.total)}
                             </span>
                         </li>

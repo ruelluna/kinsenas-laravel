@@ -23,6 +23,17 @@ class EnsureVaultUnlocked
             return $next($request);
         }
 
+        if ($request->is('api/*')) {
+            if ($request->routeIs('api.v1.vault.*', 'api.v1.auth.logout', 'api.v1.auth.me')) {
+                return $next($request);
+            }
+
+            return response()->json([
+                'message' => __('Vault is locked.'),
+                'vault_locked' => true,
+            ], 423);
+        }
+
         if ($request->routeIs('vault.*', 'settings.security', 'logout')) {
             return $next($request);
         }

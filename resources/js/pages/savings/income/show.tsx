@@ -4,6 +4,10 @@ import { useMemo, useState } from 'react';
 import Heading from '@/components/heading';
 import DeleteIncomeModal from '@/components/savings/delete-income-modal';
 import FundBankBadge from '@/components/savings/fund-bank-badge';
+import {
+    MobileMetricCard,
+    MobileMetricCardList,
+} from '@/components/mobile/mobile-metric-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -221,7 +225,79 @@ export default function IncomeShow({
                 </Form>
             )}
 
-            <div className="mt-6 overflow-hidden rounded-lg border">
+            <div className="mt-6">
+                <div className="md:hidden">
+                    {breakdown.length === 0 ? (
+                        <p className="rounded-lg border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
+                            No income amount set for this period.
+                        </p>
+                    ) : (
+                        <MobileMetricCardList>
+                            {breakdown.map((row) => {
+                                const fundBalance =
+                                    balanceByCategory[row.categoryId];
+
+                                return (
+                                    <MobileMetricCard
+                                        key={row.categoryId}
+                                        title={formatCategoryLabel(row)}
+                                        trailing={
+                                            fundBalance?.bankId &&
+                                            fundBalance.bankDisplayName ? (
+                                                <FundBankBadge
+                                                    bankDisplayName={
+                                                        fundBalance.bankDisplayName
+                                                    }
+                                                    bankLogoUrl={
+                                                        fundBalance.bankLogoUrl
+                                                    }
+                                                    layout="inline"
+                                                />
+                                            ) : undefined
+                                        }
+                                        rows={[
+                                            {
+                                                label: 'Allocation',
+                                                value: formatPercentage(row),
+                                            },
+                                            {
+                                                label: 'Amount',
+                                                value: formatMoney(row.amount),
+                                                strong: true,
+                                            },
+                                            ...(fundBalances.length > 0
+                                                ? [
+                                                      {
+                                                          label: 'Remaining',
+                                                          value: formatMoney(
+                                                              fundBalance?.remaining ??
+                                                                  null,
+                                                          ),
+                                                      },
+                                                  ]
+                                                : []),
+                                        ]}
+                                    />
+                                );
+                            })}
+                            <div className="rounded-lg border bg-muted/30 p-3 text-sm font-medium">
+                                <div className="flex items-baseline justify-between gap-3">
+                                    <span>Total</span>
+                                    <span className="tabular-nums">
+                                        {formatMoney(period.amount)}
+                                    </span>
+                                </div>
+                                <p className="mt-1 text-xs font-normal text-muted-foreground">
+                                    {hasDeductions
+                                        ? `${percentageTotal.toFixed(2)}% + custom allocations`
+                                        : '100% of income'}
+                                </p>
+                            </div>
+                        </MobileMetricCardList>
+                    )}
+                </div>
+
+                <div className="hidden overflow-hidden rounded-lg border md:block">
                 <table className="w-full text-sm">
                     <thead>
                         <tr className="border-b bg-muted/50 text-left">
@@ -318,6 +394,7 @@ export default function IncomeShow({
                         </tfoot>
                     )}
                 </table>
+                </div>
             </div>
 
             {fundBalances.length > 0 && (

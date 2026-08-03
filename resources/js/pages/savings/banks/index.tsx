@@ -6,6 +6,7 @@ import AddBankModal from '@/components/savings/add-bank-modal';
 import { BankLogo } from '@/components/savings/bank-select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { useRegisterMobileNavAction } from '@/hooks/use-register-mobile-nav-action';
 import { formatBankOptionLabel } from '@/lib/format-bank-label';
 import { formatMoney } from '@/lib/format-money';
 import type { SharedData } from '@/types';
@@ -107,10 +108,22 @@ export default function BanksIndex({
         ];
     }, [banks, bankBalances]);
 
+    const mobileNavAction = useMemo(
+        () => ({
+            label: 'Add bank',
+            ariaLabel: 'Add bank',
+            icon: Plus,
+            onClick: () => setAddModalOpen(true),
+        }),
+        [],
+    );
+
+    useRegisterMobileNavAction(mobileNavAction);
+
     return (
         <>
             <Head title="Banks" />
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
                 <Heading
                     variant="small"
                     title="Banks"
@@ -119,6 +132,7 @@ export default function BanksIndex({
                 <Button
                     onClick={() => setAddModalOpen(true)}
                     data-tour="add-bank"
+                    className="hidden shrink-0 md:inline-flex"
                 >
                     <Plus /> Add bank
                 </Button>

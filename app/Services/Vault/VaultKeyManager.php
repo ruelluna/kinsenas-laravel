@@ -2,68 +2,47 @@
 
 namespace App\Services\Vault;
 
+use App\Contracts\Vault\VaultKeyStore;
 use App\Models\Team;
 use App\Models\User;
-use Illuminate\Support\Facades\Session;
 
 class VaultKeyManager
 {
-    public const string SESSION_USER_DEK = 'vault.user_dek';
+    public const string SESSION_USER_DEK = SessionVaultKeyStore::SESSION_USER_DEK;
 
-    public const string SESSION_TEAM_DEK_PREFIX = 'vault.team_dek.';
-
-    public function __construct(private FinancialEncryptionService $encryption) {}
+    public function __construct(
+        private FinancialEncryptionService $encryption,
+        private VaultKeyStore $store,
+    ) {}
 
     public function storeUserDek(string $dek): void
     {
-        Session::put(self::SESSION_USER_DEK, base64_encode($dek));
+        $this->store->storeUserDek($dek);
     }
 
     public function storeTeamDek(Team $team, string $dek): void
     {
-        Session::put(self::SESSION_TEAM_DEK_PREFIX.$team->id, base64_encode($dek));
+        $this->store->storeTeamDek((string) $team->id, $dek);
     }
 
     public function forgetAll(): void
     {
-        Session::forget(self::SESSION_USER_DEK);
-
-        foreach (array_keys(Session::all()) as $key) {
-            if (str_starts_with($key, self::SESSION_TEAM_DEK_PREFIX)) {
-                Session::forget($key);
-            }
-        }
+        $this->store->forgetAll();
     }
 
     public function hasUserDek(): bool
     {
-        return Session::has(self::SESSION_USER_DEK);
+        return $this->store->hasUserDek();
     }
 
     public function userDek(): ?string
     {
-        $encoded = Session::get(self::SESSION_USER_DEK);
-
-        if (! is_string($encoded)) {
-            return null;
-        }
-
-        $decoded = base64_decode($encoded, true);
-
-        return $decoded === false ? null : $decoded;
+        return $this->store->userDek();
     }
 
     public function teamDek(Team $team): ?string
     {
-        $encoded = Session::get(self::SESSION_TEAM_DEK_PREFIX.$team->id);
-
-        if (! is_string($encoded)) {
-            return null;
-        }
-
-        $decoded = base64_decode($encoded, true);
-
-        return $decoded === false ? null : $decoded;
+        return $this->store->teamDek((string) $team->id);
     }
 
     public function unlockForUser(User $user, string $password): void

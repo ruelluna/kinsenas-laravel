@@ -34,7 +34,7 @@ export default function SurveyShell({
                 className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-linear-to-b from-primary/8 via-allocation-3/5 to-transparent"
             />
 
-            <header className="relative border-b border-border/40 bg-background/80 backdrop-blur-md">
+            <header className="pwa-standalone-header safe-area-x relative border-b border-border/40 bg-background/80 backdrop-blur-md">
                 <div className="mx-auto flex max-w-lg items-center justify-center px-6 py-3.5">
                     <Link
                         href={home()}

@@ -61,7 +61,7 @@ class HandleInertiaRequests extends Middleware
             'currentTeam' => fn () => $user?->currentTeam ? $user->toUserTeam($user->currentTeam) : null,
             'teams' => fn () => $user?->toUserTeams(includeCurrent: true) ?? [],
             'canCreateTeam' => fn () => $user ? Gate::allows('create', Team::class) : false,
-            'vaultLocked' => fn () => $user !== null && $user->vault !== null && ! session()->has(VaultKeyManager::SESSION_USER_DEK),
+            'vaultLocked' => fn () => $user !== null && $user->vault !== null && ! app(VaultKeyManager::class)->hasUserDek(),
             'subscription' => fn () => $this->sharedSubscription($user, $subscriptionService),
             'registrationRecoveryKey' => fn () => session('registration.recovery_key'),
             'flash' => fn () => [

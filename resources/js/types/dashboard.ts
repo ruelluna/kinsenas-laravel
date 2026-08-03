@@ -90,6 +90,12 @@ export type DashboardQuickLinks = {
     reports: string;
 };
 
+export type DashboardQuickSpend = {
+    defaultCategoryId: string | null;
+    categories: Array<{ id: string; name: string; bankId: string | null }>;
+    recipients: Array<{ id: string; name: string }>;
+};
+
 export type DashboardPageProps = {
     setup: DashboardSetup;
     plan: DashboardPlan | null;
@@ -100,4 +106,5 @@ export type DashboardPageProps = {
     recentActivity: DashboardActivityItem[];
     features: DashboardFeatures;
     quickLinks: DashboardQuickLinks;
+    quickSpend: DashboardQuickSpend | null;
 };

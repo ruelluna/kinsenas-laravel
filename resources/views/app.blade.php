@@ -2,7 +2,12 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @class(['dark' => ($appearance ?? 'system') == 'dark'])>
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+        <meta name="theme-color" content="#0D7377">
+        <meta name="description" content="Sweldo with a plan — payday allocation planner for Filipino households.">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-title" content="Kinsenas">
+        <meta name="mobile-web-app-capable" content="yes">
 
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script>
@@ -30,8 +35,9 @@
             }
         </style>
 
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="icon" href="/kinsenas-square-logo.png" type="image/png">
-        <link rel="apple-touch-icon" href="/kinsenas-square-logo.png">
+        <link rel="apple-touch-icon" href="/icons/icon-180.png" sizes="180x180">
 
         @fonts
 

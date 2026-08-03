@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\BindVaultKeyStore;
+use App\Http\Middleware\EnsureApiTeamScope;
 use App\Http\Middleware\EnsureBetaApproved;
 use App\Http\Middleware\EnsurePlatformAdmin;
 use App\Http\Middleware\EnsureSavingsPlan;
@@ -18,6 +20,7 @@ use Illuminate\Http\Request;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -31,6 +34,15 @@ return Application::configure(basePath: dirname(__DIR__))
             'savings.plan.required' => EnsureSavingsPlan::class,
             'platform.admin' => EnsurePlatformAdmin::class,
             'beta.approved' => EnsureBetaApproved::class,
+            'api.team' => EnsureApiTeamScope::class,
+        ]);
+
+        $middleware->web(prepend: [
+            BindVaultKeyStore::class,
+        ]);
+
+        $middleware->api(prepend: [
+            BindVaultKeyStore::class,
         ]);
 
         $middleware->web(append: [
