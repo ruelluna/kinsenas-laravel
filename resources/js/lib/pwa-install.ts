@@ -1,5 +1,7 @@
 export const PWA_INSTALL_DISMISS_KEY = 'kinsenas.dismiss.pwaInstall.v1';
 
+export const PWA_INSTALLED_KEY = 'kinsenas.pwaInstall.installed.v1';
+
 export const PWA_INSTALL_VISIT_COUNT_KEY = 'kinsenas.pwaInstall.visitCount.v1';
 
 export const PWA_INSTALL_HAS_PLAN_KEY = 'kinsenas.pwaInstall.hasPlan.v1';
@@ -76,6 +78,10 @@ export function isStandaloneDisplay(): boolean {
         return true;
     }
 
+    if (window.matchMedia('(display-mode: minimal-ui)').matches) {
+        return true;
+    }
+
     return (
         'standalone' in window.navigator &&
         Boolean(
@@ -83,6 +89,65 @@ export function isStandaloneDisplay(): boolean {
                 .standalone,
         )
     );
+}
+
+export function isPwaInstalled(): boolean {
+    if (isStandaloneDisplay()) {
+        return true;
+    }
+
+    try {
+        return window.localStorage.getItem(PWA_INSTALLED_KEY) === '1';
+    } catch {
+        return false;
+    }
+}
+
+export function markPwaInstalled(): void {
+    try {
+        window.localStorage.setItem(PWA_INSTALLED_KEY, '1');
+        window.localStorage.setItem(PWA_INSTALL_DISMISS_KEY, '1');
+    } catch {
+        // Ignore.
+    }
+}
+
+export function clearPwaInstalledMark(): void {
+    try {
+        window.localStorage.removeItem(PWA_INSTALLED_KEY);
+    } catch {
+        // Ignore.
+    }
+}
+
+export async function syncPwaInstalledFromBrowser(): Promise<boolean> {
+    if (isStandaloneDisplay()) {
+        markPwaInstalled();
+
+        return true;
+    }
+
+    if (!isPwaInstalled()) {
+        return false;
+    }
+
+    if (!('getInstalledRelatedApps' in navigator)) {
+        return true;
+    }
+
+    try {
+        const related = await navigator.getInstalledRelatedApps();
+
+        if (related.length === 0) {
+            clearPwaInstalledMark();
+
+            return false;
+        }
+    } catch {
+        return true;
+    }
+
+    return true;
 }
 
 export function recordPwaInstallVisit(): number {

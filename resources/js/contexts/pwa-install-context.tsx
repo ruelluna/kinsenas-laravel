@@ -16,8 +16,10 @@ import {
     getInstallGuideVariant,
     isAuthInstallPage,
     isIosSafari,
-    isStandaloneDisplay,
+    isPwaInstalled,
+    markPwaInstalled,
     PWA_INSTALL_DISMISS_KEY,
+    syncPwaInstalledFromBrowser,
     type BeforeInstallPromptEvent,
     type InstallGuideVariant,
 } from '@/lib/pwa-install';
@@ -49,19 +51,59 @@ export function PwaInstallProvider({ children }: { children: ReactNode }) {
         useState<BeforeInstallPromptEvent | null>(null);
     const [guideOpen, setGuideOpen] = useState(false);
     const [bannerDismissed, setBannerDismissed] = useState(false);
-    const [standalone, setStandalone] = useState(false);
+    const [installed, setInstalled] = useState(() => isPwaInstalled());
 
     const isIosInstall = isIosSafari();
     const canNativePrompt = Boolean(deferredPrompt);
     const installGuideVariant = getInstallGuideVariant(canNativePrompt);
 
-    useEffect(() => {
-        setStandalone(isStandaloneDisplay());
-        setBannerDismissed(isBannerDismissed(PWA_INSTALL_DISMISS_KEY));
+    const applyInstalledState = useCallback(() => {
+        if (!isPwaInstalled()) {
+            return;
+        }
+
+        markPwaInstalled();
+        setInstalled(true);
+        setBannerDismissed(true);
+        setGuideOpen(false);
+        setDeferredPrompt(null);
     }, []);
 
     useEffect(() => {
-        if (standalone) {
+        applyInstalledState();
+        setBannerDismissed(isBannerDismissed(PWA_INSTALL_DISMISS_KEY));
+
+        void syncPwaInstalledFromBrowser().then((stillInstalled) => {
+            setInstalled(stillInstalled);
+
+            if (stillInstalled) {
+                setBannerDismissed(true);
+                setGuideOpen(false);
+            }
+        });
+
+        const onAppInstalled = () => {
+            applyInstalledState();
+        };
+
+        const standaloneQuery = window.matchMedia(
+            '(display-mode: standalone), (display-mode: minimal-ui)',
+        );
+        const onDisplayModeChange = () => {
+            applyInstalledState();
+        };
+
+        window.addEventListener('appinstalled', onAppInstalled);
+        standaloneQuery.addEventListener('change', onDisplayModeChange);
+
+        return () => {
+            window.removeEventListener('appinstalled', onAppInstalled);
+            standaloneQuery.removeEventListener('change', onDisplayModeChange);
+        };
+    }, [applyInstalledState]);
+
+    useEffect(() => {
+        if (installed) {
             return;
         }
 
@@ -78,10 +120,10 @@ export function PwaInstallProvider({ children }: { children: ReactNode }) {
                 handleBeforeInstall,
             );
         };
-    }, [standalone]);
+    }, [installed]);
 
     const canOfferInstall =
-        !standalone && (onAuthInstallPage || isLoggedIn);
+        !installed && (onAuthInstallPage || isLoggedIn);
 
     const showInstallPrompt = canOfferInstall && !bannerDismissed;
 
@@ -95,10 +137,18 @@ export function PwaInstallProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const openInstallGuide = useCallback(() => {
+        if (installed) {
+            return;
+        }
+
         setGuideOpen(true);
-    }, []);
+    }, [installed]);
 
     const promptInstall = useCallback(async () => {
+        if (installed) {
+            return;
+        }
+
         if (!deferredPrompt) {
             openInstallGuide();
 
@@ -106,9 +156,16 @@ export function PwaInstallProvider({ children }: { children: ReactNode }) {
         }
 
         await deferredPrompt.prompt();
-        await deferredPrompt.userChoice;
+        const { outcome } = await deferredPrompt.userChoice;
+
+        if (outcome === 'accepted') {
+            markPwaInstalled();
+        }
+
+        applyInstalledState();
+
         setDeferredPrompt(null);
-    }, [deferredPrompt, openInstallGuide]);
+    }, [installed, deferredPrompt, openInstallGuide, applyInstalledState]);
 
     const value = useMemo(
         (): PwaInstallContextValue => ({
