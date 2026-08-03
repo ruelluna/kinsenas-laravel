@@ -117,7 +117,7 @@ export default function IncomeShow({
         <>
             <Head title={`Income — ${period.name}`} />
 
-            <div className="mb-6">
+            <div className="mb-6 max-md:hidden">
                 <Button variant="ghost" size="sm" asChild>
                     <Link href={`/${teamSlug}/savings/income`}>
                         <ArrowLeft className="size-4" />

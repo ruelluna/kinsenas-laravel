@@ -6,7 +6,13 @@
 
 Broad mobile layout improvements across member-facing pages: card-based alternatives to wide tables, tighter page spacing, horizontal settings nav, stacked pending-action rows, and CSS breakpoint splits (`md:hidden` / `hidden md:block`) instead of JS-only mobile detection for spending and transfers.
 
-## Changelog
+## Changelog (2026-08-04 — mobile header)
+
+- Sticky blurred header bar on mobile (`h-14`, backdrop blur, safe-area aware).
+- Mobile shows square logo + page title, or back chevron + title on nested pages (replaces cramped breadcrumb trail).
+- Compact team switcher (icon) on the header right; full breadcrumbs remain on desktop.
+- `Heading` `variant="small"` titles move to screen-reader only on mobile to avoid duplicating the header title.
+- Income detail "Back to income" button hidden on mobile (header back replaces it).
 
 - **Reports** — fund health shows stacked metric cards on mobile; desktop keeps the table.
 - **Income detail** — breakdown table replaced by cards on mobile with a total summary card.

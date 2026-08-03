@@ -11,3 +11,6 @@ Schedule::call(function () {
 })->daily()->description('Delete expired team invitations');
 
 Schedule::command('billing:sync-subscription-status')->daily();
+Schedule::command('notifications:pending-actions-reminder')->daily();
+Schedule::command('notifications:low-fund-balance')->daily();
+Schedule::command('notifications:trial-ending-reminder')->daily();

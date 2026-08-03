@@ -6,13 +6,17 @@ use App\Enums\TransferStatus;
 use App\Models\FundSpend;
 use App\Models\SavingsPlan;
 use App\Models\User;
+use App\Services\Notifications\PendingActionNotificationService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class FundSpendService
 {
-    public function __construct(private FundBalanceService $balanceService) {}
+    public function __construct(
+        private FundBalanceService $balanceService,
+        private PendingActionNotificationService $pendingActionNotificationService,
+    ) {}
 
     public function create(
         SavingsPlan $plan,
@@ -32,7 +36,7 @@ class FundSpendService
         }
         $now = now();
 
-        return FundSpend::query()->create([
+        $spend = FundSpend::query()->create([
             'savings_plan_id' => $plan->id,
             'category_id' => $categoryId,
             'amount_encrypted' => $amount,
@@ -45,6 +49,12 @@ class FundSpendService
             'confirmed_at' => $needsConfirmation ? null : $now,
             'confirmed_by_user_id' => $needsConfirmation ? null : $user?->id,
         ]);
+
+        if ($needsConfirmation) {
+            $this->pendingActionNotificationService->notifyForSpend($spend, $user);
+        }
+
+        return $spend;
     }
 
     public function confirm(FundSpend $spend, User $user): FundSpend

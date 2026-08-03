@@ -7,12 +7,16 @@ use App\Models\FundTransfer;
 use App\Models\SavingsCategory;
 use App\Models\SavingsPlan;
 use App\Models\User;
+use App\Services\Notifications\PendingActionNotificationService;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
 class FundTransferService
 {
-    public function __construct(private FundBalanceService $balanceService) {}
+    public function __construct(
+        private FundBalanceService $balanceService,
+        private PendingActionNotificationService $pendingActionNotificationService,
+    ) {}
 
     public function create(
         SavingsPlan $plan,
@@ -53,6 +57,10 @@ class FundTransferService
             'confirmed_at' => $sameBank ? now() : null,
             'confirmed_by_user_id' => $sameBank ? $user?->id : null,
         ]);
+
+        if (! $sameBank) {
+            $this->pendingActionNotificationService->notifyForTransfer($transfer, $user);
+        }
 
         return $transfer->fresh(['fromBank.institution', 'toBank.institution', 'fromCategory', 'toCategory']);
     }

@@ -1,4 +1,5 @@
 import type { Auth } from '@/types/auth';
+import type { SharedNotifications, WebPushConfig } from '@/types/notifications';
 import type { Team } from '@/types/teams';
 
 export type SubscriptionFeatureOption = {
@@ -179,4 +180,6 @@ export type SharedData = {
     subscription: SharedSubscription | null;
     vaultLocked: boolean;
     registrationRecoveryKey?: string | null;
+    notifications: SharedNotifications | null;
+    webPush: WebPushConfig;
 };

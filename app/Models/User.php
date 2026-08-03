@@ -21,6 +21,7 @@ use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use NotificationChannels\WebPush\HasPushSubscriptions;
 
 /**
  * @property int $id
@@ -54,7 +55,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, HasTeams, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, HasPushSubscriptions, HasTeams, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
     /**
      * Get the attributes that should be cast.
@@ -95,6 +96,18 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     public function betaAccessCode(): BelongsTo
     {
         return $this->belongsTo(BetaAccessCode::class, 'beta_access_code_id');
+    }
+
+    public function notificationPreferences(): HasOne
+    {
+        return $this->hasOne(UserNotificationPreference::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::created(function (User $user): void {
+            $user->notificationPreferences()->create(UserNotificationPreference::defaultAttributes());
+        });
     }
 
     public function canManageBilling(Team $team): bool

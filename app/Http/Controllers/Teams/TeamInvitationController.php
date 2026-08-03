@@ -8,6 +8,7 @@ use App\Http\Requests\Teams\CreateTeamInvitationRequest;
 use App\Http\Requests\Teams\RespondToTeamInvitationRequest;
 use App\Models\Team;
 use App\Models\TeamInvitation;
+use App\Models\User;
 use App\Notifications\Teams\TeamInvitation as TeamInvitationNotification;
 use App\Services\Marketing\GhlUserTagService;
 use App\Support\Marketing\GhlTagCatalog;
@@ -37,6 +38,11 @@ class TeamInvitationController extends Controller
 
         Notification::route('mail', $invitation->email)
             ->notify(new TeamInvitationNotification($invitation));
+
+        User::query()
+            ->where('email', $invitation->email)
+            ->first()
+            ?->notify(new TeamInvitationNotification($invitation));
 
         $this->ghlUserTagService->dispatch(
             $request->user(),

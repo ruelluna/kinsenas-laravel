@@ -1,7 +1,11 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Check, Circle } from 'lucide-react';
+import { DismissButton } from '@/components/dismiss-button';
 import ReplayTourButton from '@/components/onboarding/replay-tour-button';
+import { useDismissibleBanner } from '@/hooks/use-dismissible-banner';
+import { setupChecklistDismissKey } from '@/lib/dismissible-banner';
 import { cn } from '@/lib/utils';
+import type { SharedData } from '@/types';
 import type { DashboardSetup } from '@/types/dashboard';
 
 type Props = {
@@ -9,18 +13,35 @@ type Props = {
 };
 
 export default function SetupChecklist({ setup }: Props) {
+    const teamId = usePage<SharedData>().props.currentTeam?.id;
+    const storageKey = teamId
+        ? setupChecklistDismissKey(String(teamId))
+        : 'kinsenas.dismiss.setupChecklist.v1.unknown';
+    const { dismissed, dismiss } = useDismissibleBanner(storageKey);
+
+    if (dismissed) {
+        return null;
+    }
+
     if (setup.complete) {
         return (
             <div
-                className="flex flex-wrap items-center gap-3 rounded-lg border border-success/30 bg-success/5 px-4 py-3 text-sm"
+                className="relative rounded-lg border border-success/30 bg-success/5 px-4 py-3 pe-12 text-sm"
                 data-tour="setup-checklist"
             >
-                <Check className="size-4 shrink-0 text-success" />
-                <span className="font-medium">All set</span>
-                <span className="text-muted-foreground">
-                    Your savings workspace is ready.
-                </span>
-                <ReplayTourButton className="ms-auto" />
+                <DismissButton
+                    onDismiss={dismiss}
+                    label="Dismiss get started message"
+                    className="absolute top-2 right-2"
+                />
+                <div className="flex flex-wrap items-center gap-3">
+                    <Check className="size-4 shrink-0 text-success" />
+                    <span className="font-medium">All set</span>
+                    <span className="text-muted-foreground">
+                        Your savings workspace is ready.
+                    </span>
+                    <ReplayTourButton className="ms-auto" />
+                </div>
             </div>
         );
     }
@@ -28,7 +49,15 @@ export default function SetupChecklist({ setup }: Props) {
     const nextStep = setup.steps.find((step) => !step.complete);
 
     return (
-        <div className="rounded-lg border p-4" data-tour="setup-checklist">
+        <div
+            className="relative rounded-lg border p-4 pe-12"
+            data-tour="setup-checklist"
+        >
+            <DismissButton
+                onDismiss={dismiss}
+                label="Dismiss get started section"
+                className="absolute top-3 right-3"
+            />
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h2 className="font-medium">Get started</h2>

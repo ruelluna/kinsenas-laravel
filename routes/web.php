@@ -2,16 +2,26 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Marketing\SurveyResponseController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PwaLaunchController;
 use App\Http\Controllers\Teams\TeamInvitationController;
 use App\Http\Controllers\Vault\VaultUnlockController;
 use App\Http\Middleware\EnsureTeamMembership;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
+Route::get('launch', PwaLaunchController::class)->name('pwa.launch');
 Route::inertia('/survey', 'marketing/survey')->name('survey');
 Route::post('survey/responses', [SurveyResponseController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('survey.responses.store');
+
+Route::middleware(['auth', 'verified', 'beta.approved'])->group(function () {
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('notifications/recent', [NotificationController::class, 'recent'])->name('notifications.recent');
+    Route::patch('notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('beta/pending', 'auth/beta-pending')->name('beta.pending');

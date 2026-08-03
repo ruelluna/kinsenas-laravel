@@ -2,37 +2,35 @@
 
 namespace App\Notifications\Teams;
 
+use App\Enums\NotificationKind;
 use App\Models\TeamInvitation as TeamInvitationModel;
+use App\Notifications\Concerns\FormatsDatabaseNotification;
+use App\Services\Notifications\NotificationPreferenceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class TeamInvitation extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use FormatsDatabaseNotification, Queueable;
+
+    public function __construct(public TeamInvitationModel $invitation) {}
 
     /**
-     * Create a new notification instance.
-     */
-    public function __construct(public TeamInvitationModel $invitation)
-    {
-        //
-    }
-
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
+     * @return array<int, string|class-string>
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        if ($notifiable instanceof AnonymousNotifiable) {
+            return ['mail'];
+        }
+
+        return app(NotificationPreferenceService::class)
+            ->channelsFor($notifiable, NotificationKind::TeamInvitation);
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
     public function toMail(object $notifiable): MailMessage
     {
         $team = $this->invitation->team;
@@ -52,17 +50,26 @@ class TeamInvitation extends Notification implements ShouldQueue
     }
 
     /**
-     * Get the array representation of the notification.
-     *
      * @return array<string, mixed>
      */
     public function toArray(object $notifiable): array
     {
-        return [
-            'invitation_id' => $this->invitation->id,
-            'team_id' => $this->invitation->team_id,
-            'team_name' => $this->invitation->team->name,
-            'role' => $this->invitation->role->value,
-        ];
+        $team = $this->invitation->team;
+
+        return $this->databasePayload(
+            NotificationKind::TeamInvitation,
+            __('Team invitation'),
+            __(':inviter invited you to join :team.', [
+                'inviter' => $this->invitation->inviter->name,
+                'team' => $team->name,
+            ]),
+            '/dashboard',
+            [
+                'invitationId' => $this->invitation->id,
+                'teamId' => $team->id,
+                'teamSlug' => $team->slug,
+                'teamName' => $team->name,
+            ],
+        );
     }
 }

@@ -53,6 +53,7 @@ export default defineConfig(({ mode }) => ({
                 'kinsenas-square-logo.png',
             ],
             manifest: {
+                id: '/',
                 name: 'Kinsenas',
                 short_name: 'Kinsenas',
                 description:
@@ -60,8 +61,9 @@ export default defineConfig(({ mode }) => ({
                 theme_color: '#0D7377',
                 background_color: '#ffffff',
                 display: 'standalone',
-                start_url: '/',
+                start_url: '/launch',
                 scope: '/',
+                categories: ['finance', 'productivity'],
                 icons: [
                     {
                         src: '/icons/icon-192.png',
@@ -83,6 +85,7 @@ export default defineConfig(({ mode }) => ({
             },
             workbox: {
                 navigateFallback: null,
+                importScripts: ['/sw-push.js'],
                 runtimeCaching: [
                     {
                         urlPattern: ({ request }) =>
@@ -109,7 +112,7 @@ export default defineConfig(({ mode }) => ({
                 ],
             },
             devOptions: {
-                enabled: false,
+                enabled: process.env.VITE_PWA_DEV === 'true',
             },
         }),
     ],

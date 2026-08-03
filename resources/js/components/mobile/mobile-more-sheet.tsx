@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/sheet';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
+import { InstallAppMenuItem } from '@/components/pwa/install-app-menu-item';
 import { adminNavItems } from '@/lib/admin-nav';
 import { buildMemberNav } from '@/lib/member-nav';
 import { cn } from '@/lib/utils';
@@ -62,6 +63,8 @@ export function MobileMoreSheet({ open, onOpenChange }: Props) {
                             </Link>
                         </Button>
                     ))}
+
+                    <InstallAppMenuItem onActivate={() => onOpenChange(false)} />
 
                     <Button
                         variant="ghost"

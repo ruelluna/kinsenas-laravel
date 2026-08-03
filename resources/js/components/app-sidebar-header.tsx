@@ -1,42 +1,39 @@
-import { Link, usePage } from '@inertiajs/react';
-import AppLogo from '@/components/app-logo';
 import { Breadcrumbs } from '@/components/breadcrumbs';
+import { MobileHeaderBar } from '@/components/mobile/mobile-header-bar';
+import { NotificationBell } from '@/components/notifications/notification-bell';
+import { TeamSwitcher } from '@/components/team-switcher';
 import { pageContentPaddingX } from '@/components/page-content';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { buildMemberNav } from '@/lib/member-nav';
 import { cn } from '@/lib/utils';
-import type { BreadcrumbItem as BreadcrumbItemType, SharedData } from '@/types';
+import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
 
 export function AppSidebarHeader({
     breadcrumbs = [],
 }: {
     breadcrumbs?: BreadcrumbItemType[];
 }) {
-    const isMobile = useIsMobile();
-    const { homeUrl } = buildMemberNav(usePage<SharedData>().props);
-
     return (
         <header
             className={cn(
-                'pwa-standalone-header safe-area-x flex h-16 shrink-0 items-center gap-2 border-b border-sidebar-border/50 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12',
+                'pwa-standalone-header sticky top-0 z-40 flex h-14 shrink-0 items-center gap-3 border-b border-sidebar-border/50 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80',
+                'md:h-16',
                 pageContentPaddingX,
             )}
         >
-            <div className="flex min-w-0 flex-1 items-center gap-2">
-                {isMobile ? (
-                    <Link
-                        href={homeUrl}
-                        prefetch
-                        className="shrink-0"
-                        aria-label="Kinsenas home"
-                    >
-                        <AppLogo />
-                    </Link>
-                ) : (
-                    <SidebarTrigger className="-ml-1" />
-                )}
+            <div className="flex min-w-0 flex-1 items-center gap-2 md:hidden">
+                <MobileHeaderBar breadcrumbs={breadcrumbs} />
+            </div>
+
+            <div className="hidden min-w-0 flex-1 items-center gap-2 md:flex">
+                <SidebarTrigger className="-ml-1" />
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
+            </div>
+
+            <div className="flex shrink-0 items-center gap-2">
+                <NotificationBell />
+                <div className="md:hidden">
+                    <TeamSwitcher inHeader compact />
+                </div>
             </div>
         </header>
     );

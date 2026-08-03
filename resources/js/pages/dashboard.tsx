@@ -10,6 +10,7 @@ import AddSpendingModal from '@/components/savings/add-spending-modal';
 import FundBalancesSection from '@/components/savings/fund-balances-section';
 import { Button } from '@/components/ui/button';
 import { useRegisterMobileNavAction } from '@/hooks/use-register-mobile-nav-action';
+import { markPwaEngagementFromPlan } from '@/lib/pwa-install';
 import { requestOnboardingTourAutoStart } from '@/lib/onboarding-tour/storage';
 import { dashboard } from '@/routes';
 import type { DashboardInvitation, SharedData } from '@/types';
@@ -42,6 +43,12 @@ export default function Dashboard({
     const teamId = page.props.currentTeam?.id;
 
     const showFinancialSections = setup.hasPlan;
+
+    useEffect(() => {
+        if (setup.hasPlan) {
+            markPwaEngagementFromPlan();
+        }
+    }, [setup.hasPlan]);
 
     useEffect(() => {
         if (teamId && !setup.complete) {

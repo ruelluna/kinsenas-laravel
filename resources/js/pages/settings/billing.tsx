@@ -3,7 +3,9 @@ import Heading from '@/components/heading';
 import { PublicBetaAlert } from '@/components/public-beta-alert';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { useDismissibleBanner } from '@/hooks/use-dismissible-banner';
 import { BETA_PRICING_COMING_SOON_LABEL } from '@/lib/beta-copy';
+import { OPEN_BETA_BANNER_DISMISS_KEY } from '@/lib/dismissible-banner';
 import { formatMoneyFromCents } from '@/lib/format-money';
 import type { SharedData } from '@/types';
 
@@ -55,6 +57,8 @@ export default function BillingSettings({
     const hasAccess = sharedSubscription?.hasAccess ?? true;
     const flashError = page.props.flash?.error;
     const isLockedOut = !hasAccess && !openBeta.isActive;
+    const { dismissed: betaAlertDismissed, dismiss: dismissBetaAlert } =
+        useDismissibleBanner(OPEN_BETA_BANNER_DISMISS_KEY);
 
     return (
         <>
@@ -69,8 +73,8 @@ export default function BillingSettings({
                 }
             />
 
-            {openBeta.isActive && (
-                <PublicBetaAlert className="mt-6">
+            {openBeta.isActive && !betaAlertDismissed && (
+                <PublicBetaAlert className="mt-6" onDismiss={dismissBetaAlert}>
                     <p>
                         {team.name} has full access to the core savings planner
                         at no cost. We are not collecting payments during beta.

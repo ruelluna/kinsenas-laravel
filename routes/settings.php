@@ -3,6 +3,7 @@
 use App\Http\Controllers\Billing\PaymentSubmissionController;
 use App\Http\Controllers\Settings\BetaFeedbackController;
 use App\Http\Controllers\Settings\BillingController;
+use App\Http\Controllers\Settings\NotificationPreferenceController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
 use App\Http\Controllers\Teams\TeamController;
@@ -28,6 +29,11 @@ Route::middleware(['auth', 'verified', 'beta.approved'])->group(function () {
         ->name('user-password.update');
 
     Route::inertia('settings/appearance', 'settings/appearance')->name('appearance.edit');
+
+    Route::get('settings/notifications', [NotificationPreferenceController::class, 'edit'])->name('settings.notifications.edit');
+    Route::patch('settings/notifications', [NotificationPreferenceController::class, 'update'])->name('settings.notifications.update');
+    Route::post('settings/notifications/push-subscription', [NotificationPreferenceController::class, 'storePushSubscription'])->name('settings.notifications.push-subscription.store');
+    Route::delete('settings/notifications/push-subscription', [NotificationPreferenceController::class, 'destroyPushSubscription'])->name('settings.notifications.push-subscription.destroy');
 
     Route::get('settings/billing', [BillingController::class, 'show'])->name('settings.billing');
     Route::get('settings/feedback', [BetaFeedbackController::class, 'create'])->name('settings.feedback');

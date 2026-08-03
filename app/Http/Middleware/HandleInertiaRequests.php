@@ -67,6 +67,12 @@ class HandleInertiaRequests extends Middleware
             'flash' => fn () => [
                 'error' => $request->session()->get('error'),
             ],
+            'notifications' => fn () => $user ? [
+                'unreadCount' => $user->unreadNotifications()->count(),
+            ] : null,
+            'webPush' => fn () => [
+                'vapidPublicKey' => config('webpush.vapid.public_key'),
+            ],
         ];
     }
 

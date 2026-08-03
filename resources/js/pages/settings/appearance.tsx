@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 import AppearanceTabs from '@/components/appearance-tabs';
 import Heading from '@/components/heading';
+import { InstallAppSettingsSection } from '@/components/pwa/install-app-settings-section';
 import { edit as editAppearance } from '@/routes/appearance';
 
 export default function Appearance() {
@@ -17,6 +18,8 @@ export default function Appearance() {
                     description="Update the appearance settings for your account"
                 />
                 <AppearanceTabs />
+
+                <InstallAppSettingsSection />
             </div>
         </>
     );

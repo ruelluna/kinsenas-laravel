@@ -32,6 +32,11 @@ const baseSidebarNavItems: NavItem[] = [
         href: '/settings/billing',
         icon: null,
     },
+    {
+        title: 'Notifications',
+        href: '/settings/notifications',
+        icon: null,
+    },
 ];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {

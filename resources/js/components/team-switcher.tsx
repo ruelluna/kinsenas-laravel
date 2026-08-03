@@ -16,9 +16,10 @@ import type { Team } from '@/types';
 
 type TeamSwitcherProps = {
     inHeader?: boolean;
+    compact?: boolean;
 };
 
-export function TeamSwitcher({ inHeader = false }: TeamSwitcherProps) {
+export function TeamSwitcher({ inHeader = false, compact = false }: TeamSwitcherProps) {
     const page = usePage();
     const isMobile = useIsMobile();
     const currentTeam = page.props.currentTeam;
@@ -58,43 +59,56 @@ export function TeamSwitcher({ inHeader = false }: TeamSwitcherProps) {
                 <Button
                     variant="ghost"
                     data-test="team-switcher-trigger"
+                    aria-label={
+                        compact
+                            ? `Switch team, current: ${currentTeam?.name ?? 'none selected'}`
+                            : undefined
+                    }
                     className={
-                        inHeader
-                            ? 'h-8 gap-1 px-2'
-                            : 'w-full justify-start px-2 has-[>svg]:px-2 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
+                        compact
+                            ? 'size-9 shrink-0 px-0'
+                            : inHeader
+                              ? 'h-8 max-w-[7rem] gap-1 px-2'
+                              : 'w-full justify-start px-2 has-[>svg]:px-2 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
                     }
                 >
                     <Users
                         className={
-                            inHeader
-                                ? 'hidden'
-                                : 'hidden size-4 shrink-0 group-data-[collapsible=icon]:block'
+                            compact
+                                ? 'size-4 shrink-0'
+                                : inHeader
+                                  ? 'hidden'
+                                  : 'hidden size-4 shrink-0 group-data-[collapsible=icon]:block'
                         }
                     />
-                    <div
-                        className={
-                            inHeader
-                                ? 'grid flex-1 text-left text-sm leading-tight'
-                                : 'grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden'
-                        }
-                    >
-                        <span
+                    {!compact && (
+                        <div
                             className={
                                 inHeader
-                                    ? 'max-w-[120px] truncate font-medium'
-                                    : 'truncate font-semibold'
+                                    ? 'grid min-w-0 flex-1 text-left text-sm leading-tight'
+                                    : 'grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden'
                             }
                         >
-                            {currentTeam?.name ?? 'Select team'}
-                        </span>
-                    </div>
-                    <ChevronsUpDown
-                        className={
-                            inHeader
-                                ? 'size-4 opacity-50'
-                                : 'ml-auto group-data-[collapsible=icon]:hidden'
-                        }
-                    />
+                            <span
+                                className={
+                                    inHeader
+                                        ? 'truncate font-medium'
+                                        : 'truncate font-semibold'
+                                }
+                            >
+                                {currentTeam?.name ?? 'Select team'}
+                            </span>
+                        </div>
+                    )}
+                    {!compact && (
+                        <ChevronsUpDown
+                            className={
+                                inHeader
+                                    ? 'size-4 shrink-0 opacity-50'
+                                    : 'ml-auto group-data-[collapsible=icon]:hidden'
+                            }
+                        />
+                    )}
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
