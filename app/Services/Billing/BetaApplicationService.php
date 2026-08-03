@@ -6,6 +6,7 @@ use App\Enums\BetaApplicationStatus;
 use App\Enums\BillingMode;
 use App\Jobs\SyncBetaApplicationToGhl;
 use App\Models\User;
+use App\Notifications\Billing\BetaApproved;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -98,6 +99,8 @@ class BetaApplicationService
             'user_id' => $user->id,
             'admin_user_id' => $admin->id,
         ]);
+
+        $user->notify(new BetaApproved);
     }
 
     public function approveViaCode(User $user): void
@@ -115,6 +118,8 @@ class BetaApplicationService
         $this->grantLaunchDiscountIfEligible($user);
 
         SyncBetaApplicationToGhl::dispatch($user->fresh(), 'application_approved_via_code')->afterCommit();
+
+        $user->notify(new BetaApproved);
     }
 
     public function reject(User $user, User $admin): void

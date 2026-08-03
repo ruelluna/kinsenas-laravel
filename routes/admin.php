@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminBetaAccessCodeController;
 use App\Http\Controllers\Admin\AdminBetaApplicationController;
 use App\Http\Controllers\Admin\AdminBetaFeedbackController;
+use App\Http\Controllers\Admin\AdminNotificationTestController;
 use App\Http\Controllers\Admin\AdminPaymentQrController;
 use App\Http\Controllers\Admin\AdminPaymentSubmissionController;
 use App\Http\Controllers\Admin\AdminPlatformUserController;
@@ -16,6 +17,8 @@ Route::prefix('admin')
     ->name('admin.')
     ->group(function () {
         Route::get('subscribers', [AdminSubscriberController::class, 'index'])->name('subscribers.index');
+        Route::get('notifications-test', [AdminNotificationTestController::class, 'index'])->name('notifications-test.index');
+        Route::post('notifications-test', [AdminNotificationTestController::class, 'store'])->name('notifications-test.store');
         Route::get('subscribers/{team}', [AdminSubscriberController::class, 'show'])->name('subscribers.show');
         Route::post('subscribers/{team}/extend-trial', [AdminSubscriberController::class, 'extendTrial'])->name('subscribers.extend-trial');
         Route::post('subscribers/{team}/cancel', [AdminSubscriberController::class, 'cancel'])->name('subscribers.cancel');

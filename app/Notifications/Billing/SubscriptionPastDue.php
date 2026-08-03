@@ -1,25 +1,23 @@
 <?php
 
-namespace App\Notifications\Savings;
+namespace App\Notifications\Billing;
 
 use App\Enums\NotificationKind;
-use App\Models\SavingsCategory;
+use App\Models\Subscription;
 use App\Models\Team;
 use App\Notifications\Concerns\FormatsDatabaseNotification;
 use App\Services\Notifications\NotificationPreferenceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\WebPush\WebPushMessage;
 
-class LowFundBalance extends Notification implements ShouldQueue
+class SubscriptionPastDue extends Notification implements ShouldQueue
 {
     use FormatsDatabaseNotification, Queueable;
 
-    public function __construct(
-        public SavingsCategory $category,
-        public int $percentUsed,
-    ) {}
+    public function __construct(public Subscription $subscription) {}
 
     /**
      * @return array<int, string|class-string>
@@ -27,7 +25,7 @@ class LowFundBalance extends Notification implements ShouldQueue
     public function via(object $notifiable): array
     {
         return app(NotificationPreferenceService::class)
-            ->channelsFor($notifiable, NotificationKind::LowFundBalance);
+            ->channelsFor($notifiable, NotificationKind::SubscriptionPastDue);
     }
 
     /**
@@ -38,20 +36,30 @@ class LowFundBalance extends Notification implements ShouldQueue
         $team = $this->team();
 
         return $this->databasePayload(
-            NotificationKind::LowFundBalance,
-            __('Fund bucket running low'),
-            __(':fund is :percent% used this period.', [
-                'fund' => $this->category->name,
-                'percent' => $this->percentUsed,
+            NotificationKind::SubscriptionPastDue,
+            __('Subscription past due'),
+            __('Your Kinsenas subscription for :team needs attention.', [
+                'team' => $team?->name ?? config('app.name'),
             ]),
-            $team !== null ? "/{$team->slug}/dashboard" : '/dashboard',
+            '/settings/billing',
             [
-                'categoryId' => $this->category->id,
+                'subscriptionId' => $this->subscription->id,
                 'teamId' => $team?->id,
                 'teamSlug' => $team?->slug,
-                'percentUsed' => $this->percentUsed,
             ],
         );
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $team = $this->team();
+
+        return (new MailMessage)
+            ->subject(__('Your Kinsenas subscription is past due'))
+            ->line(__('Your subscription for :team is past due. Update billing to restore full access.', [
+                'team' => $team?->name ?? config('app.name'),
+            ]))
+            ->action(__('Manage billing'), url('/settings/billing'));
     }
 
     public function toWebPush(object $notifiable, mixed $notification): WebPushMessage
@@ -67,8 +75,8 @@ class LowFundBalance extends Notification implements ShouldQueue
 
     private function team(): ?Team
     {
-        $this->category->loadMissing('plan.team');
+        $this->subscription->loadMissing('team');
 
-        return $this->category->plan?->team;
+        return $this->subscription->team;
     }
 }

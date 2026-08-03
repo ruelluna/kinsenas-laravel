@@ -22,8 +22,13 @@ export type NotificationPreferences = {
     inAppPendingActions: boolean;
     inAppBillingReminders: boolean;
     pushEnabled: boolean;
+    pushTeamInvitations: boolean;
     pushPendingActions: boolean;
+    pushLowFundBalance: boolean;
     pushBillingReminders: boolean;
+    pushTeamActivity: boolean;
+    pushIncomeReminders: boolean;
+    pushActionUpdates: boolean;
 };
 
 export type WebPushConfig = {

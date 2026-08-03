@@ -27,6 +27,7 @@ class FundTransfer extends Model
         'status',
         'confirmed_at',
         'confirmed_by_user_id',
+        'created_by_user_id',
     ];
 
     protected function casts(): array

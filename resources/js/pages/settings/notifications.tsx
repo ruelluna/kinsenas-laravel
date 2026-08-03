@@ -4,6 +4,7 @@ import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
     isWebPushSupported,
@@ -14,6 +15,7 @@ import type { NotificationPreferences } from '@/types/notifications';
 
 type PageProps = {
     preferences: NotificationPreferences;
+    paydayDayOfMonth: number | null;
     pushSubscriptionCount: number;
     vapidPublicKey: string | null;
 };
@@ -48,6 +50,7 @@ function PreferenceToggle({
 
 export default function NotificationsSettings({
     preferences,
+    paydayDayOfMonth,
     pushSubscriptionCount,
     vapidPublicKey,
 }: PageProps) {
@@ -97,7 +100,10 @@ export default function NotificationsSettings({
             <Form
                 action="/settings/notifications"
                 method="patch"
-                defaults={preferences}
+                defaults={{
+                    ...preferences,
+                    paydayDayOfMonth: paydayDayOfMonth ?? '',
+                }}
                 options={{ preserveScroll: true }}
                 className="space-y-8"
             >
@@ -186,6 +192,15 @@ export default function NotificationsSettings({
                                 </p>
                             )}
                             <PreferenceToggle
+                                id="pushTeamInvitations"
+                                label="Team invitations"
+                                description="Push when you are invited to a team"
+                                checked={data.pushTeamInvitations}
+                                onCheckedChange={(checked) =>
+                                    setData('pushTeamInvitations', checked)
+                                }
+                            />
+                            <PreferenceToggle
                                 id="pushPendingActions"
                                 label="Pending actions"
                                 description="Push when confirmation is needed"
@@ -195,12 +210,48 @@ export default function NotificationsSettings({
                                 }
                             />
                             <PreferenceToggle
+                                id="pushLowFundBalance"
+                                label="Low fund balance"
+                                description="Push when a fund bucket is nearly used up"
+                                checked={data.pushLowFundBalance}
+                                onCheckedChange={(checked) =>
+                                    setData('pushLowFundBalance', checked)
+                                }
+                            />
+                            <PreferenceToggle
                                 id="pushBillingReminders"
                                 label="Billing reminders"
-                                description="Push before your trial ends"
+                                description="Push for trial ending and past-due billing"
                                 checked={data.pushBillingReminders}
                                 onCheckedChange={(checked) =>
                                     setData('pushBillingReminders', checked)
+                                }
+                            />
+                            <PreferenceToggle
+                                id="pushTeamActivity"
+                                label="Team activity"
+                                description="Push when someone accepts your team invitation"
+                                checked={data.pushTeamActivity}
+                                onCheckedChange={(checked) =>
+                                    setData('pushTeamActivity', checked)
+                                }
+                            />
+                            <PreferenceToggle
+                                id="pushIncomeReminders"
+                                label="Income reminders"
+                                description="Push on your payday if income is not logged"
+                                checked={data.pushIncomeReminders}
+                                onCheckedChange={(checked) =>
+                                    setData('pushIncomeReminders', checked)
+                                }
+                            />
+                            <PreferenceToggle
+                                id="pushActionUpdates"
+                                label="Action updates"
+                                description="Push when your pending spend or transfer is confirmed"
+                                checked={data.pushActionUpdates}
+                                onCheckedChange={(checked) =>
+                                    setData('pushActionUpdates', checked)
                                 }
                             />
                             {pushSupported && (
@@ -231,6 +282,37 @@ export default function NotificationsSettings({
                                     {pushError}
                                 </p>
                             )}
+                        </div>
+
+                        <div className="space-y-4">
+                            <Heading
+                                variant="small"
+                                title="Payday reminder"
+                                description="Optional day of the month (1–28) to remind you to log income"
+                            />
+                            <div className="grid max-w-xs gap-2">
+                                <Label htmlFor="paydayDayOfMonth">
+                                    Payday (day of month)
+                                </Label>
+                                <Input
+                                    id="paydayDayOfMonth"
+                                    name="paydayDayOfMonth"
+                                    type="number"
+                                    min={1}
+                                    max={28}
+                                    value={data.paydayDayOfMonth}
+                                    onChange={(event) =>
+                                        setData(
+                                            'paydayDayOfMonth',
+                                            event.target.value === ''
+                                                ? ''
+                                                : Number(event.target.value),
+                                        )
+                                    }
+                                    placeholder="e.g. 15"
+                                />
+                                <InputError message={errors.paydayDayOfMonth} />
+                            </div>
                         </div>
 
                         <InputError message={errors.emailTeamInvitations} />

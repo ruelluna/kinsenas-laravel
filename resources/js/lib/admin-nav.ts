@@ -12,6 +12,11 @@ import type { NavItem } from '@/types';
 
 export const adminNavItems: NavItem[] = [
     { title: 'Subscribers', href: '/admin/subscribers', icon: Users },
+    {
+        title: 'Push test',
+        href: '/admin/notifications-test',
+        icon: MessageSquare,
+    },
     { title: 'Plans', href: '/admin/plans', icon: CreditCard },
     { title: 'Payments', href: '/admin/payment-submissions', icon: QrCode },
     {

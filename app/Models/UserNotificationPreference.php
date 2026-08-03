@@ -22,8 +22,13 @@ class UserNotificationPreference extends Model
         'in_app_pending_actions',
         'in_app_billing_reminders',
         'push_enabled',
+        'push_team_invitations',
         'push_pending_actions',
+        'push_low_fund_balance',
         'push_billing_reminders',
+        'push_team_activity',
+        'push_income_reminders',
+        'push_action_updates',
     ];
 
     /**
@@ -39,8 +44,13 @@ class UserNotificationPreference extends Model
             'in_app_pending_actions' => 'boolean',
             'in_app_billing_reminders' => 'boolean',
             'push_enabled' => 'boolean',
+            'push_team_invitations' => 'boolean',
             'push_pending_actions' => 'boolean',
+            'push_low_fund_balance' => 'boolean',
             'push_billing_reminders' => 'boolean',
+            'push_team_activity' => 'boolean',
+            'push_income_reminders' => 'boolean',
+            'push_action_updates' => 'boolean',
         ];
     }
 
@@ -62,8 +72,13 @@ class UserNotificationPreference extends Model
             'in_app_pending_actions' => true,
             'in_app_billing_reminders' => true,
             'push_enabled' => false,
+            'push_team_invitations' => true,
             'push_pending_actions' => true,
+            'push_low_fund_balance' => true,
             'push_billing_reminders' => true,
+            'push_team_activity' => true,
+            'push_income_reminders' => true,
+            'push_action_updates' => false,
         ];
     }
 }

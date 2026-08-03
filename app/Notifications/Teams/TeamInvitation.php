@@ -11,6 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use NotificationChannels\WebPush\WebPushMessage;
 
 class TeamInvitation extends Notification implements ShouldQueue
 {
@@ -71,5 +72,16 @@ class TeamInvitation extends Notification implements ShouldQueue
                 'teamName' => $team->name,
             ],
         );
+    }
+
+    public function toWebPush(object $notifiable, mixed $notification): WebPushMessage
+    {
+        $payload = $this->toArray($notifiable);
+
+        return (new WebPushMessage)
+            ->title($payload['title'])
+            ->body($payload['body'])
+            ->data(['actionUrl' => $payload['actionUrl']])
+            ->options(['TTL' => 86400]);
     }
 }

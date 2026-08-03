@@ -19,10 +19,11 @@ it('shows notification preference settings', function () {
         ->assertInertia(fn ($page) => $page
             ->component('settings/notifications')
             ->has('preferences')
+            ->has('paydayDayOfMonth')
             ->has('pushSubscriptionCount'));
 });
 
-it('updates notification preferences', function () {
+it('updates granular notification preferences and payday', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)
@@ -34,8 +35,14 @@ it('updates notification preferences', function () {
             'inAppPendingActions' => false,
             'inAppBillingReminders' => true,
             'pushEnabled' => false,
+            'pushTeamInvitations' => false,
             'pushPendingActions' => true,
+            'pushLowFundBalance' => true,
             'pushBillingReminders' => false,
+            'pushTeamActivity' => true,
+            'pushIncomeReminders' => false,
+            'pushActionUpdates' => true,
+            'paydayDayOfMonth' => 15,
         ])
         ->assertRedirect(route('settings.notifications.edit'));
 
@@ -43,5 +50,8 @@ it('updates notification preferences', function () {
 
     expect($preferences->email_team_invitations)->toBeFalse()
         ->and($preferences->in_app_pending_actions)->toBeFalse()
-        ->and($preferences->push_billing_reminders)->toBeFalse();
+        ->and($preferences->push_team_invitations)->toBeFalse()
+        ->and($preferences->push_billing_reminders)->toBeFalse()
+        ->and($preferences->push_action_updates)->toBeTrue()
+        ->and($user->fresh()->payday_day_of_month)->toBe(15);
 });

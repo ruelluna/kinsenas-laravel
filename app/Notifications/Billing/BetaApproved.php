@@ -1,10 +1,8 @@
 <?php
 
-namespace App\Notifications\Savings;
+namespace App\Notifications\Billing;
 
 use App\Enums\NotificationKind;
-use App\Models\SavingsCategory;
-use App\Models\Team;
 use App\Notifications\Concerns\FormatsDatabaseNotification;
 use App\Services\Notifications\NotificationPreferenceService;
 use Illuminate\Bus\Queueable;
@@ -12,14 +10,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\WebPush\WebPushMessage;
 
-class LowFundBalance extends Notification implements ShouldQueue
+class BetaApproved extends Notification implements ShouldQueue
 {
     use FormatsDatabaseNotification, Queueable;
-
-    public function __construct(
-        public SavingsCategory $category,
-        public int $percentUsed,
-    ) {}
 
     /**
      * @return array<int, string|class-string>
@@ -27,7 +20,7 @@ class LowFundBalance extends Notification implements ShouldQueue
     public function via(object $notifiable): array
     {
         return app(NotificationPreferenceService::class)
-            ->channelsFor($notifiable, NotificationKind::LowFundBalance);
+            ->channelsFor($notifiable, NotificationKind::BetaApproved);
     }
 
     /**
@@ -35,22 +28,12 @@ class LowFundBalance extends Notification implements ShouldQueue
      */
     public function toArray(object $notifiable): array
     {
-        $team = $this->team();
-
         return $this->databasePayload(
-            NotificationKind::LowFundBalance,
-            __('Fund bucket running low'),
-            __(':fund is :percent% used this period.', [
-                'fund' => $this->category->name,
-                'percent' => $this->percentUsed,
-            ]),
-            $team !== null ? "/{$team->slug}/dashboard" : '/dashboard',
-            [
-                'categoryId' => $this->category->id,
-                'teamId' => $team?->id,
-                'teamSlug' => $team?->slug,
-                'percentUsed' => $this->percentUsed,
-            ],
+            NotificationKind::BetaApproved,
+            __('Beta access approved'),
+            __('Your Kinsenas beta application was approved. You now have full access.'),
+            '/dashboard',
+            [],
         );
     }
 
@@ -63,12 +46,5 @@ class LowFundBalance extends Notification implements ShouldQueue
             ->body($payload['body'])
             ->data(['actionUrl' => $payload['actionUrl']])
             ->options(['TTL' => 86400]);
-    }
-
-    private function team(): ?Team
-    {
-        $this->category->loadMissing('plan.team');
-
-        return $this->category->plan?->team;
     }
 }

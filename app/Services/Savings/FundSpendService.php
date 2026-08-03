@@ -6,6 +6,7 @@ use App\Enums\TransferStatus;
 use App\Models\FundSpend;
 use App\Models\SavingsPlan;
 use App\Models\User;
+use App\Services\Notifications\PendingActionConfirmedNotificationService;
 use App\Services\Notifications\PendingActionNotificationService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -16,6 +17,7 @@ class FundSpendService
     public function __construct(
         private FundBalanceService $balanceService,
         private PendingActionNotificationService $pendingActionNotificationService,
+        private PendingActionConfirmedNotificationService $pendingActionConfirmedNotificationService,
     ) {}
 
     public function create(
@@ -48,6 +50,7 @@ class FundSpendService
             'status' => $needsConfirmation ? TransferStatus::Pending : TransferStatus::Confirmed,
             'confirmed_at' => $needsConfirmation ? null : $now,
             'confirmed_by_user_id' => $needsConfirmation ? null : $user?->id,
+            'created_by_user_id' => $user?->id,
         ]);
 
         if ($needsConfirmation) {
@@ -80,6 +83,8 @@ class FundSpendService
             'confirmed_at' => now(),
             'confirmed_by_user_id' => $user->id,
         ]);
+
+        $this->pendingActionConfirmedNotificationService->notifyForSpend($spend, $user);
 
         return $spend->fresh(['bank', 'recipient', 'category']);
     }

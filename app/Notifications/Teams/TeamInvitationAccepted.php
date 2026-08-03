@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Notifications\Savings;
+namespace App\Notifications\Teams;
 
 use App\Enums\NotificationKind;
-use App\Models\SavingsCategory;
 use App\Models\Team;
+use App\Models\TeamInvitation as TeamInvitationModel;
+use App\Models\User;
 use App\Notifications\Concerns\FormatsDatabaseNotification;
 use App\Services\Notifications\NotificationPreferenceService;
 use Illuminate\Bus\Queueable;
@@ -12,13 +13,13 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\WebPush\WebPushMessage;
 
-class LowFundBalance extends Notification implements ShouldQueue
+class TeamInvitationAccepted extends Notification implements ShouldQueue
 {
     use FormatsDatabaseNotification, Queueable;
 
     public function __construct(
-        public SavingsCategory $category,
-        public int $percentUsed,
+        public TeamInvitationModel $invitation,
+        public User $acceptedBy,
     ) {}
 
     /**
@@ -27,7 +28,7 @@ class LowFundBalance extends Notification implements ShouldQueue
     public function via(object $notifiable): array
     {
         return app(NotificationPreferenceService::class)
-            ->channelsFor($notifiable, NotificationKind::LowFundBalance);
+            ->channelsFor($notifiable, NotificationKind::TeamInvitationAccepted);
     }
 
     /**
@@ -38,18 +39,18 @@ class LowFundBalance extends Notification implements ShouldQueue
         $team = $this->team();
 
         return $this->databasePayload(
-            NotificationKind::LowFundBalance,
-            __('Fund bucket running low'),
-            __(':fund is :percent% used this period.', [
-                'fund' => $this->category->name,
-                'percent' => $this->percentUsed,
+            NotificationKind::TeamInvitationAccepted,
+            __('Invitation accepted'),
+            __(':name joined :team.', [
+                'name' => $this->acceptedBy->name,
+                'team' => $team->name,
             ]),
-            $team !== null ? "/{$team->slug}/dashboard" : '/dashboard',
+            '/settings/teams/'.$team->slug,
             [
-                'categoryId' => $this->category->id,
-                'teamId' => $team?->id,
-                'teamSlug' => $team?->slug,
-                'percentUsed' => $this->percentUsed,
+                'invitationId' => $this->invitation->id,
+                'teamId' => $team->id,
+                'teamSlug' => $team->slug,
+                'acceptedByUserId' => $this->acceptedBy->id,
             ],
         );
     }
@@ -65,10 +66,10 @@ class LowFundBalance extends Notification implements ShouldQueue
             ->options(['TTL' => 86400]);
     }
 
-    private function team(): ?Team
+    private function team(): Team
     {
-        $this->category->loadMissing('plan.team');
+        $this->invitation->loadMissing('team');
 
-        return $this->category->plan?->team;
+        return $this->invitation->team;
     }
 }

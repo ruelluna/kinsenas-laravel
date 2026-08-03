@@ -24,6 +24,7 @@ class NotificationPreferenceController extends Controller
 
         return Inertia::render('settings/notifications', [
             'preferences' => $this->preferenceService->toSharedArray($preferences),
+            'paydayDayOfMonth' => $user->payday_day_of_month,
             'pushSubscriptionCount' => $user->pushSubscriptions()->count(),
             'vapidPublicKey' => config('webpush.vapid.public_key'),
         ]);
@@ -31,8 +32,15 @@ class NotificationPreferenceController extends Controller
 
     public function update(UpdateNotificationPreferencesRequest $request): RedirectResponse
     {
-        $preferences = $this->preferenceService->forUser($request->user());
+        $user = $request->user();
+        $preferences = $this->preferenceService->forUser($user);
         $preferences->update($request->preferenceAttributes());
+
+        $user->update([
+            'payday_day_of_month' => $request->filled('paydayDayOfMonth')
+                ? (int) $request->input('paydayDayOfMonth')
+                : null,
+        ]);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Notification preferences updated.')]);
 

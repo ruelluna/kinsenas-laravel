@@ -10,6 +10,7 @@ use App\Models\Team;
 use App\Models\TeamInvitation;
 use App\Models\User;
 use App\Notifications\Teams\TeamInvitation as TeamInvitationNotification;
+use App\Notifications\Teams\TeamInvitationAccepted;
 use App\Services\Marketing\GhlUserTagService;
 use App\Support\Marketing\GhlTagCatalog;
 use Illuminate\Http\RedirectResponse;
@@ -91,6 +92,12 @@ class TeamInvitationController extends Controller
 
             $user->switchTeam($team);
         });
+
+        $invitation->loadMissing('inviter');
+
+        if ($invitation->inviter !== null && ! $invitation->inviter->is($user)) {
+            $invitation->inviter->notify(new TeamInvitationAccepted($invitation, $user));
+        }
 
         $this->ghlUserTagService->dispatch(
             $user,

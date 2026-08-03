@@ -11,13 +11,17 @@ use App\Models\SubscriptionPlan;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\Marketing\GhlUserTagService;
+use App\Services\Notifications\SubscriptionNotificationService;
 use App\Support\Marketing\GhlTagCatalog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class SubscriptionService
 {
-    public function __construct(private GhlUserTagService $ghlUserTagService) {}
+    public function __construct(
+        private GhlUserTagService $ghlUserTagService,
+        private SubscriptionNotificationService $subscriptionNotificationService,
+    ) {}
 
     public function startTrial(Team $team, ?SubscriptionPlan $plan = null): Subscription
     {
@@ -193,6 +197,8 @@ class SubscriptionService
                 'team_id' => $subscription->team_id,
             ]);
 
+            $this->subscriptionNotificationService->notifyPastDue($subscription->fresh());
+
             return true;
         }
 
@@ -204,6 +210,8 @@ class SubscriptionService
                 'subscription_id' => $subscription->id,
                 'team_id' => $subscription->team_id,
             ]);
+
+            $this->subscriptionNotificationService->notifyPastDue($subscription->fresh());
 
             return true;
         }

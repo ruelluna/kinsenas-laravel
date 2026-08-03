@@ -41,11 +41,17 @@ class NotificationPreferenceService
     public function wantsDatabase(UserNotificationPreference $preferences, NotificationKind $kind): bool
     {
         return match ($kind) {
-            NotificationKind::TeamInvitation => $preferences->in_app_team_invitations,
+            NotificationKind::TeamInvitation,
+            NotificationKind::TeamInvitationAccepted => $preferences->in_app_team_invitations,
             NotificationKind::PendingSpendConfirmation,
-            NotificationKind::PendingTransferConfirmation => $preferences->in_app_pending_actions,
+            NotificationKind::PendingTransferConfirmation,
+            NotificationKind::PendingActionConfirmed => $preferences->in_app_pending_actions,
             NotificationKind::LowFundBalance,
-            NotificationKind::TrialEndingReminder => $preferences->in_app_billing_reminders,
+            NotificationKind::TrialEndingReminder,
+            NotificationKind::SubscriptionPastDue,
+            NotificationKind::BetaApproved => $preferences->in_app_billing_reminders,
+            NotificationKind::IncomeReminder => $preferences->in_app_pending_actions,
+            NotificationKind::TestPush => true,
         };
     }
 
@@ -55,8 +61,14 @@ class NotificationPreferenceService
             NotificationKind::TeamInvitation => $preferences->email_team_invitations,
             NotificationKind::PendingSpendConfirmation,
             NotificationKind::PendingTransferConfirmation => $preferences->email_pending_actions,
-            NotificationKind::LowFundBalance => false,
-            NotificationKind::TrialEndingReminder => $preferences->email_billing_reminders,
+            NotificationKind::LowFundBalance,
+            NotificationKind::TeamInvitationAccepted,
+            NotificationKind::PendingActionConfirmed,
+            NotificationKind::IncomeReminder,
+            NotificationKind::BetaApproved,
+            NotificationKind::TestPush => false,
+            NotificationKind::TrialEndingReminder,
+            NotificationKind::SubscriptionPastDue => $preferences->email_billing_reminders,
         };
     }
 
@@ -67,11 +79,17 @@ class NotificationPreferenceService
         }
 
         return match ($kind) {
-            NotificationKind::TeamInvitation => false,
+            NotificationKind::TeamInvitation => $preferences->push_team_invitations,
             NotificationKind::PendingSpendConfirmation,
             NotificationKind::PendingTransferConfirmation => $preferences->push_pending_actions,
-            NotificationKind::LowFundBalance => false,
-            NotificationKind::TrialEndingReminder => $preferences->push_billing_reminders,
+            NotificationKind::LowFundBalance => $preferences->push_low_fund_balance,
+            NotificationKind::TrialEndingReminder,
+            NotificationKind::SubscriptionPastDue,
+            NotificationKind::BetaApproved => $preferences->push_billing_reminders,
+            NotificationKind::TeamInvitationAccepted => $preferences->push_team_activity,
+            NotificationKind::PendingActionConfirmed => $preferences->push_action_updates,
+            NotificationKind::IncomeReminder => $preferences->push_income_reminders,
+            NotificationKind::TestPush => true,
         };
     }
 
@@ -88,8 +106,13 @@ class NotificationPreferenceService
             'inAppPendingActions' => $preferences->in_app_pending_actions,
             'inAppBillingReminders' => $preferences->in_app_billing_reminders,
             'pushEnabled' => $preferences->push_enabled,
+            'pushTeamInvitations' => $preferences->push_team_invitations,
             'pushPendingActions' => $preferences->push_pending_actions,
+            'pushLowFundBalance' => $preferences->push_low_fund_balance,
             'pushBillingReminders' => $preferences->push_billing_reminders,
+            'pushTeamActivity' => $preferences->push_team_activity,
+            'pushIncomeReminders' => $preferences->push_income_reminders,
+            'pushActionUpdates' => $preferences->push_action_updates,
         ];
     }
 }
