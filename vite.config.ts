@@ -46,13 +46,11 @@ export default defineConfig(({ mode }) => ({
             scope: '/',
             buildBase: '/build/',
             includeAssets: [
-                'favicon.svg',
-                'icons/icon.svg',
+                'kinsenas-square-logo.png',
                 'icons/icon-180.png',
                 'icons/icon-192.png',
                 'icons/icon-512.png',
                 'icons/icon-512-maskable.png',
-                'kinsenas-square-logo.png',
             ],
             manifest: {
                 id: '/',
@@ -68,17 +66,17 @@ export default defineConfig(({ mode }) => ({
                 categories: ['finance', 'productivity'],
                 icons: [
                     {
-                        src: '/kinsenas-square-logo.png',
+                        src: '/icons/icon-192.png',
                         sizes: '192x192',
                         type: 'image/png',
                     },
                     {
-                        src: '/kinsenas-square-logo.png',
+                        src: '/icons/icon-512.png',
                         sizes: '512x512',
                         type: 'image/png',
                     },
                     {
-                        src: '/kinsenas-square-logo.png',
+                        src: '/icons/icon-512-maskable.png',
                         sizes: '512x512',
                         type: 'image/png',
                         purpose: 'maskable',
