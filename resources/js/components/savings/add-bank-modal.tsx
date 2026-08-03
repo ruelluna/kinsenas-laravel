@@ -1,6 +1,8 @@
 import { Form, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import BankInstitutionPicker from '@/components/savings/bank-institution-picker';
+import BankInstitutionPicker, {
+    type BankInstitutionSelection,
+} from '@/components/savings/bank-institution-picker';
 import GoSaveSpaceSetup, {
     createDefaultGoSaveSpaces,
 } from '@/components/savings/gosave-space-setup';
@@ -25,6 +27,18 @@ type Props = {
     institutions: BankInstitution[];
 };
 
+function canSubmitSelection(selection: BankInstitutionSelection): boolean {
+    if (selection === null) {
+        return false;
+    }
+
+    if (selection.mode === 'institution') {
+        return selection.institutionId !== '';
+    }
+
+    return selection.name.trim() !== '';
+}
+
 export default function AddBankModal({
     open,
     onOpenChange,
@@ -33,14 +47,14 @@ export default function AddBankModal({
     const { currentTeam } = usePage<SharedData>().props;
     const teamSlug = currentTeam?.slug ?? '';
     const [formKey, setFormKey] = useState(0);
-    const [institutionSelection, setInstitutionSelection] = useState<{
-        institutionId: string;
-        name: string;
-    } | null>(null);
+    const [selection, setSelection] = useState<BankInstitutionSelection>(null);
 
-    const selectedInstitution = institutions.find(
-        (institution) => institution.id === institutionSelection?.institutionId,
-    );
+    const selectedInstitution =
+        selection?.mode === 'institution'
+            ? institutions.find(
+                  (institution) => institution.id === selection.institutionId,
+              )
+            : undefined;
     const savingsSpacesConfig = selectedInstitution?.savingsSpaces ?? null;
 
     const [mainLabel, setMainLabel] = useState('');
@@ -49,7 +63,7 @@ export default function AddBankModal({
     >([]);
 
     function resetFormState() {
-        setInstitutionSelection(null);
+        setSelection(null);
         setMainLabel('');
         setSpaces([]);
         setFormKey((key) => key + 1);
@@ -63,14 +77,15 @@ export default function AddBankModal({
         onOpenChange(nextOpen);
     }
 
-    function handleInstitutionChange(
-        selection: { institutionId: string; name: string } | null,
-    ) {
-        setInstitutionSelection(selection);
+    function handleSelectionChange(nextSelection: BankInstitutionSelection) {
+        setSelection(nextSelection);
 
-        const institution = institutions.find(
-            (item) => item.id === selection?.institutionId,
-        );
+        const institution =
+            nextSelection?.mode === 'institution'
+                ? institutions.find(
+                      (item) => item.id === nextSelection.institutionId,
+                  )
+                : undefined;
 
         if (institution?.savingsSpaces) {
             setMainLabel(institution.savingsSpaces.mainLabel);
@@ -106,7 +121,7 @@ export default function AddBankModal({
 
                             <BankInstitutionPicker
                                 institutions={institutions}
-                                onChange={handleInstitutionChange}
+                                onChange={handleSelectionChange}
                             />
 
                             {savingsSpacesConfig ? (
@@ -118,16 +133,18 @@ export default function AddBankModal({
                                     onSpacesChange={setSpaces}
                                 />
                             ) : (
-                                <div className="grid gap-2">
-                                    <Label htmlFor="account_label">
-                                        Account label (optional)
-                                    </Label>
-                                    <Input
-                                        id="account_label"
-                                        name="account_label"
-                                        placeholder="Savings, Payroll, Main…"
-                                    />
-                                </div>
+                                selection !== null && (
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="account_label">
+                                            Account label (optional)
+                                        </Label>
+                                        <Input
+                                            id="account_label"
+                                            name="account_label"
+                                            placeholder="Savings, Payroll, Main…"
+                                        />
+                                    </div>
+                                )
                             )}
 
                             <DialogFooter className="gap-2">
@@ -140,7 +157,7 @@ export default function AddBankModal({
                                     type="submit"
                                     disabled={
                                         processing ||
-                                        institutionSelection === null
+                                        !canSubmitSelection(selection)
                                     }
                                 >
                                     {savingsSpacesConfig

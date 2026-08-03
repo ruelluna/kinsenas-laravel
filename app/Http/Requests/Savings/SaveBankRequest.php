@@ -11,6 +11,19 @@ class SaveBankRequest extends FormRequest
         return $this->user() !== null;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $name = $this->input('name');
+
+        $this->merge([
+            'name' => is_string($name) ? trim($name) : $name,
+            'bank_institution_id' => $this->input('bank_institution_id') ?: null,
+            'account_label' => is_string($this->input('account_label'))
+                ? trim($this->input('account_label')) ?: null
+                : $this->input('account_label'),
+        ]);
+    }
+
     /**
      * @return array<string, mixed>
      */

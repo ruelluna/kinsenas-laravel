@@ -113,7 +113,12 @@ class BankController extends Controller
     {
         abort_if($bank->team_id !== $current_team->id, 404);
 
-        $bank->update($request->validated());
+        $bank->update(collect($request->validated())->only([
+            'name',
+            'account_label',
+            'is_active',
+            'sort_order',
+        ])->all());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Bank updated.')]);
 

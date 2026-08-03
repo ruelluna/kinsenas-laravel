@@ -3,13 +3,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { BankInstitution } from '@/types/savings';
 
+export type BankInstitutionSelection =
+    | { mode: 'institution'; institutionId: string; name: string }
+    | { mode: 'custom'; name: string }
+    | null;
+
 type Props = {
     institutions: BankInstitution[];
     name?: string;
     institutionId?: string;
-    onChange: (
-        selection: { institutionId: string; name: string } | null,
-    ) => void;
+    onChange: (selection: BankInstitutionSelection) => void;
     error?: string;
 };
 
@@ -21,7 +24,19 @@ export default function BankInstitutionPicker({
     error,
 }: Props) {
     const [query, setQuery] = useState('');
-    const [selectedId, setSelectedId] = useState(controlledId ?? '');
+    const [selection, setSelection] = useState<BankInstitutionSelection>(
+        controlledId
+            ? {
+                  mode: 'institution',
+                  institutionId: controlledId,
+                  name:
+                      institutions.find(
+                          (institution) => institution.id === controlledId,
+                      )?.name ?? '',
+              }
+            : null,
+    );
+    const [customName, setCustomName] = useState('');
 
     const filtered = useMemo(() => {
         const normalized = query.trim().toLowerCase();
@@ -35,21 +50,92 @@ export default function BankInstitutionPicker({
         );
     }, [institutions, query]);
 
-    const selected =
-        institutions.find((institution) => institution.id === selectedId) ??
-        null;
+    const trimmedQuery = query.trim();
 
-    const handleSelect = (institution: BankInstitution) => {
-        setSelectedId(institution.id);
+    const selectedInstitution =
+        selection?.mode === 'institution'
+            ? (institutions.find(
+                  (institution) =>
+                      institution.id === selection.institutionId,
+              ) ?? null)
+            : null;
+
+    const handleSelectInstitution = (institution: BankInstitution) => {
+        const nextSelection: BankInstitutionSelection = {
+            mode: 'institution',
+            institutionId: institution.id,
+            name: institution.name,
+        };
+
+        setSelection(nextSelection);
         setQuery(institution.name);
-        onChange({ institutionId: institution.id, name: institution.name });
+        setCustomName('');
+        onChange(nextSelection);
+    };
+
+    const handleSelectCustom = (initialName: string) => {
+        const nextSelection: BankInstitutionSelection = {
+            mode: 'custom',
+            name: initialName,
+        };
+
+        setSelection(nextSelection);
+        setCustomName(initialName);
+        setQuery('');
+        onChange(nextSelection);
     };
 
     const handleClear = () => {
-        setSelectedId('');
+        setSelection(null);
         setQuery('');
+        setCustomName('');
         onChange(null);
     };
+
+    const handleCustomNameChange = (value: string) => {
+        setCustomName(value);
+        onChange({ mode: 'custom', name: value });
+    };
+
+    if (selection?.mode === 'custom') {
+        return (
+            <div className="grid gap-2">
+                <Label htmlFor="custom-bank-name">Bank name</Label>
+                <Input
+                    id="custom-bank-name"
+                    name="name"
+                    value={customName}
+                    onChange={(event) =>
+                        handleCustomNameChange(event.target.value)
+                    }
+                    placeholder="Enter bank or e-wallet name"
+                    required
+                    autoComplete="off"
+                />
+                <div className="flex items-center gap-3 rounded-md border p-3 text-sm">
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded bg-muted text-sm font-medium">
+                        {customName.trim().charAt(0).toUpperCase() || '?'}
+                    </span>
+                    <div className="flex-1">
+                        <p className="font-medium">
+                            {customName.trim() || 'Custom bank'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                            Custom bank
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+                        onClick={handleClear}
+                    >
+                        Change
+                    </button>
+                </div>
+                {error && <p className="text-sm text-destructive">{error}</p>}
+            </div>
+        );
+    }
 
     return (
         <div className="grid gap-2">
@@ -60,25 +146,42 @@ export default function BankInstitutionPicker({
                 onChange={(event) => {
                     setQuery(event.target.value);
 
-                    if (selected && event.target.value !== selected.name) {
-                        setSelectedId('');
+                    if (
+                        selectedInstitution &&
+                        event.target.value !== selectedInstitution.name
+                    ) {
+                        setSelection(null);
                         onChange(null);
                     }
                 }}
                 placeholder="Search BDO, GCash, Maya…"
                 autoComplete="off"
             />
-            {selected && (
+            {selectedInstitution && (
                 <>
-                    <input type="hidden" name={name} value={selected.id} />
-                    <input type="hidden" name="name" value={selected.name} />
+                    <input
+                        type="hidden"
+                        name={name}
+                        value={selectedInstitution.id}
+                    />
+                    <input
+                        type="hidden"
+                        name="name"
+                        value={selectedInstitution.name}
+                    />
                 </>
             )}
-            {!selected && query !== '' && (
+            {!selectedInstitution && query !== '' && (
                 <ul className="max-h-48 overflow-y-auto rounded-md border text-sm">
-                    {filtered.length === 0 ? (
-                        <li className="px-3 py-2 text-muted-foreground">
-                            No matches.
+                    {filtered.length === 0 && trimmedQuery !== '' ? (
+                        <li>
+                            <button
+                                type="button"
+                                className="flex w-full px-3 py-2 text-left hover:bg-muted/50"
+                                onClick={() => handleSelectCustom(trimmedQuery)}
+                            >
+                                Use &ldquo;{trimmedQuery}&rdquo;
+                            </button>
                         </li>
                     ) : (
                         filtered.slice(0, 12).map((institution) => (
@@ -86,7 +189,9 @@ export default function BankInstitutionPicker({
                                 <button
                                     type="button"
                                     className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-muted/50"
-                                    onClick={() => handleSelect(institution)}
+                                    onClick={() =>
+                                        handleSelectInstitution(institution)
+                                    }
                                 >
                                     {institution.logoUrl ? (
                                         <img
@@ -104,21 +209,34 @@ export default function BankInstitutionPicker({
                             </li>
                         ))
                     )}
+                    <li className="border-t">
+                        <button
+                            type="button"
+                            className="flex w-full px-3 py-2 text-left text-muted-foreground hover:bg-muted/50"
+                            onClick={() =>
+                                handleSelectCustom(trimmedQuery)
+                            }
+                        >
+                            Other bank…
+                        </button>
+                    </li>
                 </ul>
             )}
-            {selected && (
+            {selectedInstitution && (
                 <div className="flex items-center gap-3 rounded-md border p-3 text-sm">
-                    {selected.logoUrl ? (
+                    {selectedInstitution.logoUrl ? (
                         <img
-                            src={selected.logoUrl}
+                            src={selectedInstitution.logoUrl}
                             alt=""
                             className="size-8 object-contain"
                         />
                     ) : null}
                     <div className="flex-1">
-                        <p className="font-medium">{selected.name}</p>
+                        <p className="font-medium">
+                            {selectedInstitution.name}
+                        </p>
                         <p className="text-xs text-muted-foreground capitalize">
-                            {selected.type.replace('_', ' ')}
+                            {selectedInstitution.type.replace('_', ' ')}
                         </p>
                     </div>
                     <button

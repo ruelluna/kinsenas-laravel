@@ -1,8 +1,10 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Info, Plus } from 'lucide-react';
+import { Info, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import Heading from '@/components/heading';
 import AddBankModal from '@/components/savings/add-bank-modal';
+import DeleteBankModal from '@/components/savings/delete-bank-modal';
+import EditBankModal from '@/components/savings/edit-bank-modal';
 import { BankLogo } from '@/components/savings/bank-select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -33,6 +35,9 @@ export default function BanksIndex({
     const { currentTeam } = usePage<SharedData>().props;
     const teamSlug = currentTeam?.slug ?? '';
     const [addModalOpen, setAddModalOpen] = useState(false);
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
 
     const balanceForBank = (bankId: string) =>
         bankBalances.find((balance) => balance.bankId === bankId);
@@ -168,6 +173,19 @@ export default function BanksIndex({
                 institutions={institutions}
             />
 
+            <EditBankModal
+                open={editModalOpen}
+                onOpenChange={setEditModalOpen}
+                bank={selectedBank}
+            />
+
+            <DeleteBankModal
+                open={deleteModalOpen}
+                onOpenChange={setDeleteModalOpen}
+                bank={selectedBank}
+                teamSlug={teamSlug}
+            />
+
             <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {banks.length === 0 ? (
                     <li className="col-span-full rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
@@ -208,6 +226,14 @@ export default function BanksIndex({
                                     <BankListItem
                                         bank={bank}
                                         balance={balance}
+                                        onEdit={() => {
+                                            setSelectedBank(bank);
+                                            setEditModalOpen(true);
+                                        }}
+                                        onDelete={() => {
+                                            setSelectedBank(bank);
+                                            setDeleteModalOpen(true);
+                                        }}
                                     />
                                 </li>
                             );
@@ -244,6 +270,14 @@ export default function BanksIndex({
                                                     bank.id,
                                                 )}
                                                 compact
+                                                onEdit={() => {
+                                                    setSelectedBank(bank);
+                                                    setEditModalOpen(true);
+                                                }}
+                                                onDelete={() => {
+                                                    setSelectedBank(bank);
+                                                    setDeleteModalOpen(true);
+                                                }}
                                             />
                                         </li>
                                     ))}
@@ -261,10 +295,14 @@ function BankListItem({
     bank,
     balance,
     compact = false,
+    onEdit,
+    onDelete,
 }: {
     bank: Bank;
     balance?: BankBalance;
     compact?: boolean;
+    onEdit: () => void;
+    onDelete: () => void;
 }) {
     return (
         <div>
@@ -273,18 +311,46 @@ function BankListItem({
                     <BankLogo logoUrl={bank.logoUrl} name={bank.name} />
                 )}
                 <div className="min-w-0 flex-1">
-                    <p
-                        className={
-                            compact ? 'text-sm font-medium' : 'font-medium'
-                        }
-                    >
-                        {formatBankOptionLabel(bank)}
-                    </p>
-                    {balance && (
-                        <p className="mt-1 text-sm font-medium">
-                            Balance: {formatMoney(balance.total)}
-                        </p>
-                    )}
+                    <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                            <p
+                                className={
+                                    compact
+                                        ? 'text-sm font-medium'
+                                        : 'font-medium'
+                                }
+                            >
+                                {formatBankOptionLabel(bank)}
+                            </p>
+                            {balance && (
+                                <p className="mt-1 text-sm font-medium">
+                                    Balance: {formatMoney(balance.total)}
+                                </p>
+                            )}
+                        </div>
+                        <div className="flex shrink-0 gap-1">
+                            <Button
+                                type="button"
+                                size="icon"
+                                variant="ghost"
+                                className="size-8"
+                                aria-label={`Edit ${formatBankOptionLabel(bank)}`}
+                                onClick={onEdit}
+                            >
+                                <Pencil className="size-4" />
+                            </Button>
+                            <Button
+                                type="button"
+                                size="icon"
+                                variant="ghost"
+                                className="size-8 text-destructive hover:text-destructive"
+                                aria-label={`Remove ${formatBankOptionLabel(bank)}`}
+                                onClick={onDelete}
+                            >
+                                <Trash2 className="size-4" />
+                            </Button>
+                        </div>
+                    </div>
                 </div>
             </div>
             {balance && balance.byCategory.length > 0 && (

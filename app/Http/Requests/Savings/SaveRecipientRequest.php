@@ -13,6 +13,17 @@ class SaveRecipientRequest extends FormRequest
         return $this->user() !== null;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $name = $this->input('name');
+        $notes = $this->input('notes');
+
+        $this->merge([
+            'name' => is_string($name) ? trim($name) : $name,
+            'notes' => is_string($notes) ? trim($notes) ?: null : $notes,
+        ]);
+    }
+
     /**
      * @return array<string, mixed>
      */
