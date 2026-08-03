@@ -2,7 +2,13 @@ import { InstallAppSheet } from '@/components/pwa/install-app-sheet';
 import { usePwaInstall } from '@/contexts/pwa-install-context';
 
 export function PwaInstallSheetHost() {
-    const { guideOpen, setGuideOpen } = usePwaInstall();
+    const { guideOpen, setGuideOpen, installGuideVariant } = usePwaInstall();
 
-    return <InstallAppSheet open={guideOpen} onOpenChange={setGuideOpen} />;
+    return (
+        <InstallAppSheet
+            open={guideOpen}
+            onOpenChange={setGuideOpen}
+            variant={installGuideVariant}
+        />
+    );
 }

@@ -101,3 +101,42 @@ gains id, categories, and start_url /launch.
 - Install prompt is dismissible and rediscoverable from More and Appearance
 - iOS users get a proper 3-step guide instead of a one-line hint
 - PWA shortcuts land on dashboard when logged in, not the marketing welcome page
+
+---
+
+## Changelog (2026-08-04 — aggressive install prompts)
+
+- **Register / login** — install card on auth pages immediately (no engagement gate)
+- **After login** — install banner shows on first app page (no 2nd-visit or plan requirement)
+- **Broader eligibility** — no subscription or vault-unlock gate; any logged-in member or guest on register/login
+- **No `beforeinstallprompt` required** — Chromium/generic browsers get “How to install” with menu/address-bar steps
+- **Auto-open guide** — first register/login visit per session opens install sheet when native prompt unavailable (iOS)
+- **Provider moved to app root** — `PwaInstallProvider` wraps all Inertia pages in `app.tsx`
+
+### Files (this pass)
+
+- `resources/js/lib/pwa-install.ts`
+- `resources/js/contexts/pwa-install-context.tsx`
+- `resources/js/components/pwa/install-app-auth-prompt.tsx` (new)
+- `resources/js/components/pwa/install-app-banner.tsx`
+- `resources/js/components/pwa/install-app-sheet.tsx`
+- `resources/js/app.tsx`
+- `resources/js/layouts/auth/auth-simple-layout.tsx`
+- `resources/js/layouts/app/app-sidebar-layout.tsx`
+- `resources/js/types/auth.ts`
+
+### Visual QA (updated)
+
+1. Open **Register** or Live Beta link — install card above the form; sheet may auto-open on iOS
+2. Log in — **Install Kinsenas** banner on dashboard (or vault unlock) without a second visit
+3. Dismiss still works; **More → Install app** and **Settings → Appearance** remain available
+4. Clear `localStorage` key `kinsenas.dismiss.pwaInstall.v1` if testing after a prior dismiss
+
+### Suggested commit
+
+```
+Summary: Show PWA install prompt on register and first login
+
+Remove engagement and beforeinstallprompt gates so install UI appears on
+auth pages and immediately after login, with browser-specific install guides.
+```

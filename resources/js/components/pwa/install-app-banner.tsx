@@ -60,7 +60,16 @@ export function InstallAppBanner() {
                         >
                             Install app
                         </Button>
-                    ) : null}
+                    ) : (
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant="default"
+                            onClick={openInstallGuide}
+                        >
+                            How to install
+                        </Button>
+                    )}
                 </AlertDescription>
             </Alert>
         </div>

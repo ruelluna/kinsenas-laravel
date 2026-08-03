@@ -1,4 +1,6 @@
 import { Link } from '@inertiajs/react';
+import { InstallAppAuthPrompt } from '@/components/pwa/install-app-auth-prompt';
+import { PwaInstallSheetHost } from '@/components/pwa/pwa-install-sheet-host';
 import { KINSENAS_HORIZONTAL_LOGO } from '@/lib/brand';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
@@ -32,9 +34,11 @@ export default function AuthSimpleLayout({
                             </p>
                         </div>
                     </div>
+                    <InstallAppAuthPrompt />
                     {children}
                 </div>
             </div>
+            <PwaInstallSheetHost />
         </div>
     );
 }

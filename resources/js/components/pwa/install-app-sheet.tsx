@@ -1,4 +1,4 @@
-import { Share, Plus, SquarePlus } from 'lucide-react';
+import { Download, Menu, Monitor, Share, Plus, SquarePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Sheet,
@@ -8,13 +8,15 @@ import {
     SheetTitle,
 } from '@/components/ui/sheet';
 import { KINSENAS_SQUARE_LOGO } from '@/lib/brand';
+import type { InstallGuideVariant } from '@/lib/pwa-install';
 
 type Props = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    variant: InstallGuideVariant;
 };
 
-const steps = [
+const iosSteps = [
     {
         icon: Share,
         title: 'Tap Share',
@@ -32,7 +34,69 @@ const steps = [
     },
 ] as const;
 
-export function InstallAppSheet({ open, onOpenChange }: Props) {
+const chromiumSteps = [
+    {
+        icon: Download,
+        title: 'Find Install',
+        description:
+            'Look for the install icon in the address bar, or open the browser menu.',
+    },
+    {
+        icon: Monitor,
+        title: 'Install Kinsenas',
+        description: 'Choose Install Kinsenas or Install app, then confirm.',
+    },
+    {
+        icon: Plus,
+        title: 'Open the app',
+        description:
+            'Launch Kinsenas from your home screen, taskbar, or apps list.',
+    },
+] as const;
+
+const genericSteps = [
+    {
+        icon: Menu,
+        title: 'Open browser menu',
+        description: 'Tap the menu button in your browser toolbar.',
+    },
+    {
+        icon: Download,
+        title: 'Install or add to home screen',
+        description:
+            'Choose Install app, Add to Home Screen, or a similar option.',
+    },
+    {
+        icon: Plus,
+        title: 'Confirm',
+        description: 'Add Kinsenas, then open it from your device.',
+    },
+] as const;
+
+const guideCopy: Record<
+    InstallGuideVariant,
+    { description: string; steps: typeof iosSteps }
+> = {
+    ios: {
+        description:
+            'Add Kinsenas to your home screen for quick, app-like access.',
+        steps: iosSteps,
+    },
+    chromium: {
+        description:
+            'Install Kinsenas from your browser for quick, app-like access.',
+        steps: chromiumSteps,
+    },
+    generic: {
+        description:
+            'Add Kinsenas to this device for quick, app-like access.',
+        steps: genericSteps,
+    },
+};
+
+export function InstallAppSheet({ open, onOpenChange, variant }: Props) {
+    const { description, steps } = guideCopy[variant];
+
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent
@@ -41,10 +105,7 @@ export function InstallAppSheet({ open, onOpenChange }: Props) {
             >
                 <SheetHeader className="text-left">
                     <SheetTitle>Install Kinsenas</SheetTitle>
-                    <SheetDescription>
-                        Add Kinsenas to your home screen for quick, app-like
-                        access.
-                    </SheetDescription>
+                    <SheetDescription>{description}</SheetDescription>
                 </SheetHeader>
 
                 <div className="mt-4 flex items-center gap-3 rounded-xl border bg-muted/30 p-3">

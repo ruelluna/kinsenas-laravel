@@ -13,21 +13,23 @@ import {
     isBannerDismissed,
 } from '@/lib/dismissible-banner';
 import {
+    getInstallGuideVariant,
+    isAuthInstallPage,
     isIosSafari,
-    isPwaEngagementReady,
     isStandaloneDisplay,
-    PWA_ENGAGEMENT_CHANGE_EVENT,
     PWA_INSTALL_DISMISS_KEY,
-    recordPwaInstallVisit,
     type BeforeInstallPromptEvent,
+    type InstallGuideVariant,
 } from '@/lib/pwa-install';
 import type { SharedData } from '@/types';
 
 type PwaInstallContextValue = {
     canOfferInstall: boolean;
     showBanner: boolean;
+    showAuthPrompt: boolean;
     isIosInstall: boolean;
     canNativePrompt: boolean;
+    installGuideVariant: InstallGuideVariant;
     guideOpen: boolean;
     setGuideOpen: (open: boolean) => void;
     dismissBanner: () => void;
@@ -39,53 +41,27 @@ const PwaInstallContext = createContext<PwaInstallContextValue | null>(null);
 
 export function PwaInstallProvider({ children }: { children: ReactNode }) {
     const page = usePage<SharedData>();
-    const { subscription, vaultLocked } = page.props;
-    const hasAccess = subscription?.hasAccess ?? false;
+    const { auth } = page.props;
+    const isLoggedIn = auth.user !== null;
+    const onAuthInstallPage = isAuthInstallPage(page.component);
 
     const [deferredPrompt, setDeferredPrompt] =
         useState<BeforeInstallPromptEvent | null>(null);
     const [guideOpen, setGuideOpen] = useState(false);
-    const [engagementReady, setEngagementReady] = useState(false);
     const [bannerDismissed, setBannerDismissed] = useState(false);
     const [standalone, setStandalone] = useState(false);
 
     const isIosInstall = isIosSafari();
+    const canNativePrompt = Boolean(deferredPrompt);
+    const installGuideVariant = getInstallGuideVariant(canNativePrompt);
 
     useEffect(() => {
         setStandalone(isStandaloneDisplay());
         setBannerDismissed(isBannerDismissed(PWA_INSTALL_DISMISS_KEY));
-        setEngagementReady(isPwaEngagementReady());
     }, []);
 
     useEffect(() => {
-        const refreshEngagement = () => {
-            setEngagementReady(isPwaEngagementReady());
-        };
-
-        window.addEventListener(
-            PWA_ENGAGEMENT_CHANGE_EVENT,
-            refreshEngagement,
-        );
-
-        return () => {
-            window.removeEventListener(
-                PWA_ENGAGEMENT_CHANGE_EVENT,
-                refreshEngagement,
-            );
-        };
-    }, []);
-
-    useEffect(() => {
-        if (!hasAccess || standalone) {
-            return;
-        }
-
-        recordPwaInstallVisit();
-        setEngagementReady(isPwaEngagementReady());
-    }, [hasAccess, standalone]);
-
-    useEffect(() => {
-        if (standalone || isIosInstall) {
+        if (standalone) {
             return;
         }
 
@@ -102,16 +78,16 @@ export function PwaInstallProvider({ children }: { children: ReactNode }) {
                 handleBeforeInstall,
             );
         };
-    }, [standalone, isIosInstall]);
+    }, [standalone]);
 
     const canOfferInstall =
-        !standalone && hasAccess && !vaultLocked && (isIosInstall || Boolean(deferredPrompt));
+        !standalone && (onAuthInstallPage || isLoggedIn);
 
-    const showBanner =
-        canOfferInstall &&
-        engagementReady &&
-        !bannerDismissed &&
-        (isIosInstall || Boolean(deferredPrompt));
+    const showInstallPrompt = canOfferInstall && !bannerDismissed;
+
+    const showAuthPrompt = showInstallPrompt && onAuthInstallPage;
+
+    const showBanner = showInstallPrompt && !onAuthInstallPage;
 
     const dismissInstallBanner = useCallback(() => {
         dismissBanner(PWA_INSTALL_DISMISS_KEY);
@@ -138,8 +114,10 @@ export function PwaInstallProvider({ children }: { children: ReactNode }) {
         (): PwaInstallContextValue => ({
             canOfferInstall,
             showBanner,
+            showAuthPrompt,
             isIosInstall,
-            canNativePrompt: Boolean(deferredPrompt),
+            canNativePrompt,
+            installGuideVariant,
             guideOpen,
             setGuideOpen,
             dismissBanner: dismissInstallBanner,
@@ -149,8 +127,10 @@ export function PwaInstallProvider({ children }: { children: ReactNode }) {
         [
             canOfferInstall,
             showBanner,
+            showAuthPrompt,
             isIosInstall,
-            deferredPrompt,
+            canNativePrompt,
+            installGuideVariant,
             guideOpen,
             dismissInstallBanner,
             openInstallGuide,

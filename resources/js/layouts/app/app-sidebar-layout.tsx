@@ -9,7 +9,6 @@ import { InstallAppBanner } from '@/components/pwa/install-app-banner';
 import { PwaInstallSheetHost } from '@/components/pwa/pwa-install-sheet-host';
 import { PageContent } from '@/components/page-content';
 import { MobileNavProvider } from '@/contexts/mobile-nav-context';
-import { PwaInstallProvider } from '@/contexts/pwa-install-context';
 import type { AppLayoutProps } from '@/types';
 
 export default function AppSidebarLayout({
@@ -18,22 +17,20 @@ export default function AppSidebarLayout({
 }: AppLayoutProps) {
     return (
         <AppShell variant="sidebar">
-            <PwaInstallProvider>
-                <MobileNavProvider>
-                    <AppSidebar />
-                    <AppContent variant="sidebar" className="overflow-x-hidden">
-                        <AppSidebarHeader breadcrumbs={breadcrumbs} />
-                        <InstallAppBanner />
-                        <OpenBetaBanner />
-                        <PageContent className="pb-mobile-nav md:pb-6">
-                            {children}
-                        </PageContent>
-                    </AppContent>
-                    <MobileBottomNav />
-                    <OnboardingTourHost />
-                    <PwaInstallSheetHost />
-                </MobileNavProvider>
-            </PwaInstallProvider>
+            <MobileNavProvider>
+                <AppSidebar />
+                <AppContent variant="sidebar" className="overflow-x-hidden">
+                    <AppSidebarHeader breadcrumbs={breadcrumbs} />
+                    <InstallAppBanner />
+                    <OpenBetaBanner />
+                    <PageContent className="pb-mobile-nav md:pb-6">
+                        {children}
+                    </PageContent>
+                </AppContent>
+                <MobileBottomNav />
+                <OnboardingTourHost />
+                <PwaInstallSheetHost />
+            </MobileNavProvider>
         </AppShell>
     );
 }

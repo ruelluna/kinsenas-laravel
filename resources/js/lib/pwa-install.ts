@@ -11,6 +11,15 @@ export type BeforeInstallPromptEvent = Event & {
     userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 };
 
+export const PWA_AUTH_AUTO_OPEN_SESSION_KEY =
+    'kinsenas.pwaInstall.authAutoOpen.session.v1';
+
+export type InstallGuideVariant = 'ios' | 'chromium' | 'generic';
+
+export function isAuthInstallPage(component: string): boolean {
+    return component === 'auth/register' || component === 'auth/login';
+}
+
 export function isIosSafari(): boolean {
     if (typeof navigator === 'undefined') {
         return false;
@@ -25,6 +34,37 @@ export function isIosSafari(): boolean {
         /Safari/.test(ua) &&
         !/CriOS|FxiOS/.test(ua)
     );
+}
+
+export function isChromiumBrowser(): boolean {
+    if (typeof navigator === 'undefined') {
+        return false;
+    }
+
+    const ua = navigator.userAgent;
+
+    if (/Firefox\//.test(ua) && !/Seamonkey\//.test(ua)) {
+        return false;
+    }
+
+    return (
+        /Chrome|CriOS|Edg|OPR|Brave/.test(ua) ||
+        /SamsungBrowser\//.test(ua)
+    );
+}
+
+export function getInstallGuideVariant(
+    hasNativePrompt: boolean,
+): InstallGuideVariant {
+    if (isIosSafari()) {
+        return 'ios';
+    }
+
+    if (hasNativePrompt || isChromiumBrowser()) {
+        return 'chromium';
+    }
+
+    return 'generic';
 }
 
 export function isStandaloneDisplay(): boolean {
