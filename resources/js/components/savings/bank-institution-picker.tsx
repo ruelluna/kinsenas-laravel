@@ -172,55 +172,53 @@ export default function BankInstitutionPicker({
                 </>
             )}
             {!selectedInstitution && query !== '' && (
-                <ul className="max-h-48 overflow-y-auto rounded-md border text-sm">
+                <div className="overflow-hidden rounded-md border text-sm">
                     {filtered.length === 0 && trimmedQuery !== '' ? (
-                        <li>
-                            <button
-                                type="button"
-                                className="flex w-full px-3 py-2 text-left hover:bg-muted/50"
-                                onClick={() => handleSelectCustom(trimmedQuery)}
-                            >
-                                Use &ldquo;{trimmedQuery}&rdquo;
-                            </button>
-                        </li>
-                    ) : (
-                        filtered.slice(0, 12).map((institution) => (
-                            <li key={institution.id}>
-                                <button
-                                    type="button"
-                                    className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-muted/50"
-                                    onClick={() =>
-                                        handleSelectInstitution(institution)
-                                    }
-                                >
-                                    {institution.logoUrl ? (
-                                        <img
-                                            src={institution.logoUrl}
-                                            alt=""
-                                            className="size-6 shrink-0 object-contain"
-                                        />
-                                    ) : (
-                                        <span className="flex size-6 shrink-0 items-center justify-center rounded bg-muted text-xs">
-                                            {institution.name.charAt(0)}
-                                        </span>
-                                    )}
-                                    <span>{institution.name}</span>
-                                </button>
-                            </li>
-                        ))
-                    )}
-                    <li className="border-t">
                         <button
                             type="button"
-                            className="flex w-full px-3 py-2 text-left text-muted-foreground hover:bg-muted/50"
-                            onClick={() =>
-                                handleSelectCustom(trimmedQuery)
-                            }
+                            className="flex w-full px-3 py-2 text-left hover:bg-muted/50"
+                            onClick={() => handleSelectCustom(trimmedQuery)}
+                        >
+                            Use &ldquo;{trimmedQuery}&rdquo;
+                        </button>
+                    ) : (
+                        <ul className="max-h-48 overflow-y-auto">
+                            {filtered.slice(0, 12).map((institution) => (
+                                <li key={institution.id}>
+                                    <button
+                                        type="button"
+                                        className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-muted/50"
+                                        onClick={() =>
+                                            handleSelectInstitution(institution)
+                                        }
+                                    >
+                                        {institution.logoUrl ? (
+                                            <img
+                                                src={institution.logoUrl}
+                                                alt=""
+                                                className="size-6 shrink-0 object-contain"
+                                            />
+                                        ) : (
+                                            <span className="flex size-6 shrink-0 items-center justify-center rounded bg-muted text-xs">
+                                                {institution.name.charAt(0)}
+                                            </span>
+                                        )}
+                                        <span>{institution.name}</span>
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                    <div className="border-t bg-muted/20">
+                        <button
+                            type="button"
+                            className="flex w-full px-3 py-2 text-left font-medium hover:bg-muted/50"
+                            onClick={() => handleSelectCustom(trimmedQuery)}
                         >
                             Other bank…
                         </button>
-                    </li>
-                </ul>
+                    </div>
+                </div>
             )}
             {selectedInstitution && (
                 <div className="flex items-center gap-3 rounded-md border p-3 text-sm">

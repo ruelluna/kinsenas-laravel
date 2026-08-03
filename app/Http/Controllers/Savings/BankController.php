@@ -88,7 +88,13 @@ class BankController extends Controller
         $isFirstInstitutionOnTeam = ! empty($data['bank_institution_id'])
             && ! $current_team->banks()->where('bank_institution_id', $data['bank_institution_id'])->exists();
 
-        $current_team->banks()->create($data);
+        $current_team->banks()->create(collect($data)->only([
+            'bank_institution_id',
+            'name',
+            'account_label',
+            'is_active',
+            'sort_order',
+        ])->all());
 
         if (! empty($data['bank_institution_id'])) {
             $institution = BankInstitution::query()->find($data['bank_institution_id']);

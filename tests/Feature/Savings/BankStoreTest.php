@@ -35,7 +35,39 @@ it('creates a custom bank without an institution', function () {
     expect($bank->name)->toBe('Rural Credit Union')
         ->and($bank->account_label)->toBe('Payroll')
         ->and($bank->bank_institution_id)->toBeNull()
+        ->and($bank->team_id)->toBe($user->currentTeam->id)
         ->and($bank->displayLabel())->toBe('Rural Credit Union — Payroll');
+});
+
+it('does not add custom banks to the global institution catalog', function () {
+    $user = User::factory()->create();
+    $this->unlockVaultFor($user);
+
+    $institutionCount = BankInstitution::query()->count();
+
+    $this->actingAs($user)->post(route('savings.banks.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'name' => 'Barangay Co-op',
+    ])->assertRedirect();
+
+    expect(BankInstitution::query()->count())->toBe($institutionCount);
+});
+
+it('keeps custom banks visible only to the team that added them', function () {
+    $owner = User::factory()->create();
+    $otherUser = User::factory()->create();
+    $this->unlockVaultFor($owner);
+    $this->unlockVaultFor($otherUser);
+
+    $this->actingAs($owner)->post(route('savings.banks.store', [
+        'current_team' => $owner->currentTeam->slug,
+    ]), [
+        'name' => 'Private Credit Union',
+    ])->assertRedirect();
+
+    expect($owner->currentTeam->banks()->count())->toBe(1)
+        ->and($otherUser->currentTeam->banks()->count())->toBe(0);
 });
 
 it('rejects a custom bank with an empty name', function () {
@@ -71,7 +103,7 @@ it('creates an institution-linked bank', function () {
     $bank = Bank::query()->firstOrFail();
 
     expect($bank->bank_institution_id)->toBe($bdo->id)
-        ->and($bank->name)->toBe('BDO')
+        ->and($bank->name)->toBe($bdo->name)
         ->and($bank->account_label)->toBe('Savings');
 });
 
