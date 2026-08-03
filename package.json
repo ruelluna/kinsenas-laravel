@@ -7,7 +7,7 @@
         "packages/*"
     ],
     "scripts": {
-        "build": "vite build",
+        "build": "vite build && node scripts/sync-pwa-to-public-root.mjs",
         "build:ssr": "vite build && vite build --ssr",
         "dev": "vite",
         "icons:pwa": "php scripts/generate-pwa-icons.php",

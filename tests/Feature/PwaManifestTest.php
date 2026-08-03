@@ -27,6 +27,7 @@ it('serves a built web app manifest when assets are compiled', function () {
 it('includes pwa meta tags in the app shell', function () {
     $this->get(route('home'))
         ->assertOk()
+        ->assertSee('rel="manifest"', false)
         ->assertSee('apple-mobile-web-app-capable', false)
         ->assertSee('theme-color', false)
         ->assertSee('viewport-fit=cover', false);

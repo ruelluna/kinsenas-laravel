@@ -1,9 +1,9 @@
 import { createInertiaApp } from '@inertiajs/react';
 import { KinsenasProvider } from '@kinsenas/ui';
-import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
+import { registerPwaServiceWorker } from '@/lib/register-pwa';
 import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
@@ -11,23 +11,7 @@ import 'driver.js/dist/driver.css';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Kinsenas';
 
-if (import.meta.env.PROD) {
-    void import('virtual:pwa-register').then(({ registerSW }) => {
-        registerSW({
-            immediate: true,
-            onNeedRefresh() {
-                toast('Update available', {
-                    description: 'A new version of Kinsenas is ready.',
-                    action: {
-                        label: 'Reload',
-                        onClick: () => window.location.reload(),
-                    },
-                    duration: Infinity,
-                });
-            },
-        });
-    });
-}
+registerPwaServiceWorker();
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),

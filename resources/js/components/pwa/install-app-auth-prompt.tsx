@@ -20,20 +20,31 @@ export function InstallAppAuthPrompt() {
             return;
         }
 
-        try {
-            if (sessionStorage.getItem(PWA_AUTH_AUTO_OPEN_SESSION_KEY)) {
+        const timer = window.setTimeout(() => {
+            try {
+                if (sessionStorage.getItem(PWA_AUTH_AUTO_OPEN_SESSION_KEY)) {
+                    return;
+                }
+
+                sessionStorage.setItem(PWA_AUTH_AUTO_OPEN_SESSION_KEY, '1');
+            } catch {
                 return;
             }
 
-            sessionStorage.setItem(PWA_AUTH_AUTO_OPEN_SESSION_KEY, '1');
-        } catch {
-            return;
-        }
+            if (isIosInstall || !canNativePrompt) {
+                openInstallGuide();
+            }
+        }, 2000);
 
-        if (isIosInstall || !canNativePrompt) {
-            openInstallGuide();
-        }
-    }, [showAuthPrompt, isIosInstall, canNativePrompt, openInstallGuide]);
+        return () => {
+            window.clearTimeout(timer);
+        };
+    }, [
+        showAuthPrompt,
+        isIosInstall,
+        canNativePrompt,
+        openInstallGuide,
+    ]);
 
     if (!showAuthPrompt) {
         return null;

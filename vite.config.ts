@@ -43,6 +43,8 @@ export default defineConfig(({ mode }) => ({
         }),
         VitePWA({
             registerType: 'prompt',
+            scope: '/',
+            buildBase: '/build/',
             includeAssets: [
                 'favicon.svg',
                 'icons/icon.svg',
@@ -67,12 +69,12 @@ export default defineConfig(({ mode }) => ({
                 icons: [
                     {
                         src: '/kinsenas-square-logo.png',
-                        sizes: '512x512',
+                        sizes: '192x192',
                         type: 'image/png',
                     },
                     {
                         src: '/kinsenas-square-logo.png',
-                        sizes: '192x192',
+                        sizes: '512x512',
                         type: 'image/png',
                     },
                     {

@@ -37,6 +37,7 @@
 
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="icon" href="/kinsenas-square-logo.png" type="image/png">
+        <link rel="manifest" href="/manifest.webmanifest">
         <link rel="apple-touch-icon" href="/kinsenas-square-logo.png">
 
         @fonts
