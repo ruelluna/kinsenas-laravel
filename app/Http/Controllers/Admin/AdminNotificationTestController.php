@@ -22,11 +22,6 @@ class AdminNotificationTestController extends Controller
 
         return Inertia::render('admin/notifications-test/index', [
             'subscriberCount' => $subscriberCount,
-            'defaults' => [
-                'title' => 'Kinsenas test push',
-                'body' => 'If you see this, Web Push is working.',
-                'actionUrl' => '/dashboard',
-            ],
         ]);
     }
 
@@ -48,7 +43,8 @@ class AdminNotificationTestController extends Controller
         };
 
         if ($validated['target'] === 'email' && $target === null) {
-            return back()->withErrors(['targetEmail' => __('No user found with that email.')]);
+            return to_route('admin.notifications-test.index')
+                ->withErrors(['targetEmail' => __('No user found with that email.')]);
         }
 
         $sent = 0;
@@ -66,6 +62,7 @@ class AdminNotificationTestController extends Controller
             $sent = 1;
         }
 
-        return back()->with('success', __('Sent :count test push notification(s).', ['count' => $sent]));
+        return to_route('admin.notifications-test.index')
+            ->with('success', __('Sent :count test push notification(s).', ['count' => $sent]));
     }
 }

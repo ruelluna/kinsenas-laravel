@@ -5,18 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
+const pushFormDefaults = {
+    title: 'Kinsenas test push',
+    body: 'If you see this, Web Push is working.',
+    actionUrl: '/dashboard',
+    target: 'self',
+    targetEmail: '',
+};
+
 type Props = {
     subscriberCount: number;
-    defaults: {
-        title: string;
-        body: string;
-        actionUrl: string;
-    };
 };
 
 export default function AdminNotificationsTestIndex({
-    subscriberCount,
-    defaults,
+    subscriberCount = 0,
 }: Props) {
     return (
         <>
@@ -35,13 +37,7 @@ export default function AdminNotificationsTestIndex({
                 method="post"
                 action="/admin/notifications-test"
                 className="mt-6 max-w-xl space-y-4"
-                defaults={{
-                    title: defaults.title,
-                    body: defaults.body,
-                    actionUrl: defaults.actionUrl,
-                    target: 'self',
-                    targetEmail: '',
-                }}
+                defaults={pushFormDefaults}
             >
                 {({ data, setData, processing, errors }) => (
                     <>
