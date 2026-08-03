@@ -20,4 +20,22 @@ class GhlUserTagService
 
         SyncUserTagsToGhl::dispatch($user, $tagsToAdd, $tagsToRemove, $context)->afterCommit();
     }
+
+    /**
+     * @param  list<string>  $tagsToRemove
+     * @param  array<string, mixed>  $context
+     */
+    public function syncRemovalForDeletedAccount(User $user, array $tagsToRemove, array $context = []): void
+    {
+        if ($tagsToRemove === []) {
+            return;
+        }
+
+        app(GhlMarketingService::class)->mutateTags(
+            email: $user->email,
+            name: $user->name,
+            tagsToRemove: $tagsToRemove,
+            context: array_merge($context, ['user_id' => $user->id]),
+        );
+    }
 }

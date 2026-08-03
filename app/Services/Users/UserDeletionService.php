@@ -57,11 +57,10 @@ class UserDeletionService
                 ->get()
                 ->each(fn (Team $team) => $this->deleteOwnedTeam($team, $target));
 
-            $this->ghlUserTagService->dispatch(
+            $this->ghlUserTagService->syncRemovalForDeletedAccount(
                 $target,
-                tagsToAdd: [],
-                tagsToRemove: GhlTagCatalog::allStaticTags(),
-                context: ['event' => 'account_deleted'],
+                GhlTagCatalog::allStaticTags(),
+                ['event' => 'account_deleted'],
             );
 
             DB::table('sessions')->where('user_id', $target->id)->delete();
@@ -81,6 +80,7 @@ class UserDeletionService
             $this->subscriptionService->cancel(
                 $team->subscription,
                 'Admin deleted user account',
+                syncMarketingTags: false,
             );
         }
 

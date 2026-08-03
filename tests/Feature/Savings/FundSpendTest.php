@@ -5,6 +5,7 @@ use App\Models\FundSpend;
 use App\Models\Recipient;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlan;
+use App\Models\User;
 use Database\Seeders\BillingSeeder;
 use Database\Seeders\SavingsFormulaTemplateSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -261,7 +262,7 @@ it('includes fund health on reports page', function () {
         ->where('totals.fund_health.0.spent', '2500.00')
         ->where('totals.fund_health.0.remaining', '32500.00')
         ->where('totals.fund_health.0.bank_id', $bank->id)
-        ->where('totals.fund_health.0.bank_display_name', 'BPI'),
+        ->where('totals.fund_health.0.bank_display_name', $bank->displayLabel()),
     );
 });
 
@@ -416,7 +417,7 @@ it('persists allow_editing_spends from plan settings', function () {
     expect($plan->fresh()->allow_editing_spends)->toBeTrue();
 });
 
-it('records spending against opening balance before income is locked', function () {
+it('records spending against opening balance before income is added', function () {
     $user = User::factory()->create();
     test()->unlockVaultFor($user);
 

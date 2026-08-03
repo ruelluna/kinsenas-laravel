@@ -60,11 +60,9 @@ it('blocks payment submissions during open beta', function () {
 it('does not lock approved users out when switching to a past due team during open beta', function () {
     $user = User::factory()->betaApproved()->create(['email' => 'switch-beta@example.com']);
     $this->unlockVaultFor($user);
-    $personalTeam = $user->personalTeam();
     $sharedTeam = Team::factory()->create(['name' => 'Locked Team']);
     $sharedTeam->members()->attach($user, ['role' => TeamRole::Owner->value]);
-    $sharedTeam->subscription()->create([
-        'plan_id' => $personalTeam->subscription->plan_id,
+    $sharedTeam->subscription()->update([
         'status' => SubscriptionStatus::PastDue,
         'trial_ends_at' => null,
         'current_period_ends_at' => null,

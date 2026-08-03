@@ -140,9 +140,9 @@ class SubscriptionService
         });
     }
 
-    public function cancel(Subscription $subscription, ?string $reason = null): Subscription
+    public function cancel(Subscription $subscription, ?string $reason = null, bool $syncMarketingTags = true): Subscription
     {
-        return DB::transaction(function () use ($subscription, $reason) {
+        return DB::transaction(function () use ($subscription, $reason, $syncMarketingTags) {
             $subscription->update([
                 'status' => SubscriptionStatus::Cancelled,
                 'current_period_ends_at' => null,
@@ -154,7 +154,9 @@ class SubscriptionService
                 'reason' => $reason,
             ]);
 
-            $this->syncSubscriptionCancelledTag($subscription->team);
+            if ($syncMarketingTags) {
+                $this->syncSubscriptionCancelledTag($subscription->team);
+            }
 
             return $subscription->fresh('plan');
         });

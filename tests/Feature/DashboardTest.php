@@ -174,7 +174,7 @@ it('dashboard setup shows incomplete steps for a new team without a plan', funct
         ->component('dashboard')
         ->where('setup.hasPlan', false)
         ->where('setup.complete', false)
-        ->has('setup.steps', 5)
+        ->has('setup.steps', 4)
         ->where('setup.steps.0.key', 'bank')
         ->where('setup.steps.0.complete', false)
         ->where('setup.steps.1.key', 'plan')

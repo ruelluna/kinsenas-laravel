@@ -6,6 +6,7 @@ use Database\Seeders\BillingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Queue;
 
 uses(RefreshDatabase::class);
 
@@ -46,10 +47,12 @@ it('logs when sync is skipped due to disabled config', function () {
         'services.ghl.location_id' => 'loc_test_123',
     ]);
 
-    Http::fake();
-    Log::spy();
+    Queue::fake();
 
     $user = User::factory()->create(['email' => 'log@example.com']);
+
+    Http::fake();
+    Log::spy();
 
     app(GhlMarketingService::class)->syncUserTags($user, ['registered'], [], ['event' => 'registered']);
 

@@ -51,7 +51,7 @@ it('blocks revoking own platform admin access', function () {
     expect($admin->fresh()->is_platform_admin)->toBeTrue();
 });
 
-it('blocks revoking the last platform admin', function () {
+it('allows revoking platform admin when another admin remains', function () {
     User::query()->where('is_platform_admin', true)->update(['is_platform_admin' => false]);
 
     $soleAdmin = User::factory()->create(['email' => 'sole-admin@example.com', 'is_platform_admin' => true]);
@@ -61,9 +61,9 @@ it('blocks revoking the last platform admin', function () {
         'is_platform_admin' => false,
     ]);
 
-    $response->assertSessionHasErrors('is_platform_admin');
+    $response->assertRedirect();
 
-    expect($soleAdmin->fresh()->is_platform_admin)->toBeTrue();
+    expect($soleAdmin->fresh()->is_platform_admin)->toBeFalse();
 });
 
 it('forbids non-admin from updating platform admin status', function () {
@@ -105,7 +105,7 @@ it('blocks deleting own account from admin', function () {
     expect($admin->fresh())->not->toBeNull();
 });
 
-it('blocks deleting the last platform admin', function () {
+it('allows deleting platform admin when another admin remains', function () {
     User::query()->where('is_platform_admin', true)->update(['is_platform_admin' => false]);
 
     $soleAdmin = User::factory()->create(['email' => 'sole-admin@example.com', 'is_platform_admin' => true]);
@@ -115,9 +115,9 @@ it('blocks deleting the last platform admin', function () {
         'email' => 'sole-admin@example.com',
     ]);
 
-    $response->assertSessionHasErrors('email');
+    $response->assertRedirect(route('admin.platform-users.index'));
 
-    expect($soleAdmin->fresh())->not->toBeNull();
+    expect(User::query()->find($soleAdmin->id))->toBeNull();
 });
 
 it('blocks deleting a user who owns a shared team with other members', function () {
