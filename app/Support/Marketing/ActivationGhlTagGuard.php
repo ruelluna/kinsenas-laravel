@@ -24,10 +24,7 @@ final class ActivationGhlTagGuard
 
     public function isFirstLockedIncomeForTeam(Team $team): bool
     {
-        return IncomePeriod::query()
-            ->where('is_locked', true)
-            ->whereHas('plan', fn ($query) => $query->where('team_id', $team->id))
-            ->count() === 1;
+        return $this->isFirstIncomePeriodForTeam($team);
     }
 
     public function isFirstTransferForTeam(Team $team): bool

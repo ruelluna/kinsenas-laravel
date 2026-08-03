@@ -2,8 +2,8 @@ import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import Heading from '@/components/heading';
+import DeleteIncomeModal from '@/components/savings/delete-income-modal';
 import FundBankBadge from '@/components/savings/fund-bank-badge';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -68,6 +68,7 @@ export default function IncomeShow({
 }: Props) {
     const { currentTeam } = usePage<SharedData>().props;
     const teamSlug = currentTeam?.slug ?? '';
+    const [deleteOpen, setDeleteOpen] = useState(false);
 
     const balanceByCategory = useMemo(
         () =>
@@ -127,24 +128,26 @@ export default function IncomeShow({
                     title={period.name}
                     description={`${period.periodStart} · ${plan.name} breakdown`}
                 />
-                <div className="flex items-center gap-2">
-                    <Badge variant={period.isLocked ? 'default' : 'secondary'}>
-                        {period.isLocked ? 'Locked' : 'Preview'}
-                    </Badge>
-                    {!period.isLocked && (
-                        <Form
-                            action={`/${teamSlug}/savings/income/${period.id}/lock`}
-                            method="post"
-                        >
-                            <Button type="submit" size="sm">
-                                Lock
-                            </Button>
-                        </Form>
-                    )}
-                </div>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => setDeleteOpen(true)}
+                >
+                    Delete income
+                </Button>
             </div>
 
-            {!period.isLocked && customCategories.length > 0 && (
+            <DeleteIncomeModal
+                periodId={period.id}
+                periodName={period.name}
+                teamSlug={teamSlug}
+                open={deleteOpen}
+                onOpenChange={setDeleteOpen}
+            />
+
+            {customCategories.length > 0 && (
                 <Form
                     action={`/${teamSlug}/savings/income/${period.id}/custom-amounts`}
                     method="put"
@@ -153,9 +156,9 @@ export default function IncomeShow({
                     <div>
                         <h3 className="font-medium">Custom fund buckets</h3>
                         <p className="mt-1 text-sm text-muted-foreground">
-                            Optional amounts for this income period. Clear a
-                            field to skip the deduction — the fund bucket stays
-                            on your plan.
+                            Optional amounts for this income period. Saving
+                            recalculates fund allocations. Clear a field to skip
+                            the deduction — the fund bucket stays on your plan.
                         </p>
                     </div>
 
@@ -319,21 +322,14 @@ export default function IncomeShow({
 
             {fundBalances.length > 0 && (
                 <p className="mt-3 text-sm text-muted-foreground">
-                    Remaining balances reflect all locked income minus confirmed
-                    spending.{' '}
+                    Remaining balances reflect all income allocations minus
+                    confirmed spending.{' '}
                     <Link
                         href={`/${teamSlug}/savings/spending`}
                         className="text-primary underline-offset-4 hover:underline"
                     >
                         Record spending →
                     </Link>
-                </p>
-            )}
-
-            {!period.isLocked && breakdown.length > 0 && (
-                <p className="mt-3 text-sm text-muted-foreground">
-                    Preview only — allocations are saved when you lock this
-                    period.
                 </p>
             )}
         </>

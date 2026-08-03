@@ -52,7 +52,7 @@ export default function AddFundBalanceModal({
                     </DialogTitle>
                     <DialogDescription>
                         Record money you already have in this fund bucket.
-                        Locked income adds payday allocations on top.
+                        Income allocations add payday amounts on top.
                     </DialogDescription>
                 </DialogHeader>
 

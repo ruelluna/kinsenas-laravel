@@ -10,7 +10,7 @@ export type DashboardSetupStep = {
 export type DashboardSetup = {
     hasPlan: boolean;
     hasIncome: boolean;
-    hasLockedIncome: boolean;
+    canDrawFromFunds: boolean;
     hasOpeningBalances: boolean;
     hasBank: boolean;
     hasSpending: boolean;
@@ -21,7 +21,6 @@ export type DashboardSetup = {
 export type DashboardPlan = {
     id: string;
     name: string;
-    hasLockedIncome: boolean;
     hasIncome: boolean;
     canDrawFromFunds: boolean;
 };

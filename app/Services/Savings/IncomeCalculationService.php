@@ -19,16 +19,21 @@ class IncomeCalculationService
         private FundBalanceService $fundBalanceService,
     ) {}
 
-    public function create(SavingsPlan $plan, string $name, string $amount, string $periodStart): IncomePeriod
+    public function create(SavingsPlan $plan, User $user, string $name, string $amount, string $periodStart): IncomePeriod
     {
-        $period = IncomePeriod::query()->create([
-            'plan_id' => $plan->id,
-            'name' => $name,
-            'amount_encrypted' => $amount,
-            'period_start' => $periodStart,
-        ]);
+        return DB::transaction(function () use ($plan, $user, $name, $amount, $periodStart) {
+            $period = IncomePeriod::query()->create([
+                'plan_id' => $plan->id,
+                'name' => $name,
+                'amount_encrypted' => $amount,
+                'period_start' => $periodStart,
+            ]);
 
-        return $period->load(['plan.categories.deductFromCategory']);
+            $period->load(['plan.categories.deductFromCategory', 'periodDeductions']);
+            $this->persistAllocations($period, $user);
+
+            return $period->fresh(['plan.categories.deductFromCategory', 'allocations.category']);
+        });
     }
 
     /**
@@ -46,7 +51,7 @@ class IncomeCalculationService
     {
         $period->loadMissing(['allocations.category.deductFromCategory', 'plan.categories.deductFromCategory']);
 
-        if ($period->is_locked && $period->allocations->isNotEmpty()) {
+        if ($period->allocations->isNotEmpty()) {
             $allocationsByCategory = $period->allocations->keyBy('category_id');
 
             return $period->allocations
@@ -118,14 +123,8 @@ class IncomeCalculationService
     /**
      * @param  list<array{category_id: string, amount: float|int|string|null}>  $customAmounts
      */
-    public function syncCustomAmounts(IncomePeriod $period, array $customAmounts): IncomePeriod
+    public function syncCustomAmounts(IncomePeriod $period, User $user, array $customAmounts): IncomePeriod
     {
-        if ($period->is_locked) {
-            throw ValidationException::withMessages([
-                'period' => __('Cannot edit custom amounts on a locked income period.'),
-            ]);
-        }
-
         $period->loadMissing('plan.categories');
 
         $customCategoryIds = $period->plan->categories
@@ -133,7 +132,7 @@ class IncomeCalculationService
             ->pluck('id')
             ->all();
 
-        return DB::transaction(function () use ($period, $customAmounts, $customCategoryIds) {
+        return DB::transaction(function () use ($period, $user, $customAmounts, $customCategoryIds) {
             foreach ($customAmounts as $row) {
                 $categoryId = $row['category_id'];
 
@@ -157,65 +156,66 @@ class IncomeCalculationService
                 );
             }
 
-            return $period->fresh(['plan.categories.deductFromCategory', 'periodDeductions']);
+            $period->load(['plan.categories.deductFromCategory', 'periodDeductions']);
+            $this->persistAllocations($period, $user);
+
+            return $period->fresh(['plan.categories.deductFromCategory', 'periodDeductions', 'allocations.category']);
         });
     }
 
-    public function lock(IncomePeriod $period, User $user): IncomePeriod
+    public function delete(IncomePeriod $period): void
     {
-        if ($period->is_locked) {
+        $this->fundBalanceService->assertCanRemovePeriod($period);
+
+        $period->delete();
+    }
+
+    public function allocateUnlockedPeriod(IncomePeriod $period, User $user): IncomePeriod
+    {
+        if ($period->is_locked && $period->allocations()->exists()) {
             return $period->load('allocations.category');
         }
 
         return DB::transaction(function () use ($period, $user) {
             $period->load(['plan.categories.deductFromCategory', 'periodDeductions']);
-            $amount = $period->amount_encrypted;
-
-            if ($amount === null) {
-                throw ValidationException::withMessages([
-                    'amount' => __('Income amount is required before locking.'),
-                ]);
-            }
-
-            $allocations = $this->calculator->calculate(
-                $period->plan,
-                $amount,
-                $this->periodDeductionOverrides($period),
-            );
-
-            foreach ($period->plan->categories as $category) {
-                IncomeAllocation::query()->create([
-                    'income_period_id' => $period->id,
-                    'category_id' => $category->id,
-                    'amount_encrypted' => $allocations[$category->id] ?? '0.00',
-                ]);
-            }
-
-            $period->update([
-                'is_locked' => true,
-                'locked_at' => now(),
-                'locked_by_user_id' => $user->id,
-            ]);
+            $this->persistAllocations($period, $user);
 
             return $period->fresh(['allocations.category', 'plan.categories']);
         });
     }
 
-    public function unlock(IncomePeriod $period): IncomePeriod
+    private function persistAllocations(IncomePeriod $period, User $user): void
     {
-        $this->fundBalanceService->assertCanUnlockPeriod($period);
+        $period->loadMissing(['plan.categories.deductFromCategory', 'periodDeductions']);
+        $amount = $period->amount_encrypted;
 
-        return DB::transaction(function () use ($period) {
-            $period->allocations()->delete();
-
-            $period->update([
-                'is_locked' => false,
-                'locked_at' => null,
-                'locked_by_user_id' => null,
+        if ($amount === null) {
+            throw ValidationException::withMessages([
+                'amount' => __('Income amount is required before allocating to funds.'),
             ]);
+        }
 
-            return $period->fresh(['plan.categories.deductFromCategory']);
-        });
+        $allocations = $this->calculator->calculate(
+            $period->plan,
+            $amount,
+            $this->periodDeductionOverrides($period),
+        );
+
+        $period->allocations()->delete();
+
+        foreach ($period->plan->categories as $category) {
+            IncomeAllocation::query()->create([
+                'income_period_id' => $period->id,
+                'category_id' => $category->id,
+                'amount_encrypted' => $allocations[$category->id] ?? '0.00',
+            ]);
+        }
+
+        $period->update([
+            'is_locked' => true,
+            'locked_at' => now(),
+            'locked_by_user_id' => $user->id,
+        ]);
     }
 
     /**

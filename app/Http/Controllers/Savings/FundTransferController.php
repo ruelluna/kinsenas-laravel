@@ -39,7 +39,6 @@ class FundTransferController extends Controller
             'plan' => [
                 'id' => $plan->id,
                 'name' => $plan->name,
-                'hasLockedIncome' => $plan->hasLockedIncomePeriod(),
                 'canDrawFromFunds' => $plan->canDrawFromFunds(),
             ],
             'fundBalances' => $plan->shouldShowFundBalances()

@@ -2,7 +2,6 @@
 
 use App\Models\Bank;
 use App\Models\FundTransfer;
-use App\Models\IncomePeriod;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlan;
 use App\Models\User;
@@ -40,13 +39,6 @@ function createTransferFixture(string $amount = '50000.00'): array
         'amount' => $amount,
         'period_start' => '2026-01-01',
     ]);
-
-    $period = IncomePeriod::query()->firstOrFail();
-
-    test()->actingAs($user)->post(route('savings.income.lock', [
-        'current_team' => $user->currentTeam->slug,
-        'incomePeriod' => $period->id,
-    ]));
 
     $plan = SavingsPlan::query()->with('categories')->firstOrFail();
     $everydayCategory = $plan->categories->firstWhere('name', 'Everyday Fund');

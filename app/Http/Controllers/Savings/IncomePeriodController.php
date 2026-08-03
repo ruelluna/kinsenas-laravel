@@ -105,7 +105,11 @@ class IncomePeriodController extends Controller
     ): RedirectResponse {
         abort_if($incomePeriod->plan_id !== $this->planService->forTeam($current_team, $request->user())?->id, 404);
 
-        $this->incomeService->syncCustomAmounts($incomePeriod, $request->validated('custom_amounts'));
+        $this->incomeService->syncCustomAmounts(
+            $incomePeriod,
+            $request->user(),
+            $request->validated('custom_amounts'),
+        );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Custom amounts updated.')]);
 
@@ -118,40 +122,29 @@ class IncomePeriodController extends Controller
 
         $this->incomeService->create(
             $plan,
+            $request->user(),
             $request->validated('name'),
             $request->validated('amount'),
             $request->validated('period_start'),
         );
 
         $this->activationGhlTagService->syncFirstIncomeEntered($request->user(), $current_team);
+        $this->activationGhlTagService->syncIncomeLocked($request->user(), $current_team);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Income period saved.')]);
 
         return back();
     }
 
-    public function lock(Request $request, Team $current_team, IncomePeriod $incomePeriod): RedirectResponse
+    public function destroy(Request $request, Team $current_team, IncomePeriod $incomePeriod): RedirectResponse
     {
         abort_if($incomePeriod->plan_id !== $this->planService->forTeam($current_team, $request->user())?->id, 404);
 
-        $this->incomeService->lock($incomePeriod, $request->user());
+        $this->incomeService->delete($incomePeriod);
 
-        $this->activationGhlTagService->syncIncomeLocked($request->user(), $current_team);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Income period deleted.')]);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Income locked.')]);
-
-        return back();
-    }
-
-    public function unlock(Request $request, Team $current_team, IncomePeriod $incomePeriod): RedirectResponse
-    {
-        abort_if($incomePeriod->plan_id !== $this->planService->forTeam($current_team, $request->user())?->id, 404);
-
-        $this->incomeService->unlock($incomePeriod);
-
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Income unlocked.')]);
-
-        return back();
+        return redirect()->route('savings.income.index', ['current_team' => $current_team->slug]);
     }
 
     /**
@@ -177,7 +170,7 @@ class IncomePeriodController extends Controller
     }
 
     /**
-     * @return array{id: string, name: string, periodStart: string, amount: string|null, isLocked: bool}
+     * @return array{id: string, name: string, periodStart: string, amount: string|null}
      */
     private function periodSummary(IncomePeriod $period): array
     {
@@ -186,7 +179,6 @@ class IncomePeriodController extends Controller
             'name' => $period->name,
             'periodStart' => $period->period_start->toDateString(),
             'amount' => $period->amount_encrypted,
-            'isLocked' => $period->is_locked,
         ];
     }
 }

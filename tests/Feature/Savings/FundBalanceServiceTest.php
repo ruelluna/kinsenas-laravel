@@ -3,7 +3,6 @@
 use App\Models\Bank;
 use App\Models\FundSpend;
 use App\Models\FundTransfer;
-use App\Models\IncomePeriod;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlan;
 use App\Models\User;
@@ -41,13 +40,6 @@ function setupLockedPlan(User $user, string $amount = '100000.00'): SavingsPlan
         'period_start' => '2026-02-01',
     ]);
 
-    $period = IncomePeriod::query()->firstOrFail();
-
-    test()->actingAs($user)->post(route('savings.income.lock', [
-        'current_team' => $user->currentTeam->slug,
-        'incomePeriod' => $period->id,
-    ]));
-
     return SavingsPlan::query()->with('categories')->firstOrFail();
 }
 
@@ -78,13 +70,6 @@ it('aggregates spending across multiple income periods', function () {
         'amount' => '50000.00',
         'period_start' => '2026-03-01',
     ]);
-
-    $secondPeriod = IncomePeriod::query()->orderByDesc('period_start')->firstOrFail();
-
-    test()->actingAs($user)->post(route('savings.income.lock', [
-        'current_team' => $user->currentTeam->slug,
-        'incomePeriod' => $secondPeriod->id,
-    ]));
 
     $everydayCategory = $plan->categories->firstWhere('name', 'Everyday Fund');
 

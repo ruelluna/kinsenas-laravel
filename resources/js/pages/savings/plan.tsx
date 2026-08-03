@@ -449,9 +449,9 @@ function SavingsPlanEditor({
                             <FundBalancesSection
                                 title="Fund balances"
                                 description={
-                                    plan.hasLockedIncome
-                                        ? 'Existing funds plus locked income, minus transfers and spending.'
-                                        : 'Add existing savings to any fund bucket anytime. Locked income adds payday allocations on top.'
+                                    plan.canDrawFromFunds
+                                        ? 'Existing funds plus income allocations, minus transfers and spending.'
+                                        : 'Add income or existing savings to any fund bucket to start tracking balances.'
                                 }
                                 fundBalances={fundBalances}
                                 spendHref={`/${teamSlug}/savings/spending`}
@@ -474,7 +474,7 @@ function SavingsPlanEditor({
                                 <AlertDescription>
                                     Adding, editing, or removing a custom fund
                                     bucket updates this plan for every income
-                                    period — including locked periods. Past
+                                    period — including past income entries. Past
                                     breakdowns and spending tied to a removed
                                     fund bucket may no longer match.
                                 </AlertDescription>

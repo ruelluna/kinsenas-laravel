@@ -79,9 +79,9 @@ export default function Dashboard({
                         <FundBalancesSection
                             title={plan?.name ?? 'Fund balances'}
                             description={
-                                setup.hasLockedIncome
-                                    ? 'Running totals from existing funds and locked income minus transfers and spending.'
-                                    : 'Add existing savings to any fund bucket anytime. Locked income adds payday allocations on top.'
+                                setup.canDrawFromFunds
+                                    ? 'Running totals from existing funds and income minus transfers and spending.'
+                                    : 'Add income or existing savings to any fund bucket to start tracking balances.'
                             }
                             fundBalances={fundBalances}
                             spendHref={quickLinks.spending}
@@ -147,17 +147,10 @@ export default function Dashboard({
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    asChild={
-                                        setup.hasLockedIncome ||
-                                        setup.hasOpeningBalances
-                                    }
-                                    disabled={
-                                        !setup.hasLockedIncome &&
-                                        !setup.hasOpeningBalances
-                                    }
+                                    asChild={setup.canDrawFromFunds}
+                                    disabled={!setup.canDrawFromFunds}
                                 >
-                                    {setup.hasLockedIncome ||
-                                    setup.hasOpeningBalances ? (
+                                    {setup.canDrawFromFunds ? (
                                         <Link href={quickLinks.spending}>
                                             Add spending
                                         </Link>
@@ -169,17 +162,10 @@ export default function Dashboard({
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        asChild={
-                                            setup.hasLockedIncome ||
-                                            setup.hasOpeningBalances
-                                        }
-                                        disabled={
-                                            !setup.hasLockedIncome &&
-                                            !setup.hasOpeningBalances
-                                        }
+                                        asChild={setup.canDrawFromFunds}
+                                        disabled={!setup.canDrawFromFunds}
                                     >
-                                        {setup.hasLockedIncome ||
-                                        setup.hasOpeningBalances ? (
+                                        {setup.canDrawFromFunds ? (
                                             <Link href={quickLinks.transfers}>
                                                 Transfer funds
                                             </Link>

@@ -204,7 +204,7 @@ class FundBalanceService
         $this->assertCanDrawFromCategory($plan, $categoryId, $amount, 'transfer');
     }
 
-    public function assertCanUnlockPeriod(IncomePeriod $period): void
+    public function assertCanRemovePeriod(IncomePeriod $period): void
     {
         $period->loadMissing(['plan.categories', 'allocations']);
         $plan = $period->plan;
@@ -223,17 +223,17 @@ class FundBalanceService
             $categoryId = $allocation->category_id;
             $periodAmount = $this->decryptAmount($dek, $allocation->getRawOriginal('amount_encrypted')) ?? '0.00';
             $currentAllocated = $allocatedByCategory[$categoryId] ?? '0.00';
-            $allocatedAfterUnlock = bcsub($currentAllocated, $periodAmount, 2);
+            $allocatedAfterRemoval = bcsub($currentAllocated, $periodAmount, 2);
             $transferredOut = $transferredOutByCategory[$categoryId] ?? '0.00';
             $receivedIn = $receivedInByCategory[$categoryId] ?? '0.00';
             $spent = $spentByCategory[$categoryId] ?? '0.00';
             $drawn = bcsub(bcadd($transferredOut, $spent, 2), $receivedIn, 2);
 
-            if (bccomp($drawn, $allocatedAfterUnlock, 2) === 1) {
+            if (bccomp($drawn, $allocatedAfterRemoval, 2) === 1) {
                 $categoryName = $allocation->category?->name ?? __('a fund');
 
                 throw ValidationException::withMessages([
-                    'period' => __('Cannot unlock income — :fund transfers and spending exceed what would remain allocated.', [
+                    'period' => __('Cannot delete income — :fund transfers and spending exceed what would remain allocated.', [
                         'fund' => $categoryName,
                     ]),
                 ]);
@@ -538,9 +538,7 @@ class FundBalanceService
         $totals = [];
 
         $allocations = IncomeAllocation::query()
-            ->whereHas('incomePeriod', fn ($query) => $query
-                ->where('plan_id', $plan->id)
-                ->where('is_locked', true))
+            ->whereHas('incomePeriod', fn ($query) => $query->where('plan_id', $plan->id))
             ->get();
 
         foreach ($allocations as $allocation) {
@@ -657,7 +655,7 @@ class FundBalanceService
 
         if (bccomp($remaining, '0', 2) !== 1) {
             throw ValidationException::withMessages([
-                'amount' => __('Lock at least one income period or add existing savings before recording :action.', [
+                'amount' => __('Add income or existing savings before recording :action.', [
                     'action' => $action,
                 ]),
             ]);

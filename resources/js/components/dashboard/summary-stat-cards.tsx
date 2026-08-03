@@ -36,7 +36,7 @@ export default function SummaryStatCards({
                 title="In banks"
                 value={formatMoney(summary.totalInBanks)}
                 description={
-                    setup.hasLockedIncome || setup.hasOpeningBalances ? (
+                    setup.canDrawFromFunds || setup.hasOpeningBalances ? (
                         <Link
                             href={quickLinks.banks}
                             className="text-primary underline-offset-4 hover:underline"

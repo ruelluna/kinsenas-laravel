@@ -22,7 +22,6 @@ export type SavingsPlan = {
     isSharedWithTeam: boolean;
     allowEditingSpends: boolean;
     categories: SavingsCategory[];
-    hasLockedIncome: boolean;
     hasIncome: boolean;
     percentagesLocked: boolean;
     canDrawFromFunds: boolean;
@@ -128,7 +127,6 @@ export type IncomePeriodSummary = {
     name: string;
     periodStart: string;
     amount: string | null;
-    isLocked: boolean;
 };
 
 export type IncomePlanCategory = {

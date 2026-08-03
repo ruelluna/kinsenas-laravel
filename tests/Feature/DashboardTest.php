@@ -205,7 +205,7 @@ it('dashboard shows fund buckets after plan is chosen', function () {
     );
 });
 
-it('dashboard summary includes fund totals after locked income', function () {
+it('dashboard summary includes fund totals after income is added', function () {
     [$user, $plan, $everydayCategory] = createUserWithLockedIncome();
 
     $response = $this->actingAs($user)->get(dashboardRoute($user));
@@ -214,7 +214,7 @@ it('dashboard summary includes fund totals after locked income', function () {
     $response->assertInertia(fn (Assert $page) => $page
         ->component('dashboard')
         ->where('setup.hasPlan', true)
-        ->where('setup.hasLockedIncome', true)
+        ->where('setup.canDrawFromFunds', true)
         ->where('plan.name', $plan->name)
         ->where('summary.totalRemaining', '50000.00')
         ->has('fundBalances', 3)

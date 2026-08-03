@@ -1,9 +1,9 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
-import { ChevronRight, Plus } from 'lucide-react';
+import { ChevronRight, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import Heading from '@/components/heading';
 import AddIncomeModal from '@/components/savings/add-income-modal';
-import { Badge } from '@/components/ui/badge';
+import DeleteIncomeModal from '@/components/savings/delete-income-modal';
 import { Button } from '@/components/ui/button';
 import { formatMoney } from '@/lib/format-money';
 import type { SharedData } from '@/types';
@@ -104,31 +104,23 @@ function IncomePeriodMobileCard({
     period,
     planCategories,
     teamSlug,
+    onDelete,
 }: {
     period: IncomePeriodTableRow;
     planCategories: IncomePlanCategory[];
     teamSlug: string;
+    onDelete: (period: IncomePeriodTableRow) => void;
 }) {
     return (
         <div className="rounded-lg border p-3">
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                        <Link
-                            href={`/${teamSlug}/savings/income/${period.id}`}
-                            className="font-medium text-primary underline-offset-4 hover:underline"
-                        >
-                            {period.name}
-                        </Link>
-                        {period.isLocked && (
-                            <Badge
-                                variant="secondary"
-                                className="px-1 py-0 text-[10px]"
-                            >
-                                Locked
-                            </Badge>
-                        )}
-                    </div>
+                    <Link
+                        href={`/${teamSlug}/savings/income/${period.id}`}
+                        className="font-medium text-primary underline-offset-4 hover:underline"
+                    >
+                        {period.name}
+                    </Link>
                     <p className="mt-0.5 text-[11px] text-muted-foreground">
                         {period.periodStart}
                     </p>
@@ -157,20 +149,16 @@ function IncomePeriodMobileCard({
             </dl>
 
             <div className="mt-3 flex items-center justify-between gap-2 border-t pt-3">
-                {!period.isLocked && (
-                    <Form
-                        action={`/${teamSlug}/savings/income/${period.id}/lock`}
-                        method="post"
-                    >
-                        <Button
-                            type="submit"
-                            size="sm"
-                            className="h-8 px-3 text-xs"
-                        >
-                            Lock
-                        </Button>
-                    </Form>
-                )}
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2 text-xs text-destructive hover:text-destructive"
+                    onClick={() => onDelete(period)}
+                >
+                    <Trash2 className="size-3.5" />
+                    Delete
+                </Button>
                 <Button
                     variant="ghost"
                     size="sm"
@@ -273,6 +261,8 @@ export default function IncomeIndex({
     const { currentTeam } = usePage<SharedData>().props;
     const teamSlug = currentTeam?.slug ?? '';
     const [addModalOpen, setAddModalOpen] = useState(false);
+    const [deleteTarget, setDeleteTarget] =
+        useState<IncomePeriodTableRow | null>(null);
 
     const totals = useMemo(() => {
         const amountTotal = sumMoneyAmounts(
@@ -327,7 +317,7 @@ export default function IncomeIndex({
                 <Heading
                     variant="small"
                     title="Income"
-                    description={`Enter monthly income for ${plan.name}. Lock to enable spending.`}
+                    description={`Enter monthly income for ${plan.name}. Allocations apply immediately.`}
                 />
                 <Button
                     onClick={() => setAddModalOpen(true)}
@@ -342,6 +332,20 @@ export default function IncomeIndex({
                 onOpenChange={setAddModalOpen}
             />
 
+            {deleteTarget !== null && (
+                <DeleteIncomeModal
+                    periodId={deleteTarget.id}
+                    periodName={deleteTarget.name}
+                    teamSlug={teamSlug}
+                    open={deleteTarget !== null}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            setDeleteTarget(null);
+                        }
+                    }}
+                />
+            )}
+
             <div className="mt-8 md:hidden">
                 {periods.length === 0 ? (
                     <div className="rounded-lg border px-4 py-6 text-center text-sm text-muted-foreground">
@@ -355,6 +359,7 @@ export default function IncomeIndex({
                                 period={period}
                                 planCategories={planCategories}
                                 teamSlug={teamSlug}
+                                onDelete={setDeleteTarget}
                             />
                         ))}
                         <IncomeMobileSummary
@@ -416,17 +421,7 @@ export default function IncomeIndex({
                                         </Link>
                                     </td>
                                     <td className="px-2 py-1.5">
-                                        <div className="flex items-center gap-1.5">
-                                            <span>{period.name}</span>
-                                            {period.isLocked && (
-                                                <Badge
-                                                    variant="secondary"
-                                                    className="px-1 py-0 text-[10px]"
-                                                >
-                                                    Locked
-                                                </Badge>
-                                            )}
-                                        </div>
+                                        {period.name}
                                     </td>
                                     <td className="px-2 py-1.5 text-right font-medium tabular-nums">
                                         {formatMoney(period.amount)}
@@ -444,20 +439,17 @@ export default function IncomeIndex({
                                         </td>
                                     ))}
                                     <td className="px-2 py-1.5 text-right">
-                                        {!period.isLocked && (
-                                            <Form
-                                                action={`/${teamSlug}/savings/income/${period.id}/lock`}
-                                                method="post"
-                                            >
-                                                <Button
-                                                    type="submit"
-                                                    size="sm"
-                                                    className="h-7 px-2 text-xs"
-                                                >
-                                                    Lock
-                                                </Button>
-                                            </Form>
-                                        )}
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-7 px-2 text-xs text-destructive hover:text-destructive"
+                                            onClick={() =>
+                                                setDeleteTarget(period)
+                                            }
+                                        >
+                                            Delete
+                                        </Button>
                                     </td>
                                 </tr>
                             ))

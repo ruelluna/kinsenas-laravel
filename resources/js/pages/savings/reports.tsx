@@ -54,7 +54,7 @@ export default function SavingsReports({ totals }: Props) {
                                         colSpan={6}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
-                                        Lock income and record transfers or
+                                        Add income and record transfers or
                                         spending to see fund health.
                                     </td>
                                 </tr>

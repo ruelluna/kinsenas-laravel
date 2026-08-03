@@ -6,7 +6,6 @@ use App\Enums\SubscriptionFeature;
 use App\Enums\TransferStatus;
 use App\Models\FundSpend;
 use App\Models\FundTransfer;
-use App\Models\IncomePeriod;
 use App\Models\SavingsPlan;
 use App\Models\Team;
 use App\Models\User;
@@ -37,26 +36,13 @@ class DashboardSummaryService
 
         $hasPlan = $plan !== null;
         $hasIncome = $plan?->hasIncomePeriod() ?? false;
-        $hasLockedIncome = $plan?->hasLockedIncomePeriod() ?? false;
+        $canDrawFromFunds = $plan?->canDrawFromFunds() ?? false;
         $hasOpeningBalances = $plan?->hasOpeningBalances() ?? false;
         $hasBank = $team->banks()->exists();
         $hasSpending = $hasPlan && FundSpend::query()
             ->where('savings_plan_id', $plan->id)
             ->where('status', TransferStatus::Confirmed)
             ->exists();
-
-        $latestUnlockedPeriod = $hasPlan
-            ? IncomePeriod::query()
-                ->where('plan_id', $plan->id)
-                ->where('is_locked', false)
-                ->latest('period_start')
-                ->latest()
-                ->first()
-            : null;
-
-        $lockIncomeHref = $latestUnlockedPeriod !== null
-            ? "{$savingsBase}/income/{$latestUnlockedPeriod->id}"
-            : "{$savingsBase}/income";
 
         $steps = [
             [
@@ -76,12 +62,6 @@ class DashboardSummaryService
                 'label' => 'Add income',
                 'complete' => $hasIncome,
                 'href' => "{$savingsBase}/income",
-            ],
-            [
-                'key' => 'lock_income',
-                'label' => 'Lock income',
-                'complete' => $hasLockedIncome,
-                'href' => $lockIncomeHref,
             ],
             [
                 'key' => 'spending',
@@ -118,7 +98,7 @@ class DashboardSummaryService
             'setup' => [
                 'hasPlan' => $hasPlan,
                 'hasIncome' => $hasIncome,
-                'hasLockedIncome' => $hasLockedIncome,
+                'canDrawFromFunds' => $canDrawFromFunds,
                 'hasOpeningBalances' => $hasOpeningBalances,
                 'hasBank' => $hasBank,
                 'hasSpending' => $hasSpending,
@@ -128,9 +108,8 @@ class DashboardSummaryService
             'plan' => $plan !== null ? [
                 'id' => $plan->id,
                 'name' => $plan->name,
-                'hasLockedIncome' => $hasLockedIncome,
-                'hasIncome' => $hasIncome,
                 'canDrawFromFunds' => $plan->canDrawFromFunds(),
+                'hasIncome' => $hasIncome,
             ] : null,
             'summary' => $summary,
             'fundBalances' => $fundBalances,

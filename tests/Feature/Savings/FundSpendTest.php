@@ -212,7 +212,7 @@ it('shows remaining balances on income detail when income is locked', function (
     );
 });
 
-it('blocks unlocking income when spending exceeds remaining allocation', function () {
+it('blocks deleting income when spending exceeds remaining allocation', function () {
     [$user, , $everydayCategory, $period] = createUserWithLockedIncome();
 
     $this->actingAs($user)->post(route('savings.spending.store', [
@@ -224,7 +224,7 @@ it('blocks unlocking income when spending exceeds remaining allocation', functio
         'spent_on' => '2026-01-05',
     ]);
 
-    $response = $this->actingAs($user)->post(route('savings.income.unlock', [
+    $response = $this->actingAs($user)->delete(route('savings.income.destroy', [
         'current_team' => $user->currentTeam->slug,
         'incomePeriod' => $period->id,
     ]));

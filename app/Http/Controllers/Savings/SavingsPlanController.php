@@ -69,7 +69,6 @@ class SavingsPlanController extends Controller
                         ? (string) $c->opening_balance_encrypted
                         : null,
                 ]),
-                'hasLockedIncome' => $plan->hasLockedIncomePeriod(),
                 'hasIncome' => $plan->hasIncomePeriod(),
                 'percentagesLocked' => $plan->hasIncomePeriod(),
                 'canDrawFromFunds' => $plan->canDrawFromFunds(),

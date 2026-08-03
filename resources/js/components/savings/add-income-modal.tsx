@@ -47,8 +47,8 @@ export default function AddIncomeModal({ open, onOpenChange }: Props) {
                             <DialogHeader>
                                 <DialogTitle>Add income</DialogTitle>
                                 <DialogDescription>
-                                    Enter a monthly income period. Lock it when
-                                    ready to enable transfers and spending.
+                                    Enter a monthly income period. Allocations
+                                    apply immediately and enable spending.
                                 </DialogDescription>
                             </DialogHeader>
 

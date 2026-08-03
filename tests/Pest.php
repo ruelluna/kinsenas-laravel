@@ -99,11 +99,6 @@ function createUserWithLockedIncome(string $amount = '50000.00'): array
 
     $period = IncomePeriod::query()->firstOrFail();
 
-    test()->actingAs($user)->post(route('savings.income.lock', [
-        'current_team' => $user->currentTeam->slug,
-        'incomePeriod' => $period->id,
-    ]));
-
     $plan = SavingsPlan::query()->firstOrFail();
     $everydayCategory = $plan->categories()->where('name', 'Everyday Fund')->firstOrFail();
 

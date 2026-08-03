@@ -56,11 +56,6 @@ class SavingsPlan extends Model
         return $this->hasMany(FundSpend::class, 'savings_plan_id');
     }
 
-    public function hasLockedIncomePeriod(): bool
-    {
-        return $this->incomePeriods()->where('is_locked', true)->exists();
-    }
-
     public function hasIncomePeriod(): bool
     {
         return $this->incomePeriods()->exists();
@@ -80,6 +75,6 @@ class SavingsPlan extends Model
 
     public function canDrawFromFunds(): bool
     {
-        return $this->hasOpeningBalances() || $this->hasLockedIncomePeriod();
+        return $this->hasOpeningBalances() || $this->hasIncomePeriod();
     }
 }

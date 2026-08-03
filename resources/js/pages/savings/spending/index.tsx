@@ -14,7 +14,6 @@ type Props = {
     plan: {
         id: string;
         name: string;
-        hasLockedIncome: boolean;
         canDrawFromFunds: boolean;
         allowEditingSpends: boolean;
     };
@@ -70,8 +69,8 @@ export default function SpendingIndex({
 
             {!plan.canDrawFromFunds && (
                 <p className="mt-4 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                    Lock at least one income period or add a current balance on
-                    your savings plan before recording spending.
+                    Add income or existing savings to your plan before
+                    recording spending.
                 </p>
             )}
 
