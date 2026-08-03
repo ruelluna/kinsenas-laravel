@@ -1,5 +1,5 @@
-import { Form, Head } from '@inertiajs/react';
-import { useState } from 'react';
+import { Form, Head, router } from '@inertiajs/react';
+import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -7,6 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    detectPushPlatform,
+    pushSetupHints,
+} from '@/lib/push-platform-hints';
 import {
     isWebPushSupported,
     subscribeToWebPush,
@@ -19,6 +23,9 @@ type PageProps = {
     paydayDayOfMonth: number | null;
     pushSubscriptionCount: number;
     vapidPublicKey: string | null;
+    errors?: {
+        push?: string;
+    };
 };
 
 function PreferenceToggle({
@@ -54,8 +61,10 @@ export default function NotificationsSettings({
     paydayDayOfMonth,
     pushSubscriptionCount,
     vapidPublicKey,
+    errors = {},
 }: PageProps) {
     const [pushBusy, setPushBusy] = useState(false);
+    const [testPushBusy, setTestPushBusy] = useState(false);
     const [pushError, setPushError] = useState<string | null>(null);
     const [hasPushSubscription, setHasPushSubscription] = useState(
         pushSubscriptionCount > 0,
@@ -65,6 +74,24 @@ export default function NotificationsSettings({
     );
 
     const pushSupported = isWebPushSupported();
+    const pushPlatform = useMemo(() => detectPushPlatform(), []);
+    const setupHints = useMemo(
+        () => pushSetupHints(pushPlatform),
+        [pushPlatform],
+    );
+
+    const handleTestPush = () => {
+        setTestPushBusy(true);
+
+        router.post(
+            '/settings/notifications/test-push',
+            {},
+            {
+                preserveScroll: true,
+                onFinish: () => setTestPushBusy(false),
+            },
+        );
+    };
 
     const handlePushToggle = async (enabled: boolean) => {
         if (!vapidPublicKey) {
@@ -194,7 +221,7 @@ export default function NotificationsSettings({
                             <Heading
                                 variant="small"
                                 title="Push notifications"
-                                description="Browser alerts when Kinsenas is installed or open in the background"
+                                description="Phone and desktop alerts outside the Kinsenas app — separate from the bell inbox"
                             />
                             {!pushSupported && (
                                 <p className="text-sm text-muted-foreground">
@@ -266,7 +293,7 @@ export default function NotificationsSettings({
                                 }
                             />
                             {pushSupported && (
-                                <div className="space-y-2 rounded-lg border p-4">
+                                <div className="space-y-3 rounded-lg border p-4">
                                     <div className="flex flex-wrap items-center gap-3">
                                         <Button
                                             type="button"
@@ -284,6 +311,16 @@ export default function NotificationsSettings({
                                                 ? 'Disable browser push'
                                                 : 'Enable browser push'}
                                         </Button>
+                                        {hasPushSubscription && (
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                disabled={testPushBusy}
+                                                onClick={handleTestPush}
+                                            >
+                                                Send test notification
+                                            </Button>
+                                        )}
                                     </div>
                                     <ul className="space-y-1 text-sm text-muted-foreground">
                                         <li>
@@ -303,6 +340,18 @@ export default function NotificationsSettings({
                                             account: {pushSubscriptionCount}
                                         </li>
                                     </ul>
+                                    <div className="space-y-2 text-sm text-muted-foreground">
+                                        <p className="font-medium text-foreground">
+                                            {pushPlatform === 'android'
+                                                ? 'Android setup'
+                                                : 'Setup tips'}
+                                        </p>
+                                        <ul className="list-disc space-y-1 pl-5">
+                                            {setupHints.map((hint) => (
+                                                <li key={hint}>{hint}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
                                     {!hasPushSubscription && (
                                         <p className="text-sm text-muted-foreground">
                                             Enable browser push first, then
@@ -311,6 +360,7 @@ export default function NotificationsSettings({
                                     )}
                                 </div>
                             )}
+                            <InputError message={errors.push} />
                             {pushError && (
                                 <p className="text-sm text-destructive">
                                     {pushError}

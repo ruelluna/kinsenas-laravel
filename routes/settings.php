@@ -34,6 +34,9 @@ Route::middleware(['auth', 'verified', 'beta.approved'])->group(function () {
     Route::patch('settings/notifications', [NotificationPreferenceController::class, 'update'])->name('settings.notifications.update');
     Route::post('settings/notifications/push-subscription', [NotificationPreferenceController::class, 'storePushSubscription'])->name('settings.notifications.push-subscription.store');
     Route::delete('settings/notifications/push-subscription', [NotificationPreferenceController::class, 'destroyPushSubscription'])->name('settings.notifications.push-subscription.destroy');
+    Route::post('settings/notifications/test-push', [NotificationPreferenceController::class, 'sendTestPush'])
+        ->middleware('throttle:6,1')
+        ->name('settings.notifications.test-push');
 
     Route::get('settings/billing', [BillingController::class, 'show'])->name('settings.billing');
     Route::get('settings/feedback', [BetaFeedbackController::class, 'create'])->name('settings.feedback');

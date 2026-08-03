@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\DeletePushSubscriptionRequest;
 use App\Http\Requests\Settings\StorePushSubscriptionRequest;
 use App\Http\Requests\Settings\UpdateNotificationPreferencesRequest;
+use App\Notifications\System\TestPushNotification;
 use App\Services\Notifications\NotificationPreferenceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -81,5 +82,28 @@ class NotificationPreferenceController extends Controller
             'pushEnabled' => $user->pushSubscriptions()->exists(),
             'pushSubscriptionCount' => $user->pushSubscriptions()->count(),
         ]);
+    }
+
+    public function sendTestPush(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        $preferences = $this->preferenceService->forUser($user);
+
+        if (! $preferences->push_enabled || $user->pushSubscriptions()->doesntExist()) {
+            return to_route('settings.notifications.edit')
+                ->withErrors(['push' => __('Enable browser push on this device before sending a test notification.')]);
+        }
+
+        $user->notify(new TestPushNotification(
+            __('Kinsenas test notification'),
+            __('If you see this outside the app, push is working on this device.'),
+        ));
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => __('Test notification queued. Leave the app or lock your phone to check the notification shade.'),
+        ]);
+
+        return to_route('settings.notifications.edit');
     }
 }
