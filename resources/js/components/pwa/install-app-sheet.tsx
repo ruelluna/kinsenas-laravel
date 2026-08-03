@@ -108,45 +108,47 @@ export function InstallAppSheet({ open, onOpenChange, variant }: Props) {
                     <SheetDescription>{description}</SheetDescription>
                 </SheetHeader>
 
-                <div className="mt-4 flex items-center gap-3 rounded-xl border bg-muted/30 p-3">
-                    <img
-                        src={KINSENAS_SQUARE_LOGO}
-                        alt=""
-                        className="size-12 rounded-xl object-contain"
-                    />
-                    <div>
-                        <p className="font-medium">Kinsenas</p>
-                        <p className="text-sm text-muted-foreground">
-                            Sweldo with a plan
-                        </p>
+                <div className="flex flex-col gap-5 px-4">
+                    <div className="flex items-center gap-3 rounded-xl border bg-muted/30 p-3">
+                        <img
+                            src={KINSENAS_SQUARE_LOGO}
+                            alt="Kinsenas"
+                            className="size-12 shrink-0 object-contain"
+                        />
+                        <div>
+                            <p className="font-medium">Kinsenas</p>
+                            <p className="text-sm text-muted-foreground">
+                                Sweldo with a plan
+                            </p>
+                        </div>
                     </div>
+
+                    <ol className="space-y-4">
+                        {steps.map((step, index) => (
+                            <li key={step.title} className="flex gap-3">
+                                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                    <step.icon className="size-4" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium">
+                                        {index + 1}. {step.title}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {step.description}
+                                    </p>
+                                </div>
+                            </li>
+                        ))}
+                    </ol>
+
+                    <Button
+                        type="button"
+                        className="w-full"
+                        onClick={() => onOpenChange(false)}
+                    >
+                        Got it
+                    </Button>
                 </div>
-
-                <ol className="mt-5 space-y-4">
-                    {steps.map((step, index) => (
-                        <li key={step.title} className="flex gap-3">
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                <step.icon className="size-4" />
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium">
-                                    {index + 1}. {step.title}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    {step.description}
-                                </p>
-                            </div>
-                        </li>
-                    ))}
-                </ol>
-
-                <Button
-                    type="button"
-                    className="mt-6 w-full"
-                    onClick={() => onOpenChange(false)}
-                >
-                    Got it
-                </Button>
             </SheetContent>
         </Sheet>
     );

@@ -66,17 +66,17 @@ export default defineConfig(({ mode }) => ({
                 categories: ['finance', 'productivity'],
                 icons: [
                     {
-                        src: '/icons/icon-192.png',
-                        sizes: '192x192',
-                        type: 'image/png',
-                    },
-                    {
-                        src: '/icons/icon-512.png',
+                        src: '/kinsenas-square-logo.png',
                         sizes: '512x512',
                         type: 'image/png',
                     },
                     {
-                        src: '/icons/icon-512-maskable.png',
+                        src: '/kinsenas-square-logo.png',
+                        sizes: '192x192',
+                        type: 'image/png',
+                    },
+                    {
+                        src: '/kinsenas-square-logo.png',
                         sizes: '512x512',
                         type: 'image/png',
                         purpose: 'maskable',
