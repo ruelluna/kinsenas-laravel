@@ -274,3 +274,13 @@
 @utility pb-mobile-nav {
     padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
 }
+
+@media (max-width: 767px) {
+    #nprogress .bar {
+        height: 3px;
+    }
+
+    #nprogress {
+        top: env(safe-area-inset-top, 0px);
+    }
+}

@@ -3,6 +3,7 @@ import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
 import { MobileBottomNav } from '@/components/mobile/mobile-bottom-nav';
+import { NavigationLoadingOverlay } from '@/components/navigation/navigation-loading-overlay';
 import OnboardingTourHost from '@/components/onboarding/onboarding-tour-host';
 import { OpenBetaBanner } from '@/components/open-beta-banner';
 import { InstallAppBanner } from '@/components/pwa/install-app-banner';
@@ -25,9 +26,12 @@ export default function AppSidebarLayout({
                         <AppSidebarHeader breadcrumbs={breadcrumbs} />
                         <InstallAppBanner />
                         <OpenBetaBanner />
-                        <PageContent className="pb-mobile-nav md:pb-6">
-                            {children}
-                        </PageContent>
+                        <div className="relative flex flex-1 flex-col">
+                            <NavigationLoadingOverlay />
+                            <PageContent className="pb-mobile-nav md:pb-6">
+                                {children}
+                            </PageContent>
+                        </div>
                     </AppContent>
                     <MobileBottomNav />
                     <OnboardingTourHost />

@@ -2,11 +2,13 @@ import { Link, usePage } from '@inertiajs/react';
 import { Menu } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
 import { MobileMoreSheet } from '@/components/mobile/mobile-more-sheet';
+import { Spinner } from '@/components/ui/spinner';
+import { useNavigationLoading } from '@/contexts/navigation-loading-context';
 import { useMobileNav } from '@/contexts/mobile-nav-context';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { buildMemberNav } from '@/lib/member-nav';
-import { cn } from '@/lib/utils';
+import { cn, toUrl } from '@/lib/utils';
 import type { NavItem, SharedData } from '@/types';
 
 export function MobileBottomNav() {
@@ -14,6 +16,7 @@ export function MobileBottomNav() {
     const page = usePage<SharedData>();
     const { action } = useMobileNav();
     const { isCurrentOrParentUrl } = useCurrentUrl();
+    const { isNavigating, pendingUrl } = useNavigationLoading();
     const [moreOpen, setMoreOpen] = useState(false);
     const { bottomTabs, moreItems, hasAccess, billingNavItems } =
         buildMemberNav(page.props);
@@ -22,6 +25,22 @@ export function MobileBottomNav() {
         () => moreItems.some((item) => isCurrentOrParentUrl(item.href)),
         [isCurrentOrParentUrl, moreItems],
     );
+
+    const moreIsPending = useMemo(
+        () =>
+            Boolean(
+                pendingUrl &&
+                    moreItems.some((item) =>
+                        isPendingDestination(item.href, pendingUrl),
+                    ),
+            ),
+        [moreItems, pendingUrl],
+    );
+
+    const isItemPending = (item: NavItem) =>
+        Boolean(
+            pendingUrl && isPendingDestination(item.href, pendingUrl),
+        );
 
     const showCenterAction = Boolean(
         action?.icon && !action.disabled,
@@ -40,9 +59,13 @@ export function MobileBottomNav() {
                         <MobileNavLink
                             item={billingNavItems[0]}
                             active={isCurrentOrParentUrl('/settings/billing')}
+                            pending={isItemPending(billingNavItems[0])}
+                            dimmed={isNavigating && !isItemPending(billingNavItems[0])}
                         />
                         <MobileMoreButton
                             active={moreIsActive}
+                            pending={moreIsPending}
+                            dimmed={isNavigating && !moreIsPending}
                             onClick={() => setMoreOpen(true)}
                         />
                     </div>
@@ -60,11 +83,15 @@ export function MobileBottomNav() {
                         <MobileNavLink
                             item={bottomTabs[0]}
                             active={isCurrentOrParentUrl(bottomTabs[0].href)}
+                            pending={isItemPending(bottomTabs[0])}
+                            dimmed={isNavigating && !isItemPending(bottomTabs[0])}
                             compact
                         />
                         <MobileNavLink
                             item={bottomTabs[1]}
                             active={isCurrentOrParentUrl(bottomTabs[1].href)}
+                            pending={isItemPending(bottomTabs[1])}
+                            dimmed={isNavigating && !isItemPending(bottomTabs[1])}
                             compact
                         />
                         <div className="flex justify-center pb-2">
@@ -85,10 +112,14 @@ export function MobileBottomNav() {
                         <MobileNavLink
                             item={bottomTabs[2]}
                             active={isCurrentOrParentUrl(bottomTabs[2].href)}
+                            pending={isItemPending(bottomTabs[2])}
+                            dimmed={isNavigating && !isItemPending(bottomTabs[2])}
                             compact
                         />
                         <MobileMoreButton
                             active={moreIsActive}
+                            pending={moreIsPending}
+                            dimmed={isNavigating && !moreIsPending}
                             onClick={() => setMoreOpen(true)}
                             compact
                         />
@@ -100,11 +131,15 @@ export function MobileBottomNav() {
                                 key={item.title}
                                 item={item}
                                 active={isCurrentOrParentUrl(item.href)}
+                                pending={isItemPending(item)}
+                                dimmed={isNavigating && !isItemPending(item)}
                                 compact
                             />
                         ))}
                         <MobileMoreButton
                             active={moreIsActive}
+                            pending={moreIsPending}
+                            dimmed={isNavigating && !moreIsPending}
                             onClick={() => setMoreOpen(true)}
                             compact
                         />
@@ -129,10 +164,14 @@ function MobileNavBar({ children }: { children: ReactNode }) {
 
 function MobileMoreButton({
     active,
+    pending = false,
+    dimmed = false,
     onClick,
     compact = false,
 }: {
     active: boolean;
+    pending?: boolean;
+    dimmed?: boolean;
     onClick: () => void;
     compact?: boolean;
 }) {
@@ -142,26 +181,44 @@ function MobileMoreButton({
             aria-label="Open more navigation"
             onClick={onClick}
             className={cn(
-                'flex flex-col items-center gap-0.5 py-2 text-[11px]',
+                'flex flex-col items-center gap-0.5 py-2 text-[11px] transition-opacity',
                 compact ? 'px-1' : 'px-2',
-                active
+                dimmed && 'opacity-40',
+                pending || active
                     ? 'font-medium text-primary'
                     : 'text-muted-foreground',
             )}
         >
-            <Menu className="size-5 shrink-0" />
+            {pending ? (
+                <Spinner className="size-5 shrink-0" />
+            ) : (
+                <Menu className="size-5 shrink-0" />
+            )}
             <span>More</span>
         </button>
     );
 }
 
+function isPendingDestination(
+    href: NavItem['href'],
+    pendingUrl: string,
+): boolean {
+    const path = toUrl(href);
+
+    return pendingUrl === path || pendingUrl.startsWith(`${path}/`);
+}
+
 function MobileNavLink({
     item,
     active,
+    pending = false,
+    dimmed = false,
     compact = false,
 }: {
     item: NavItem;
     active: boolean;
+    pending?: boolean;
+    dimmed?: boolean;
     compact?: boolean;
 }) {
     const Icon = item.icon;
@@ -175,14 +232,19 @@ function MobileNavLink({
             href={item.href}
             prefetch
             className={cn(
-                'flex flex-col items-center gap-0.5 py-2 text-[11px]',
+                'flex flex-col items-center gap-0.5 py-2 text-[11px] transition-opacity',
                 compact ? 'px-1' : 'px-2',
-                active
+                dimmed && 'opacity-40',
+                pending || active
                     ? 'font-medium text-primary'
                     : 'text-muted-foreground',
             )}
         >
-            {Icon && <Icon className="size-5 shrink-0" />}
+            {pending && Icon ? (
+                <Spinner className="size-5 shrink-0" />
+            ) : (
+                Icon && <Icon className="size-5 shrink-0" />
+            )}
             <span className="max-w-[4.5rem] truncate">{shortLabel}</span>
         </Link>
     );

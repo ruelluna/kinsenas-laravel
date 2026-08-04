@@ -2,6 +2,7 @@ import { createInertiaApp } from '@inertiajs/react';
 import { KinsenasProvider } from '@kinsenas/ui';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { NavigationLoadingProvider } from '@/contexts/navigation-loading-context';
 import { initializeTheme } from '@/hooks/use-appearance';
 import { registerPwaServiceWorker } from '@/lib/register-pwa';
 import AppLayout from '@/layouts/app-layout';
@@ -35,15 +36,20 @@ createInertiaApp({
     withApp(app) {
         return (
             <KinsenasProvider>
-                <TooltipProvider delayDuration={0}>
-                    {app}
-                    <Toaster />
-                </TooltipProvider>
+                <NavigationLoadingProvider>
+                    <TooltipProvider delayDuration={0}>
+                        {app}
+                        <Toaster />
+                    </TooltipProvider>
+                </NavigationLoadingProvider>
             </KinsenasProvider>
         );
     },
     progress: {
         color: '#0D7377',
+        includeCSS: true,
+        showSpinner: false,
+        delay: 150,
     },
 });
 
