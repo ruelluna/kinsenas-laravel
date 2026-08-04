@@ -3,11 +3,13 @@
 use App\Enums\NotificationKind;
 use App\Enums\TeamRole;
 use App\Models\Bank;
+use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlan;
 use App\Models\User;
 use App\Notifications\Savings\PendingActionConfirmed;
 use App\Services\Notifications\NotificationPreferenceService;
 use App\Services\Savings\FundSpendService;
+use App\Services\Vault\VaultKeyManager;
 use Database\Seeders\BillingSeeder;
 use Database\Seeders\SavingsFormulaTemplateSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -42,17 +44,42 @@ it('includes web push channel for team invitations when enabled', function () {
 it('notifies the creator when a pending spend is confirmed by someone else', function () {
     Notification::fake();
 
-    [$creator] = createUserWithLockedIncome();
-    $confirmer = User::factory()->create();
+    $creator = User::factory()->create();
+    $this->unlockVaultFor($creator);
     $team = $creator->currentTeam;
-    $team->members()->attach($confirmer, ['role' => TeamRole::Member->value]);
+
+    $template = SavingsFormulaTemplate::query()
+        ->where('slug', 'abundant-formula')
+        ->firstOrFail();
+
+    $this->actingAs($creator)->post(route('savings.plan.from-template', [
+        'current_team' => $team->slug,
+        'template' => $template->id,
+    ]));
 
     $plan = SavingsPlan::query()->firstOrFail();
+    $plan->update(['is_shared_with_team' => true]);
+
+    $teamDek = app(VaultKeyManager::class)->userDek();
+    app(VaultKeyManager::class)->storeTeamDek($team, $teamDek);
+
+    $this->actingAs($creator)->post(route('savings.income.store', [
+        'current_team' => $team->slug,
+    ]), [
+        'name' => 'January salary',
+        'amount' => '50000.00',
+        'period_start' => '2026-01-01',
+    ]);
+
+    $confirmer = User::factory()->create();
+    $team->members()->attach($confirmer, ['role' => TeamRole::Member->value]);
+
     $category = $plan->categories()->firstOrFail();
     $bank = Bank::factory()->create(['team_id' => $team->id]);
 
     $this->actingAs($creator);
     $this->unlockVaultFor($creator);
+    app(VaultKeyManager::class)->storeTeamDek($team, $teamDek);
 
     $spend = app(FundSpendService::class)->create(
         $plan,
@@ -66,9 +93,10 @@ it('notifies the creator when a pending spend is confirmed by someone else', fun
     );
 
     $this->actingAs($confirmer);
-    $this->unlockVaultFor($confirmer);
+    app(VaultKeyManager::class)->storeUserDek($teamDek);
+    app(VaultKeyManager::class)->storeTeamDek($team, $teamDek);
 
-    app(FundSpendService::class)->confirm($spend->fresh(), $confirmer);
+    app(FundSpendService::class)->confirm($spend->fresh(['plan.team']), $confirmer);
 
     Notification::assertSentTo($creator, PendingActionConfirmed::class);
     Notification::assertNotSentTo($confirmer, PendingActionConfirmed::class);

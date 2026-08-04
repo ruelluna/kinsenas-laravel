@@ -3,14 +3,17 @@
 namespace App\Http\Controllers\Savings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Savings\CompleteIncomeDistributionTodoRequest;
 use App\Http\Requests\Savings\SaveIncomePeriodDeductionsRequest;
 use App\Http\Requests\Savings\SaveIncomePeriodRequest;
+use App\Models\IncomeDistributionTodo;
 use App\Models\IncomePeriod;
 use App\Models\SavingsCategory;
 use App\Models\Team;
 use App\Services\Marketing\ActivationGhlTagService;
 use App\Services\Savings\FundBalanceService;
 use App\Services\Savings\IncomeCalculationService;
+use App\Services\Savings\IncomeDistributionTodoService;
 use App\Services\Savings\SavingsPlanService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,6 +27,7 @@ class IncomePeriodController extends Controller
         private IncomeCalculationService $incomeService,
         private FundBalanceService $fundBalanceService,
         private ActivationGhlTagService $activationGhlTagService,
+        private IncomeDistributionTodoService $distributionTodoService,
     ) {}
 
     public function index(Request $request, Team $current_team): Response
@@ -57,6 +61,8 @@ class IncomePeriodController extends Controller
             ];
         });
 
+        $distributionTodoProgress = $this->distributionTodoService->progressForPeriods($periods);
+
         $fundSummary = null;
 
         if ($plan->shouldShowFundBalances()) {
@@ -75,7 +81,18 @@ class IncomePeriodController extends Controller
         return Inertia::render('savings/income/index', [
             'plan' => ['id' => $plan->id, 'name' => $plan->name],
             'planCategories' => $planCategories,
-            'periods' => $periodRows,
+            'periods' => $periodRows->map(function (array $row) use ($distributionTodoProgress) {
+                $progress = $distributionTodoProgress[$row['id']] ?? [
+                    'pendingCount' => 0,
+                    'totalCount' => 0,
+                    'complete' => true,
+                ];
+
+                return [
+                    ...$row,
+                    'distributionTodoProgress' => $progress,
+                ];
+            }),
             'fundSummary' => $fundSummary,
         ]);
     }
@@ -95,7 +112,24 @@ class IncomePeriodController extends Controller
             'fundBalances' => $plan->shouldShowFundBalances()
                 ? $this->fundBalanceService->balancesForPlan($plan)
                 : [],
+            'distributionTodos' => $this->distributionTodoService->summaryForPeriod($incomePeriod),
+            'distributionTodoProgress' => $this->distributionTodoService->progressForPeriod($incomePeriod),
         ]);
+    }
+
+    public function completeDistributionTodo(
+        CompleteIncomeDistributionTodoRequest $request,
+        Team $current_team,
+        IncomePeriod $incomePeriod,
+        IncomeDistributionTodo $todo,
+    ): RedirectResponse {
+        abort_if($incomePeriod->plan_id !== $this->planService->forTeam($current_team, $request->user())?->id, 404);
+
+        $this->distributionTodoService->complete($request->user(), $todo);
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Transfer marked complete.')]);
+
+        return back();
     }
 
     public function updateCustomAmounts(

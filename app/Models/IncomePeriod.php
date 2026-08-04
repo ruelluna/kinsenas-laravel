@@ -54,4 +54,9 @@ class IncomePeriod extends Model
     {
         return $this->hasMany(IncomePeriodDeduction::class);
     }
+
+    public function distributionTodos(): HasMany
+    {
+        return $this->hasMany(IncomeDistributionTodo::class);
+    }
 }

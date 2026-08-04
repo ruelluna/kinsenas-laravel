@@ -21,6 +21,10 @@ it('returns dashboard data for team member', function () {
     $this->unlockVaultFor($user);
     Sanctum::actingAs($user);
 
+    $this->postJson('/api/v1/vault/unlock', [
+        'password' => 'password',
+    ])->assertSuccessful();
+
     $response = $this->getJson('/api/v1/teams/'.$user->currentTeam->id.'/dashboard');
 
     $response->assertSuccessful();

@@ -2,7 +2,6 @@
 
 use App\Enums\SubscriptionStatus;
 use App\Enums\TeamRole;
-use App\Models\Subscription;
 use App\Models\Team;
 use App\Models\User;
 use App\Notifications\Billing\SubscriptionPastDue;
@@ -25,8 +24,8 @@ it('notifies billing managers when a subscription becomes past due', function ()
     $team = Team::factory()->create();
     $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
 
-    $subscription = Subscription::factory()->create([
-        'team_id' => $team->id,
+    $subscription = $team->fresh()->subscription;
+    $subscription->update([
         'status' => SubscriptionStatus::Trialing,
         'trial_ends_at' => now()->subDay(),
     ]);
@@ -41,9 +40,11 @@ it('deduplicates past due notifications by subscription id', function () {
     $team = Team::factory()->create();
     $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
 
-    $subscription = Subscription::factory()->create([
-        'team_id' => $team->id,
+    $subscription = $team->fresh()->subscription;
+    $subscription->update([
         'status' => SubscriptionStatus::PastDue,
+        'trial_ends_at' => null,
+        'current_period_ends_at' => null,
     ]);
 
     app(SubscriptionNotificationService::class)

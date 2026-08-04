@@ -129,6 +129,24 @@ export type IncomePeriodSummary = {
     amount: string | null;
 };
 
+export type IncomeDistributionTodoProgress = {
+    pendingCount: number;
+    totalCount: number;
+    complete: boolean;
+};
+
+export type IncomeDistributionTodo = {
+    id: string;
+    categoryId: string;
+    categoryName: string;
+    bankId: string | null;
+    bankDisplayName: string | null;
+    bankLogoUrl: string | null;
+    amount: string | null;
+    status: 'pending' | 'completed';
+    completedAt: string | null;
+};
+
 export type IncomePlanCategory = {
     id: string;
     name: string;
@@ -140,6 +158,7 @@ export type IncomePlanCategory = {
 
 export type IncomePeriodTableRow = IncomePeriodSummary & {
     categoryAmounts: Record<string, string | null>;
+    distributionTodoProgress: IncomeDistributionTodoProgress;
 };
 
 export type IncomeFundSummary = {

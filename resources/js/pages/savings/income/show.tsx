@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import Heading from '@/components/heading';
 import DeleteIncomeModal from '@/components/savings/delete-income-modal';
 import FundBankBadge from '@/components/savings/fund-bank-badge';
+import IncomeDistributionTodos from '@/components/savings/income-distribution-todos';
 import {
     MobileMetricCard,
     MobileMetricCardList,
@@ -17,6 +18,8 @@ import type {
     FundBalance,
     IncomeBreakdownRow,
     IncomeCustomCategory,
+    IncomeDistributionTodo,
+    IncomeDistributionTodoProgress,
     IncomePeriodSummary,
 } from '@/types/savings';
 
@@ -26,6 +29,8 @@ type Props = {
     breakdown: IncomeBreakdownRow[];
     customCategories: IncomeCustomCategory[];
     fundBalances: FundBalance[];
+    distributionTodos: IncomeDistributionTodo[];
+    distributionTodoProgress: IncomeDistributionTodoProgress;
 };
 
 function formatPercentage(row: IncomeBreakdownRow): string {
@@ -69,6 +74,8 @@ export default function IncomeShow({
     breakdown,
     customCategories,
     fundBalances,
+    distributionTodos,
+    distributionTodoProgress,
 }: Props) {
     const { currentTeam } = usePage<SharedData>().props;
     const teamSlug = currentTeam?.slug ?? '';
@@ -224,6 +231,13 @@ export default function IncomeShow({
                     </Button>
                 </Form>
             )}
+
+            <IncomeDistributionTodos
+                periodId={period.id}
+                teamSlug={teamSlug}
+                todos={distributionTodos}
+                progress={distributionTodoProgress}
+            />
 
             <div className="mt-6">
                 <div className="md:hidden">

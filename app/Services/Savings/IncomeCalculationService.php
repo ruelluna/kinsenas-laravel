@@ -17,6 +17,7 @@ class IncomeCalculationService
     public function __construct(
         private CategoryAllocationCalculator $calculator,
         private FundBalanceService $fundBalanceService,
+        private IncomeDistributionTodoService $distributionTodoService,
     ) {}
 
     public function create(SavingsPlan $plan, User $user, string $name, string $amount, string $periodStart): IncomePeriod
@@ -216,6 +217,9 @@ class IncomeCalculationService
             'locked_at' => now(),
             'locked_by_user_id' => $user->id,
         ]);
+
+        $period->load(['allocations.category.bank']);
+        $this->distributionTodoService->syncFromPeriod($period);
     }
 
     /**

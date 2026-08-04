@@ -101,6 +101,23 @@ function sumMoneyAmounts(amounts: Array<string | null>): string | null {
     return hasValue ? total.toFixed(2) : null;
 }
 
+function DistributionTodoBadge({
+    progress,
+}: {
+    progress: IncomePeriodTableRow['distributionTodoProgress'];
+}) {
+    if (progress.totalCount === 0 || progress.complete) {
+        return null;
+    }
+
+    return (
+        <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:text-amber-300">
+            {progress.pendingCount} transfer
+            {progress.pendingCount === 1 ? '' : 's'} pending
+        </span>
+    );
+}
+
 function IncomePeriodMobileCard({
     period,
     planCategories,
@@ -122,9 +139,14 @@ function IncomePeriodMobileCard({
                     >
                         {period.name}
                     </Link>
-                    <p className="mt-0.5 text-[11px] text-muted-foreground">
-                        {period.periodStart}
-                    </p>
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                        <p className="text-[11px] text-muted-foreground">
+                            {period.periodStart}
+                        </p>
+                        <DistributionTodoBadge
+                            progress={period.distributionTodoProgress}
+                        />
+                    </div>
                 </div>
                 <p className="shrink-0 text-sm font-semibold tabular-nums">
                     {formatMoney(period.amount)}
@@ -434,7 +456,14 @@ export default function IncomeIndex({
                                         </Link>
                                     </td>
                                     <td className="px-2 py-1.5">
-                                        {period.name}
+                                        <div className="flex flex-col gap-1">
+                                            <span>{period.name}</span>
+                                            <DistributionTodoBadge
+                                                progress={
+                                                    period.distributionTodoProgress
+                                                }
+                                            />
+                                        </div>
                                     </td>
                                     <td className="px-2 py-1.5 text-right font-medium tabular-nums">
                                         {formatMoney(period.amount)}

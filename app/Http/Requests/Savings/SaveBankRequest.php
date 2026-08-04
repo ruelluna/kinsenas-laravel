@@ -30,7 +30,7 @@ class SaveBankRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required_without:bank_institution_id', 'string', 'max:255'],
+            'name' => ['required_without:bank_institution_id', 'nullable', 'string', 'max:255'],
             'bank_institution_id' => ['nullable', 'uuid', 'exists:bank_institutions,id'],
             'account_label' => ['nullable', 'string', 'max:255'],
             'main_label' => ['nullable', 'string', 'max:255'],

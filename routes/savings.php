@@ -35,6 +35,7 @@ Route::prefix('savings')
                 Route::get('income/{incomePeriod}', [IncomePeriodController::class, 'show'])->name('income.show');
                 Route::post('income', [IncomePeriodController::class, 'store'])->name('income.store');
                 Route::put('income/{incomePeriod}/custom-amounts', [IncomePeriodController::class, 'updateCustomAmounts'])->name('income.custom-amounts');
+                Route::post('income/{incomePeriod}/todos/{todo}/complete', [IncomePeriodController::class, 'completeDistributionTodo'])->name('income.todos.complete');
                 Route::delete('income/{incomePeriod}', [IncomePeriodController::class, 'destroy'])->name('income.destroy');
 
                 Route::get('spending', [FundSpendController::class, 'index'])->name('spending.index');

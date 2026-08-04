@@ -19,21 +19,6 @@ beforeEach(function () {
     ]);
 });
 
-function createUserWithPlan(string $templateSlug = 'abundant-formula'): User
-{
-    $user = User::factory()->create();
-    test()->unlockVaultFor($user);
-
-    $template = SavingsFormulaTemplate::query()->where('slug', $templateSlug)->firstOrFail();
-
-    test()->actingAs($user)->post(route('savings.plan.from-template', [
-        'current_team' => $user->currentTeam->slug,
-        'template' => $template->id,
-    ]));
-
-    return $user;
-}
-
 function createIncomePeriodFor(
     User $user,
     string $amount = '50000.00',
