@@ -5,8 +5,11 @@ import {
 } from '@/components/savings/plan-guidance-panels';
 import TemplateAllocationPieChart from '@/components/savings/template-allocation-pie-chart';
 import VideoEmbed from '@/components/savings/video-embed';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { FormulaTemplate, SavingsPlanPageGuidance } from '@/types/savings';
+
+const RECOMMENDED_TEMPLATE_SLUG = 'trc-savings';
 
 function TemplatePickerCard({
     template,
@@ -21,7 +24,12 @@ function TemplatePickerCard({
             method="post"
             className="flex flex-col rounded-lg border p-4"
         >
-            <h3 className="font-medium">{template.name}</h3>
+            <div className="flex flex-wrap items-center gap-2">
+                <h3 className="font-medium">{template.name}</h3>
+                {template.slug === RECOMMENDED_TEMPLATE_SLUG && (
+                    <Badge variant="secondary">Recommended</Badge>
+                )}
+            </div>
             {template.description && (
                 <p className="mt-1 text-sm text-muted-foreground">
                     {template.description}

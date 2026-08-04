@@ -19,23 +19,32 @@ export type MobileNavAction = {
 type MobileNavContextValue = {
     action: MobileNavAction | null;
     setAction: (action: MobileNavAction | null) => void;
+    moreSheetOpen: boolean;
+    setMoreSheetOpen: (open: boolean) => void;
 };
 
 const MobileNavContext = createContext<MobileNavContextValue | null>(null);
 
 export function MobileNavProvider({ children }: { children: ReactNode }) {
     const [action, setActionState] = useState<MobileNavAction | null>(null);
+    const [moreSheetOpen, setMoreSheetOpenState] = useState(false);
 
     const setAction = useCallback((next: MobileNavAction | null) => {
         setActionState(next);
+    }, []);
+
+    const setMoreSheetOpen = useCallback((open: boolean) => {
+        setMoreSheetOpenState(open);
     }, []);
 
     const value = useMemo(
         () => ({
             action,
             setAction,
+            moreSheetOpen,
+            setMoreSheetOpen,
         }),
-        [action, setAction],
+        [action, setAction, moreSheetOpen, setMoreSheetOpen],
     );
 
     return (

@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { Menu } from 'lucide-react';
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, type ReactNode } from 'react';
+import { registerMobileMoreSheetController } from '@/lib/mobile-more-sheet-bridge';
 import { MobileMoreSheet } from '@/components/mobile/mobile-more-sheet';
 import { Spinner } from '@/components/ui/spinner';
 import { useNavigationLoading } from '@/contexts/navigation-loading-context';
@@ -14,10 +15,16 @@ import type { NavItem, SharedData } from '@/types';
 export function MobileBottomNav() {
     const isMobile = useIsMobile();
     const page = usePage<SharedData>();
-    const { action } = useMobileNav();
+    const { action, moreSheetOpen, setMoreSheetOpen } = useMobileNav();
     const { isCurrentOrParentUrl } = useCurrentUrl();
     const { isNavigating, pendingUrl } = useNavigationLoading();
-    const [moreOpen, setMoreOpen] = useState(false);
+
+    useEffect(() => {
+        return registerMobileMoreSheetController({
+            open: () => setMoreSheetOpen(true),
+            close: () => setMoreSheetOpen(false),
+        });
+    }, [setMoreSheetOpen]);
     const { bottomTabs, moreItems, hasAccess, billingNavItems } =
         buildMemberNav(page.props);
 
@@ -66,11 +73,14 @@ export function MobileBottomNav() {
                             active={moreIsActive}
                             pending={moreIsPending}
                             dimmed={isNavigating && !moreIsPending}
-                            onClick={() => setMoreOpen(true)}
+                            onClick={() => setMoreSheetOpen(true)}
                         />
                     </div>
                 </MobileNavBar>
-                <MobileMoreSheet open={moreOpen} onOpenChange={setMoreOpen} />
+                <MobileMoreSheet
+                    open={moreSheetOpen}
+                    onOpenChange={setMoreSheetOpen}
+                />
             </>
         );
     }
@@ -120,7 +130,7 @@ export function MobileBottomNav() {
                             active={moreIsActive}
                             pending={moreIsPending}
                             dimmed={isNavigating && !moreIsPending}
-                            onClick={() => setMoreOpen(true)}
+                            onClick={() => setMoreSheetOpen(true)}
                             compact
                         />
                     </div>
@@ -140,13 +150,16 @@ export function MobileBottomNav() {
                             active={moreIsActive}
                             pending={moreIsPending}
                             dimmed={isNavigating && !moreIsPending}
-                            onClick={() => setMoreOpen(true)}
+                            onClick={() => setMoreSheetOpen(true)}
                             compact
                         />
                     </div>
                 )}
             </MobileNavBar>
-            <MobileMoreSheet open={moreOpen} onOpenChange={setMoreOpen} />
+            <MobileMoreSheet
+                open={moreSheetOpen}
+                onOpenChange={setMoreSheetOpen}
+            />
         </>
     );
 }
@@ -231,6 +244,7 @@ function MobileNavLink({
         <Link
             href={item.href}
             prefetch
+            data-tour={item.tourId}
             className={cn(
                 'flex flex-col items-center gap-0.5 py-2 text-[11px] transition-opacity',
                 compact ? 'px-1' : 'px-2',

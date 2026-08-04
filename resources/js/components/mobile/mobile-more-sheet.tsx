@@ -55,7 +55,11 @@ export function MobileMoreSheet({ open, onOpenChange }: Props) {
                             asChild
                             onClick={() => onOpenChange(false)}
                         >
-                            <Link href={item.href} prefetch>
+                            <Link
+                                href={item.href}
+                                prefetch
+                                data-tour={item.tourId}
+                            >
                                 {item.icon && (
                                     <item.icon className="size-5 shrink-0" />
                                 )}

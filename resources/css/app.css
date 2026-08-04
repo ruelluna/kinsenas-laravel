@@ -252,6 +252,12 @@
     border-color: var(--border);
 }
 
+@media (max-width: 767px) {
+    .kinsenas-driver-popover-mobile.driver-popover {
+        max-width: min(320px, calc(100vw - 2rem));
+    }
+}
+
 @utility safe-area-top {
     padding-top: env(safe-area-inset-top, 0px);
 }

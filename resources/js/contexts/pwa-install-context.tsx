@@ -49,7 +49,9 @@ export function PwaInstallProvider({ children }: { children: ReactNode }) {
     const isLoggedIn = auth.user !== null;
     const onAuthInstallPage = isAuthInstallPage(page.component);
     const isLayoutMobile = useIsMobile();
-    const isMobileInstall = isLayoutMobile || isMobileInstallDevice();
+    const [clientReady, setClientReady] = useState(false);
+    const isMobileInstall =
+        clientReady && (isLayoutMobile || isMobileInstallDevice());
 
     const [deferredPrompt, setDeferredPrompt] =
         useState<BeforeInstallPromptEvent | null>(null);
@@ -57,7 +59,7 @@ export function PwaInstallProvider({ children }: { children: ReactNode }) {
     const [bannerDismissed, setBannerDismissed] = useState(false);
     const [installed, setInstalled] = useState(() => isPwaInstalled());
 
-    const isIosInstall = isIosSafari();
+    const isIosInstall = clientReady && isIosSafari();
     const canNativePrompt = Boolean(deferredPrompt);
     const installGuideVariant = getInstallGuideVariant(canNativePrompt);
 
@@ -71,6 +73,10 @@ export function PwaInstallProvider({ children }: { children: ReactNode }) {
         setBannerDismissed(true);
         setGuideOpen(false);
         setDeferredPrompt(null);
+    }, []);
+
+    useEffect(() => {
+        setClientReady(true);
     }, []);
 
     useEffect(() => {

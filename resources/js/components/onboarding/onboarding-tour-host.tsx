@@ -1,5 +1,6 @@
 import { usePage } from '@inertiajs/react';
 import { useEffect, useRef } from 'react';
+import { getTourResumeDelayMs } from '@/lib/onboarding-tour/is-mobile-viewport';
 import {
     isOnboardingTourRunning,
     runOnboardingTour,
@@ -44,7 +45,7 @@ export default function OnboardingTourHost() {
                     forced: active.forced,
                 });
                 bootstrapping.current = false;
-            }, 350);
+            }, getTourResumeDelayMs());
 
             return () => {
                 window.clearTimeout(timer);
