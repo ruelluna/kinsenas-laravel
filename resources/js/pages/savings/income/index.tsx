@@ -129,6 +129,8 @@ function IncomePeriodMobileCard({
     teamSlug: string;
     onDelete: (period: IncomePeriodTableRow) => void;
 }) {
+    const isDeleteBlocked = Boolean(period.deleteBlockReason);
+
     return (
         <div className="rounded-lg border p-3">
             <div className="flex items-start justify-between gap-3">
@@ -172,16 +174,18 @@ function IncomePeriodMobileCard({
             </dl>
 
             <div className="mt-3 flex items-center justify-between gap-2 border-t pt-3">
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 px-2 text-xs text-destructive hover:text-destructive"
-                    onClick={() => onDelete(period)}
-                >
-                    <Trash2 className="size-3.5" />
-                    Delete
-                </Button>
+                {!isDeleteBlocked && (
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-2 text-xs text-destructive hover:text-destructive"
+                        onClick={() => onDelete(period)}
+                    >
+                        <Trash2 className="size-3.5" />
+                        Delete
+                    </Button>
+                )}
                 <Button
                     variant="ghost"
                     size="sm"
@@ -378,6 +382,7 @@ export default function IncomeIndex({
                             setDeleteTarget(null);
                         }
                     }}
+                    blockReason={deleteTarget.deleteBlockReason}
                 />
             )}
 
@@ -481,17 +486,19 @@ export default function IncomeIndex({
                                         </td>
                                     ))}
                                     <td className="px-2 py-1.5 text-right">
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-7 px-2 text-xs text-destructive hover:text-destructive"
-                                            onClick={() =>
-                                                setDeleteTarget(period)
-                                            }
-                                        >
-                                            Delete
-                                        </Button>
+                                        {!period.deleteBlockReason && (
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-7 px-2 text-xs text-destructive hover:text-destructive"
+                                                onClick={() =>
+                                                    setDeleteTarget(period)
+                                                }
+                                            >
+                                                Delete
+                                            </Button>
+                                        )}
                                     </td>
                                 </tr>
                             ))

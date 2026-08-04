@@ -206,18 +206,28 @@ class FundBalanceService
 
     public function assertCanRemovePeriod(IncomePeriod $period): void
     {
-        $period->loadMissing(['plan.categories', 'allocations']);
+        if ($reason = $this->deleteBlockReasonForPeriod($period)) {
+            throw ValidationException::withMessages([
+                'period' => $reason,
+            ]);
+        }
+    }
+
+    public function deleteBlockReasonForPeriod(IncomePeriod $period): ?string
+    {
+        $period->loadMissing(['plan.categories', 'allocations.category']);
         $plan = $period->plan;
         $dek = $this->vaultKeyManager->userDek();
 
         if ($dek === null) {
-            return;
+            return null;
         }
 
         $allocatedByCategory = $this->allocatedTotalsByCategory($plan, $dek);
         $transferredOutByCategory = $this->transferredOutTotalsByCategory($plan, $dek);
         $receivedInByCategory = $this->receivedInTotalsByCategory($plan, $dek);
         $spentByCategory = $this->spentTotalsByCategory($plan, $dek);
+        $categoriesById = $plan->categories->keyBy('id');
 
         foreach ($period->allocations as $allocation) {
             $categoryId = $allocation->category_id;
@@ -227,18 +237,42 @@ class FundBalanceService
             $transferredOut = $transferredOutByCategory[$categoryId] ?? '0.00';
             $receivedIn = $receivedInByCategory[$categoryId] ?? '0.00';
             $spent = $spentByCategory[$categoryId] ?? '0.00';
-            $drawn = bcsub(bcadd($transferredOut, $spent, 2), $receivedIn, 2);
+            $category = $categoriesById->get($categoryId) ?? $allocation->category;
+            $openingBalance = $category !== null
+                ? $this->openingBalanceForCategory($category, $dek)
+                : '0.00';
 
-            if (bccomp($drawn, $allocatedAfterRemoval, 2) === 1) {
-                $categoryName = $allocation->category?->name ?? __('a fund');
+            $remainingAfter = bcsub(
+                bcadd(
+                    bcadd($openingBalance, bcsub($allocatedAfterRemoval, $transferredOut, 2), 2),
+                    $receivedIn,
+                    2,
+                ),
+                $spent,
+                2,
+            );
 
-                throw ValidationException::withMessages([
-                    'period' => __('Cannot delete income — :fund transfers and spending exceed what would remain allocated.', [
-                        'fund' => $categoryName,
-                    ]),
+            if (bccomp($remainingAfter, '0', 2) === -1) {
+                $categoryName = $category?->name ?? __('a fund');
+
+                return __('Cannot delete income — :fund transfers and spending exceed what would remain in that fund bucket.', [
+                    'fund' => $categoryName,
                 ]);
             }
         }
+
+        return null;
+    }
+
+    /**
+     * @param  Collection<int, IncomePeriod>  $periods
+     * @return array<string, string|null>
+     */
+    public function deleteBlockReasonsForPeriods(Collection $periods): array
+    {
+        return $periods->mapWithKeys(fn (IncomePeriod $period) => [
+            $period->id => $this->deleteBlockReasonForPeriod($period),
+        ])->all();
     }
 
     /**

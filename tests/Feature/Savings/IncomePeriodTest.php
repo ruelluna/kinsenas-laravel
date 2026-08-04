@@ -31,9 +31,13 @@ function createIncomePeriodFor(
         'name' => $name,
         'amount' => $amount,
         'period_start' => $periodStart,
-    ]);
+    ])->assertRedirect();
 
-    return IncomePeriod::query()->firstOrFail();
+    return IncomePeriod::query()
+        ->where('name', $name)
+        ->whereDate('period_start', $periodStart)
+        ->latest()
+        ->firstOrFail();
 }
 
 function createUserWithPlanAndIncome(string $amount = '50000.00', string $periodStart = '2026-01-01'): array
@@ -316,5 +320,99 @@ it('allows clearing a custom amount for an income period while keeping the categ
         ->where('breakdown.2.amount', '0.00')
         ->has('customCategories', 1)
         ->where('customCategories.0.name', 'College Fund'),
+    );
+});
+
+it('allows deleting income when opening balance covers spending after removal', function () {
+    [$user, , $everydayCategory, $period] = createUserWithLockedIncome();
+
+    $everydayCategory->update(['opening_balance_encrypted' => '20000.00']);
+
+    $this->actingAs($user)->post(route('savings.spending.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'category_id' => $everydayCategory->id,
+        'amount' => '15000.00',
+        'description' => 'Rent',
+        'spent_on' => '2026-01-05',
+    ]);
+
+    $response = $this->actingAs($user)->delete(route('savings.income.destroy', [
+        'current_team' => $user->currentTeam->slug,
+        'incomePeriod' => $period->id,
+    ]));
+
+    $response->assertRedirect(route('savings.income.index', [
+        'current_team' => $user->currentTeam->slug,
+    ]));
+
+    expect(IncomePeriod::query()->find($period->id))->toBeNull();
+});
+
+it('allows deleting one income period when another covers remaining spending', function () {
+    [$user, $plan, $everydayCategory, $firstPeriod] = createUserWithLockedIncome();
+
+    $secondPeriod = createIncomePeriodFor(
+        $user,
+        '50000.00',
+        '2026-02-01',
+        'February salary',
+    );
+
+    expect($secondPeriod->id)->not->toBe($firstPeriod->id);
+
+    $this->actingAs($user)->post(route('savings.spending.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'category_id' => $everydayCategory->id,
+        'amount' => '10000.00',
+        'description' => 'Groceries',
+        'spent_on' => '2026-01-15',
+    ]);
+
+    $response = $this->actingAs($user)->delete(route('savings.income.destroy', [
+        'current_team' => $user->currentTeam->slug,
+        'incomePeriod' => $firstPeriod->id,
+    ]));
+
+    $response->assertRedirect(route('savings.income.index', [
+        'current_team' => $user->currentTeam->slug,
+    ]));
+
+    expect(IncomePeriod::query()->find($firstPeriod->id))->toBeNull()
+        ->and(IncomePeriod::query()->find($secondPeriod->id))->not->toBeNull();
+});
+
+it('exposes deleteBlockReason on income show and index when delete is blocked', function () {
+    [$user, , $everydayCategory, $period] = createUserWithLockedIncome();
+
+    $this->actingAs($user)->post(route('savings.spending.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'category_id' => $everydayCategory->id,
+        'amount' => '10000.00',
+        'description' => 'Rent',
+        'spent_on' => '2026-01-05',
+    ]);
+
+    $showResponse = $this->actingAs($user)->get(route('savings.income.show', [
+        'current_team' => $user->currentTeam->slug,
+        'incomePeriod' => $period->id,
+    ]));
+
+    $showResponse->assertOk();
+    $showResponse->assertInertia(fn (Assert $page) => $page
+        ->where('deleteBlockReason', fn (?string $reason) => $reason !== null
+            && str_contains($reason, 'Everyday Fund')),
+    );
+
+    $indexResponse = $this->actingAs($user)->get(route('savings.income.index', [
+        'current_team' => $user->currentTeam->slug,
+    ]));
+
+    $indexResponse->assertOk();
+    $indexResponse->assertInertia(fn (Assert $page) => $page
+        ->where('periods.0.deleteBlockReason', fn (?string $reason) => $reason !== null
+            && str_contains($reason, 'Everyday Fund')),
     );
 });

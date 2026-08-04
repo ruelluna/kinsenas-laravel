@@ -127,6 +127,7 @@ export type IncomePeriodSummary = {
     name: string;
     periodStart: string;
     amount: string | null;
+    deleteBlockReason?: string | null;
 };
 
 export type IncomeDistributionTodoProgress = {

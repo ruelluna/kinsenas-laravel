@@ -31,6 +31,7 @@ type Props = {
     fundBalances: FundBalance[];
     distributionTodos: IncomeDistributionTodo[];
     distributionTodoProgress: IncomeDistributionTodoProgress;
+    deleteBlockReason: string | null;
 };
 
 function formatPercentage(row: IncomeBreakdownRow): string {
@@ -76,6 +77,7 @@ export default function IncomeShow({
     fundBalances,
     distributionTodos,
     distributionTodoProgress,
+    deleteBlockReason,
 }: Props) {
     const { currentTeam } = usePage<SharedData>().props;
     const teamSlug = currentTeam?.slug ?? '';
@@ -139,15 +141,17 @@ export default function IncomeShow({
                     title={period.name}
                     description={`${period.periodStart} · ${plan.name} breakdown`}
                 />
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="text-destructive hover:text-destructive"
-                    onClick={() => setDeleteOpen(true)}
-                >
-                    Delete income
-                </Button>
+                {!deleteBlockReason && (
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => setDeleteOpen(true)}
+                    >
+                        Delete income
+                    </Button>
+                )}
             </div>
 
             <DeleteIncomeModal
@@ -156,6 +160,7 @@ export default function IncomeShow({
                 teamSlug={teamSlug}
                 open={deleteOpen}
                 onOpenChange={setDeleteOpen}
+                blockReason={deleteBlockReason}
             />
 
             {customCategories.length > 0 && (

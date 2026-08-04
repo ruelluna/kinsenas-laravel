@@ -62,6 +62,7 @@ class IncomePeriodController extends Controller
         });
 
         $distributionTodoProgress = $this->distributionTodoService->progressForPeriods($periods);
+        $deleteBlockReasons = $this->fundBalanceService->deleteBlockReasonsForPeriods($periods);
 
         $fundSummary = null;
 
@@ -81,7 +82,7 @@ class IncomePeriodController extends Controller
         return Inertia::render('savings/income/index', [
             'plan' => ['id' => $plan->id, 'name' => $plan->name],
             'planCategories' => $planCategories,
-            'periods' => $periodRows->map(function (array $row) use ($distributionTodoProgress) {
+            'periods' => $periodRows->map(function (array $row) use ($distributionTodoProgress, $deleteBlockReasons) {
                 $progress = $distributionTodoProgress[$row['id']] ?? [
                     'pendingCount' => 0,
                     'totalCount' => 0,
@@ -91,6 +92,7 @@ class IncomePeriodController extends Controller
                 return [
                     ...$row,
                     'distributionTodoProgress' => $progress,
+                    'deleteBlockReason' => $deleteBlockReasons[$row['id']] ?? null,
                 ];
             }),
             'fundSummary' => $fundSummary,
@@ -114,6 +116,7 @@ class IncomePeriodController extends Controller
                 : [],
             'distributionTodos' => $this->distributionTodoService->summaryForPeriod($incomePeriod),
             'distributionTodoProgress' => $this->distributionTodoService->progressForPeriod($incomePeriod),
+            'deleteBlockReason' => $this->fundBalanceService->deleteBlockReasonForPeriod($incomePeriod),
         ]);
     }
 

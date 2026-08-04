@@ -1,4 +1,7 @@
 import { Form } from '@inertiajs/react';
+import { AlertCircle } from 'lucide-react';
+import InputError from '@/components/input-error';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -16,6 +19,7 @@ type Props = {
     teamSlug: string;
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    blockReason?: string | null;
 };
 
 export default function DeleteIncomeModal({
@@ -24,7 +28,10 @@ export default function DeleteIncomeModal({
     teamSlug,
     open,
     onOpenChange,
+    blockReason = null,
 }: Props) {
+    const isBlocked = Boolean(blockReason);
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
@@ -34,7 +41,7 @@ export default function DeleteIncomeModal({
                     className="space-y-6"
                     onSuccess={() => onOpenChange(false)}
                 >
-                    {({ processing }) => (
+                    {({ processing, errors }) => (
                         <>
                             <DialogHeader>
                                 <DialogTitle>Delete income period?</DialogTitle>
@@ -46,6 +53,17 @@ export default function DeleteIncomeModal({
                                 </DialogDescription>
                             </DialogHeader>
 
+                            {isBlocked && (
+                                <Alert variant="destructive">
+                                    <AlertCircle />
+                                    <AlertDescription>
+                                        {blockReason}
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+
+                            <InputError message={errors.period} />
+
                             <DialogFooter className="gap-2">
                                 <DialogClose asChild>
                                     <Button type="button" variant="secondary">
@@ -55,7 +73,7 @@ export default function DeleteIncomeModal({
                                 <Button
                                     type="submit"
                                     variant="destructive"
-                                    disabled={processing}
+                                    disabled={processing || isBlocked}
                                 >
                                     Delete income
                                 </Button>
