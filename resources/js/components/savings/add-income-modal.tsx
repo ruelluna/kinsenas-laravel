@@ -47,8 +47,9 @@ export default function AddIncomeModal({ open, onOpenChange }: Props) {
                             <DialogHeader>
                                 <DialogTitle>Add income</DialogTitle>
                                 <DialogDescription>
-                                    Enter a monthly income period. Allocations
-                                    apply immediately and enable spending.
+                                    Record when you received this income.
+                                    Allocations apply immediately and enable
+                                    spending.
                                 </DialogDescription>
                             </DialogHeader>
 
@@ -65,7 +66,7 @@ export default function AddIncomeModal({ open, onOpenChange }: Props) {
 
                             <div className="grid gap-2">
                                 <Label htmlFor="period_start">
-                                    Period start
+                                    Received on
                                 </Label>
                                 <Input
                                     id="period_start"

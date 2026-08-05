@@ -415,7 +415,9 @@ export default function IncomeIndex({
                 <table className="w-full min-w-180 text-xs">
                     <thead>
                         <tr className="border-b bg-muted/50 text-left">
-                            <th className="px-2 py-1.5 font-medium">Date</th>
+                            <th className="px-2 py-1.5 font-medium">
+                                Received on
+                            </th>
                             <th className="px-2 py-1.5 font-medium">
                                 Income name
                             </th>

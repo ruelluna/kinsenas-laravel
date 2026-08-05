@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\BankSpaceRole;
 use App\Models\Bank;
 use App\Models\BankInstitution;
 use App\Models\SavingsFormulaTemplate;
@@ -37,7 +36,7 @@ function gotymeInstitution(): BankInstitution
     return BankInstitution::query()->where('slug', 'gotyme')->firstOrFail();
 }
 
-it('creates main account and enabled gosave spaces in one setup', function () {
+it('creates a single gotyme main account with label', function () {
     $user = User::factory()->create();
     $this->unlockVaultFor($user);
     $gotyme = gotymeInstitution();
@@ -46,68 +45,19 @@ it('creates main account and enabled gosave spaces in one setup', function () {
         'current_team' => $user->currentTeam->slug,
     ]), [
         'bank_institution_id' => $gotyme->id,
-        'main_label' => 'Main account',
-        'spaces' => [
-            ['label' => 'Vacation', 'enabled' => true],
-            ['label' => 'Emergency', 'enabled' => true],
-            ['label' => 'GoSave 3', 'enabled' => false],
-        ],
+        'account_label' => 'GoTyme/Main',
     ]);
 
     $response->assertRedirect();
 
-    $banks = Bank::query()->where('team_id', $user->currentTeam->id)->orderBy('sort_order')->get();
+    $bank = Bank::query()->where('team_id', $user->currentTeam->id)->sole();
 
-    expect($banks)->toHaveCount(3)
-        ->and($banks->pluck('bank_account_group_id')->unique())->toHaveCount(1)
-        ->and($banks->first()->space_role)->toBe(BankSpaceRole::Main)
-        ->and($banks->first()->account_label)->toBe('Main account')
-        ->and($banks->skip(1)->pluck('space_role')->unique()->all())->toBe([BankSpaceRole::SavingsSpace])
-        ->and($banks->pluck('account_label')->all())->toBe(['Main account', 'Vacation', 'Emergency']);
+    expect($bank->account_label)->toBe('GoTyme/Main')
+        ->and($bank->bank_account_group_id)->toBeNull()
+        ->and($bank->space_role)->toBeNull();
 });
 
-it('rejects more than five gosave spaces', function () {
-    $user = User::factory()->create();
-    $this->unlockVaultFor($user);
-    $gotyme = gotymeInstitution();
-
-    $spaces = [];
-
-    for ($index = 1; $index <= 6; $index++) {
-        $spaces[] = ['label' => "GoSave {$index}", 'enabled' => true];
-    }
-
-    $response = $this->actingAs($user)->post(route('savings.banks.store', [
-        'current_team' => $user->currentTeam->slug,
-    ]), [
-        'bank_institution_id' => $gotyme->id,
-        'main_label' => 'Main account',
-        'spaces' => $spaces,
-    ]);
-
-    $response->assertSessionHasErrors('spaces');
-});
-
-it('rejects duplicate space labels within a setup', function () {
-    $user = User::factory()->create();
-    $this->unlockVaultFor($user);
-    $gotyme = gotymeInstitution();
-
-    $response = $this->actingAs($user)->post(route('savings.banks.store', [
-        'current_team' => $user->currentTeam->slug,
-    ]), [
-        'bank_institution_id' => $gotyme->id,
-        'main_label' => 'Main account',
-        'spaces' => [
-            ['label' => 'Vacation', 'enabled' => true],
-            ['label' => 'Vacation', 'enabled' => true],
-        ],
-    ]);
-
-    $response->assertSessionHasErrors('spaces');
-});
-
-it('exposes display names and grouping on the banks page', function () {
+it('creates a single gosave account independently of a main account', function () {
     $user = User::factory()->create();
     $this->unlockVaultFor($user);
     $gotyme = gotymeInstitution();
@@ -116,10 +66,40 @@ it('exposes display names and grouping on the banks page', function () {
         'current_team' => $user->currentTeam->slug,
     ]), [
         'bank_institution_id' => $gotyme->id,
-        'main_label' => 'Main account',
-        'spaces' => [
-            ['label' => 'Vacation', 'enabled' => true],
-        ],
+        'account_label' => 'GoSave/Mom',
+    ])->assertRedirect();
+
+    expect(Bank::query()->where('team_id', $user->currentTeam->id)->count())->toBe(1)
+        ->and(Bank::query()->first()->account_label)->toBe('GoSave/Mom');
+});
+
+it('allows adding multiple gosave accounts without a limit', function () {
+    $user = User::factory()->create();
+    $this->unlockVaultFor($user);
+    $gotyme = gotymeInstitution();
+
+    for ($index = 1; $index <= 6; $index++) {
+        $this->actingAs($user)->post(route('savings.banks.store', [
+            'current_team' => $user->currentTeam->slug,
+        ]), [
+            'bank_institution_id' => $gotyme->id,
+            'account_label' => "GoSave/Person {$index}",
+        ])->assertRedirect();
+    }
+
+    expect(Bank::query()->where('team_id', $user->currentTeam->id)->count())->toBe(6);
+});
+
+it('exposes display names on the banks page', function () {
+    $user = User::factory()->create();
+    $this->unlockVaultFor($user);
+    $gotyme = gotymeInstitution();
+
+    $this->actingAs($user)->post(route('savings.banks.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'bank_institution_id' => $gotyme->id,
+        'account_label' => 'GoSave/Mom',
     ]);
 
     $response = $this->actingAs($user)->get(route('savings.banks.index', [
@@ -129,28 +109,24 @@ it('exposes display names and grouping on the banks page', function () {
     $response->assertSuccessful()
         ->assertInertia(fn (Assert $page) => $page
             ->component('savings/banks/index')
-            ->has('banks', 2)
-            ->where('banks.0.displayName', 'GoTyme Bank — Main account')
-            ->where('banks.1.displayName', 'GoTyme Bank — Vacation')
-            ->where('banks.0.bankAccountGroupId', fn ($value) => $value !== null)
-            ->where('banks.1.bankAccountGroupId', fn ($value) => $value !== null));
+            ->has('banks', 1)
+            ->where('banks.0.displayName', 'GoTyme Bank — GoSave/Mom')
+            ->where('banks.0.bankAccountGroupId', null));
 });
 
-it('allows assigning different gosave spaces to different categories', function () {
+it('allows assigning different gosave labels to different categories', function () {
     $user = User::factory()->create();
     $this->unlockVaultFor($user);
     $gotyme = gotymeInstitution();
 
-    $this->actingAs($user)->post(route('savings.banks.store', [
-        'current_team' => $user->currentTeam->slug,
-    ]), [
-        'bank_institution_id' => $gotyme->id,
-        'main_label' => 'Main account',
-        'spaces' => [
-            ['label' => 'Vacation', 'enabled' => true],
-            ['label' => 'Emergency', 'enabled' => true],
-        ],
-    ]);
+    foreach (['GoSave/Vacation', 'GoSave/Emergency'] as $label) {
+        $this->actingAs($user)->post(route('savings.banks.store', [
+            'current_team' => $user->currentTeam->slug,
+        ]), [
+            'bank_institution_id' => $gotyme->id,
+            'account_label' => $label,
+        ]);
+    }
 
     $template = SavingsFormulaTemplate::query()->where('slug', 'abundant-formula')->firstOrFail();
 
@@ -160,8 +136,8 @@ it('allows assigning different gosave spaces to different categories', function 
     ]));
 
     $plan = SavingsPlan::query()->with('categories')->firstOrFail();
-    $vacationBank = Bank::query()->where('account_label', 'Vacation')->firstOrFail();
-    $emergencyBank = Bank::query()->where('account_label', 'Emergency')->firstOrFail();
+    $vacationBank = Bank::query()->where('account_label', 'GoSave/Vacation')->firstOrFail();
+    $emergencyBank = Bank::query()->where('account_label', 'GoSave/Emergency')->firstOrFail();
 
     $payload = $plan->categories->map(fn ($category) => [
         'id' => $category->id,

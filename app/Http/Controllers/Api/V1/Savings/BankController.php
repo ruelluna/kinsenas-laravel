@@ -8,7 +8,6 @@ use App\Models\Bank;
 use App\Models\BankInstitution;
 use App\Models\Team;
 use App\Services\Marketing\BankGhlTagService;
-use App\Services\Savings\BankAccountSetupService;
 use App\Services\Savings\BankPayloadMapper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,7 +15,6 @@ use Illuminate\Http\Request;
 class BankController extends Controller
 {
     public function __construct(
-        private BankAccountSetupService $bankAccountSetupService,
         private BankGhlTagService $bankGhlTagService,
     ) {}
 
@@ -38,28 +36,6 @@ class BankController extends Controller
         $isFirstInstitutionOnTeam = $institution !== null
             && ! $team->banks()->where('bank_institution_id', $institution->id)->exists();
 
-        if ($institution?->supportsSavingsSpaces()) {
-            $this->bankAccountSetupService->createSavingsSpaces(
-                $team,
-                $institution,
-                $data['main_label'] ?? $institution->savingsSpacesConfig()['main_label'] ?? 'Main account',
-                $data['spaces'] ?? [],
-            );
-            $this->bankGhlTagService->syncBankAdded(
-                $request->user(),
-                $team->fresh(),
-                $institution,
-                withSavingsSpaces: true,
-                isFirstBankOnTeam: $isFirstBankOnTeam,
-                isFirstInstitutionOnTeam: $isFirstInstitutionOnTeam,
-            );
-
-            return response()->json([
-                'data' => $team->fresh()->banks()->with('institution')->orderBy('sort_order')->get()
-                    ->map(fn (Bank $bank) => BankPayloadMapper::toOption($bank))->values(),
-            ], 201);
-        }
-
         $bank = $team->banks()->create(collect([
             ...$data,
             'name' => $data['name'] ?? $institution?->name,
@@ -70,6 +46,7 @@ class BankController extends Controller
                 $request->user(),
                 $team->fresh(),
                 $institution,
+                accountLabel: $bank->account_label,
                 isFirstBankOnTeam: $isFirstBankOnTeam,
                 isFirstInstitutionOnTeam: $isFirstInstitutionOnTeam,
             );

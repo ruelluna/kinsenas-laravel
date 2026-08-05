@@ -3,9 +3,7 @@ import { useState } from 'react';
 import BankInstitutionPicker, {
     type BankInstitutionSelection,
 } from '@/components/savings/bank-institution-picker';
-import GoSaveSpaceSetup, {
-    createDefaultGoSaveSpaces,
-} from '@/components/savings/gosave-space-setup';
+import GoTymeAccountLabel from '@/components/savings/gotyme-account-label';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -39,6 +37,12 @@ function canSubmitSelection(selection: BankInstitutionSelection): boolean {
     return selection.name.trim() !== '';
 }
 
+function isGoTymeInstitution(
+    institution: BankInstitution | undefined,
+): boolean {
+    return institution?.slug === 'gotyme';
+}
+
 export default function AddBankModal({
     open,
     onOpenChange,
@@ -48,6 +52,7 @@ export default function AddBankModal({
     const teamSlug = currentTeam?.slug ?? '';
     const [formKey, setFormKey] = useState(0);
     const [selection, setSelection] = useState<BankInstitutionSelection>(null);
+    const [, setGoTymeAccountLabel] = useState('GoTyme/Main');
 
     const selectedInstitution =
         selection?.mode === 'institution'
@@ -55,17 +60,11 @@ export default function AddBankModal({
                   (institution) => institution.id === selection.institutionId,
               )
             : undefined;
-    const savingsSpacesConfig = selectedInstitution?.savingsSpaces ?? null;
-
-    const [mainLabel, setMainLabel] = useState('');
-    const [spaces, setSpaces] = useState<
-        Array<{ enabled: boolean; label: string }>
-    >([]);
+    const isGoTyme = isGoTymeInstitution(selectedInstitution);
 
     function resetFormState() {
         setSelection(null);
-        setMainLabel('');
-        setSpaces([]);
+        setGoTymeAccountLabel('GoTyme/Main');
         setFormKey((key) => key + 1);
     }
 
@@ -75,27 +74,6 @@ export default function AddBankModal({
         }
 
         onOpenChange(nextOpen);
-    }
-
-    function handleSelectionChange(nextSelection: BankInstitutionSelection) {
-        setSelection(nextSelection);
-
-        const institution =
-            nextSelection?.mode === 'institution'
-                ? institutions.find(
-                      (item) => item.id === nextSelection.institutionId,
-                  )
-                : undefined;
-
-        if (institution?.savingsSpaces) {
-            setMainLabel(institution.savingsSpaces.mainLabel);
-            setSpaces(createDefaultGoSaveSpaces(institution.savingsSpaces));
-
-            return;
-        }
-
-        setMainLabel('');
-        setSpaces([]);
     }
 
     return (
@@ -121,16 +99,12 @@ export default function AddBankModal({
 
                             <BankInstitutionPicker
                                 institutions={institutions}
-                                onChange={handleSelectionChange}
+                                onChange={setSelection}
                             />
 
-                            {savingsSpacesConfig ? (
-                                <GoSaveSpaceSetup
-                                    config={savingsSpacesConfig}
-                                    mainLabel={mainLabel}
-                                    onMainLabelChange={setMainLabel}
-                                    spaces={spaces}
-                                    onSpacesChange={setSpaces}
+                            {isGoTyme ? (
+                                <GoTymeAccountLabel
+                                    onLabelChange={setGoTymeAccountLabel}
                                 />
                             ) : (
                                 selection !== null && (
@@ -155,14 +129,13 @@ export default function AddBankModal({
                                 </DialogClose>
                                 <Button
                                     type="submit"
+                                    data-test="add-bank-submit"
                                     disabled={
                                         processing ||
                                         !canSubmitSelection(selection)
                                     }
                                 >
-                                    {savingsSpacesConfig
-                                        ? 'Add GoTyme account'
-                                        : 'Add bank'}
+                                    Add bank
                                 </Button>
                             </DialogFooter>
                         </>

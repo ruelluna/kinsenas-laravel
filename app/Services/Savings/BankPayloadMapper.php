@@ -55,6 +55,7 @@ class BankPayloadMapper
 
         return [
             'id' => $institution->id,
+            'slug' => $institution->slug,
             'name' => $institution->name,
             'logoUrl' => $institution->logo_url,
             'type' => $institution->type->value,

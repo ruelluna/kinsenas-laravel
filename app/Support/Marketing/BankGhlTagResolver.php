@@ -2,6 +2,7 @@
 
 namespace App\Support\Marketing;
 
+use App\Models\Bank;
 use App\Models\BankInstitution;
 use App\Models\Team;
 
@@ -12,7 +13,7 @@ final class BankGhlTagResolver
      */
     public function tagsToAddOnBankCreated(
         BankInstitution $institution,
-        bool $withSavingsSpaces,
+        ?string $accountLabel,
         bool $isFirstBankOnTeam,
         bool $isFirstInstitutionOnTeam,
     ): array {
@@ -26,7 +27,7 @@ final class BankGhlTagResolver
             $tags[] = GhlTagCatalog::institutionBankAddedTag($institution->slug);
         }
 
-        if ($withSavingsSpaces && $institution->slug === 'gotyme') {
+        if ($institution->slug === 'gotyme' && self::isGoSaveAccountLabel($accountLabel)) {
             $tags[] = GhlTagCatalog::GOTYME_GOSAVE_SETUP;
         }
 
@@ -46,6 +47,8 @@ final class BankGhlTagResolver
             if ($institution->slug === 'gotyme') {
                 $tags[] = GhlTagCatalog::GOTYME_GOSAVE_SETUP;
             }
+        } elseif ($institution->slug === 'gotyme' && ! $this->teamHasGoSaveBank($team, $institution)) {
+            $tags[] = GhlTagCatalog::GOTYME_GOSAVE_SETUP;
         }
 
         if (! $team->banks()->exists()) {
@@ -53,5 +56,28 @@ final class BankGhlTagResolver
         }
 
         return array_values(array_unique($tags));
+    }
+
+    public static function isGoSaveAccountLabel(?string $accountLabel): bool
+    {
+        if ($accountLabel === null) {
+            return false;
+        }
+
+        $normalized = trim($accountLabel);
+
+        if ($normalized === '') {
+            return false;
+        }
+
+        return str_starts_with(strtolower($normalized), 'gosave');
+    }
+
+    private function teamHasGoSaveBank(Team $team, BankInstitution $institution): bool
+    {
+        return $team->banks()
+            ->where('bank_institution_id', $institution->id)
+            ->get()
+            ->contains(fn (Bank $bank): bool => self::isGoSaveAccountLabel($bank->account_label));
     }
 }

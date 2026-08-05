@@ -90,7 +90,7 @@ it('removes institution tag when the last bank of that institution is deleted', 
     });
 });
 
-it('adds gotyme gosave setup tag when savings spaces are created', function () {
+it('adds gotyme gosave setup tag when a gosave account is created', function () {
     $user = User::factory()->create();
     $this->unlockVaultFor($user);
 
@@ -100,10 +100,7 @@ it('adds gotyme gosave setup tag when savings spaces are created', function () {
         'current_team' => $user->currentTeam->slug,
     ]), [
         'bank_institution_id' => $gotyme->id,
-        'main_label' => 'Main account',
-        'spaces' => [
-            ['label' => 'Vacation', 'enabled' => true],
-        ],
+        'account_label' => 'GoSave/Mom',
     ])->assertRedirect();
 
     Http::assertSent(function ($request) {
@@ -113,5 +110,28 @@ it('adds gotyme gosave setup tag when savings spaces are created', function () {
             && str_ends_with($request->url(), '/contacts/ct_test_123/tags')
             && $tags->contains('gotyme-bank-added')
             && $tags->contains('gotyme-gosave-setup');
+    });
+});
+
+it('does not add gotyme gosave setup tag for a gotyme main account only', function () {
+    $user = User::factory()->create();
+    $this->unlockVaultFor($user);
+
+    $gotyme = BankInstitution::query()->where('slug', 'gotyme')->firstOrFail();
+
+    $this->actingAs($user)->post(route('savings.banks.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'bank_institution_id' => $gotyme->id,
+        'account_label' => 'GoTyme/Main',
+    ])->assertRedirect();
+
+    Http::assertSent(function ($request) {
+        $tags = collect($request->data()['tags'] ?? []);
+
+        return $request->method() === 'POST'
+            && str_ends_with($request->url(), '/contacts/ct_test_123/tags')
+            && $tags->contains('gotyme-bank-added')
+            && ! $tags->contains('gotyme-gosave-setup');
     });
 });

@@ -56,7 +56,7 @@ it('seeds known banks and e-wallets with correct types', function () {
         ->and(BankInstitution::query()->where('type', BankInstitutionType::EWallet)->exists())->toBeTrue();
 });
 
-it('seeds gotyme with savings space features', function () {
+it('seeds gotyme without bundled savings space features', function () {
     Http::fake([
         '*' => Http::response(
             base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='),
@@ -69,13 +69,9 @@ it('seeds gotyme with savings space features', function () {
 
     $gotyme = BankInstitution::query()->where('slug', 'gotyme')->firstOrFail();
 
-    expect($gotyme->supportsSavingsSpaces())->toBeTrue()
-        ->and($gotyme->maxSavingsSpaces())->toBe(5)
-        ->and($gotyme->savingsSpacesConfig())->toMatchArray([
-            'max' => 5,
-            'main_label' => 'Main account',
-            'space_label_prefix' => 'GoSave',
-        ]);
+    expect($gotyme->supportsSavingsSpaces())->toBeFalse()
+        ->and($gotyme->maxSavingsSpaces())->toBe(0)
+        ->and($gotyme->savingsSpacesConfig())->toBeNull();
 });
 
 it('stores logos on the public disk when download succeeds', function () {

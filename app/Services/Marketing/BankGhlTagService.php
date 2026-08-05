@@ -18,13 +18,13 @@ class BankGhlTagService
         User $user,
         Team $team,
         BankInstitution $institution,
-        bool $withSavingsSpaces = false,
+        ?string $accountLabel = null,
         bool $isFirstBankOnTeam = false,
         bool $isFirstInstitutionOnTeam = false,
     ): void {
         $tagsToAdd = $this->bankGhlTagResolver->tagsToAddOnBankCreated(
             $institution,
-            $withSavingsSpaces,
+            $accountLabel,
             $isFirstBankOnTeam,
             $isFirstInstitutionOnTeam,
         );
