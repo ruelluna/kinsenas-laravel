@@ -1,0 +1,164 @@
+---
+description: Kinsenas testing standard — impact analysis, conflict resolution, TDD, Pest Feature/Unit/Browser, and full-suite green gate
+alwaysApply: true
+---
+
+# Testing (Kinsenas)
+
+This rule is the **single source of truth** for how Kinsenas writes and runs tests. It supersedes conflicting test guidance elsewhere in cursor rules or user instructions.
+
+Related: [feature-planning.mdc](./feature-planning.mdc), [plan-implementation.mdc](./plan-implementation.mdc), [feature-plans.mdc](./feature-plans.mdc).
+
+## Workflow (standard order)
+
+Every behavior change follows this sequence:
+
+1. **Impact analysis** — complete the checklist in [feature-planning.mdc](./feature-planning.mdc); list affected files, flows, seeders, and **existing tests**.
+2. **Conflict resolution** — if behaviors, scope, tests, or rules conflict, **stop and ask the user** what to retain vs remove (see below). Record decisions in the plan before writing tests or code.
+3. **RED** — write **failing** tests first (Unit → Feature → Browser as applicable).
+4. **GREEN** — implement the minimum code until new tests pass.
+5. **REFACTOR** — clean up with tests still green.
+6. **Regression** — update or fix tests listed in the impact matrix.
+7. **Full suite green** — run the full test suite before marking plan work complete.
+
+```mermaid
+flowchart TD
+    A[Impact analysis] --> B{Conflicts?}
+    B -->|Yes| C[Ask retain / remove]
+    C --> D[Record decisions in plan]
+    D --> E[RED — failing tests]
+    B -->|No| E
+    E --> F[GREEN — implement]
+    F --> G[REFACTOR]
+    G --> H[Fix regression tests]
+    H --> I[Full suite green]
+```
+
+## Conflict resolution
+
+When impact analysis or implementation reveals **conflicting behavior, scope, tests, or rules**, do **not** resolve automatically.
+
+1. **Stop** — do not delete routes, UI, enums, or tests until the user decides.
+2. **Ask** the user feature-wise what to **retain** and what to **remove**.
+3. Present each conflict as a decision card:
+
+| Field | Content |
+| ----- | ------- |
+| **Context** | What changed and what it touches |
+| **Current behavior** | What exists today |
+| **Proposed behavior** | What the plan wants |
+| **Affected surfaces** | Routes, pages, tests, mobile, seeders |
+| **Options** | **Retain** / **Replace** / **Hybrid** / **Defer** |
+| **Recommendation** | Agent suggestion and why |
+
+4. **Record** the user's choice in the plan `## Decisions` section and in the breakdown `## Decisions` table.
+5. **Align** the impact matrix, test todos, and implementation to the recorded decision.
+6. Use structured questions (`AskQuestion`) when there are 2–4 concrete options.
+
+**Ask when:** deprecating behavior, tests disagree on expectations, mobile vs web diverge, seed/demo data assumes an old model, or two features cannot both stay.
+
+**Skip asking when:** single obvious bug fix, pure rename/refactor with unchanged behavior, or copy/CSS-only with impact matrix marked N/A.
+
+## Test pyramid
+
+| Layer | Directory | Use for |
+| ----- | --------- | ------- |
+| **Unit** | `tests/Unit/` | Pure service logic, calculators, formatters — no HTTP |
+| **Feature** | `tests/Feature/` | Routes, validation, policies, API JSON, Inertia props |
+| **Browser** | `tests/Browser/` | User-visible flows, modals, navigation, JS errors — [Pest browser testing](https://pestphp.com/docs/browser-testing) |
+
+**Do not add Laravel Dusk.** Use `pestphp/pest-plugin-browser` (Playwright) only.
+
+### When each layer is required
+
+| Change type | Unit | Feature | Browser |
+| ----------- | ---- | ------- | ------- |
+| New/changed service logic | Required if isolatable | If exposed via HTTP | N/A |
+| New API endpoint | Optional | Required | N/A |
+| New/changed Inertia page or workflow | N/A | Props/redirects | Required (smoke or happy path) |
+| Modal / confirmation UX | N/A | Optional | Required |
+| Auth / vault flow | N/A | Required | Extend browser pattern |
+| Copy / CSS only, no behavior | N/A | N/A | N/A — document N/A in impact matrix |
+
+## TDD rules
+
+- **Tests before implementation** for behavior changes — write failing tests in the same pass before production code (RED first).
+- **Do not** implement ambiguous behavior when the impact matrix shows conflicts — resolve with the user first.
+- Use **Arrange–Act–Assert** in every test; meaningful factory data (e.g. `'email' => 'admin@kinsenas.test'`).
+- Use `php artisan make:test --pest {name}`; pass `--unit` for unit tests.
+- All tests use **Pest** — never PHPUnit class syntax.
+- Do **not** remove test files without user approval.
+
+### Running tests
+
+| When | What to run |
+| ---- | ----------- |
+| During RED/GREEN cycles | Affected file or `--filter=` for the test being written |
+| Before marking plan work complete | **Full suite:** `php artisan test --compact` |
+| In breakdowns / handoff | List **suggested** commands for the user (Feature + Browser paths) |
+| User explicitly asks not to run | Skip execution; still write tests and list suggested commands |
+
+Use `php artisan test --compact tests/Feature/ExampleTest.php` for a single file.
+
+**CI** runs `composer ci:check` (includes full Pest suite + Playwright) on pull requests.
+
+## Browser testing (Pest + Playwright)
+
+Stack is already installed: `pestphp/pest-plugin-browser`, Playwright in CI (`.github/workflows/tests.yml`).
+
+### Conventions
+
+- Tests live in `tests/Browser/`.
+- Use `visit('/')` and Pest browser API (`click`, `fill`, `assertSee`, etc.).
+- Prefer **`data-test` selectors** via `@name` (e.g. `click('@login-button')`) — add `data-test` to new interactive UI when missing.
+- Call `assertNoSmoke()` on smoke tests (no console logs / JS errors).
+- Use `visit('/')->on()->mobile()` or `iPhone14Pro()` for mobile-relevant flows.
+- Screenshots go to `tests/Browser/Screenshots/` (gitignored).
+- Reuse Laravel test helpers: `RefreshDatabase`, factories, seeders in `beforeEach` (match sibling Feature tests).
+- For authenticated savings flows, plan browser helpers (login → vault unlock → seeded plan) — mirror `tests/Pest.php` Feature helpers.
+
+### Example pattern
+
+See `tests/Browser/LoginTest.php` and `tests/Browser/WelcomeTest.php`.
+
+### Debug
+
+- `php artisan test --compact tests/Browser/LoginTest.php --debug` for headed pause on failure
+- Docs: https://pestphp.com/docs/browser-testing
+
+## Kinsenas test helpers
+
+Reuse existing patterns:
+
+- `Tests\Concerns\UnlocksVault` — encrypted savings tests
+- `tests/Pest.php` — `grantTeamSubscriptionAccess()`, `createUserWithPlan()`, `fakeGhlApi()`, etc.
+- Seed in `beforeEach`: `BillingSeeder`, `SavingsFormulaTemplateSeeder` where sibling Feature tests do
+
+## Plan and breakdown requirements
+
+Plans ([feature-plans.mdc](./feature-plans.mdc)) must include todos in this order when behavior changes:
+
+1. `impact-analysis`
+2. `resolve-conflicts` (if any — otherwise skip)
+3. `failing-unit-tests` / `failing-feature-tests` / `failing-browser-tests` (as applicable)
+4. `implement`
+5. `update-regression-tests`
+6. `full-suite-green`
+
+Plans must include a `## Decisions` section when conflicts were resolved.
+
+Breakdowns ([plan-implementation.mdc](./plan-implementation.mdc)) must include:
+
+- **Decisions** table (when applicable)
+- **Suggested tests** with Feature and Browser paths
+- **Visual QA** for Inertia/UI changes
+
+## Exceptions
+
+Document in the impact matrix as **N/A** with one-line rationale:
+
+- Copy or styling with no behavior change
+- Cursor rules or agent config only
+- Dependency bumps with no app logic change
+
+Even for exceptions, run the full suite before merge if CI would catch regressions in touched areas.

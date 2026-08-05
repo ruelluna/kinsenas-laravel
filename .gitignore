@@ -27,4 +27,7 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+/tests/Browser/Screenshots
+
+# Local Expo app (not versioned in this repo; work on disk as usual)
 /apps/mobile

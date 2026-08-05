@@ -41,10 +41,6 @@ return Application::configure(basePath: dirname(__DIR__))
             BindVaultKeyStore::class,
         ]);
 
-        $middleware->api(prepend: [
-            BindVaultKeyStore::class,
-        ]);
-
         $middleware->web(append: [
             HandleAppearance::class,
             HandleInertiaRequests::class,

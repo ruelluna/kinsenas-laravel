@@ -38,7 +38,7 @@ echo "Wrote icon-512-maskable.png\n";
 imagedestroy($source);
 
 /**
- * @return \GdImage
+ * @return GdImage
  */
 function loadSquareImage(string $path)
 {
@@ -55,7 +55,7 @@ function loadSquareImage(string $path)
 }
 
 /**
- * @param  \GdImage  $source
+ * @param  GdImage  $source
  */
 function writeResizedIcon($source, string $path, int $size, bool $maskable): void
 {
