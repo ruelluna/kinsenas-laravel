@@ -136,6 +136,7 @@ export default function BanksIndex({
                 />
                 <Button
                     onClick={() => setAddModalOpen(true)}
+                    data-test="add-bank"
                     data-tour="add-bank"
                     className="hidden shrink-0 md:inline-flex"
                 >

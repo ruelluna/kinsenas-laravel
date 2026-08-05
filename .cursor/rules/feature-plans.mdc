@@ -63,8 +63,9 @@ Follow [feature-planning.mdc](./feature-planning.mdc) for the impact checklist. 
 4. Frontend — types, components, pages
 5. Seeders & factories
 6. Role / permission / subscription gates
-7. Tests — files to update + suggested commands (do not run unless asked)
-8. Out of scope
+7. Tests — TDD todos + files to update ([testing.mdc](./testing.mdc))
+8. Decisions — retain/remove table when conflicts were resolved
+9. Out of scope
 
 Use YAML frontmatter when helpful:
 
@@ -73,12 +74,32 @@ Use YAML frontmatter when helpful:
 name: Short plan title
 overview: One-line summary
 todos:
-  - id: slug
-    content: Actionable todo
+  - id: impact-analysis
+    content: "Impact matrix — affected files, tests, seeders, mobile screens"
+    status: pending
+  - id: resolve-conflicts
+    content: "If conflicts exist, ask user retain/remove; record in ## Decisions"
+    status: pending
+  - id: failing-feature-tests
+    content: "RED — write failing Feature tests for routes/API/validation"
+    status: pending
+  - id: failing-browser-tests
+    content: "RED — write failing Browser tests for UI workflows (if applicable)"
+    status: pending
+  - id: implement
+    content: "GREEN — implement until new tests pass"
+    status: pending
+  - id: update-regression-tests
+    content: "Fix tests listed in impact matrix"
+    status: pending
+  - id: full-suite-green
+    content: "Run php artisan test --compact — all green"
     status: pending
 isProject: true
 ---
 ```
+
+Add `failing-unit-tests` when new service logic is isolatable. Skip `resolve-conflicts` when the impact matrix has no conflicts (note N/A in plan body).
 
 ## Creating and updating plans
 

@@ -35,15 +35,13 @@ class PhilippineBankSeeder extends Seeder
                 ],
             );
 
-            $attributesToSync = array_filter([
+            $attributesToSync = [
                 'name' => $row['name'],
                 'type' => $row['type'],
                 'features' => $row['features'] ?? null,
-            ], fn ($value) => $value !== null);
+            ];
 
-            if ($attributesToSync !== []) {
-                $institution->update($attributesToSync);
-            }
+            $institution->update($attributesToSync);
 
             $existingLogoPath = $logoService->resolveExistingLogoPath(
                 $row['slug'],

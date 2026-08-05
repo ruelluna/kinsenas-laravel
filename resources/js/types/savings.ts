@@ -190,6 +190,7 @@ export type BankInstitutionSavingsSpaces = {
 
 export type BankInstitution = {
     id: string;
+    slug: string;
     name: string;
     logoUrl: string | null;
     type: 'bank' | 'e_wallet';

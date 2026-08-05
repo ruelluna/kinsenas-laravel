@@ -7,7 +7,7 @@ alwaysApply: true
 
 When executing an approved plan (or a plan attached to the conversation), follow this order **before** marking work complete.
 
-**Before implementation:** plans must follow [feature-planning.mdc](./feature-planning.mdc) — seeders, factories, tests, permissions, and adjacent UI should already be listed in the plan todos. Major plans live in `.cursor/plans/` per [feature-plans.mdc](./feature-plans.mdc) (`YYYYMMDD-HHMM-<task-slug>-plan.md`).
+**Before implementation:** plans must follow [feature-planning.mdc](./feature-planning.mdc) and [testing.mdc](./testing.mdc) — impact analysis, conflict decisions, TDD todos, seeders, factories, and adjacent UI should already be listed in the plan. Major plans live in `.cursor/plans/` per [feature-plans.mdc](./feature-plans.mdc) (`YYYYMMDD-HHMM-<task-slug>-plan.md`).
 
 ## When this rule applies
 
@@ -64,19 +64,34 @@ When updating the plan file todos, mark the docs item done only after markdown r
 
 ## 3. Testing (Kinsenas)
 
-- Do **not** run `php artisan test` unless the user asks.
-- In breakdowns and replies, list **suggested** commands only.
-- Prefer **Pest 5 browser tests** (`pestphp/pest-plugin-browser`, `tests/Browser/`) for automated E2E — **do not add Laravel Dusk**.
-- Use Pest Feature tests for auth, validation, redirects, and server-side behavior (existing pattern in `tests/Feature/`).
+Follow [testing.mdc](./testing.mdc) — the authoritative testing standard.
 
-### When to suggest automated browser tests
+### During implementation
 
-| Change type                   | Visual QA in breakdown | Suggest browser test   |
-| ----------------------------- | ---------------------- | ---------------------- |
-| Backend-only                  | Skip                   | Feature test only      |
-| New Inertia page or component | Required               | Smoke test if new page |
-| New admin workflow            | Required               | Flow test if critical  |
-| CSS-only tweak                | Required               | Optional               |
+- Write **failing tests before** production code (RED → GREEN → REFACTOR).
+- Run **affected** tests during development: `php artisan test --compact tests/Feature/...` or `tests/Browser/...`.
+- If impact analysis found **conflicts**, confirm user decisions are recorded in the plan `## Decisions` section before implementing.
+- Before marking work complete, run the **full suite**: `php artisan test --compact` (or confirm CI will run `composer ci:check`).
+
+### In breakdowns and replies
+
+- List **suggested** test commands for manual re-run (Feature + Browser paths).
+- If the user explicitly asks not to run tests in-session, skip execution but still write tests and list commands.
+
+### Browser tests
+
+- Use **Pest 5 browser tests** (`pestphp/pest-plugin-browser`, `tests/Browser/`) — **do not add Laravel Dusk**.
+- Required for new/changed Inertia workflows per [testing.mdc](./testing.mdc).
+
+### When browser tests are required
+
+| Change type                   | Visual QA in breakdown | Browser test        |
+| ----------------------------- | ---------------------- | ------------------- |
+| Backend-only                  | Skip                   | Feature test only   |
+| New Inertia page or component | Required               | Smoke or happy path |
+| New admin workflow            | Required               | Flow test           |
+| Modal / confirmation UX       | Required               | Interaction test    |
+| CSS-only tweak                | Required               | Optional (N/A in impact matrix) |
 
 ## 4. Kinsenas verify checklist
 
@@ -143,13 +158,24 @@ YYYYMMDD-HHMM-<task-slug>-breakdown.md
 - Title and date
 - Summary (what changed and why)
 - Bullet changelog of user-visible/admin changes
+- **Decisions** — table of retain/remove choices when conflicts were resolved (or N/A)
 - Files touched (grouped by area)
 - Deploy/migration steps if any (see Kinsenas verify checklist)
-- **Suggested test commands** (do not run unless user asks)
+- **Suggested test commands** (Feature + Browser; user may run manually)
 - **Visual QA** — when UI or Inertia pages changed (see template below)
 - Suggested application commit (summary + body)
 - Suggested doc commit if `docs/` was edited
 - Linear paste block (Title, Description, Comment/instructions, Documentation paths when applicable)
+
+### Decisions template (when conflicts were resolved)
+
+```markdown
+## Decisions
+
+| Topic | Choice | Implication |
+| ----- | ------ | ----------- |
+| Income lock ceremony | Remove | Delete lock routes; update IncomePeriodTest |
+```
 
 ### Visual QA template (UI or Inertia changes)
 
@@ -257,8 +283,11 @@ docs/admin/managing-teams.md
 Before finishing, confirm in the reply:
 
 - [ ] Breakdown file created or updated (or N/A — lightweight workflow)
+- [ ] Decisions table included when conflicts were resolved (or N/A)
+- [ ] TDD followed — failing tests before implementation (or N/A — lightweight)
+- [ ] Full suite green before complete (or suggested commands listed if user skipped running)
 - [ ] Visual QA steps included (or N/A — no UI change)
-- [ ] Test commands suggested, not run (unless user asked)
+- [ ] Test commands suggested in breakdown (Feature + Browser when applicable)
 - [ ] Docs updated (or N/A — not requested / no user-facing guide needed)
 - [ ] Docs: no `php artisan`, shell blocks, or `.cursor/` references (per `documentation.mdc`)
 - [ ] Suggested application commit summary + body

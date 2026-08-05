@@ -66,7 +66,7 @@ class SaveSavingsPlanRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
-            $team = $this->route('current_team');
+            $team = $this->route('current_team') ?? $this->route('team');
             $plan = $team !== null
                 ? app(SavingsPlanService::class)->forTeam($team, $this->user())
                 : null;

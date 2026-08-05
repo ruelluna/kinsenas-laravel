@@ -36,6 +36,15 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
+        return $this->register($input)['user'];
+    }
+
+    /**
+     * @param  array<string, mixed>  $input
+     * @return array{user: User, recovery_key: string}
+     */
+    public function register(array $input): array
+    {
         Validator::make($input, [
             ...$this->profileRules(),
             'password' => $this->passwordRules(),
@@ -78,7 +87,10 @@ class CreateNewUser implements CreatesNewUsers
             );
             $this->vaultKeyManager->storeUserDek($dek);
 
-            return $user;
+            return [
+                'user' => $user,
+                'recovery_key' => $result['recovery_key'],
+            ];
         });
     }
 }

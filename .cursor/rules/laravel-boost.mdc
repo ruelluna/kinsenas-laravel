@@ -141,8 +141,12 @@ protected function isAccessible(User $user, ?string $path = null): bool
 
 ## Test Enforcement
 
-- Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
-- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test --compact` with a specific filename or filter.
+Follow [testing.mdc](./testing.mdc) in the repo for the full Kinsenas standard (impact analysis → conflict resolution → TDD → full suite green).
+
+- Every behavior change must be programmatically tested — write failing tests first, then implement.
+- Run affected tests during RED/GREEN cycles; run the full suite before marking plan work complete.
+- Use `php artisan test --compact` with a specific filename or `--filter=` during development.
+- Browser tests: `tests/Browser/` with `pestphp/pest-plugin-browser` — see [testing.mdc](./testing.mdc).
 
 === laravel/core rules ===
 
@@ -236,13 +240,14 @@ Use Wayfinder to generate TypeScript functions for Laravel routes. Import from `
 
 ## Pest
 ### Testing
-- If you need to verify a feature is working, write or update a Unit / Feature test.
+- Follow [testing.mdc](./testing.mdc) for workflow, TDD order, browser tests, and conflict resolution.
+- If you need to verify a feature is working, write or update a Unit / Feature / Browser test.
 
 ### Pest Tests
 - All tests must be written using Pest. Use `php artisan make:test --pest {name}`.
 - You must not remove any tests or test files from the tests directory without approval. These are not temporary or helper files - these are core to the application.
 - Tests should test all of the happy paths, failure paths, and weird paths.
-- Tests live in the `tests/Feature` and `tests/Unit` directories.
+- Tests live in the `tests/Feature`, `tests/Unit`, and `tests/Browser` directories.
 - Pest tests look and behave like this:
 <code-snippet name="Basic Pest Test Example" lang="php">
 it('is true', function () {
@@ -251,11 +256,10 @@ it('is true', function () {
 </code-snippet>
 
 ### Running Tests
-- Run the minimal number of tests using an appropriate filter before finalizing code edits.
-- To run all tests: `php artisan test --compact`.
+- Run affected tests during RED/GREEN cycles; run the full suite before marking work complete (`php artisan test --compact`).
 - To run all tests in a file: `php artisan test --compact tests/Feature/ExampleTest.php`.
-- To filter on a particular test name: `php artisan test --compact --filter=testName` (recommended after making a change to a related file).
-- When the tests relating to your changes are passing, ask the user if they would like to run the entire test suite to ensure everything is still passing.
+- To filter on a particular test name: `php artisan test --compact --filter=testName`.
+- List suggested commands in breakdowns when the user prefers not to run tests in-session.
 
 ### Pest Assertions
 - When asserting status codes on a response, use the specific method like `assertForbidden` and `assertNotFound` instead of using `assertStatus(403)` or similar, e.g.:

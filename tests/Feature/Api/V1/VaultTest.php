@@ -32,6 +32,22 @@ it('unlocks vault with password for token auth', function () {
     $response->assertJsonPath('vaultLocked', false);
 });
 
+it('keeps vault unlocked on subsequent api requests after token unlock', function () {
+    $user = User::factory()->create();
+    app(VaultKeyManager::class)->forgetAll();
+
+    Sanctum::actingAs($user);
+
+    $this->postJson('/api/v1/vault/unlock', [
+        'password' => 'password',
+    ])->assertSuccessful();
+
+    $bootstrap = $this->getJson('/api/v1/auth/bootstrap');
+
+    $bootstrap->assertSuccessful();
+    $bootstrap->assertJsonPath('vaultLocked', false);
+});
+
 it('returns locked response for protected routes when vault is locked', function () {
     $user = User::factory()->create();
     Sanctum::actingAs($user);

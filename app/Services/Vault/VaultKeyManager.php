@@ -12,37 +12,41 @@ class VaultKeyManager
 
     public function __construct(
         private FinancialEncryptionService $encryption,
-        private VaultKeyStore $store,
     ) {}
+
+    private function store(): VaultKeyStore
+    {
+        return app(VaultKeyStore::class);
+    }
 
     public function storeUserDek(string $dek): void
     {
-        $this->store->storeUserDek($dek);
+        $this->store()->storeUserDek($dek);
     }
 
     public function storeTeamDek(Team $team, string $dek): void
     {
-        $this->store->storeTeamDek((string) $team->id, $dek);
+        $this->store()->storeTeamDek((string) $team->id, $dek);
     }
 
     public function forgetAll(): void
     {
-        $this->store->forgetAll();
+        $this->store()->forgetAll();
     }
 
     public function hasUserDek(): bool
     {
-        return $this->store->hasUserDek();
+        return $this->store()->hasUserDek();
     }
 
     public function userDek(): ?string
     {
-        return $this->store->userDek();
+        return $this->store()->userDek();
     }
 
     public function teamDek(Team $team): ?string
     {
-        return $this->store->teamDek((string) $team->id);
+        return $this->store()->teamDek((string) $team->id);
     }
 
     public function unlockForUser(User $user, string $password): void

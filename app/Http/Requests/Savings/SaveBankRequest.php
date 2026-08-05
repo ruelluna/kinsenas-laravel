@@ -33,10 +33,6 @@ class SaveBankRequest extends FormRequest
             'name' => ['required_without:bank_institution_id', 'nullable', 'string', 'max:255'],
             'bank_institution_id' => ['nullable', 'uuid', 'exists:bank_institutions,id'],
             'account_label' => ['nullable', 'string', 'max:255'],
-            'main_label' => ['nullable', 'string', 'max:255'],
-            'spaces' => ['nullable', 'array', 'max:5'],
-            'spaces.*.label' => ['required_with:spaces', 'string', 'max:255'],
-            'spaces.*.enabled' => ['sometimes', 'boolean'],
             'is_active' => ['sometimes', 'boolean'],
             'sort_order' => ['sometimes', 'integer', 'min:0'],
         ];

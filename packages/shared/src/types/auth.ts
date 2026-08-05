@@ -17,3 +17,17 @@ export type User = {
 export type Auth = {
     user: User;
 };
+
+export type TeamInvitationContext = {
+    code: string;
+    teamName: string;
+};
+
+export type RegisterContext = {
+    passwordRules: string;
+    teamInvitation: TeamInvitationContext | null;
+    trialOffer: unknown | null;
+    openBetaOffer: unknown | null;
+    betaCode: string | null;
+    betaCodeLabel: string | null;
+};

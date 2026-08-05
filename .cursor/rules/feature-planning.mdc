@@ -28,8 +28,19 @@ For every feature plan, walk through this list. Mark **N/A** only when genuinely
 | **Settings / admin CRUD** | Does the feature belong in Settings, Teams, or both? |
 | **Print / export / reports** | Slips, PDFs, labels that display the same data? |
 | **Change logs / audit text** | Human-readable summaries that reference old field names? |
-| **Tests** | Feature, unit, browser — which existing tests break? What new coverage? |
+| **Tests** | Feature, unit, browser — which existing tests break? What new coverage? See [testing.mdc](./testing.mdc). |
+| **Conflicts** | Any behavior that cannot coexist with current code, tests, or rules? List each; **ask user** retain/remove before RED tests. |
+| **Mobile** | `apps/mobile` screens or API client types affected? |
 | **Docs** | Operator guide needed? (Only if user requested or plan includes docs todo.) |
+
+## Conflict resolution (before TDD)
+
+When the impact checklist surfaces **conflicting behavior, scope, tests, or rules**:
+
+1. Do **not** auto-resolve — follow [testing.mdc](./testing.mdc) conflict resolution.
+2. Ask the user feature-wise what to **retain** and what to **remove** (Retain / Replace / Hybrid / Defer).
+3. Record choices in the plan under `## Decisions` before writing failing tests or implementation code.
+4. Update the test todo list to match the decision (add, update, or explicitly remove coverage).
 
 ## Seeders are not optional for domain changes
 
@@ -52,13 +63,22 @@ A complete plan should include, when applicable:
 4. **Frontend** — types, components, settings pages
 5. **Seeders & factories** — order, idempotency, demo scenario
 6. **Role / permission cleanup** — deprecations and hidden enums
-7. **Tests** — files to update + new tests + suggested commands (do not run unless asked)
-8. **Out of scope** — explicit boundaries
+7. **Tests** — TDD order: failing Unit/Feature/Browser tests → implement → regression fixes → full suite green ([testing.mdc](./testing.mdc))
+8. **Decisions** — retain/remove choices when conflicts were resolved (table format)
+9. **Out of scope** — explicit boundaries
 
 Use mermaid or tables when the change touches multiple layers.
+
+## Impact matrix template (optional in plans)
+
+| Area | Affected? | Notes | Retain / Remove / Hybrid |
+| ---- | --------- | ----- | ------------------------ |
+| Database | | | |
+| Tests (list files) | | | |
+| Browser tests needed? | | | |
 
 ## Relationship to plan implementation
 
 After a plan is **approved and executed**, follow [plan-implementation.mdc](./plan-implementation.mdc) for breakdowns, visual QA, commit suggestions, and test command wording.
 
-Planning catches **what** to change; implementation rules catch **how** to ship it.
+Planning catches **what** to change and **what to keep**; [testing.mdc](./testing.mdc) catches **how** to verify it.
