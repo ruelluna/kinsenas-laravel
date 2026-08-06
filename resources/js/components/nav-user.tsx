@@ -9,7 +9,7 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-    useSidebar,
+    useOptionalSidebar,
 } from '@/components/ui/sidebar';
 import { UserInfo } from '@/components/user-info';
 import { UserMenuContent } from '@/components/user-menu-content';
@@ -17,7 +17,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 export function NavUser() {
     const { auth, currentTeam } = usePage().props;
-    const { state } = useSidebar();
+    const sidebar = useOptionalSidebar();
+    const state = sidebar?.state ?? 'expanded';
     const isMobile = useIsMobile();
 
     return (

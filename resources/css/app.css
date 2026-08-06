@@ -217,7 +217,11 @@
     }
 
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background font-dm text-foreground antialiased;
+    }
+
+    body ::selection {
+        background-color: color-mix(in oklch, var(--primary) 30%, transparent);
     }
 }
 

@@ -11,7 +11,7 @@ export default function VaultUnlock({ isLocked }: Props) {
             <Head title="Unlock vault" />
             <div className="safe-area-x mx-auto flex max-w-md flex-col gap-6 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
                 <div>
-                    <h1 className="text-xl font-semibold">
+                    <h1 className="font-space text-xl font-bold text-foreground">
                         Unlock your financial vault
                     </h1>
                     <p className="mt-2 text-sm text-muted-foreground">
@@ -46,7 +46,7 @@ export default function VaultUnlock({ isLocked }: Props) {
                             />
                         </div>
                     )}
-                    <Button type="submit" className="w-full">
+                    <Button type="submit" className="h-11 w-full font-bold">
                         Unlock
                     </Button>
                 </Form>

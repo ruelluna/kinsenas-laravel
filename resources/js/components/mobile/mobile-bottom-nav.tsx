@@ -110,7 +110,7 @@ export function MobileBottomNav() {
                                     type="button"
                                     aria-label={action.ariaLabel}
                                     onClick={action.onClick}
-                                    className="flex size-14 -translate-y-3 flex-col items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg"
+                                    className="flex size-14 -translate-y-3 flex-col items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-colors hover:bg-glow"
                                 >
                                     <ActionIcon className="size-6" />
                                     <span className="sr-only">

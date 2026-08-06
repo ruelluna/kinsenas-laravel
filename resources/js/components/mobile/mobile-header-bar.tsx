@@ -30,7 +30,7 @@ export function MobileHeaderBar({ breadcrumbs }: Props) {
                     </Link>
                 </Button>
             ) : null}
-            <h1 className="min-w-0 flex-1 truncate text-base font-semibold leading-tight">
+            <h1 className="min-w-0 flex-1 truncate font-space text-base font-bold leading-tight text-foreground">
                 {title}
             </h1>
         </>

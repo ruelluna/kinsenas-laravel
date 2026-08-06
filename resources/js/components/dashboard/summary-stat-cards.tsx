@@ -39,7 +39,7 @@ export default function SummaryStatCards({
                     setup.canDrawFromFunds || setup.hasOpeningBalances ? (
                         <Link
                             href={quickLinks.banks}
-                            className="text-primary underline-offset-4 hover:underline"
+                            className="text-primary underline-offset-4 transition-colors hover:text-glow hover:underline"
                         >
                             View banks
                         </Link>
@@ -105,7 +105,7 @@ function StatCard({
             className={
                 tone === 'warning'
                     ? 'rounded-xl border border-warning/30 bg-warning/5 p-4'
-                    : 'rounded-xl border p-4'
+                    : 'rounded-xl border border-border bg-surface p-4'
             }
         >
             <div className="flex items-center gap-2 text-sm text-muted-foreground">

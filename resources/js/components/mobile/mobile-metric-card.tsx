@@ -21,9 +21,9 @@ export function MobileMetricCard({
     className,
 }: MobileMetricCardProps) {
     return (
-        <div className={cn('rounded-lg border p-3 text-sm', className)}>
+        <div className={cn('rounded-xl border border-border bg-surface p-3 text-sm', className)}>
             <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0 font-medium leading-snug">{title}</div>
+                <div className="min-w-0 font-medium leading-snug text-foreground">{title}</div>
                 {trailing ? (
                     <div className="shrink-0">{trailing}</div>
                 ) : null}
