@@ -49,6 +49,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'appearance' => $request->cookie('appearance') ?? 'system',
             'billingMode' => config('billing.mode'),
             'openBeta' => fn () => $betaApplicationService->sharedProps($user),
             'auth' => [

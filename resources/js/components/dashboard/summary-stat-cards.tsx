@@ -112,7 +112,7 @@ function StatCard({
                 <Icon className="size-4" />
                 {title}
             </div>
-            <p className="mt-2 text-xl font-semibold tracking-tight md:text-2xl">
+            <p className="mt-2 font-space text-xl font-semibold tracking-tight md:text-2xl">
                 {value}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">{description}</p>

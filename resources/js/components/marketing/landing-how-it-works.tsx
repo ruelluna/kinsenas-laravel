@@ -1,38 +1,41 @@
-import { HOW_IT_WORKS_STEPS } from '@/components/marketing/landing-content';
-import LandingSection, {
-    LandingSectionHeader,
-} from '@/components/marketing/landing-section';
+import { LOOP_STEPS } from '@/components/marketing/landing-content';
+import { KINSENAS_APP_PREVIEW } from '@/lib/brand';
 
 export default function LandingHowItWorks() {
     return (
-        <LandingSection id="how-it-works">
-            <LandingSectionHeader title="Give every peso a place before it disappears." />
-            <ol className="grid gap-8 md:grid-cols-3 md:gap-6 lg:gap-10">
-                {HOW_IT_WORKS_STEPS.map((step, index) => (
-                    <li
-                        key={step.title}
-                        className="relative flex flex-col gap-4"
-                    >
-                        {index < HOW_IT_WORKS_STEPS.length - 1 && (
-                            <div
-                                className="pointer-events-none absolute top-10 left-5 hidden h-px w-[calc(100%+1.5rem)] bg-border/60 md:block lg:w-[calc(100%+2.5rem)]"
-                                aria-hidden
-                            />
-                        )}
-                        <div className="flex size-10 items-center justify-center rounded-full border border-primary/20 bg-primary/8 text-sm font-semibold text-primary">
-                            {index + 1}
-                        </div>
-                        <div className="space-y-2">
-                            <h3 className="text-lg font-semibold text-foreground">
-                                {step.title}
-                            </h3>
-                            <p className="text-base leading-relaxed text-muted-foreground">
-                                {step.description}
-                            </p>
-                        </div>
-                    </li>
-                ))}
-            </ol>
-        </LandingSection>
+        <section id="loop" className="mx-auto max-w-7xl border-t border-border px-6 py-24">
+            <div className="grid gap-20 md:grid-cols-2">
+                <div>
+                    <h2 className="mb-12 font-space text-4xl font-bold text-foreground">
+                        The Kinsenas Loop
+                    </h2>
+                    <div className="relative space-y-12">
+                        <div className="absolute top-2 bottom-2 left-4 w-px bg-border" />
+                        {LOOP_STEPS.map((step) => (
+                            <div key={step.number} className="relative pl-12">
+                                <div
+                                    className={`absolute top-0 left-0 flex h-8 w-8 items-center justify-center rounded-full font-bold ${step.badgeClass}`}
+                                >
+                                    {step.number}
+                                </div>
+                                <h3 className="mb-1 font-bold text-foreground">{step.title}</h3>
+                                <p className="text-sm text-muted-foreground">
+                                    {step.description}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <img
+                    src={KINSENAS_APP_PREVIEW}
+                    alt="Kinsenas app showing fund buckets and recent spending in Philippine pesos"
+                    width={800}
+                    height={1200}
+                    loading="lazy"
+                    className="aspect-[4/5] w-full rounded-[1.4rem] object-cover"
+                />
+            </div>
+        </section>
     );
 }

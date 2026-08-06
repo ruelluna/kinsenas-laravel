@@ -1,25 +1,21 @@
-import { PAIN_POINTS } from '@/components/marketing/landing-content';
-import LandingSection, {
-    LandingSectionHeader,
-} from '@/components/marketing/landing-section';
-
 export default function LandingEmotionalProblem() {
     return (
-        <LandingSection tone="soft">
-            <LandingSectionHeader
-                title="Hindi ka naman maluho. Wala ka lang sistema."
-                description="You try to save. You promise yourself this payday will be different. But when money sits in one place, everything feels spendable. Kinsenas helps you decide first, so you are not relying on guilt, memory, or willpower."
-            />
-            <ul className="grid gap-3 sm:grid-cols-2">
-                {PAIN_POINTS.map((point) => (
-                    <li
-                        key={point}
-                        className="rounded-2xl border border-border/40 bg-background/70 px-5 py-4 text-sm leading-relaxed text-foreground"
-                    >
-                        {point}
-                    </li>
-                ))}
-            </ul>
-        </LandingSection>
+        <section className="border-y border-border bg-gradient-to-b from-surface/50 via-teal/5 to-surface/20 py-24">
+            <div className="mx-auto max-w-4xl px-6 text-center">
+                <h2 className="mb-6 font-space text-3xl leading-tight font-bold text-foreground md:text-5xl">
+                    “Hindi ka naman maluho.
+                    <br />
+                    <span className="text-gold-soft">
+                        Wala ka lang sistema.”
+                    </span>
+                </h2>
+                <p className="text-lg leading-relaxed text-muted-foreground">
+                    Budgeting apps often fail because they track what happened
+                    in the past. Kinsenas focuses on the future—planning your
+                    sweldo the moment it hits, so you never have to ask where it
+                    went.
+                </p>
+            </div>
+        </section>
     );
 }

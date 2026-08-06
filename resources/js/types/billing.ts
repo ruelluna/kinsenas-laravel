@@ -168,8 +168,11 @@ export type AdminBetaFeedback = {
     createdAt: string;
 };
 
+export type AppearancePreference = 'light' | 'dark' | 'system';
+
 export type SharedData = {
     name: string;
+    appearance: AppearancePreference;
     billingMode: string;
     openBeta: OpenBetaInfo;
     auth: Auth;

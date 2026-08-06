@@ -38,7 +38,7 @@ export function MobileMetricCard({
                         <dd
                             className={cn(
                                 'shrink-0 text-right tabular-nums',
-                                row.strong && 'font-semibold',
+                                row.strong && 'font-space font-semibold',
                             )}
                         >
                             {row.value}

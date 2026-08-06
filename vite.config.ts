@@ -10,24 +10,17 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig(({ mode }) => ({
     define: {
         'process.env.NODE_ENV': JSON.stringify(mode),
-        'process.env.TAMAGUI_HEADLESS': JSON.stringify(''),
-        'process.env.TAMAGUI_CSS_VARIABLE_PREFIX': JSON.stringify(''),
-        'process.env.TAMAGUI_WARN_ON_MISSING_VARIANT': JSON.stringify(''),
-        'process.env.TAMAGUI_POSITION_STATIC': JSON.stringify(''),
-        'process.env.IS_STATIC': JSON.stringify(''),
-    },
-    resolve: {
-        alias: {
-            'react-native': 'react-native-web',
-        },
     },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
             refresh: true,
             fonts: [
-                bunny('Instrument Sans', {
-                    weights: [400, 500, 600],
+                bunny('DM Sans', {
+                    weights: [400, 500, 600, 700],
+                }),
+                bunny('Space Grotesk', {
+                    weights: [400, 500, 600, 700],
                 }),
             ],
         }),
@@ -59,8 +52,8 @@ export default defineConfig(({ mode }) => ({
                 short_name: 'Kinsenas',
                 description:
                     'Sweldo with a plan — payday allocation planner for Filipino households.',
-                theme_color: '#0D7377',
-                background_color: '#ffffff',
+                theme_color: '#1E8B75',
+                background_color: '#F7FAF9',
                 display: 'standalone',
                 start_url: '/launch',
                 scope: '/',

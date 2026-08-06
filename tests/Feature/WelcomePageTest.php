@@ -15,31 +15,31 @@ it('shows the hero headline on the landing page', function () {
     $response = $this->get(route('home'));
 
     $response->assertOk();
-    $response->assertSee('Not how big you save —', false);
-    $response->assertSee('but the habit of saving!', false);
+    $response->assertSee('Sweldo with', false);
+    $response->assertSee('a plan.', false);
 });
 
-it('shows how it works section anchor', function () {
+it('shows the kinsenas loop section', function () {
     $response = $this->get(route('home'));
 
     $response->assertOk();
-    $response->assertSee('Give every peso a place before it disappears.', false);
+    $response->assertSee('The Kinsenas Loop', false);
+    $response->assertSee('Choose formula', false);
 });
 
 it('shows encryption trust messaging on the landing page', function () {
     $response = $this->get(route('home'));
 
     $response->assertOk();
-    $response->assertSee('Your income is encrypted and safe.', false);
-    $response->assertSee('Only you can unlock your financial data', false);
+    $response->assertSee('Your numbers are for your eyes only.', false);
+    $response->assertSee('Client-side encryption', false);
 });
 
-it('shows sticky open beta banner when billing mode is open beta', function () {
+it('shows open beta pill in hero when billing mode is open beta', function () {
     config(['billing.mode' => 'open_beta']);
 
     $response = $this->get(route('home'));
 
     $response->assertOk();
-    $response->assertSee('Open beta — free access', false);
-    $response->assertSee('Apply for beta access', false);
+    $response->assertSee('Now in Open Beta', false);
 });

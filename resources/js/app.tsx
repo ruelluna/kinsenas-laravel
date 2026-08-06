@@ -1,8 +1,5 @@
 import { createInertiaApp } from '@inertiajs/react';
-import { KinsenasProvider } from '@kinsenas/ui';
-import { Toaster } from '@/components/ui/sonner';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { NavigationLoadingProvider } from '@/contexts/navigation-loading-context';
+import AppProviders from '@/components/app-providers';
 import { initializeTheme } from '@/hooks/use-appearance';
 import { registerPwaServiceWorker } from '@/lib/register-pwa';
 import AppLayout from '@/layouts/app-layout';
@@ -13,6 +10,8 @@ import 'driver.js/dist/driver.css';
 const appName = import.meta.env.VITE_APP_NAME || 'Kinsenas';
 
 registerPwaServiceWorker();
+
+initializeTheme();
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
@@ -34,24 +33,12 @@ createInertiaApp({
     },
     strictMode: true,
     withApp(app) {
-        return (
-            <KinsenasProvider>
-                <NavigationLoadingProvider>
-                    <TooltipProvider delayDuration={0}>
-                        {app}
-                        <Toaster />
-                    </TooltipProvider>
-                </NavigationLoadingProvider>
-            </KinsenasProvider>
-        );
+        return <AppProviders>{app}</AppProviders>;
     },
     progress: {
-        color: '#0D7377',
+        color: '#1E8B75',
         includeCSS: true,
         showSpinner: false,
         delay: 150,
     },
 });
-
-// This will set light / dark mode on load...
-initializeTheme();

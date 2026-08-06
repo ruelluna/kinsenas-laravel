@@ -1,47 +1,39 @@
 import { Head, usePage } from '@inertiajs/react';
+import LandingBanks from '@/components/marketing/landing-banks';
 import LandingEmotionalProblem from '@/components/marketing/landing-emotional-problem';
+import LandingFilipinoSpending from '@/components/marketing/landing-filipino-spending';
 import LandingFinalCta from '@/components/marketing/landing-final-cta';
-import LandingFooter from '@/components/marketing/landing-footer';
 import LandingFormulaSection from '@/components/marketing/landing-formula-section';
 import LandingHeader from '@/components/marketing/landing-header';
 import LandingHero from '@/components/marketing/landing-hero';
 import LandingHowItWorks from '@/components/marketing/landing-how-it-works';
-import LandingOpenBetaBanner from '@/components/marketing/landing-open-beta-banner';
-import LandingOutcome from '@/components/marketing/landing-outcome';
 import LandingPrivacy from '@/components/marketing/landing-privacy';
-import LandingTrustStrip from '@/components/marketing/landing-trust-strip';
 import { dashboard } from '@/routes';
 
 export default function Welcome() {
-    const { auth, currentTeam, name } = usePage().props;
+    const { auth, currentTeam } = usePage().props;
     const dashboardUrl = currentTeam ? dashboard(currentTeam.slug) : '/';
     const isAuthenticated = Boolean(auth.user);
 
     return (
         <>
             <Head title="Sweldo with a plan" />
-            <div className="flex min-h-screen flex-col bg-background">
-                <div className="sticky top-0 z-50">
-                    <LandingOpenBetaBanner />
-                    <LandingHeader
-                        isAuthenticated={isAuthenticated}
-                        dashboardUrl={dashboardUrl}
-                        appName={name}
-                    />
-                </div>
+            <div className="landing-marketing min-h-screen bg-midnight font-dm text-foreground selection:bg-primary/30">
+                <LandingHeader
+                    isAuthenticated={isAuthenticated}
+                    dashboardUrl={dashboardUrl}
+                />
 
-                <main className="flex-1">
+                <main>
                     <LandingHero showCtas={!isAuthenticated} />
-                    <LandingTrustStrip />
                     <LandingEmotionalProblem />
+                    <LandingFilipinoSpending />
+                    <LandingBanks />
                     <LandingHowItWorks />
                     <LandingFormulaSection />
                     <LandingPrivacy />
-                    <LandingOutcome />
                     <LandingFinalCta showCta={!isAuthenticated} />
                 </main>
-
-                <LandingFooter appName={name} />
             </div>
         </>
     );

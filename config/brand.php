@@ -11,12 +11,12 @@ return [
 
     'mail' => [
         'colors' => [
-            'primary' => '#0D7377',
+            'primary' => '#1E8B75',
             'primary_foreground' => '#FCFCFC',
-            'background' => '#FAFDFD',
-            'foreground' => '#1A2B2E',
-            'muted' => '#6B7B7E',
-            'border' => '#DDE8E8',
+            'background' => '#F7FAF9',
+            'foreground' => '#1A3338',
+            'muted' => '#64748B',
+            'border' => '#D9E8E8',
             'wrapper' => '#F0F7F7',
         ],
     ],

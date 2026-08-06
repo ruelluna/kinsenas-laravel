@@ -1,5 +1,5 @@
 import { Form, Head, usePage } from '@inertiajs/react';
-import { ResponsiveDataView } from '@kinsenas/ui';
+import { ResponsiveDataView } from '@/components/ui/responsive-data-view';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import Heading from '@/components/heading';

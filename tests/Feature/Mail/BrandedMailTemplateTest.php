@@ -36,7 +36,7 @@ it('renders branded team invitation mail with logo and primary color', function 
     expect($html)
         ->toContain($logoUrl)
         ->toContain('logo-horizontal')
-        ->toContain('#0d7377')
+        ->toContain('#1e8b75')
         ->toContain(config('app.name'));
 });
 
@@ -53,6 +53,6 @@ it('renders branded verify email notification with logo and primary color', func
     expect($html)
         ->toContain($logoUrl)
         ->toContain('logo-horizontal')
-        ->toContain('#0d7377')
+        ->toContain('#1e8b75')
         ->toContain(config('app.name'));
 });

@@ -1,7 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import HeroParallaxBackground from '@/components/marketing/hero-parallax-background';
-import PaydaySplitVisual from '@/components/marketing/payday-split-visual';
-import { Button } from '@/components/ui/button';
+import LandingHeroDemoCard from '@/components/marketing/landing-hero-demo-card';
 /* @chisel-registration */
 import { register } from '@/routes';
 /* @end-chisel-registration */
@@ -15,57 +13,62 @@ export default function LandingHero({ showCtas }: LandingHeroProps) {
     const { openBeta } = usePage<SharedData>().props;
 
     return (
-        <section className="relative min-h-[60dvh] overflow-hidden">
-            <HeroParallaxBackground />
+        <section className="relative mx-auto grid max-w-7xl items-center gap-16 px-6 pt-12 pb-24 md:grid-cols-2">
+            <div
+                aria-hidden
+                className="pointer-events-none absolute -top-24 -left-32 h-80 w-80 rounded-full bg-teal/10 blur-[100px]"
+            />
+            <div
+                aria-hidden
+                className="pointer-events-none absolute top-40 right-0 h-72 w-72 rounded-full bg-gold/10 blur-[110px]"
+            />
 
-            <div className="relative z-10 flex min-h-[60dvh] items-center px-6 py-20 lg:px-10 lg:py-28">
-                <div className="mx-auto grid w-full max-w-6xl items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
-                    <div className="space-y-6 p-2 text-center sm:p-4 lg:text-left">
-                        <p className="inline-flex rounded-full bg-white/10 px-3.5 py-1 text-sm font-medium text-white/90 backdrop-blur-sm">
-                            {openBeta.isActive
-                                ? 'Public beta — free'
-                                : 'Spend only after you have saved.'}
-                        </p>
-                        <h1 className="text-4xl leading-[1.1] font-semibold tracking-tight text-balance text-white sm:text-5xl lg:text-[3.25rem]">
-                            Not how big you save —
-                            <br />
-                            but the habit of saving!
-                        </h1>
-                        <p className="mx-auto max-w-xl text-lg leading-relaxed text-pretty text-white/80 lg:mx-0">
-                            {openBeta.isActive
-                                ? 'Create a real account, use the core savings planner for free during beta, and keep your data when paid plans launch. Pricing: coming soon.'
-                                : 'Kinsenas helps you split every income into clear portions, so your money already has a purpose before life starts asking for it.'}
-                        </p>
-                        {showCtas && (
-                            <div className="flex flex-wrap items-center justify-center gap-3 pt-1 lg:justify-start">
-                                {/* @chisel-registration */}
-                                <Button
-                                    size="lg"
-                                    className="h-11 rounded-full px-7 shadow-sm"
-                                    asChild
-                                >
-                                    <Link href={register()}>
-                                        Create My Kinsenas Plan
-                                    </Link>
-                                </Button>
-                                {/* @end-chisel-registration */}
-                                <Button
-                                    size="lg"
-                                    variant="outline"
-                                    className="h-11 rounded-full border-white/25 bg-white/5 px-7 text-white backdrop-blur-sm hover:bg-white/10 hover:text-white"
-                                    asChild
-                                >
-                                    <a href="#how-it-works">See How It Works</a>
-                                </Button>
-                            </div>
-                        )}
+            <div className="space-y-8">
+                {openBeta.isActive && (
+                    <div className="relative inline-flex items-center gap-2 rounded-full border border-gold/25 bg-gold/10 px-3 py-1 text-xs font-bold tracking-widest text-gold-soft uppercase">
+                        <span className="relative flex h-2 w-2">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-75" />
+                            <span className="relative inline-flex h-2 w-2 rounded-full bg-gold" />
+                        </span>
+                        Now in Open Beta
                     </div>
+                )}
 
-                    <div className="flex justify-center lg:justify-end">
-                        <PaydaySplitVisual />
+                <h1 className="relative font-space text-6xl leading-[0.9] font-bold tracking-tighter text-foreground md:text-7xl">
+                    Sweldo with
+                    <br />
+                    <span className="bg-gradient-to-r from-primary via-glow to-teal bg-clip-text text-transparent italic">
+                        a plan.
+                    </span>
+                </h1>
+
+                <p className="relative max-w-md text-xl leading-relaxed text-muted-foreground">
+                    The Filipino payday planning app designed to end the “petsa de
+                    peligro” cycle. Direct your PHP earnings into buckets before
+                    you spend a single cent.
+                </p>
+
+                {showCtas && (
+                    <div className="relative flex flex-wrap items-center gap-4 pt-4">
+                        {/* @chisel-registration */}
+                        <Link
+                            href={register()}
+                            className="rounded-xl bg-primary px-8 py-4 text-lg font-bold text-primary-foreground transition-all hover:shadow-[0_0_20px_color-mix(in_oklab,var(--primary)_40%,transparent)]"
+                        >
+                            Start Planning Free
+                        </Link>
+                        {/* @end-chisel-registration */}
+                        <a
+                            href="#formulas"
+                            className="rounded-xl border border-gold/30 px-8 py-4 text-lg font-bold text-gold-soft transition-colors hover:bg-gold/10"
+                        >
+                            See the formulas
+                        </a>
                     </div>
-                </div>
+                )}
             </div>
+
+            <LandingHeroDemoCard />
         </section>
     );
 }

@@ -13,7 +13,7 @@ body *:not(html):not(style):not(br):not(tr):not(code) {
 
 body {
     -webkit-text-size-adjust: none;
-    background-color: #fafdfd;
+    background-color: #f7faf9;
     color: #1a2b2e;
     height: 100%;
     line-height: 1.4;
@@ -31,7 +31,7 @@ blockquote {
 }
 
 a {
-    color: #0d7377;
+    color: #1e8b75;
 }
 
 a img {
@@ -255,11 +255,11 @@ img {
 
 .button-blue,
 .button-primary {
-    background-color: #0d7377;
-    border-bottom: 8px solid #0d7377;
-    border-left: 18px solid #0d7377;
-    border-right: 18px solid #0d7377;
-    border-top: 8px solid #0d7377;
+    background-color: #1e8b75;
+    border-bottom: 8px solid #1e8b75;
+    border-left: 18px solid #1e8b75;
+    border-right: 18px solid #1e8b75;
+    border-top: 8px solid #1e8b75;
 }
 
 .button-green,
@@ -283,7 +283,7 @@ img {
 /* Panels */
 
 .panel {
-    border-left: #0d7377 solid 4px;
+    border-left: #1e8b75 solid 4px;
     margin: 21px 0;
 }
 

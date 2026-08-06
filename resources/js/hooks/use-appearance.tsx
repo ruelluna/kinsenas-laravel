@@ -70,6 +70,34 @@ const mediaQuery = (): MediaQueryList | null => {
 
 const handleSystemThemeChange = (): void => applyTheme(currentAppearance);
 
+function readBootAppearance(): Appearance {
+    if (typeof document === 'undefined') {
+        return 'system';
+    }
+
+    const pageData = document.querySelector(
+        'script[data-page="app"]',
+    )?.textContent;
+
+    if (pageData) {
+        try {
+            const appearance = JSON.parse(pageData).props?.appearance;
+
+            if (
+                appearance === 'light' ||
+                appearance === 'dark' ||
+                appearance === 'system'
+            ) {
+                return appearance;
+            }
+        } catch {
+            // Ignore malformed boot payload.
+        }
+    }
+
+    return currentAppearance;
+}
+
 export function initializeTheme(): void {
     if (typeof window === 'undefined') {
         return;
@@ -91,7 +119,7 @@ export function useAppearance(): UseAppearanceReturn {
     const appearance: Appearance = useSyncExternalStore(
         subscribe,
         () => currentAppearance,
-        () => 'system',
+        () => readBootAppearance(),
     );
 
     const resolvedAppearance: ResolvedAppearance = isDarkMode(appearance)

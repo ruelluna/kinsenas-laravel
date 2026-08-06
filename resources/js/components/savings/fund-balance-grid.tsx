@@ -126,7 +126,7 @@ export default function FundBalanceGrid({
                                     Remaining
                                 </p>
                                 <p
-                                    className={`text-lg font-semibold ${remainingTone(balance.percentUsed)}`}
+                                    className={`font-space text-lg font-semibold ${remainingTone(balance.percentUsed)}`}
                                 >
                                     {formatMoney(balance.remaining)}
                                 </p>
@@ -153,7 +153,7 @@ export default function FundBalanceGrid({
                     className={`rounded-lg border p-4 ${balance.isDefault ? 'ring-2 ring-primary/20' : ''}`}
                 >
                     <FundCardHeader {...balance} />
-                    <dl className="mt-4 space-y-1 text-sm">
+                    <dl className="mt-4 space-y-1 font-space text-sm">
                         {balance.openingBalance !== null &&
                             parseFloat(balance.openingBalance) > 0 && (
                                 <div className="flex justify-between gap-2">

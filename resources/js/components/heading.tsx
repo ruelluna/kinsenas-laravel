@@ -20,7 +20,7 @@ export default function Heading({
                 className={cn(
                     variant === 'small'
                         ? 'mb-0.5 text-base font-medium'
-                        : 'text-xl font-semibold tracking-tight',
+                        : 'font-space text-xl font-semibold tracking-tight',
                     shouldHideTitleOnMobile && 'max-md:sr-only',
                 )}
             >
