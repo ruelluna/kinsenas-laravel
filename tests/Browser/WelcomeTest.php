@@ -19,11 +19,14 @@ it('navigates to the login screen from the header', function () {
         ->assertSee('Email address');
 });
 
-it('shows banks and security anchor sections', function () {
+it('shows banks, loop, and security anchor sections', function () {
     $page = visit('/');
 
     $page->assertSee('Your banks, your buckets.')
         ->assertSee('Built for how Filipinos')
+        ->assertSee('The Kinsenas Loop')
+        ->assertSee('Choose formula')
         ->assertSee('Your numbers are for your eyes only.')
+        ->assertSee('Client-side encryption')
         ->assertNoSmoke();
 });

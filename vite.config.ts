@@ -11,6 +11,12 @@ export default defineConfig(({ mode }) => ({
     define: {
         'process.env.NODE_ENV': JSON.stringify(mode),
     },
+    // Prefer IPv4 so Pest browser tests (and Windows Playwright) can reach the
+    // Vite hot server when public/hot is present.
+    server: {
+        host: '127.0.0.1',
+        strictPort: false,
+    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
@@ -81,6 +87,12 @@ export default defineConfig(({ mode }) => ({
                 navigateFallback: null,
                 globIgnores: ['**/registerSW.js'],
                 importScripts: ['/sw-push.js'],
+                // Built files live under public/build, but the SW is served from
+                // /sw.js (scope /). Prefix asset precache URLs so Playwright /
+                // browsers request /build/assets/* instead of /assets/*.
+                modifyURLPrefix: {
+                    'assets/': '/build/assets/',
+                },
                 runtimeCaching: [
                     {
                         urlPattern: ({ request }) =>
