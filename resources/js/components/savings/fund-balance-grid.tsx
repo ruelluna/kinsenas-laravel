@@ -20,6 +20,7 @@ type Props = {
     onFund?: (categoryId: string) => void;
     limit?: number;
     showReceived?: boolean;
+    showAllocationPercent?: boolean;
     transferredLabel?: string;
     action?: FundAction;
 };
@@ -33,6 +34,7 @@ export default function FundBalanceGrid({
     onFund,
     limit,
     showReceived = false,
+    showAllocationPercent = false,
     transferredLabel = 'Transferred',
     action,
 }: Props) {
@@ -119,7 +121,10 @@ export default function FundBalanceGrid({
                         key={balance.categoryId}
                         className={`rounded-lg border p-4 ${balance.isDefault ? 'ring-2 ring-primary/20' : ''}`}
                     >
-                        <FundCardHeader {...balance} />
+                        <FundCardHeader
+                            {...balance}
+                            showAllocationPercent={showAllocationPercent}
+                        />
                         <div className="mt-3 flex items-end justify-between gap-2">
                             <div>
                                 <p className="text-xs text-muted-foreground">
@@ -152,7 +157,10 @@ export default function FundBalanceGrid({
                     key={balance.categoryId}
                     className={`rounded-lg border p-4 ${balance.isDefault ? 'ring-2 ring-primary/20' : ''}`}
                 >
-                    <FundCardHeader {...balance} />
+                    <FundCardHeader
+                        {...balance}
+                        showAllocationPercent={showAllocationPercent}
+                    />
                     <dl className="mt-4 space-y-1 font-space text-sm">
                         {balance.openingBalance !== null &&
                             parseFloat(balance.openingBalance) > 0 && (

@@ -220,6 +220,8 @@ it('dashboard summary includes fund totals after income is added', function () {
         ->where('summary.totalRemaining', '50000.00')
         ->has('fundBalances', 3)
         ->where('fundBalances.0.name', 'Everyday Fund')
+        ->where('fundBalances.0.allocationType', 'percentage')
+        ->where('fundBalances.0.percentage', '70.00')
         ->where('fundBalances.0.remaining', '35000.00'),
     );
 });

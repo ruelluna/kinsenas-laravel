@@ -185,7 +185,7 @@ export const LOOP_STEPS = [
         number: 1,
         title: 'Choose formula',
         description:
-            'Select 70/20/10, TRC, or create a custom bucket system.',
+            'Select 70/20/10, 7 Buckets, or create a custom bucket system.',
         badgeClass: 'bg-primary text-primary-foreground',
     },
     {
@@ -219,7 +219,7 @@ export const FORMULA_CARDS = [
         ],
     },
     {
-        title: 'TRC Seven Buckets',
+        title: '7 Buckets',
         description:
             'The comprehensive Filipino strategy for long-term abundance and legacy.',
         hoverBorder: 'hover:border-teal/40',

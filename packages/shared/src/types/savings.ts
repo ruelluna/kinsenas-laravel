@@ -139,6 +139,10 @@ export type FundBalance = {
     openingBalance: string | null;
     canFund: boolean;
     percentUsed: number | null;
+    allocationType: CategoryAllocationType;
+    percentage: string | null;
+    deductionMode?: DeductionMode | null;
+    deductionValue?: string | null;
     bankId: string | null;
     bankDisplayName: string | null;
     bankLogoUrl: string | null;

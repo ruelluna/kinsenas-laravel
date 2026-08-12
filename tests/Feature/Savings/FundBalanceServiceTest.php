@@ -56,7 +56,11 @@ it('calculates running balances across locked income', function () {
     expect($everyday['allocated'])->toBe('50000.00')
         ->and($everyday['remaining'])->toBe('50000.00')
         ->and($everyday['isDefault'])->toBeTrue()
-        ->and($empower['allocated'])->toBe('5000.00');
+        ->and($empower['allocated'])->toBe('5000.00')
+        ->and($everyday['allocationType'])->toBe('percentage')
+        ->and($everyday['percentage'])->toBe('50.00')
+        ->and($empower['allocationType'])->toBe('percentage')
+        ->and($empower['percentage'])->toBe('5.00');
 });
 
 it('aggregates spending across multiple income periods', function () {

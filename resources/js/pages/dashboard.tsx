@@ -129,6 +129,7 @@ export default function Dashboard({
                             fundBalances={fundBalances}
                             spendHref={quickLinks.spending}
                             canDrawFromFunds={plan?.canDrawFromFunds ?? false}
+                            showAllocationPercent
                         />
                         <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
                             <Link

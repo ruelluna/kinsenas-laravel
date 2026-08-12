@@ -38,6 +38,22 @@ it('returns dashboard data for team member', function () {
     ]);
 });
 
+it('includes allocation metadata on fund balances after income is locked', function () {
+    [$user] = createUserWithLockedIncome();
+    Sanctum::actingAs($user);
+
+    $this->postJson('/api/v1/vault/unlock', [
+        'password' => 'password',
+    ])->assertSuccessful();
+
+    $response = $this->getJson('/api/v1/teams/'.$user->currentTeam->id.'/dashboard');
+
+    $response->assertSuccessful();
+    $response->assertJsonPath('data.fundBalances.0.name', 'Everyday Fund');
+    $response->assertJsonPath('data.fundBalances.0.allocationType', 'percentage');
+    $response->assertJsonPath('data.fundBalances.0.percentage', '70.00');
+});
+
 it('forbids dashboard for non member team', function () {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
