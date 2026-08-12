@@ -4,6 +4,7 @@ namespace App\Services\Savings;
 
 use App\Enums\TransferStatus;
 use App\Models\FundSpend;
+use App\Models\FundSpendReimbursement;
 use App\Models\FundTransfer;
 use App\Models\IncomeAllocation;
 use App\Models\IncomePeriod;
@@ -38,7 +39,8 @@ class FundBalanceService
      *     percentUsed: float|null,
      *     bankId: string|null,
      *     bankDisplayName: string|null,
-     *     bankLogoUrl: string|null
+     *     bankLogoUrl: string|null,
+     *     awaitingReimbursement: string|null
      * }>
      */
     public function balancesForPlan(SavingsPlan $plan): array
@@ -49,6 +51,8 @@ class FundBalanceService
         $transferredOutByCategory = $this->transferredOutTotalsByCategory($plan, $dek);
         $receivedInByCategory = $this->receivedInTotalsByCategory($plan, $dek);
         $spentByCategory = $this->spentTotalsByCategory($plan, $dek);
+        $reimbursementCreditsByCategory = $this->reimbursementCreditsByCategory($plan, $dek);
+        $awaitingReimbursementByCategory = $this->awaitingReimbursementByCategory($plan, $dek);
         $defaultCategoryId = $this->defaultCategoryId($plan);
 
         return $plan->categories
@@ -59,6 +63,8 @@ class FundBalanceService
                 $transferredOutByCategory,
                 $receivedInByCategory,
                 $spentByCategory,
+                $reimbursementCreditsByCategory,
+                $awaitingReimbursementByCategory,
                 $defaultCategoryId,
                 $dek,
             ) {
@@ -66,6 +72,10 @@ class FundBalanceService
                 $transferredOut = $transferredOutByCategory[$category->id] ?? '0.00';
                 $receivedIn = $receivedInByCategory[$category->id] ?? '0.00';
                 $spent = $spentByCategory[$category->id] ?? '0.00';
+                $reimbursementCredits = $reimbursementCreditsByCategory[$category->id] ?? '0.00';
+                $effectiveSpent = $dek === null
+                    ? null
+                    : bcsub($spent, $reimbursementCredits, 2);
                 $openingBalance = $this->openingBalanceForCategory($category, $dek);
                 $remaining = $dek === null
                     ? null
@@ -75,7 +85,7 @@ class FundBalanceService
                             $receivedIn,
                             2,
                         ),
-                        $spent,
+                        $effectiveSpent,
                         2,
                     );
                 $percentUsed = null;
@@ -103,6 +113,9 @@ class FundBalanceService
                     'bankId' => $bank?->id,
                     'bankDisplayName' => $bank !== null ? $bank->displayLabel() : null,
                     'bankLogoUrl' => $bank?->institution?->logo_url,
+                    'awaitingReimbursement' => $dek === null
+                        ? null
+                        : ($awaitingReimbursementByCategory[$category->id] ?? '0.00'),
                 ];
             })
             ->all();
@@ -120,6 +133,8 @@ class FundBalanceService
         $transferredOut = $this->transferredOutTotalsByCategory($plan, $dek)[$categoryId] ?? '0.00';
         $receivedIn = $this->receivedInTotalsByCategory($plan, $dek)[$categoryId] ?? '0.00';
         $spent = $this->spentTotalsByCategory($plan, $dek)[$categoryId] ?? '0.00';
+        $reimbursementCredits = $this->reimbursementCreditsByCategory($plan, $dek)[$categoryId] ?? '0.00';
+        $effectiveSpent = bcsub($spent, $reimbursementCredits, 2);
         $category = $plan->categories()->find($categoryId);
         $openingBalance = $category !== null
             ? $this->openingBalanceForCategory($category, $dek)
@@ -131,7 +146,7 @@ class FundBalanceService
                 $receivedIn,
                 2,
             ),
-            $spent,
+            $effectiveSpent,
             2,
         );
     }
@@ -227,6 +242,7 @@ class FundBalanceService
         $transferredOutByCategory = $this->transferredOutTotalsByCategory($plan, $dek);
         $receivedInByCategory = $this->receivedInTotalsByCategory($plan, $dek);
         $spentByCategory = $this->spentTotalsByCategory($plan, $dek);
+        $reimbursementCreditsByCategory = $this->reimbursementCreditsByCategory($plan, $dek);
         $categoriesById = $plan->categories->keyBy('id');
 
         foreach ($period->allocations as $allocation) {
@@ -237,6 +253,8 @@ class FundBalanceService
             $transferredOut = $transferredOutByCategory[$categoryId] ?? '0.00';
             $receivedIn = $receivedInByCategory[$categoryId] ?? '0.00';
             $spent = $spentByCategory[$categoryId] ?? '0.00';
+            $reimbursementCredits = $reimbursementCreditsByCategory[$categoryId] ?? '0.00';
+            $effectiveSpent = bcsub($spent, $reimbursementCredits, 2);
             $category = $categoriesById->get($categoryId) ?? $allocation->category;
             $openingBalance = $category !== null
                 ? $this->openingBalanceForCategory($category, $dek)
@@ -248,7 +266,7 @@ class FundBalanceService
                     $receivedIn,
                     2,
                 ),
-                $spent,
+                $effectiveSpent,
                 2,
             );
 
@@ -670,6 +688,82 @@ class FundBalanceService
             }
 
             $totals[$spend->category_id] = bcadd($totals[$spend->category_id] ?? '0.00', $plain, 2);
+        }
+
+        return $totals;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function reimbursementCreditsByCategory(SavingsPlan $plan, ?string $dek): array
+    {
+        if ($dek === null) {
+            return [];
+        }
+
+        $totals = [];
+
+        $reimbursements = FundSpendReimbursement::query()
+            ->where('savings_plan_id', $plan->id)
+            ->get();
+
+        foreach ($reimbursements as $reimbursement) {
+            $plain = $this->decryptAmount($dek, $reimbursement->getRawOriginal('amount_encrypted'));
+
+            if ($plain === null) {
+                continue;
+            }
+
+            $totals[$reimbursement->category_id] = bcadd($totals[$reimbursement->category_id] ?? '0.00', $plain, 2);
+        }
+
+        return $totals;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function awaitingReimbursementByCategory(SavingsPlan $plan, ?string $dek): array
+    {
+        if ($dek === null) {
+            return [];
+        }
+
+        $totals = [];
+
+        $spends = FundSpend::query()
+            ->where('savings_plan_id', $plan->id)
+            ->where('expects_reimbursement', true)
+            ->whereNull('reimbursement_closed_at')
+            ->where('status', TransferStatus::Confirmed)
+            ->with('reimbursements')
+            ->get();
+
+        foreach ($spends as $spend) {
+            $spendAmount = $this->decryptAmount($dek, $spend->getRawOriginal('amount_encrypted'));
+
+            if ($spendAmount === null) {
+                continue;
+            }
+
+            $received = '0.00';
+
+            foreach ($spend->reimbursements as $reimbursement) {
+                $plain = $this->decryptAmount($dek, $reimbursement->getRawOriginal('amount_encrypted'));
+
+                if ($plain !== null) {
+                    $received = bcadd($received, $plain, 2);
+                }
+            }
+
+            $remaining = bcsub($spendAmount, $received, 2);
+
+            if (bccomp($remaining, '0', 2) !== 1) {
+                continue;
+            }
+
+            $totals[$spend->category_id] = bcadd($totals[$spend->category_id] ?? '0.00', $remaining, 2);
         }
 
         return $totals;

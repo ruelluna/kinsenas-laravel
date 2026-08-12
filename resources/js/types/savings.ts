@@ -51,24 +51,6 @@ export type SavingsPlanPageGuidance = {
     afterIncomeVideoUrl: string | null;
 };
 
-export type FundBalance = {
-    categoryId: string;
-    name: string;
-    hint: string | null;
-    isDefault: boolean;
-    allocated: string | null;
-    transferred: string | null;
-    received: string | null;
-    spent: string | null;
-    remaining: string | null;
-    openingBalance: string | null;
-    canFund: boolean;
-    percentUsed: number | null;
-    bankId: string | null;
-    bankDisplayName: string | null;
-    bankLogoUrl: string | null;
-};
-
 export type FundTransfer = {
     id: string;
     amount: string | null;
@@ -86,6 +68,40 @@ export type FundTransfer = {
     crossesBanks: boolean;
 };
 
+export type FundBalance = {
+    categoryId: string;
+    name: string;
+    hint: string | null;
+    isDefault: boolean;
+    allocated: string | null;
+    transferred: string | null;
+    received: string | null;
+    spent: string | null;
+    remaining: string | null;
+    openingBalance: string | null;
+    canFund: boolean;
+    percentUsed: number | null;
+    bankId: string | null;
+    bankDisplayName: string | null;
+    bankLogoUrl: string | null;
+    awaitingReimbursement?: string | null;
+};
+
+export type FundSpendReimbursement = {
+    id: string;
+    amount: string | null;
+    receivedOn: string;
+    bankName: string | null;
+    notes: string | null;
+};
+
+export type ReimbursementStatus =
+    | 'none'
+    | 'awaiting'
+    | 'partial'
+    | 'resolved'
+    | 'closed';
+
 export type FundSpend = {
     id: string;
     amount: string | null;
@@ -98,6 +114,13 @@ export type FundSpend = {
     categoryId: string;
     recipientId: string | null;
     receiptImageUrl: string | null;
+    expectsReimbursement?: boolean;
+    expectedFromRecipientId?: string | null;
+    expectedFromRecipientName?: string | null;
+    reimbursementStatus?: ReimbursementStatus;
+    reimbursedAmount?: string | null;
+    remainingOwed?: string | null;
+    reimbursements?: FundSpendReimbursement[];
 };
 
 export type IncomeCustomCategory = {
@@ -165,6 +188,7 @@ export type IncomePeriodTableRow = IncomePeriodSummary & {
 export type IncomeFundSummary = {
     categorySpent: Record<string, string | null>;
     categoryRemaining: Record<string, string | null>;
+    categoryFundsAdded: Record<string, string | null>;
 };
 
 export type IncomePeriod = IncomePeriodSummary;

@@ -5,6 +5,7 @@ namespace App\Services\Savings;
 use App\Enums\CategoryAllocationType;
 use App\Enums\DeductionMode;
 use App\Models\Bank;
+use App\Models\FundAddedEntry;
 use App\Models\SavingsCategory;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlan;
@@ -89,7 +90,7 @@ class SavingsPlanService
      *     opening_balance?: float|int|string|null
      * }>  $categories
      */
-    public function updateCategories(SavingsPlan $plan, array $categories): SavingsPlan
+    public function updateCategories(SavingsPlan $plan, array $categories, ?User $user = null): SavingsPlan
     {
         if ($plan->hasIncomePeriod()) {
             return $this->mergeCategoriesAfterIncome($plan, $categories);
@@ -97,15 +98,15 @@ class SavingsPlanService
 
         $this->validateCategories($categories);
 
-        return $this->replaceAllCategories($plan, $categories);
+        return $this->replaceAllCategories($plan, $categories, $user);
     }
 
     /**
      * @param  list<array<string, mixed>>  $categories
      */
-    private function replaceAllCategories(SavingsPlan $plan, array $categories): SavingsPlan
+    private function replaceAllCategories(SavingsPlan $plan, array $categories, ?User $user = null): SavingsPlan
     {
-        return DB::transaction(function () use ($plan, $categories) {
+        return DB::transaction(function () use ($plan, $categories, $user) {
             $existingCategories = $plan->categories()->get()->keyBy('id');
 
             $plan->categories()->delete();
@@ -141,6 +142,17 @@ class SavingsPlanService
                     'opening_balance_encrypted' => $submittedOpeningBalance,
                     'sort_order' => $index,
                 ]);
+
+                $addedAmount = $this->openingBalanceDelta($existingOpeningBalance, $submittedOpeningBalance);
+
+                if ($addedAmount !== null) {
+                    $this->recordFundAddedEntry(
+                        $plan,
+                        $created[$index],
+                        $addedAmount,
+                        $user,
+                    );
+                }
             }
 
             $this->resolveDeductionSources($categories, $created);
@@ -323,22 +335,58 @@ class SavingsPlanService
         return $normalized;
     }
 
-    public function addOpeningBalance(SavingsPlan $plan, SavingsCategory $category, string $amount): SavingsCategory
+    public function addOpeningBalance(SavingsPlan $plan, SavingsCategory $category, string $amount, ?User $user = null): SavingsCategory
     {
         if ($category->plan_id !== $plan->id) {
             abort(404);
         }
 
+        $normalizedAmount = number_format((float) $amount, 2, '.', '');
+
         $existing = $category->opening_balance_encrypted !== null
             ? number_format((float) $category->opening_balance_encrypted, 2, '.', '')
             : '0.00';
-        $newTotal = bcadd($existing, number_format((float) $amount, 2, '.', ''), 2);
+        $newTotal = bcadd($existing, $normalizedAmount, 2);
 
         $category->update([
             'opening_balance_encrypted' => $this->normalizeOpeningBalance($newTotal),
         ]);
 
+        $this->recordFundAddedEntry($plan, $category, $normalizedAmount, $user);
+
         return $category->fresh();
+    }
+
+    private function recordFundAddedEntry(
+        SavingsPlan $plan,
+        SavingsCategory $category,
+        string $amount,
+        ?User $user = null,
+    ): void {
+        FundAddedEntry::query()->create([
+            'savings_plan_id' => $plan->id,
+            'category_id' => $category->id,
+            'category_name' => $category->name,
+            'amount_encrypted' => $amount,
+            'added_on' => now()->toDateString(),
+            'created_by_user_id' => $user?->id,
+        ]);
+    }
+
+    private function openingBalanceDelta(?string $previous, ?string $next): ?string
+    {
+        $previousAmount = $previous !== null
+            ? number_format((float) $previous, 2, '.', '')
+            : '0.00';
+        $nextAmount = $next !== null
+            ? number_format((float) $next, 2, '.', '')
+            : '0.00';
+
+        if (bccomp($nextAmount, $previousAmount, 2) !== 1) {
+            return null;
+        }
+
+        return bcsub($nextAmount, $previousAmount, 2);
     }
 
     /**

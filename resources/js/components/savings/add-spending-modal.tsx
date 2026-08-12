@@ -69,6 +69,8 @@ function AddSpendingForm({
         () => presetCategoryId ?? defaultCategoryId ?? categories[0]?.id ?? '',
     );
     const [amount, setAmount] = useState('');
+    const [expectsReimbursement, setExpectsReimbursement] = useState(false);
+    const [expectedFromRecipientId, setExpectedFromRecipientId] = useState('');
 
     const selectedBalance = useMemo(
         () =>
@@ -129,6 +131,7 @@ function AddSpendingForm({
                             type="number"
                             step="0.01"
                             min="0.01"
+                            data-test="spending-amount"
                             value={amount}
                             onChange={(event) => setAmount(event.target.value)}
                             required
@@ -150,6 +153,7 @@ function AddSpendingForm({
                             id="description"
                             name="description"
                             placeholder="Groceries, car repair, tithe…"
+                            data-test="spending-description"
                             required
                         />
                         <InputError message={errors.description} />
@@ -168,6 +172,65 @@ function AddSpendingForm({
                     </div>
 
                     <ReceiptUploadField error={errors.receipt_image} />
+
+                    <label className="flex items-start gap-2 text-sm">
+                        <input
+                            type="hidden"
+                            name="expects_reimbursement"
+                            value={expectsReimbursement ? '1' : '0'}
+                        />
+                        <input
+                            type="checkbox"
+                            data-test="expects-reimbursement"
+                            checked={expectsReimbursement}
+                            onChange={(event) =>
+                                setExpectsReimbursement(event.target.checked)
+                            }
+                            className="mt-0.5"
+                        />
+                        <span>
+                            <span className="font-medium">
+                                Expecting payback
+                            </span>
+                            <span className="mt-0.5 block text-muted-foreground">
+                                Fund balance drops now. Record payback when you
+                                receive it.
+                            </span>
+                        </span>
+                    </label>
+                    <InputError message={errors.expects_reimbursement} />
+
+                    {expectsReimbursement && (
+                        <div className="grid gap-2">
+                            <Label htmlFor="expected_from_recipient_id">
+                                Who will pay you back?
+                            </Label>
+                            <select
+                                id="expected_from_recipient_id"
+                                name="expected_from_recipient_id"
+                                data-test="expected-from-recipient"
+                                className="h-9 rounded-md border border-input px-3 text-sm"
+                                value={expectedFromRecipientId}
+                                onChange={(event) =>
+                                    setExpectedFromRecipientId(event.target.value)
+                                }
+                                required
+                            >
+                                <option value="">Select person</option>
+                                {recipients.map((recipient) => (
+                                    <option
+                                        key={recipient.id}
+                                        value={recipient.id}
+                                    >
+                                        {recipient.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <InputError
+                                message={errors.expected_from_recipient_id}
+                            />
+                        </div>
+                    )}
 
                     <div className="grid gap-2">
                         <Label htmlFor="recipient_id">
@@ -195,7 +258,7 @@ function AddSpendingForm({
                                 Cancel
                             </Button>
                         </DialogClose>
-                        <Button type="submit" disabled={processing}>
+                        <Button type="submit" disabled={processing} data-test="record-spending-submit">
                             Record spending
                         </Button>
                     </DialogFooter>

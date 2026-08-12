@@ -30,8 +30,16 @@ class FundSpendService
         ?string $recipientId = null,
         ?User $user = null,
         ?string $receiptImagePath = null,
+        bool $expectsReimbursement = false,
+        ?string $expectedFromRecipientId = null,
     ): FundSpend {
         $needsConfirmation = $bankId !== null;
+
+        if ($expectsReimbursement && $expectedFromRecipientId === null) {
+            throw ValidationException::withMessages([
+                'expected_from_recipient_id' => __('Select who will pay you back.'),
+            ]);
+        }
 
         if (! $needsConfirmation) {
             $this->balanceService->assertCanSpend($plan, $categoryId, $amount);
@@ -46,6 +54,8 @@ class FundSpendService
             'spent_on' => $spentOn,
             'bank_id' => $bankId,
             'recipient_id' => $recipientId,
+            'expects_reimbursement' => $expectsReimbursement,
+            'expected_from_recipient_id' => $expectsReimbursement ? $expectedFromRecipientId : null,
             'receipt_image_path' => $receiptImagePath,
             'status' => $needsConfirmation ? TransferStatus::Pending : TransferStatus::Confirmed,
             'confirmed_at' => $needsConfirmation ? null : $now,
@@ -99,8 +109,22 @@ class FundSpendService
         ?string $recipientId = null,
         ?string $receiptImagePath = null,
         bool $removeReceipt = false,
+        bool $expectsReimbursement = false,
+        ?string $expectedFromRecipientId = null,
     ): FundSpend {
-        $spend->loadMissing('plan');
+        $spend->loadMissing(['plan', 'reimbursements']);
+
+        if ($spend->reimbursements->isNotEmpty() && ! $expectsReimbursement) {
+            throw ValidationException::withMessages([
+                'expects_reimbursement' => __('Cannot turn off expecting payback after paybacks were recorded.'),
+            ]);
+        }
+
+        if ($expectsReimbursement && $expectedFromRecipientId === null) {
+            throw ValidationException::withMessages([
+                'expected_from_recipient_id' => __('Select who will pay you back.'),
+            ]);
+        }
 
         $this->balanceService->assertCanUpdateSpend($plan, $spend, $categoryId, $amount);
 
@@ -110,6 +134,8 @@ class FundSpendService
             'description' => $description,
             'spent_on' => $spentOn,
             'recipient_id' => $recipientId,
+            'expects_reimbursement' => $expectsReimbursement,
+            'expected_from_recipient_id' => $expectsReimbursement ? $expectedFromRecipientId : null,
         ];
 
         if ($receiptImagePath !== null) {
@@ -125,7 +151,7 @@ class FundSpendService
 
         $spend->update($updates);
 
-        return $spend->fresh(['bank', 'recipient', 'category']);
+        return $spend->fresh(['bank', 'recipient', 'category', 'expectedFromRecipient', 'reimbursements.bank']);
     }
 
     public function delete(FundSpend $spend, SavingsPlan $plan): void
@@ -146,7 +172,7 @@ class FundSpendService
     {
         return FundSpend::query()
             ->where('savings_plan_id', $plan->id)
-            ->with(['bank', 'recipient', 'category'])
+            ->with(['bank', 'recipient', 'category', 'expectedFromRecipient', 'reimbursements.bank'])
             ->latest('spent_on')
             ->latest()
             ->limit($limit)

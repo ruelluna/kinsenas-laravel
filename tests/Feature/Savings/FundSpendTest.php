@@ -88,6 +88,22 @@ it('rejects spending above remaining balance', function () {
     expect(FundSpend::query()->count())->toBe(0);
 });
 
+it('requires expected from recipient when expecting payback on store', function () {
+    [$user, , $everydayCategory] = createUserWithLockedIncome();
+
+    $response = $this->actingAs($user)->post(route('savings.spending.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'category_id' => $everydayCategory->id,
+        'amount' => '500.00',
+        'description' => 'Bill',
+        'spent_on' => '2026-01-15',
+        'expects_reimbursement' => true,
+    ]);
+
+    $response->assertSessionHasErrors('expected_from_recipient_id');
+});
+
 it('creates pending spending when bank is provided', function () {
     [$user, , $everydayCategory] = createUserWithLockedIncome();
 

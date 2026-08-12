@@ -1,5 +1,5 @@
 import { Form, Link } from '@inertiajs/react';
-import { ArrowRightLeft, ShoppingBag } from 'lucide-react';
+import { ArrowRightLeft, RotateCcw, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatMoney } from '@/lib/format-money';
 import type {
@@ -22,6 +22,7 @@ export default function PendingActionsPanel({
     const items = [
         ...(features.transfers ? pendingActions.transfers : []),
         ...pendingActions.spends,
+        ...pendingActions.reimbursements,
     ];
 
     return (
@@ -49,6 +50,8 @@ export default function PendingActionsPanel({
                             <div className="flex min-w-0 items-start gap-3">
                                 {item.type === 'transfer' ? (
                                     <ArrowRightLeft className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                                ) : item.type === 'reimbursement' ? (
+                                    <RotateCcw className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                                 ) : (
                                     <ShoppingBag className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                                 )}
@@ -64,20 +67,33 @@ export default function PendingActionsPanel({
                                     </p>
                                 </div>
                             </div>
-                            <Form
-                                action={item.confirmHref}
-                                method="post"
-                                className="shrink-0 sm:ml-auto"
-                            >
+                            {item.type === 'reimbursement' ? (
                                 <Button
-                                    type="submit"
+                                    asChild
                                     size="sm"
                                     variant="outline"
                                     className="w-full sm:w-auto"
                                 >
-                                    Confirm
+                                    <Link href={item.confirmHref}>
+                                        Record payback
+                                    </Link>
                                 </Button>
-                            </Form>
+                            ) : (
+                                <Form
+                                    action={item.confirmHref}
+                                    method="post"
+                                    className="shrink-0 sm:ml-auto"
+                                >
+                                    <Button
+                                        type="submit"
+                                        size="sm"
+                                        variant="outline"
+                                        className="w-full sm:w-auto"
+                                    >
+                                        Confirm
+                                    </Button>
+                                </Form>
+                            )}
                         </div>
                     ))
                 )}

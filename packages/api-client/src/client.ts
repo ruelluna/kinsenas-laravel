@@ -604,6 +604,8 @@ export class KinsenasApiClient {
                     spent_on: string;
                     bank_id?: string | null;
                     recipient_id?: string | null;
+                    expects_reimbursement?: boolean;
+                    expected_from_recipient_id?: string | null;
                     receipt_image?: Uploadable | null;
                 },
             ) => {
@@ -617,6 +619,15 @@ export class KinsenasApiClient {
                 }
                 if (payload.recipient_id) {
                     form.append('recipient_id', payload.recipient_id);
+                }
+                if (payload.expects_reimbursement) {
+                    form.append('expects_reimbursement', '1');
+                }
+                if (payload.expected_from_recipient_id) {
+                    form.append(
+                        'expected_from_recipient_id',
+                        payload.expected_from_recipient_id,
+                    );
                 }
                 if (payload.receipt_image) {
                     form.append('receipt_image', payload.receipt_image);
@@ -671,6 +682,36 @@ export class KinsenasApiClient {
             confirm: (teamId: number, fundSpendId: string) =>
                 this.request<{ data: FundSpend }>(
                     this.teamPath(teamId, `/savings/spending/${fundSpendId}/confirm`),
+                    { method: 'POST' },
+                ),
+
+            storeReimbursement: (
+                teamId: number,
+                fundSpendId: string,
+                payload: {
+                    amount: number | string;
+                    received_on: string;
+                    bank_id?: string | null;
+                    notes?: string | null;
+                },
+            ) =>
+                this.request<{ data: FundSpend }>(
+                    this.teamPath(
+                        teamId,
+                        `/savings/spending/${fundSpendId}/reimbursements`,
+                    ),
+                    {
+                        method: 'POST',
+                        body: JSON.stringify(payload),
+                    },
+                ),
+
+            closeReimbursement: (teamId: number, fundSpendId: string) =>
+                this.request<{ data: FundSpend }>(
+                    this.teamPath(
+                        teamId,
+                        `/savings/spending/${fundSpendId}/close-reimbursement`,
+                    ),
                     { method: 'POST' },
                 ),
         },

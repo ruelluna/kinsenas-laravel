@@ -34,6 +34,41 @@
             }
         </style>
 
+        @if (app()->runningUnitTests())
+            {{-- Prevent Driver.js onboarding tour from blocking Pest browser tests (no Vite rebuild required). --}}
+            <script>
+                (function () {
+                    const blockedKeys = new Set([
+                        'kinsenas.onboardingTour.active.v1',
+                        'kinsenas.onboardingTour.autoStart.v1',
+                    ]);
+
+                    const patchStorage = (storage) => {
+                        const originalSetItem = storage.setItem.bind(storage);
+
+                        storage.setItem = function (key, value) {
+                            if (blockedKeys.has(key)) {
+                                return;
+                            }
+
+                            if (typeof key === 'string' && key.startsWith('kinsenas.onboardingTour.v1.')) {
+                                return;
+                            }
+
+                            return originalSetItem(key, value);
+                        };
+                    };
+
+                    try {
+                        patchStorage(window.localStorage);
+                        patchStorage(window.sessionStorage);
+                    } catch (e) {
+                        // Ignore private mode / disabled storage.
+                    }
+                })();
+            </script>
+        @endif
+
         <link rel="icon" href="/kinsenas-square-logo.png" type="image/png">
         <link rel="manifest" href="/manifest.webmanifest">
         <link rel="apple-touch-icon" href="/icons/icon-180.png">

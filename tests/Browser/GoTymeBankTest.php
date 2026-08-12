@@ -34,18 +34,10 @@ it('adds a gosave account through the banks modal', function () {
 
     $page = visit('/login');
 
-    $page->fill('email', $member->email)
-        ->fill('password', 'password')
-        ->click('@login-button');
+    browserLogin($page, $member);
 
-    if (str_contains($page->url(), '/vault/unlock')) {
-        $page->fill('password', 'password')
-            ->press('Unlock');
-    }
-
-    $page = visit($banksUrl);
-
-    $page->assertSee('Banks')
+    $page->navigate($banksUrl)
+        ->assertSee('Banks')
         ->click('@add-bank')
         ->fill('#bank-institution-search', 'GoTyme')
         ->click('GoTyme Bank')

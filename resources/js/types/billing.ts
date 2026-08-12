@@ -185,4 +185,5 @@ export type SharedData = {
     registrationRecoveryKey?: string | null;
     notifications: SharedNotifications | null;
     webPush: WebPushConfig;
+    onboardingTourEnabled: boolean;
 };

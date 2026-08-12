@@ -74,6 +74,12 @@ function attentionDescription(summary: DashboardSummary): string {
         );
     }
 
+    if (summary.awaitingReimbursementCount > 0) {
+        parts.push(
+            `${summary.awaitingReimbursementCount} awaiting payback`,
+        );
+    }
+
     if (summary.lowBalanceFunds.length > 0) {
         parts.push(
             `${summary.lowBalanceFunds.length} low fund bucket${summary.lowBalanceFunds.length === 1 ? '' : 's'}`,

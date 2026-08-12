@@ -135,6 +135,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                                     Route::put('spending/{fundSpend}', [SpendingController::class, 'update'])->name('spending.update');
                                     Route::delete('spending/{fundSpend}', [SpendingController::class, 'destroy'])->name('spending.destroy');
                                     Route::post('spending/{fundSpend}/confirm', [SpendingController::class, 'confirm'])->name('spending.confirm');
+                                    Route::post('spending/{fundSpend}/reimbursements', [SpendingController::class, 'storeReimbursement'])->name('spending.reimbursements.store');
+                                    Route::post('spending/{fundSpend}/close-reimbursement', [SpendingController::class, 'closeReimbursement'])->name('spending.reimbursements.close');
                                 });
                             });
 

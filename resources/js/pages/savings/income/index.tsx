@@ -29,8 +29,10 @@ type ComputedTotals = {
 type ComputedFundTotals = {
     spent: Record<string, string | null>;
     remaining: Record<string, string | null>;
+    fundsAdded: Record<string, string | null>;
     spentTotal: string | null;
     remainingTotal: string | null;
+    fundsAddedTotal: string | null;
 };
 
 function formatPercentLabel(value: string): string {
@@ -253,6 +255,14 @@ function IncomeMobileSummary({
             <div className="mt-3 space-y-4 text-sm">
                 {fundTotals !== null && (
                     <SummarySection
+                        title="Total funds added"
+                        total={fundTotals.fundsAddedTotal}
+                        planCategories={planCategories}
+                        categoryAmounts={fundTotals.fundsAdded}
+                    />
+                )}
+                {fundTotals !== null && (
+                    <SummarySection
                         title="Total spent"
                         total={fundTotals.spentTotal}
                         planCategories={planCategories}
@@ -326,12 +336,20 @@ export default function IncomeIndex({
                 fundSummary.categoryRemaining[category.id] ?? null,
             ]),
         );
+        const fundsAdded = Object.fromEntries(
+            planCategories.map((category) => [
+                category.id,
+                fundSummary.categoryFundsAdded[category.id] ?? null,
+            ]),
+        );
 
         return {
             spent,
             remaining,
+            fundsAdded,
             spentTotal: sumMoneyAmounts(Object.values(spent)),
             remainingTotal: sumMoneyAmounts(Object.values(remaining)),
+            fundsAddedTotal: sumMoneyAmounts(Object.values(fundsAdded)),
         };
     }, [fundSummary, planCategories]);
 
@@ -508,6 +526,29 @@ export default function IncomeIndex({
                     </tbody>
                     {periods.length > 0 && (
                         <tfoot>
+                            {fundTotals !== null && (
+                                <tr className="border-t bg-muted/30 font-medium">
+                                    <td className="px-2 py-1.5" colSpan={2}>
+                                        Total funds added
+                                    </td>
+                                    <td className="px-2 py-1.5 text-right tabular-nums">
+                                        {formatMoney(fundTotals.fundsAddedTotal)}
+                                    </td>
+                                    {planCategories.map((category) => (
+                                        <td
+                                            key={category.id}
+                                            className="px-2 py-1.5 text-right tabular-nums"
+                                        >
+                                            {formatMoney(
+                                                fundTotals.fundsAdded[
+                                                    category.id
+                                                ] ?? null,
+                                            )}
+                                        </td>
+                                    ))}
+                                    <td className="px-2 py-1.5" />
+                                </tr>
+                            )}
                             {fundTotals !== null && (
                                 <tr className="border-t bg-muted/20 font-medium">
                                     <td className="px-2 py-1.5" colSpan={2}>

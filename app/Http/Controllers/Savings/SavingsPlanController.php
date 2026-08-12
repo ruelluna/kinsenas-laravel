@@ -138,7 +138,7 @@ class SavingsPlanController extends Controller
             abort(403);
         }
 
-        $this->planService->updateCategories($plan, $request->validated('categories'));
+        $this->planService->updateCategories($plan, $request->validated('categories'), $request->user());
 
         if ($request->has('is_shared_with_team')) {
             $this->planService->updateShareSetting($plan, $request->boolean('is_shared_with_team'));
@@ -166,7 +166,7 @@ class SavingsPlanController extends Controller
             abort(403);
         }
 
-        $this->planService->addOpeningBalance($plan, $category, $request->validated('amount'));
+        $this->planService->addOpeningBalance($plan, $category, $request->validated('amount'), $request->user());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Existing fund added.')]);
 

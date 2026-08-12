@@ -51,10 +51,14 @@ export default function Dashboard({
     }, [setup.hasPlan]);
 
     useEffect(() => {
+        if (!page.props.onboardingTourEnabled) {
+            return;
+        }
+
         if (teamId && !setup.complete) {
             requestOnboardingTourAutoStart(teamId);
         }
-    }, [teamId, setup.complete]);
+    }, [page.props.onboardingTourEnabled, teamId, setup.complete]);
 
     const mobileNavAction = useMemo(
         () =>

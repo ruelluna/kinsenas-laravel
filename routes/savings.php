@@ -43,6 +43,8 @@ Route::prefix('savings')
                 Route::put('spending/{fundSpend}', [FundSpendController::class, 'update'])->name('spending.update');
                 Route::delete('spending/{fundSpend}', [FundSpendController::class, 'destroy'])->name('spending.destroy');
                 Route::post('spending/{fundSpend}/confirm', [FundSpendController::class, 'confirm'])->name('spending.confirm');
+                Route::post('spending/{fundSpend}/reimbursements', [FundSpendController::class, 'storeReimbursement'])->name('spending.reimbursements.store');
+                Route::post('spending/{fundSpend}/close-reimbursement', [FundSpendController::class, 'closeReimbursement'])->name('spending.reimbursements.close');
             });
         });
 

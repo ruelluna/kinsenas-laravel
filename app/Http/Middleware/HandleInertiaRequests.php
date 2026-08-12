@@ -75,6 +75,7 @@ class HandleInertiaRequests extends Middleware
             'webPush' => fn () => [
                 'vapidPublicKey' => config('webpush.vapid.public_key'),
             ],
+            'onboardingTourEnabled' => fn () => ! app()->runningUnitTests(),
         ];
     }
 

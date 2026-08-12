@@ -193,6 +193,14 @@ export default function FundBalanceGrid({
                                 {formatMoney(balance.remaining)}
                             </dd>
                         </div>
+                        {balance.awaitingReimbursement !== null &&
+                            balance.awaitingReimbursement !== undefined &&
+                            parseFloat(balance.awaitingReimbursement) > 0 && (
+                                <p className="text-xs text-muted-foreground">
+                                    {formatMoney(balance.awaitingReimbursement)}{' '}
+                                    awaiting payback
+                                </p>
+                            )}
                     </dl>
                     {renderFundAction(balance)}
                     {renderSpendAction(balance)}

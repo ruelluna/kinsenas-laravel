@@ -15,9 +15,10 @@ class BindVaultKeyStore
     {
         $token = $request->user()?->currentAccessToken();
 
-        if ($token !== null) {
+        if ($token !== null && isset($token->id) && $token->id !== '' && $token->id !== null) {
             app()->instance(VaultKeyStore::class, new TokenVaultKeyStore($token->id));
         } else {
+            // Sanctum::actingAs() uses TransientToken (no id) — keep the session store for tests/web.
             app()->instance(VaultKeyStore::class, app(SessionVaultKeyStore::class));
         }
 

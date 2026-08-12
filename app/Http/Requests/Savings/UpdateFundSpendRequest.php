@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Savings;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateFundSpendRequest extends FormRequest
 {
@@ -24,6 +25,13 @@ class UpdateFundSpendRequest extends FormRequest
             'recipient_id' => ['nullable', 'uuid', 'exists:recipients,id'],
             'receipt_image' => ['nullable', 'image', 'max:5120'],
             'remove_receipt' => ['sometimes', 'boolean'],
+            'expects_reimbursement' => ['sometimes', 'boolean'],
+            'expected_from_recipient_id' => [
+                Rule::requiredIf(fn () => $this->boolean('expects_reimbursement')),
+                'nullable',
+                'uuid',
+                'exists:recipients,id',
+            ],
         ];
     }
 
@@ -34,15 +42,21 @@ class UpdateFundSpendRequest extends FormRequest
     {
         return [
             'description.required' => __('Describe what this spending was for.'),
+            'expected_from_recipient_id.required' => __('Select who will pay you back.'),
         ];
     }
 
     protected function prepareForValidation(): void
     {
         $recipientId = $this->input('recipient_id');
+        $expectedFromRecipientId = $this->input('expected_from_recipient_id');
 
         if ($recipientId === '') {
             $this->merge(['recipient_id' => null]);
+        }
+
+        if ($expectedFromRecipientId === '') {
+            $this->merge(['expected_from_recipient_id' => null]);
         }
     }
 }

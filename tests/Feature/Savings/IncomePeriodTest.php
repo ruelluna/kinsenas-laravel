@@ -142,8 +142,30 @@ it('includes spent and remaining summary on income index after spending', functi
         ->component('savings/income/index')
         ->has('fundSummary.categorySpent')
         ->has('fundSummary.categoryRemaining')
+        ->has('fundSummary.categoryFundsAdded')
         ->where("fundSummary.categorySpent.{$everydayCategory->id}", '5000.00')
         ->where("fundSummary.categoryRemaining.{$everydayCategory->id}", '30000.00'),
+    );
+});
+
+it('income index includes total funds added per category', function () {
+    [$user, $plan, $everydayCategory] = createUserWithLockedIncome();
+
+    $this->actingAs($user)->patch(route('savings.plan.category.opening-balance', [
+        'current_team' => $user->currentTeam->slug,
+        'category' => $everydayCategory->id,
+    ]), [
+        'amount' => '7500.00',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('savings.income.index', [
+        'current_team' => $user->currentTeam->slug,
+    ]));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('savings/income/index')
+        ->where("fundSummary.categoryFundsAdded.{$everydayCategory->id}", '7500.00'),
     );
 });
 

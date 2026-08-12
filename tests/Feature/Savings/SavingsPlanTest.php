@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Bank;
+use App\Models\FundAddedEntry;
 use App\Models\SavingsCategory;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlan;
@@ -611,6 +612,10 @@ it('adds opening balance to a fund bucket before income', function () {
     $response->assertRedirect();
 
     expect($everyday->fresh()->opening_balance_encrypted)->toBe('5000.00');
+
+    expect(FundAddedEntry::query()->count())->toBe(1)
+        ->and(FundAddedEntry::query()->first()->amount_encrypted)->toBe('5000.00')
+        ->and(FundAddedEntry::query()->first()->category_name)->toBe('Everyday Fund');
 });
 
 it('preserves opening balances when saving the plan without resubmitting them', function () {
@@ -775,4 +780,19 @@ it('cannot discard plan after income exists', function () {
 
     $response->assertForbidden();
     $this->assertDatabaseCount('savings_plans', 1);
+});
+
+it('records a fund added entry when adding funds via patch', function () {
+    [$user, $plan, $everydayCategory] = createUserWithLockedIncome();
+
+    $this->actingAs($user)->patch(route('savings.plan.category.opening-balance', [
+        'current_team' => $user->currentTeam->slug,
+        'category' => $everydayCategory->id,
+    ]), [
+        'amount' => '1500.00',
+    ])->assertRedirect();
+
+    expect(FundAddedEntry::query()->count())->toBe(1)
+        ->and(FundAddedEntry::query()->first()->amount_encrypted)->toBe('1500.00')
+        ->and(FundAddedEntry::query()->first()->category_id)->toBe($everydayCategory->id);
 });
