@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\SubscriptionStatus;
+use App\Models\Bank;
 use App\Models\IncomePeriod;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlan;
@@ -8,6 +9,8 @@ use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\Team;
 use App\Models\User;
+use App\Services\Vault\FinancialEncryptionService;
+use App\Services\Vault\VaultKeyManager;
 use Illuminate\Foundation\Vite;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -69,6 +72,43 @@ function grantTeamSubscriptionAccess(Team $team): Subscription
             'current_period_ends_at' => now()->addMonth(),
         ],
     );
+}
+
+function prepareTeamForInvites(User $user, Team $team): void
+{
+    grantTeamSubscriptionAccess($team);
+
+    Bank::factory()->create([
+        'team_id' => $team->id,
+    ]);
+
+    unlockVaultForUser($user);
+
+    $plan = SavingsPlan::factory()->create([
+        'team_id' => $team->id,
+        'created_by_user_id' => $user->id,
+        'is_shared_with_team' => true,
+    ]);
+
+    IncomePeriod::query()->create([
+        'plan_id' => $plan->id,
+        'name' => 'Setup income',
+        'amount_encrypted' => '50000.00',
+        'period_start' => now()->startOfMonth()->toDateString(),
+    ]);
+}
+
+function unlockVaultForUser(User $user, string $password = 'password'): void
+{
+    $vault = $user->vault;
+
+    if ($vault === null) {
+        app(FinancialEncryptionService::class)->createUserVault($user, $password);
+        $vault = $user->fresh()->vault;
+    }
+
+    $dek = app(FinancialEncryptionService::class)->unlockWithPassword($vault, $password);
+    app(VaultKeyManager::class)->storeUserDek($dek);
 }
 
 function fakeGhlApi(string $contactId = 'ct_test_123'): void

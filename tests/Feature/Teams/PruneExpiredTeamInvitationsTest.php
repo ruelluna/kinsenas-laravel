@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\TeamRole;
+use App\Enums\UserActivityAction;
 use App\Models\Team;
 use App\Models\TeamInvitation;
 use App\Models\User;
@@ -32,6 +33,10 @@ it('expired invitations are deleted by the scheduled cleanup', function () {
     ]);
 
     $this->artisan('schedule:run')->assertSuccessful();
+
+    $this->assertDatabaseHas('activity_log', [
+        'event' => UserActivityAction::TeamInvitationExpired->value,
+    ]);
 
     $this->assertDatabaseMissing('team_invitations', [
         'id' => $expiredInvitation->id,

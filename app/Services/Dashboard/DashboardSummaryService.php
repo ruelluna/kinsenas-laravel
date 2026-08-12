@@ -17,6 +17,7 @@ use App\Services\Savings\FundSpendReimbursementService;
 use App\Services\Savings\FundSpendService;
 use App\Services\Savings\FundTransferService;
 use App\Services\Savings\SavingsPlanService;
+use App\Services\Teams\TeamSetupService;
 
 class DashboardSummaryService
 {
@@ -27,6 +28,7 @@ class DashboardSummaryService
         private FundTransferService $fundTransferService,
         private FundSpendReimbursementService $reimbursementService,
         private SubscriptionService $subscriptionService,
+        private TeamSetupService $teamSetupService,
     ) {}
 
     /**
@@ -48,32 +50,7 @@ class DashboardSummaryService
             ->where('status', TransferStatus::Confirmed)
             ->exists();
 
-        $steps = [
-            [
-                'key' => 'bank',
-                'label' => 'Add your banks',
-                'complete' => $hasBank,
-                'href' => "{$savingsBase}/banks",
-            ],
-            [
-                'key' => 'plan',
-                'label' => 'Choose a savings plan',
-                'complete' => $hasPlan,
-                'href' => "{$savingsBase}/plan",
-            ],
-            [
-                'key' => 'income',
-                'label' => 'Add income',
-                'complete' => $hasIncome,
-                'href' => "{$savingsBase}/income",
-            ],
-            [
-                'key' => 'spending',
-                'label' => 'Record spending',
-                'complete' => $hasSpending,
-                'href' => "{$savingsBase}/spending",
-            ],
-        ];
+        $steps = $this->teamSetupService->dashboardSetupSteps($team, $user, $hasSpending);
 
         $setupComplete = collect($steps)->every(fn (array $step) => $step['complete']);
 

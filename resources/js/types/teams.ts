@@ -57,3 +57,23 @@ export type RoleOption = {
     value: TeamRole;
     label: string;
 };
+
+export type TeamSetupStep = {
+    key: string;
+    label: string;
+    complete: boolean;
+    href: string;
+};
+
+export type TeamInviteReadiness = {
+    ready: boolean;
+    steps: TeamSetupStep[];
+};
+
+export type TeamActivityEntry = {
+    id: number;
+    description: string;
+    event: string | null;
+    causer_name: string | null;
+    created_at: string;
+};

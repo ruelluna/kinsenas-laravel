@@ -22,6 +22,7 @@ it('team invitations can be created', function () {
     $team = Team::factory()->create();
 
     $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
+    prepareTeamForInvites($owner, $team);
 
     $response = $this
         ->actingAs($owner)
@@ -85,6 +86,7 @@ it('team invitations can be created by admins', function () {
 
     $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
     $team->members()->attach($admin, ['role' => TeamRole::Admin->value]);
+    prepareTeamForInvites($admin, $team);
 
     $response = $this
         ->actingAs($admin)
@@ -146,6 +148,8 @@ it('team invitations cannot be created by members', function () {
 
     $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
     $team->members()->attach($member, ['role' => TeamRole::Member->value]);
+    grantTeamSubscriptionAccess($team);
+    prepareTeamForInvites($owner, $team);
 
     $response = $this
         ->actingAs($member)

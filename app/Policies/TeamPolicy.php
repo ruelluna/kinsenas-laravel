@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Enums\TeamPermission;
 use App\Models\Team;
 use App\Models\User;
+use App\Services\Teams\TeamSetupService;
 
 class TeamPolicy
 {
@@ -83,7 +84,11 @@ class TeamPolicy
      */
     public function inviteMember(User $user, Team $team): bool
     {
-        return $user->hasTeamPermission($team, TeamPermission::CreateInvitation);
+        if (! $user->hasTeamPermission($team, TeamPermission::CreateInvitation)) {
+            return false;
+        }
+
+        return app(TeamSetupService::class)->isReadyForInvites($team, $user);
     }
 
     /**

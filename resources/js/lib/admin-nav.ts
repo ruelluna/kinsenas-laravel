@@ -1,6 +1,7 @@
 import {
     ClipboardList,
     CreditCard,
+    History,
     KeyRound,
     MessageSquare,
     QrCode,
@@ -36,6 +37,7 @@ export const adminNavItems: NavItem[] = [
     },
     { title: 'Payment QR', href: '/admin/payment-qr', icon: QrCode },
     { title: 'Users', href: '/admin/platform-users', icon: Shield },
+    { title: 'Activity logs', href: '/admin/activity-logs', icon: History },
     {
         title: 'Formula templates',
         href: '/admin/formula-templates',
