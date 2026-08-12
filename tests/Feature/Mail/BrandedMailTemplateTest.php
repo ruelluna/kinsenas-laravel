@@ -4,6 +4,7 @@ use App\Models\Team;
 use App\Models\TeamInvitation;
 use App\Models\User;
 use App\Notifications\Teams\TeamInvitation as TeamInvitationNotification;
+use App\Notifications\Vault\RecoveryKeyIssued;
 use Database\Seeders\BillingSeeder;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -38,6 +39,24 @@ it('renders branded team invitation mail with logo and primary color', function 
         ->toContain('logo-horizontal')
         ->toContain('#1e8b75')
         ->toContain(config('app.name'));
+});
+
+it('renders branded recovery key mail with logo and primary color', function () {
+    $user = User::factory()->create(['name' => 'Vault User']);
+
+    $html = (new RecoveryKeyIssued('AAAA-BBBB-CCCC-DDDD'))
+        ->toMail($user)
+        ->render()
+        ->toHtml();
+
+    $logoUrl = rtrim(config('app.url'), '/').config('brand.logo.horizontal');
+
+    expect($html)
+        ->toContain($logoUrl)
+        ->toContain('logo-horizontal')
+        ->toContain('#1e8b75')
+        ->toContain(config('app.name'))
+        ->toContain('AAAA-BBBB-CCCC-DDDD');
 });
 
 it('renders branded verify email notification with logo and primary color', function () {
