@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Learn\LearnIndexController;
+use App\Http\Controllers\Learn\LearnPostController;
+use App\Http\Controllers\Learn\LearnPostReactionController;
+use App\Http\Controllers\Learn\LearnSeriesController;
 use App\Http\Controllers\Marketing\SurveyResponseController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PwaLaunchController;
@@ -15,6 +19,16 @@ Route::inertia('/survey', 'marketing/survey')->name('survey');
 Route::post('survey/responses', [SurveyResponseController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('survey.responses.store');
+
+Route::get('learn', LearnIndexController::class)->name('learn.index');
+Route::get('learn/series/{series}', [LearnSeriesController::class, 'show'])->name('learn.series.show');
+Route::get('learn/posts/{post}', [LearnPostController::class, 'show'])->name('learn.posts.show');
+
+Route::middleware(['auth', 'verified', 'learn.member'])->group(function () {
+    Route::post('learn/posts/{post}/react', [LearnPostReactionController::class, 'store'])
+        ->middleware('throttle:30,1')
+        ->name('learn.posts.react');
+});
 
 Route::middleware(['auth'])->get('dashboard', function () {
     return redirect()->route('pwa.launch');

@@ -1,5 +1,6 @@
 import {
     CreditCard,
+    GraduationCap,
     History,
     MessageSquare,
     QrCode,
@@ -26,6 +27,8 @@ export const adminNavItems: NavItem[] = [
     { title: 'Payment QR', href: '/admin/payment-qr', icon: QrCode },
     { title: 'Users', href: '/admin/platform-users', icon: Shield },
     { title: 'Activity logs', href: '/admin/activity-logs', icon: History },
+    { title: 'Content', href: '/admin/content/posts', icon: GraduationCap },
+    { title: 'Content stats', href: '/admin/content/stats', icon: History },
     {
         title: 'Formula templates',
         href: '/admin/formula-templates',

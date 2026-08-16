@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Admin\AdminActivityLogController;
 use App\Http\Controllers\Admin\AdminBetaFeedbackController;
+use App\Http\Controllers\Admin\AdminContentPostController;
+use App\Http\Controllers\Admin\AdminContentSeriesController;
+use App\Http\Controllers\Admin\AdminContentStatsController;
 use App\Http\Controllers\Admin\AdminNotificationTestController;
 use App\Http\Controllers\Admin\AdminPaymentQrController;
 use App\Http\Controllers\Admin\AdminPaymentSubmissionController;
@@ -10,6 +13,7 @@ use App\Http\Controllers\Admin\AdminSavingsFormulaTemplateController;
 use App\Http\Controllers\Admin\AdminSavingsPlanPageGuidanceController;
 use App\Http\Controllers\Admin\AdminSubscriberController;
 use App\Http\Controllers\Admin\AdminSubscriptionPlanController;
+use App\Http\Controllers\Learn\LearnPostController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')
@@ -49,4 +53,9 @@ Route::prefix('admin')
         Route::get('formula-templates', [AdminSavingsFormulaTemplateController::class, 'index'])->name('formula-templates.index');
         Route::get('formula-templates/{template}/edit', [AdminSavingsFormulaTemplateController::class, 'edit'])->name('formula-templates.edit');
         Route::put('formula-templates/{template}', [AdminSavingsFormulaTemplateController::class, 'update'])->name('formula-templates.update');
+
+        Route::get('content/stats', AdminContentStatsController::class)->name('content.stats');
+        Route::get('content/posts/{post}/preview', [LearnPostController::class, 'preview'])->name('content.posts.preview');
+        Route::resource('content/series', AdminContentSeriesController::class)->names('content.series')->except(['show']);
+        Route::resource('content/posts', AdminContentPostController::class)->names('content.posts')->except(['show']);
     });

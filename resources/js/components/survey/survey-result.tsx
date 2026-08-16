@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from '@inertiajs/react';
 import { ALLOCATION_BORDER_CLASSES } from '@/components/marketing/landing-content';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -138,6 +139,16 @@ export default function SurveyResult({
                     {content.resultCTA.submit}
                 </Button>
             </form>
+
+            <p className="text-center text-sm">
+                <Link
+                    href="/learn"
+                    className="text-primary underline-offset-4 hover:underline"
+                    data-test="survey-learn-link"
+                >
+                    {content.resultCTA.learnLink}
+                </Link>
+            </p>
         </div>
     );
 }

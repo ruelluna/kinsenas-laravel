@@ -4,6 +4,7 @@ import { initializeTheme } from '@/hooks/use-appearance';
 import { registerPwaServiceWorker } from '@/lib/register-pwa';
 import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
+import LearnPageLayout from '@/layouts/learn-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import 'driver.js/dist/driver.css';
 
@@ -19,7 +20,8 @@ createInertiaApp({
         switch (true) {
             case name === 'welcome':
             case name.startsWith('marketing/'):
-                return null;
+            case name.startsWith('learn/'):
+                return LearnPageLayout;
             case name.startsWith('auth/'):
                 return AuthLayout;
             case name.startsWith('settings/'):

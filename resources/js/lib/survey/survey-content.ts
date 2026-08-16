@@ -651,6 +651,7 @@ const SHARED: Record<
             emailRequired: 'Please enter your email.',
             emailInvalid: 'Please enter a valid email address.',
             submitError: 'Something went wrong. Please try again.',
+            learnLink: 'Explore free guides on Learn',
         },
         thankYou:
             'Thank you. Your answers help shape Kinsenas around real Filipino payday habits.',
@@ -688,6 +689,7 @@ const SHARED: Record<
             emailRequired: 'Ilagay ang email mo.',
             emailInvalid: 'Maglagay ng valid na email address.',
             submitError: 'May nangyaring mali. Subukan ulit.',
+            learnLink: 'Basahin ang libreng gabay sa Learn',
         },
         thankYou:
             'Salamat. Makakatulong ang sagot mo para mabuo ang Kinsenas base sa totoong payday habits ng mga Pilipino.',
@@ -725,6 +727,7 @@ const SHARED: Record<
             emailRequired: 'Ibutang ang imong email.',
             emailInvalid: 'Ibutang og valid nga email address.',
             submitError: 'Naay sayop. Sulayi pag-usab.',
+            learnLink: 'Basaha ang libreng mga giya sa Learn',
         },
         thankYou:
             'Salamat. Makatabang imong tubag para mahulma ang Kinsenas base sa tinuod nga payday habits sa mga Pilipino.',

@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\BindVaultKeyStore;
 use App\Http\Middleware\EnsureApiTeamScope;
+use App\Http\Middleware\EnsureLearnMemberAccess;
 use App\Http\Middleware\EnsurePlatformAdmin;
 use App\Http\Middleware\EnsureSavingsPlan;
 use App\Http\Middleware\EnsureSubscribedOrTrialing;
@@ -32,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'subscribed.feature' => EnsureSubscriptionFeature::class,
             'savings.plan.required' => EnsureSavingsPlan::class,
             'platform.admin' => EnsurePlatformAdmin::class,
+            'learn.member' => EnsureLearnMemberAccess::class,
             'api.team' => EnsureApiTeamScope::class,
         ]);
 

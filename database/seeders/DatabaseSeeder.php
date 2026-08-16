@@ -43,5 +43,7 @@ class DatabaseSeeder extends Seeder
             'is_platform_admin' => true,
             'email_verified_at' => now(),
         ]);
+
+        $this->call(ContentSeeder::class);
     }
 }
