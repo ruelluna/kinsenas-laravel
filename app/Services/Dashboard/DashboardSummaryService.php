@@ -12,7 +12,9 @@ use App\Models\SavingsPlan;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\Billing\SubscriptionService;
+use App\Services\Content\LearnHighlightService;
 use App\Services\Savings\FundBalanceService;
+use App\Services\Savings\FundGraphService;
 use App\Services\Savings\FundSpendReimbursementService;
 use App\Services\Savings\FundSpendService;
 use App\Services\Savings\FundTransferService;
@@ -24,11 +26,13 @@ class DashboardSummaryService
     public function __construct(
         private SavingsPlanService $planService,
         private FundBalanceService $balanceService,
+        private FundGraphService $fundGraphService,
         private FundSpendService $fundSpendService,
         private FundTransferService $fundTransferService,
         private FundSpendReimbursementService $reimbursementService,
         private SubscriptionService $subscriptionService,
         private TeamSetupService $teamSetupService,
+        private LearnHighlightService $learnHighlightService,
     ) {}
 
     /**
@@ -75,6 +79,10 @@ class DashboardSummaryService
             ? $this->recentActivity($plan)
             : [];
 
+        $dashboardGraphs = $plan !== null && $hasSpending
+            ? $this->fundGraphService->dashboardGraphsForPlan($plan)
+            : null;
+
         $quickSpend = $plan !== null && $canDrawFromFunds
             ? [
                 'defaultCategoryId' => $this->balanceService->defaultCategoryId($plan),
@@ -112,6 +120,7 @@ class DashboardSummaryService
             'bankBalances' => $bankBalances,
             'pendingActions' => $pendingActions,
             'recentActivity' => $recentActivity,
+            'dashboardGraphs' => $dashboardGraphs,
             'features' => [
                 'transfers' => $canTransfers,
                 'reports' => $canReports,
@@ -125,6 +134,7 @@ class DashboardSummaryService
                 'reports' => "{$savingsBase}/reports",
             ],
             'quickSpend' => $quickSpend,
+            'learnHighlights' => $this->learnHighlightService->recentPosts(),
         ];
     }
 
