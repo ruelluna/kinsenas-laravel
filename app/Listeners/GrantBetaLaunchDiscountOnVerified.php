@@ -22,7 +22,11 @@ class GrantBetaLaunchDiscountOnVerified
 
         $user = $user->fresh();
 
-        $tagsToAdd = [GhlTagCatalog::EMAIL_VERIFIED];
+        $tagsToAdd = [
+            GhlTagCatalog::KINSENAS_USER,
+            GhlTagCatalog::REGISTERED,
+            GhlTagCatalog::EMAIL_VERIFIED,
+        ];
 
         if ($user->beta_enrolled_at !== null) {
             $tagsToAdd[] = GhlTagCatalog::KINSENAS_BETA;

@@ -78,7 +78,18 @@ class GhlMarketingService
 
     public function syncUserTags(User $user, array $tagsToAdd = [], array $tagsToRemove = [], array $context = []): void
     {
-        if (! $this->guardEnabled(array_merge($context, ['user_id' => $user->id]))) {
+        $context = array_merge($context, ['user_id' => $user->id]);
+
+        if (! $user->hasVerifiedEmail()) {
+            Log::info('GHL sync skipped', [
+                ...$context,
+                'reason' => 'email_unverified',
+            ]);
+
+            return;
+        }
+
+        if (! $this->guardEnabled($context)) {
             return;
         }
 
