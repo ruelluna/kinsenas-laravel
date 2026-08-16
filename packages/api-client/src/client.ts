@@ -9,6 +9,7 @@ import type {
     DashboardInvitation,
     DashboardPageProps,
     DeductionMode,
+    FundGraphData,
     FundSpend,
     FundTransfer,
     IncomeDistributionTodoCompleteResponse,
@@ -747,10 +748,24 @@ export class KinsenasApiClient {
         },
 
         reports: {
-            index: (teamId: number) =>
-                this.request<{ data: ReportTotals }>(
-                    this.teamPath(teamId, '/savings/reports'),
-                ),
+            index: (teamId: number, params?: { from?: string; to?: string }) => {
+                const search = new URLSearchParams();
+
+                if (params?.from) {
+                    search.set('from', params.from);
+                }
+
+                if (params?.to) {
+                    search.set('to', params.to);
+                }
+
+                const query = search.toString();
+                const path = `${this.teamPath(teamId, '/savings/reports')}${query ? `?${query}` : ''}`;
+
+                return this.request<{ data: ReportTotals; graphs: FundGraphData }>(
+                    path,
+                );
+            },
         },
     };
 }
