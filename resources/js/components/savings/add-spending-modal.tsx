@@ -15,6 +15,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { formatMoney } from '@/lib/format-money';
+import {
+    fundBucketOptionLabel,
+    remainingByCategoryId,
+} from '@/lib/fund-bucket-option-label';
 import type { SharedData } from '@/types';
 import type { FundBalance } from '@/types/savings';
 
@@ -80,6 +84,11 @@ function AddSpendingForm({
         [fundBalances, selectedCategoryId],
     );
 
+    const balanceByCategoryId = useMemo(
+        () => remainingByCategoryId(fundBalances),
+        [fundBalances],
+    );
+
     const projectedRemaining = remainingAfterSpend(
         selectedBalance?.remaining ?? null,
         amount,
@@ -108,6 +117,7 @@ function AddSpendingForm({
                             id="category_id"
                             name="category_id"
                             className="h-9 rounded-md border border-input px-3 text-sm"
+                            data-test="spending-fund-select"
                             value={selectedCategoryId}
                             onChange={(event) =>
                                 setSelectedCategoryId(event.target.value)
@@ -116,7 +126,11 @@ function AddSpendingForm({
                         >
                             {categories.map((category) => (
                                 <option key={category.id} value={category.id}>
-                                    {category.name}
+                                    {fundBucketOptionLabel(
+                                        category.name,
+                                        balanceByCategoryId.get(category.id) ??
+                                            null,
+                                    )}
                                 </option>
                             ))}
                         </select>
