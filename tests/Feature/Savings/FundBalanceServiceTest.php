@@ -2,6 +2,7 @@
 
 use App\Models\Bank;
 use App\Models\FundSpend;
+use App\Models\FundSpendReimbursement;
 use App\Models\FundTransfer;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlan;
@@ -240,4 +241,150 @@ it('includes opening balances in remaining before locked income', function () {
     expect($everydayBalance['openingBalance'])->toBe('15000.00')
         ->and($everydayBalance['allocated'])->toBe('0.00')
         ->and($everydayBalance['remaining'])->toBe('15000.00');
+});
+
+it('calculates percent used against full spendable pool when opening balance exists', function () {
+    $user = User::factory()->create();
+    test()->unlockVaultFor($user);
+
+    $template = SavingsFormulaTemplate::query()->where('slug', 'abundant-formula')->firstOrFail();
+
+    test()->actingAs($user)->post(route('savings.plan.from-template', [
+        'current_team' => $user->currentTeam->slug,
+        'template' => $template->id,
+    ]));
+
+    test()->actingAs($user)->post(route('savings.income.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'name' => 'January salary',
+        'amount' => '50000.00',
+        'period_start' => '2026-01-01',
+    ]);
+
+    $plan = SavingsPlan::query()->with('categories')->firstOrFail();
+    $everyday = $plan->categories->firstWhere('name', 'Everyday Fund');
+    $everyday->update(['opening_balance_encrypted' => '20000.00']);
+
+    FundSpend::factory()->create([
+        'savings_plan_id' => $plan->id,
+        'category_id' => $everyday->id,
+        'amount_encrypted' => '50000.00',
+        'spent_on' => '2026-01-15',
+    ]);
+
+    $service = app(FundBalanceService::class);
+    $balances = $service->balancesForPlan($plan->fresh('categories'));
+    $everydayBalance = collect($balances)->firstWhere('name', 'Everyday Fund');
+
+    expect($everydayBalance['allocated'])->toBe('35000.00')
+        ->and($everydayBalance['openingBalance'])->toBe('20000.00')
+        ->and($everydayBalance['spent'])->toBe('50000.00')
+        ->and($everydayBalance['remaining'])->toBe('5000.00')
+        ->and($everydayBalance['percentUsed'])->toBe(90.9);
+});
+
+it('calculates percent used for opening-balance-only buckets before income', function () {
+    $user = User::factory()->create();
+    test()->unlockVaultFor($user);
+
+    $template = SavingsFormulaTemplate::query()->where('slug', 'abundant-formula')->firstOrFail();
+
+    test()->actingAs($user)->post(route('savings.plan.from-template', [
+        'current_team' => $user->currentTeam->slug,
+        'template' => $template->id,
+    ]));
+
+    $plan = SavingsPlan::query()->with('categories')->firstOrFail();
+    $everyday = $plan->categories->firstWhere('name', 'Everyday Fund');
+    $everyday->update(['opening_balance_encrypted' => '15000.00']);
+
+    FundSpend::factory()->create([
+        'savings_plan_id' => $plan->id,
+        'category_id' => $everyday->id,
+        'amount_encrypted' => '5000.00',
+        'spent_on' => '2026-01-10',
+    ]);
+
+    $service = app(FundBalanceService::class);
+    $balances = $service->balancesForPlan($plan->fresh('categories'));
+    $everydayBalance = collect($balances)->firstWhere('name', 'Everyday Fund');
+
+    expect($everydayBalance['allocated'])->toBe('0.00')
+        ->and($everydayBalance['remaining'])->toBe('10000.00')
+        ->and($everydayBalance['percentUsed'])->toBe(33.3);
+});
+
+it('lowers percent used when spending is fully reimbursed', function () {
+    $user = User::factory()->create();
+    $plan = setupLockedPlan($user, '50000.00');
+    $everyday = $plan->categories->firstWhere('name', 'Everyday Fund');
+
+    $spend = FundSpend::factory()->create([
+        'savings_plan_id' => $plan->id,
+        'category_id' => $everyday->id,
+        'amount_encrypted' => '10000.00',
+        'spent_on' => '2026-01-15',
+    ]);
+
+    FundSpendReimbursement::factory()->create([
+        'fund_spend_id' => $spend->id,
+        'savings_plan_id' => $plan->id,
+        'category_id' => $everyday->id,
+        'amount_encrypted' => '10000.00',
+        'received_on' => '2026-01-20',
+    ]);
+
+    $service = app(FundBalanceService::class);
+    $balances = $service->balancesForPlan($plan->fresh('categories'));
+    $everydayBalance = collect($balances)->firstWhere('name', 'Everyday Fund');
+
+    expect($everydayBalance['spent'])->toBe('10000.00')
+        ->and($everydayBalance['remaining'])->toBe('25000.00')
+        ->and($everydayBalance['percentUsed'])->toBe(0.0);
+});
+
+it('does not inflate percent used for transfer-only activity', function () {
+    $user = User::factory()->create();
+    $plan = setupLockedPlan($user, '50000.00');
+    $everydayCategory = $plan->categories->firstWhere('name', 'Everyday Fund');
+    $bank = Bank::factory()->create(['team_id' => $user->currentTeam->id]);
+
+    FundTransfer::factory()->confirmed()->create([
+        'savings_plan_id' => $plan->id,
+        'from_category_id' => $everydayCategory->id,
+        'to_category_id' => $plan->categories->firstWhere('name', 'Empower Fund')->id,
+        'from_bank_id' => $bank->id,
+        'to_bank_id' => $bank->id,
+        'amount_encrypted' => '4000.00',
+    ]);
+
+    $service = app(FundBalanceService::class);
+    $balances = $service->balancesForPlan($plan->fresh('categories'));
+    $everyday = collect($balances)->firstWhere('name', 'Everyday Fund');
+
+    expect($everyday['transferred'])->toBe('4000.00')
+        ->and($everyday['spent'])->toBe('0.00')
+        ->and($everyday['remaining'])->toBe('21000.00')
+        ->and($everyday['percentUsed'])->toBe(0.0);
+});
+
+it('reports one hundred percent used when the spendable pool is fully consumed', function () {
+    $user = User::factory()->create();
+    $plan = setupLockedPlan($user, '50000.00');
+    $everyday = $plan->categories->firstWhere('name', 'Everyday Fund');
+
+    FundSpend::factory()->create([
+        'savings_plan_id' => $plan->id,
+        'category_id' => $everyday->id,
+        'amount_encrypted' => '25000.00',
+        'spent_on' => '2026-01-15',
+    ]);
+
+    $service = app(FundBalanceService::class);
+    $balances = $service->balancesForPlan($plan->fresh('categories'));
+    $everydayBalance = collect($balances)->firstWhere('name', 'Everyday Fund');
+
+    expect($everydayBalance['remaining'])->toBe('0.00')
+        ->and($everydayBalance['percentUsed'])->toBe(100.0);
 });

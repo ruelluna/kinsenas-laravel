@@ -94,9 +94,17 @@ class FundBalanceService
                     );
                 $percentUsed = null;
 
-                if ($dek !== null && bccomp($allocated, '0', 2) === 1) {
-                    $drawn = bcsub(bcadd($transferredOut, $spent, 2), $receivedIn, 2);
-                    $percentUsed = round((float) bcdiv(bcmul($drawn, '100', 4), $allocated, 2), 1);
+                if ($dek !== null && $effectiveSpent !== null) {
+                    $totalPool = bcadd(
+                        bcadd($openingBalance, bcsub($allocated, $transferredOut, 2), 2),
+                        $receivedIn,
+                        2,
+                    );
+
+                    if (bccomp($totalPool, '0', 2) === 1) {
+                        $percentUsed = round((float) bcdiv(bcmul($effectiveSpent, '100', 4), $totalPool, 2), 1);
+                        $percentUsed = (float) max(0, min(100, $percentUsed));
+                    }
                 }
 
                 $bank = $category->bank;
