@@ -1,24 +1,14 @@
-import { Link } from '@inertiajs/react';
-import { AlertTriangle, Landmark, Wallet } from 'lucide-react';
+import { AlertTriangle, Layers, Wallet } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { formatMoney } from '@/lib/format-money';
-import type {
-    DashboardQuickLinks,
-    DashboardSummary,
-    DashboardSetup,
-} from '@/types/dashboard';
+import type { DashboardSummary, DashboardSetup } from '@/types/dashboard';
 
 type Props = {
     setup: DashboardSetup;
     summary: DashboardSummary;
-    quickLinks: DashboardQuickLinks;
 };
 
-export default function SummaryStatCards({
-    setup,
-    summary,
-    quickLinks,
-}: Props) {
+export default function SummaryStatCards({ setup, summary }: Props) {
     if (!setup.hasPlan) {
         return null;
     }
@@ -27,26 +17,15 @@ export default function SummaryStatCards({
         <div className="grid gap-4 md:grid-cols-3">
             <StatCard
                 icon={Wallet}
-                title="Total remaining"
-                value={formatMoney(summary.totalRemaining)}
-                description="Across all fund buckets"
+                title={summary.defaultFundName ?? 'Everyday fund'}
+                value={formatMoney(summary.defaultFundRemaining)}
+                description={defaultFundDescription(summary.defaultFundName)}
             />
             <StatCard
-                icon={Landmark}
-                title="In banks"
-                value={formatMoney(summary.totalInBanks)}
-                description={
-                    setup.canDrawFromFunds || setup.hasOpeningBalances ? (
-                        <Link
-                            href={quickLinks.banks}
-                            className="text-primary underline-offset-4 transition-colors hover:text-glow hover:underline"
-                        >
-                            View banks
-                        </Link>
-                    ) : (
-                        'Assign banks on your savings plan'
-                    )
-                }
+                icon={Layers}
+                title="Other funds"
+                value={formatMoney(summary.otherFundsRemaining)}
+                description="All other fund buckets"
             />
             <StatCard
                 icon={AlertTriangle}
@@ -57,6 +36,14 @@ export default function SummaryStatCards({
             />
         </div>
     );
+}
+
+function defaultFundDescription(name: string | null): string {
+    if (name === 'Everyday Fund') {
+        return 'Daily expenses';
+    }
+
+    return 'Remaining balance';
 }
 
 function attentionDescription(summary: DashboardSummary): string {

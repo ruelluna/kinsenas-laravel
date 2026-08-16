@@ -111,11 +111,7 @@ export default function Dashboard({
             <div className="flex flex-col gap-4 md:gap-6">
                 <SetupChecklist setup={setup} />
 
-                <SummaryStatCards
-                    setup={setup}
-                    summary={summary}
-                    quickLinks={quickLinks}
-                />
+                <SummaryStatCards setup={setup} summary={summary} />
 
                 {showFinancialSections && (
                     <>

@@ -52,6 +52,9 @@ it('includes allocation metadata on fund balances after income is locked', funct
     $response->assertJsonPath('data.fundBalances.0.name', 'Everyday Fund');
     $response->assertJsonPath('data.fundBalances.0.allocationType', 'percentage');
     $response->assertJsonPath('data.fundBalances.0.percentage', '70.00');
+    $response->assertJsonPath('data.summary.defaultFundName', 'Everyday Fund');
+    $response->assertJsonPath('data.summary.defaultFundRemaining', '35000.00');
+    $response->assertJsonPath('data.summary.otherFundsRemaining', '15000.00');
 });
 
 it('forbids dashboard for non member team', function () {
