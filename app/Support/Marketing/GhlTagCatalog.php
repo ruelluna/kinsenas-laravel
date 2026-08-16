@@ -14,15 +14,7 @@ final class GhlTagCatalog
 
     public const EMAIL_VERIFIED = 'email-verified';
 
-    public const BETA_PENDING = 'beta-pending';
-
-    public const BETA_APPROVED = 'beta-approved';
-
-    public const BETA_REJECTED = 'beta-rejected';
-
     public const BETA_LAUNCH_DISCOUNT_ELIGIBLE = 'beta-launch-discount-eligible';
-
-    public const BETA_CODE_REDEEMED = 'beta-code-redeemed';
 
     public const BANK_ADDED = 'bank-added';
 
@@ -65,32 +57,6 @@ final class GhlTagCatalog
     public const TEAM_MEMBER = 'team-member';
 
     public const TEAM_CREATED = 'team-created';
-
-    /**
-     * @return array{0: list<string>, 1: list<string>}
-     */
-    public static function betaEventTags(string $event): ?array
-    {
-        return match ($event) {
-            'application_submitted' => [
-                [self::KINSENAS_BETA, self::BETA_PENDING],
-                [],
-            ],
-            'application_approved' => [
-                [self::KINSENAS_BETA, self::BETA_APPROVED],
-                [self::BETA_PENDING, self::BETA_REJECTED],
-            ],
-            'application_approved_via_code' => [
-                [self::KINSENAS_BETA, self::BETA_CODE_REDEEMED],
-                [],
-            ],
-            'application_rejected' => [
-                [self::KINSENAS_BETA, self::BETA_REJECTED],
-                [self::BETA_PENDING, self::BETA_APPROVED],
-            ],
-            default => null,
-        };
-    }
 
     public static function institutionBankAddedTag(string $slug): string
     {
@@ -146,11 +112,7 @@ final class GhlTagCatalog
             self::KINSENAS_SURVEY,
             self::REGISTERED,
             self::EMAIL_VERIFIED,
-            self::BETA_PENDING,
-            self::BETA_APPROVED,
-            self::BETA_REJECTED,
             self::BETA_LAUNCH_DISCOUNT_ELIGIBLE,
-            self::BETA_CODE_REDEEMED,
             self::BANK_ADDED,
             self::GOTYME_GOSAVE_SETUP,
             self::PLAN_CREATED,

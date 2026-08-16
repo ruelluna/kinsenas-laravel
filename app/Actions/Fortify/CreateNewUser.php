@@ -51,7 +51,6 @@ class CreateNewUser implements CreatesNewUsers
             ...$this->profileRules(),
             'password' => $this->passwordRules(),
             'marketing_emails_opt_in' => ['sometimes', 'boolean'],
-            'beta_code' => ['nullable', 'string', 'max:32'],
         ])->validate();
 
         $marketingEmailsOptIn = filter_var($input['marketing_emails_opt_in'] ?? false, FILTER_VALIDATE_BOOLEAN);
@@ -67,10 +66,7 @@ class CreateNewUser implements CreatesNewUsers
 
             $this->createTeam->handle($user, isPersonal: true);
 
-            $this->betaApplicationService->applyWithOptionalCode(
-                $user,
-                $input['beta_code'] ?? null,
-            );
+            $this->betaApplicationService->enroll($user);
 
             $this->ghlUserTagService->dispatch(
                 $user,

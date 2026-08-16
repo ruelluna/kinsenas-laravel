@@ -2,8 +2,6 @@
 
 namespace App\Listeners;
 
-use App\Enums\BetaApplicationStatus;
-use App\Jobs\SyncBetaApplicationToGhl;
 use App\Services\Billing\BetaApplicationService;
 use App\Services\Marketing\GhlUserTagService;
 use App\Support\Marketing\GhlTagCatalog;
@@ -24,14 +22,13 @@ class GrantBetaLaunchDiscountOnVerified
 
         $user = $user->fresh();
 
-        if ($user->beta_application_status === BetaApplicationStatus::Approved) {
-            SyncBetaApplicationToGhl::dispatch($user, 'application_approved')->afterCommit();
-        }
-
         $tagsToAdd = [GhlTagCatalog::EMAIL_VERIFIED];
 
-        if ($user->beta_application_status === BetaApplicationStatus::Approved
-            && $user->beta_launch_discount_eligible) {
+        if ($user->beta_enrolled_at !== null) {
+            $tagsToAdd[] = GhlTagCatalog::KINSENAS_BETA;
+        }
+
+        if ($user->beta_enrolled_at !== null && $user->beta_launch_discount_eligible) {
             $tagsToAdd[] = GhlTagCatalog::BETA_LAUNCH_DISCOUNT_ELIGIBLE;
         }
 

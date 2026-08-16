@@ -148,7 +148,6 @@ export class KinsenasApiClient {
             password: string;
             password_confirmation: string;
             marketing_emails_opt_in?: boolean;
-            beta_code?: string | null;
             device_name?: string;
         }) =>
             this.request<{ token: string; user: User; recovery_key: string }>(
@@ -159,13 +158,10 @@ export class KinsenasApiClient {
                 },
             ),
 
-        registerContext: (params?: { invitation?: string; beta_code?: string }) => {
+        registerContext: (params?: { invitation?: string }) => {
             const search = new URLSearchParams();
             if (params?.invitation) {
                 search.set('invitation', params.invitation);
-            }
-            if (params?.beta_code) {
-                search.set('beta_code', params.beta_code);
             }
             const query = search.toString();
 

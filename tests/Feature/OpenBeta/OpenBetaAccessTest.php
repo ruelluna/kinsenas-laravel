@@ -17,8 +17,8 @@ beforeEach(function () {
     config(['teams.allow_additional_owned_teams' => true]);
 });
 
-it('grants access to teams with past due subscriptions during open beta when approved', function () {
-    $user = User::factory()->betaApproved()->create(['email' => 'beta-access@example.com']);
+it('grants access to teams with past due subscriptions during open beta', function () {
+    $user = User::factory()->betaParticipant()->create(['email' => 'beta-access@example.com']);
     $this->unlockVaultFor($user);
     $sharedTeam = app(CreateTeam::class)->handle($user, 'Beta Shared Team', isPersonal: false);
 
@@ -29,17 +29,18 @@ it('grants access to teams with past due subscriptions during open beta when app
     $response->assertOk();
 });
 
-it('redirects pending beta applicants from the dashboard', function () {
-    $user = User::factory()->betaPending()->create(['email' => 'pending@example.com']);
+it('allows verified beta participants to access the dashboard', function () {
+    $user = User::factory()->betaParticipant()->create(['email' => 'participant@example.com']);
+    $this->unlockVaultFor($user);
     $team = $user->personalTeam();
 
     $response = $this->actingAs($user)->get(route('dashboard', ['current_team' => $team->slug]));
 
-    $response->assertRedirect(route('beta.pending'));
+    $response->assertOk();
 });
 
 it('creates shared teams with open beta subscription instead of past due', function () {
-    $owner = User::factory()->betaApproved()->create(['email' => 'shared-beta@example.com']);
+    $owner = User::factory()->betaParticipant()->create(['email' => 'shared-beta@example.com']);
 
     $sharedTeam = app(CreateTeam::class)->handle($owner, 'Side Business', isPersonal: false);
 
@@ -48,7 +49,7 @@ it('creates shared teams with open beta subscription instead of past due', funct
 });
 
 it('blocks payment submissions during open beta', function () {
-    $owner = User::factory()->betaApproved()->create(['email' => 'owner-beta@example.com']);
+    $owner = User::factory()->betaParticipant()->create(['email' => 'owner-beta@example.com']);
     app(CreateTeam::class)->handle($owner, 'Beta Team', isPersonal: false);
 
     $response = $this->actingAs($owner)->get(route('billing.pay'));
@@ -57,8 +58,8 @@ it('blocks payment submissions during open beta', function () {
     $response->assertSessionHas('error');
 });
 
-it('does not lock approved users out when switching to a past due team during open beta', function () {
-    $user = User::factory()->betaApproved()->create(['email' => 'switch-beta@example.com']);
+it('does not lock beta participants out when switching to a past due team during open beta', function () {
+    $user = User::factory()->betaParticipant()->create(['email' => 'switch-beta@example.com']);
     $this->unlockVaultFor($user);
     $sharedTeam = Team::factory()->create(['name' => 'Locked Team']);
     $sharedTeam->members()->attach($user, ['role' => TeamRole::Owner->value]);

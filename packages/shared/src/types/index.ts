@@ -88,7 +88,7 @@ export type ApiSharedProps = {
     billingMode: string;
     openBeta?: {
         isActive: boolean;
-        isApproved: boolean;
+        isParticipant: boolean;
     };
 };
 

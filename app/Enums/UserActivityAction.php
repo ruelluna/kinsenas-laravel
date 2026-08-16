@@ -33,8 +33,6 @@ enum UserActivityAction: string
     case BillingPaymentSubmitted = 'billing.payment_submitted';
     case BillingPaymentApproved = 'billing.payment_approved';
     case BillingPaymentRejected = 'billing.payment_rejected';
-    case AdminBetaApplicationApproved = 'admin.beta_application.approved';
-    case AdminBetaApplicationRejected = 'admin.beta_application.rejected';
     case AdminPlatformUserUpdated = 'admin.platform_user.updated';
     case AdminPlatformUserDeleted = 'admin.platform_user.deleted';
 
@@ -70,8 +68,6 @@ enum UserActivityAction: string
             self::BillingPaymentSubmitted => 'Payment submitted',
             self::BillingPaymentApproved => 'Payment approved',
             self::BillingPaymentRejected => 'Payment rejected',
-            self::AdminBetaApplicationApproved => 'Beta application approved',
-            self::AdminBetaApplicationRejected => 'Beta application rejected',
             self::AdminPlatformUserUpdated => 'Platform user updated',
             self::AdminPlatformUserDeleted => 'Platform user deleted',
         };

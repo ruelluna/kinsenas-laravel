@@ -22,10 +22,9 @@ export default function VerifyEmail({ status }: { status?: string }) {
                 </p>
                 {openBeta.isActive && (
                     <p>
-                        After you verify your email, your beta application goes
-                        to our team for review. Once approved, you can use the
-                        core savings planner with your real account — free
-                        during beta. {BETA_FREE_MESSAGE}
+                        After you verify your email, you can use the core
+                        savings planner with your real account — free during
+                        beta. {BETA_FREE_MESSAGE}
                     </p>
                 )}
             </div>

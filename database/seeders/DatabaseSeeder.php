@@ -37,10 +37,11 @@ class DatabaseSeeder extends Seeder
         //     );
         // }
 
-        // User::factory()->create([
-        //     'name' => 'Platform Admin',
-        //     'email' => 'admin@example.com',
-        //     'is_platform_admin' => true,
-        // ]);
+        User::factory()->create([
+            'name' => 'Platform Admin',
+            'email' => 'admin@example.com',
+            'is_platform_admin' => true,
+            'email_verified_at' => now(),
+        ]);
     }
 }

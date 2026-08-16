@@ -2,7 +2,6 @@
 
 use App\Http\Middleware\BindVaultKeyStore;
 use App\Http\Middleware\EnsureApiTeamScope;
-use App\Http\Middleware\EnsureBetaApproved;
 use App\Http\Middleware\EnsurePlatformAdmin;
 use App\Http\Middleware\EnsureSavingsPlan;
 use App\Http\Middleware\EnsureSubscribedOrTrialing;
@@ -33,7 +32,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'subscribed.feature' => EnsureSubscriptionFeature::class,
             'savings.plan.required' => EnsureSavingsPlan::class,
             'platform.admin' => EnsurePlatformAdmin::class,
-            'beta.approved' => EnsureBetaApproved::class,
             'api.team' => EnsureApiTeamScope::class,
         ]);
 
