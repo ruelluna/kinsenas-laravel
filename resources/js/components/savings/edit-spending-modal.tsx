@@ -15,6 +15,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { formatMoney } from '@/lib/format-money';
+import {
+    fundBucketOptionLabel,
+    remainingByCategoryId,
+} from '@/lib/fund-bucket-option-label';
 import type { SharedData } from '@/types';
 import type { FundBalance, FundSpend } from '@/types/savings';
 
@@ -91,6 +95,11 @@ function EditSpendingForm({
         [fundBalances, selectedCategoryId],
     );
 
+    const balanceByCategoryId = useMemo(
+        () => remainingByCategoryId(fundBalances),
+        [fundBalances],
+    );
+
     const projectedRemaining = remainingAfterSpend(
         selectedBalance?.remaining ?? null,
         amount,
@@ -120,6 +129,7 @@ function EditSpendingForm({
                             id="edit_category_id"
                             name="category_id"
                             className="h-9 rounded-md border border-input px-3 text-sm"
+                            data-test="edit-spending-fund-select"
                             value={selectedCategoryId}
                             onChange={(event) =>
                                 setSelectedCategoryId(event.target.value)
@@ -128,7 +138,11 @@ function EditSpendingForm({
                         >
                             {categories.map((category) => (
                                 <option key={category.id} value={category.id}>
-                                    {category.name}
+                                    {fundBucketOptionLabel(
+                                        category.name,
+                                        balanceByCategoryId.get(category.id) ??
+                                            null,
+                                    )}
                                 </option>
                             ))}
                         </select>
@@ -292,7 +306,11 @@ function EditSpendingForm({
 
                     <DialogFooter className="gap-2">
                         <DialogClose asChild>
-                            <Button type="button" variant="secondary">
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                data-test="edit-spending-cancel"
+                            >
                                 Cancel
                             </Button>
                         </DialogClose>
