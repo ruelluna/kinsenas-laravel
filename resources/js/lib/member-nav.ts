@@ -11,8 +11,8 @@ import {
     Users,
     Wallet,
 } from 'lucide-react';
-import { dashboard } from '@/routes';
 import { toUrl } from '@/lib/utils';
+import { dashboard } from '@/routes';
 import type { NavItem, SharedData } from '@/types';
 
 export type MemberNavConfig = {

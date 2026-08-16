@@ -47,6 +47,14 @@ it('forbids non admin from managing series', function () {
         ->assertForbidden();
 });
 
+it('forbids author from managing series', function () {
+    $author = User::factory()->author()->create();
+
+    $this->actingAs($author)
+        ->get(route('admin.content.series.index'))
+        ->assertForbidden();
+});
+
 it('lists series for platform admin', function () {
     $admin = User::factory()->platformAdmin()->create();
     ContentSeries::factory()->create(['title' => 'Listed series']);

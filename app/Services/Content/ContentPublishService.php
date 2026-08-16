@@ -139,7 +139,7 @@ class ContentPublishService
         }
 
         if ($existing === null || array_key_exists('author_id', $attributes)) {
-            $attributes['author_id'] = $author->id;
+            $attributes['author_id'] = $this->resolveAuthorId($attributes, $author, $existing);
         }
 
         if (empty($attributes['slug']) && ! empty($attributes['title'])) {
@@ -147,6 +147,22 @@ class ContentPublishService
         }
 
         return $attributes;
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    private function resolveAuthorId(array $attributes, User $actor, ?ContentPost $existing): int
+    {
+        if ($actor->canManagePlatform() && filled($attributes['author_id'] ?? null)) {
+            return (int) $attributes['author_id'];
+        }
+
+        if ($existing !== null && $existing->author_id !== null) {
+            return $existing->author_id;
+        }
+
+        return $actor->id;
     }
 
     private function logPostPublished(ContentPost $post, User $author): void

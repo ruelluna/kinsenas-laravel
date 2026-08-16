@@ -154,6 +154,20 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return $this->can(PlatformPermission::ManageContent->value);
     }
 
+    public function canManageAllContent(): bool
+    {
+        return $this->canManagePlatform();
+    }
+
+    public function canManageContentPost(ContentPost $post): bool
+    {
+        if ($this->canManagePlatform()) {
+            return true;
+        }
+
+        return $this->canManageContent() && $post->author_id === $this->id;
+    }
+
     public function isBetaParticipant(): bool
     {
         return $this->beta_enrolled_at !== null;

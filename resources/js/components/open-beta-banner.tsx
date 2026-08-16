@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
-import { PublicBetaAlert } from '@/components/public-beta-alert';
 import { pageContentPaddingX } from '@/components/page-content';
+import { PublicBetaAlert } from '@/components/public-beta-alert';
 import { useDismissibleBanner } from '@/hooks/use-dismissible-banner';
 import { OPEN_BETA_BANNER_DISMISS_KEY } from '@/lib/dismissible-banner';
 import { cn } from '@/lib/utils';

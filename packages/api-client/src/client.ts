@@ -115,6 +115,7 @@ export class KinsenasApiClient {
                 message?: string;
                 errors?: Record<string, string[]>;
             };
+
             throw new ApiError(
                 body.message ?? `Request failed (${response.status})`,
                 response.status,
@@ -161,9 +162,11 @@ export class KinsenasApiClient {
 
         registerContext: (params?: { invitation?: string }) => {
             const search = new URLSearchParams();
+
             if (params?.invitation) {
                 search.set('invitation', params.invitation);
             }
+
             const query = search.toString();
 
             return this.request<RegisterContext>(
@@ -302,6 +305,7 @@ export class KinsenasApiClient {
                 const form = new FormData();
                 form.append('plan_price_id', payload.plan_price_id);
                 form.append('reference_number', payload.reference_number);
+
                 if (payload.proof_image) {
                     form.append('proof_image', payload.proof_image);
                 }
@@ -611,21 +615,26 @@ export class KinsenasApiClient {
                 form.append('amount', String(payload.amount));
                 form.append('description', payload.description);
                 form.append('spent_on', payload.spent_on);
+
                 if (payload.bank_id) {
                     form.append('bank_id', payload.bank_id);
                 }
+
                 if (payload.recipient_id) {
                     form.append('recipient_id', payload.recipient_id);
                 }
+
                 if (payload.expects_reimbursement) {
                     form.append('expects_reimbursement', '1');
                 }
+
                 if (payload.expected_from_recipient_id) {
                     form.append(
                         'expected_from_recipient_id',
                         payload.expected_from_recipient_id,
                     );
                 }
+
                 if (payload.receipt_image) {
                     form.append('receipt_image', payload.receipt_image);
                 }
@@ -654,12 +663,15 @@ export class KinsenasApiClient {
                 form.append('amount', String(payload.amount));
                 form.append('description', payload.description);
                 form.append('spent_on', payload.spent_on);
+
                 if (payload.recipient_id) {
                     form.append('recipient_id', payload.recipient_id);
                 }
+
                 if (payload.receipt_image) {
                     form.append('receipt_image', payload.receipt_image);
                 }
+
                 if (payload.remove_receipt) {
                     form.append('remove_receipt', '1');
                 }

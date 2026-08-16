@@ -2,8 +2,8 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import LearnMarketingShell from '@/components/learn/learn-marketing-shell';
 import { Badge } from '@/components/ui/badge';
 import { dashboard } from '@/routes';
-import type { ContentPostSummary, ContentSeriesSummary } from '@/types/content';
 import type { SharedData } from '@/types';
+import type { ContentPostSummary, ContentSeriesSummary } from '@/types/content';
 
 type Episode = ContentPostSummary & { isRead: boolean };
 

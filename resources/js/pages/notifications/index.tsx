@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { NotificationList } from '@/components/notifications/notification-list';
 import Heading from '@/components/heading';
+import { NotificationList } from '@/components/notifications/notification-list';
 import { Button } from '@/components/ui/button';
 import type { NotificationItem } from '@/types/notifications';
 

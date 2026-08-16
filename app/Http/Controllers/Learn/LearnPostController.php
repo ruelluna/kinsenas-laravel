@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Learn;
 
 use App\Enums\ContentEngagementSource;
 use App\Enums\ContentPostStatus;
-use App\Enums\PlatformPermission;
 use App\Http\Controllers\Controller;
 use App\Models\ContentPost;
 use App\Services\Content\ContentEngagementService;
@@ -74,7 +73,7 @@ class LearnPostController extends Controller
 
     public function preview(Request $request, ContentPost $post): Response
     {
-        abort_unless($request->user()?->can(PlatformPermission::ManageContent->value), 403);
+        abort_unless($request->user()?->canManageContentPost($post), 403);
 
         $post->load(['series', 'author']);
 

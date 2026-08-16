@@ -1,21 +1,34 @@
 import { Form, Head, Link } from '@inertiajs/react';
+import ContentPostFormFields from '@/components/admin/content-post-form-fields';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import ContentPostFormFields from '@/components/admin/content-post-form-fields';
+
+type AuthorOption = {
+    id: number;
+    name: string;
+};
 
 type Props = {
     seriesOptions: Array<{ id: string; title: string }>;
+    authorOptions: AuthorOption[];
+    canAssignAuthor: boolean;
 };
 
-export default function AdminContentPostsCreate({ seriesOptions }: Props) {
+export default function AdminContentPostsCreate({
+    seriesOptions,
+    authorOptions,
+    canAssignAuthor,
+}: Props) {
     return (
         <>
             <Head title="Admin — New post" />
             <Heading variant="small" title="New post" />
             <Form action="/admin/content/posts" method="post" className="mt-6 max-w-3xl space-y-4">
-                <ContentPostFormFields seriesOptions={seriesOptions} />
+                <ContentPostFormFields
+                    seriesOptions={seriesOptions}
+                    authorOptions={authorOptions}
+                    canAssignAuthor={canAssignAuthor}
+                />
                 <div className="flex gap-2">
                     <Button type="submit">Create post</Button>
                     <Button variant="outline" asChild>

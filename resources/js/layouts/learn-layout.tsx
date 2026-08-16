@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
 import { usePage } from '@inertiajs/react';
+import type { ReactNode } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import type { SharedData } from '@/types';
 

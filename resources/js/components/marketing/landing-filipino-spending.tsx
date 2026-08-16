@@ -6,16 +6,18 @@ import {
     ShoppingBag,
     TrendingUp,
     Users,
-    Wallet,
-    type LucideIcon,
+    Wallet
+    
 } from 'lucide-react';
+import type {LucideIcon} from 'lucide-react';
 import {
     KINSENAS_PAYDAY_LINES,
     SAMPLE_INCOME,
     SAMPLE_SAVED_AMOUNT,
-    USUAL_PAYDAY_LINES,
-    type ComparisonLine,
+    USUAL_PAYDAY_LINES
+    
 } from '@/components/marketing/landing-content';
+import type {ComparisonLine} from '@/components/marketing/landing-content';
 import { formatMoney } from '@/lib/format-money';
 
 const ICONS: Record<string, LucideIcon> = {

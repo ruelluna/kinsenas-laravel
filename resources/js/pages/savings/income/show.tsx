@@ -2,13 +2,13 @@ import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import Heading from '@/components/heading';
-import DeleteIncomeModal from '@/components/savings/delete-income-modal';
-import FundBankBadge from '@/components/savings/fund-bank-badge';
-import IncomeDistributionTodos from '@/components/savings/income-distribution-todos';
 import {
     MobileMetricCard,
     MobileMetricCardList,
 } from '@/components/mobile/mobile-metric-card';
+import DeleteIncomeModal from '@/components/savings/delete-income-modal';
+import FundBankBadge from '@/components/savings/fund-bank-badge';
+import IncomeDistributionTodos from '@/components/savings/income-distribution-todos';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

@@ -1,0 +1,64 @@
+---
+description: Stage task-scoped files when delivering a breakdown or implementation summary — never commit
+alwaysApply: true
+---
+
+# Breakdown staging (Kinsenas)
+
+When a task finishes with a **breakdown file** (`.cursor/breakdowns/`) or an **implementation summary** (changelog bullets at end of reply), **stage all files for that task** so the user can commit manually. Multiple agents or tasks may modify the repo at once — staging must be **scoped to this task only**.
+
+Related: [plan-implementation.mdc](./plan-implementation.mdc).
+
+## When to stage
+
+| Trigger | Stage? |
+| ------- | ------ |
+| Full workflow — breakdown + implementation summary | **Yes** |
+| Lightweight workflow — implementation summary only (no breakdown) | **Yes**, if app/docs/rules files changed |
+| Question-only / review-only — no code or breakdown | No |
+
+Run staging **before** the final reply, after tests and formatting are done.
+
+## What to stage
+
+Stage every path that belongs to **this task**:
+
+1. Breakdown file (`.cursor/breakdowns/YYYYMMDD-HHMM-<task-slug>-breakdown.md`)
+2. Plan file when this task created or updated one (`.cursor/plans/…`)
+3. Every path under **Files touched** in the breakdown (or the equivalent list you would put there)
+4. Any new/edited files from this session that support the same feature but were easy to miss (generated routes, lockfiles when deps changed, etc.)
+
+**Do not** stage files you did not touch for this task, even if they appear in `git status`.
+
+## Concurrent tasks — strict boundaries
+
+- **Never** `git add .`, `git add -A`, or `git add -u` without explicit paths.
+- **Never** `git reset`, `git restore --staged`, or otherwise unstage files — other tasks may already have staged theirs.
+- **Never** `git commit` or `git push` unless the user explicitly asks ([plan-implementation.mdc](./plan-implementation.mdc) §5).
+- If a file was edited for multiple tasks and you cannot split it, **do not stage it**; note in the reply that it needs a manual decision.
+
+## How to stage
+
+Use explicit paths (one `git add` with multiple paths is fine):
+
+```bash
+git add .cursor/breakdowns/20260817-0438-example-breakdown.md app/Http/Controllers/ExampleController.php resources/js/pages/example.tsx
+```
+
+On Windows/PowerShell, quote paths that contain spaces or brackets.
+
+## Report in the final reply
+
+After staging, include a short **Staged for commit** block:
+
+```markdown
+## Staged for commit
+
+- `.cursor/breakdowns/…-breakdown.md`
+- `app/…`
+- `resources/js/…`
+
+**Not staged** (other work / shared edits): `path/if/any`
+```
+
+If nothing was staged (no file changes), say so — do not run `git add` unnecessarily.

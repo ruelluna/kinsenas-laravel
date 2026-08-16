@@ -29,7 +29,7 @@ export type ContentPostSummary = {
 
 export type ContentPostAdmin = ContentPostSummary & {
     contentSeriesId: string | null;
-    authorId: string | null;
+    authorId: number | null;
 };
 
 export type ContentSeriesAdmin = ContentSeriesSummary & {

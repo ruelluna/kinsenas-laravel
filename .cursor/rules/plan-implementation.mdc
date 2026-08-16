@@ -103,7 +103,9 @@ Include applicable items in breakdowns and Linear comments:
 - `npm run dev` or `npm run build` — if `resources/js/` changed
 - Manual check in Herd: `http://financial-literacy.test`
 
-## 5. Commit messages (suggest only)
+## 5. Stage task files + commit messages (suggest only)
+
+**Stage, do not commit.** Before the final reply, follow [breakdown-staging.mdc](./breakdown-staging.mdc): `git add` every file for this task (breakdown, plan if any, **Files touched**, related generated/lockfile changes) using explicit paths — never `git add .` or unstage other work. Include a **Staged for commit** list in the reply.
 
 Do **not** commit unless the user asks. At the end of plan implementation, provide suggested commits the user can copy.
 
@@ -290,6 +292,7 @@ Before finishing, confirm in the reply:
 - [ ] Test commands suggested in breakdown (Feature + Browser when applicable)
 - [ ] Docs updated (or N/A — not requested / no user-facing guide needed)
 - [ ] Docs: no `php artisan`, shell blocks, or `.cursor/` references (per `documentation.mdc`)
+- [ ] Task files staged per [breakdown-staging.mdc](./breakdown-staging.mdc) — **Staged for commit** block in reply (or N/A — no file changes)
 - [ ] Suggested application commit summary + body
 - [ ] Suggested doc commit if applicable
 - [ ] Implementation summary (title + bullets)

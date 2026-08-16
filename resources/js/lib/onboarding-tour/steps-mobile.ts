@@ -1,7 +1,8 @@
 import {
-    ONBOARDING_TOUR_STEP_DEFINITIONS,
-    type OnboardingTourStepBase,
+    ONBOARDING_TOUR_STEP_DEFINITIONS
+    
 } from '@/lib/onboarding-tour/steps-shared';
+import type {OnboardingTourStepBase} from '@/lib/onboarding-tour/steps-shared';
 
 export type OnboardingTourMobileStep = OnboardingTourStepBase & {
     openMoreSheet?: boolean;

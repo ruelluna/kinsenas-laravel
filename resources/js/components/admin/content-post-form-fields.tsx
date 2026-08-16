@@ -1,3 +1,4 @@
+import TiptapEditor from '@/components/admin/tiptap-editor';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { ContentPostAdmin } from '@/types/content';
@@ -5,14 +6,44 @@ import type { ContentPostAdmin } from '@/types/content';
 const textareaClassName =
     'border-input min-h-24 w-full rounded-md border px-3 py-2 text-sm shadow-xs outline-none';
 
+type AuthorOption = {
+    id: number;
+    name: string;
+};
+
 type Props = {
     post?: ContentPostAdmin;
     seriesOptions: Array<{ id: string; title: string }>;
+    authorOptions?: AuthorOption[];
+    canAssignAuthor?: boolean;
 };
 
-export default function ContentPostFormFields({ post, seriesOptions }: Props) {
+export default function ContentPostFormFields({
+    post,
+    seriesOptions,
+    authorOptions = [],
+    canAssignAuthor = false,
+}: Props) {
     return (
         <>
+            {canAssignAuthor && (
+                <div className="grid gap-2">
+                    <Label htmlFor="author_id">Author</Label>
+                    <select
+                        id="author_id"
+                        name="author_id"
+                        className={textareaClassName}
+                        defaultValue={post?.authorId ?? ''}
+                    >
+                        <option value="">Select author</option>
+                        {authorOptions.map((author) => (
+                            <option key={author.id} value={author.id}>
+                                {author.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
             <div className="grid gap-2">
                 <Label htmlFor="title">Title</Label>
                 <Input id="title" name="title" defaultValue={post?.title ?? ''} required />
@@ -97,14 +128,8 @@ export default function ContentPostFormFields({ post, seriesOptions }: Props) {
                 />
             </div>
             <div className="grid gap-2">
-                <Label htmlFor="body">Body (markdown)</Label>
-                <textarea
-                    id="body"
-                    name="body"
-                    className={`${textareaClassName} min-h-64 font-mono`}
-                    defaultValue={post?.body ?? ''}
-                    required
-                />
+                <Label htmlFor="body">Body</Label>
+                <TiptapEditor defaultValue={post?.body ?? ''} required />
             </div>
             <div className="grid gap-2">
                 <Label htmlFor="cover_image_url">Cover image URL</Label>

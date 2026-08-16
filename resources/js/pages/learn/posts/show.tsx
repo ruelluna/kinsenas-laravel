@@ -1,14 +1,14 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import { ThumbsUp } from 'lucide-react';
+import { useState } from 'react';
 import ContentBody from '@/components/content/content-body';
 import LearnMarketingShell from '@/components/learn/learn-marketing-shell';
 import VideoEmbed from '@/components/savings/video-embed';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
-import type { ContentPostSummary } from '@/types/content';
 import type { SharedData } from '@/types';
-import { ThumbsUp } from 'lucide-react';
-import { useState } from 'react';
+import type { ContentPostSummary } from '@/types/content';
 
 type Props = {
     post: ContentPostSummary;

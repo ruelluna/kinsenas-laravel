@@ -7,9 +7,9 @@ import type { ExistingFundTarget } from '@/components/savings/add-fund-balance-m
 import AddSpendingModal from '@/components/savings/add-spending-modal';
 import AddTransferModal from '@/components/savings/add-transfer-modal';
 import FundCardHeader from '@/components/savings/fund-card-header';
-import { ResponsiveDataView } from '@/components/ui/responsive-data-view';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ResponsiveDataView } from '@/components/ui/responsive-data-view';
 import { categoryTitleWithAllocation } from '@/lib/category-allocation-label';
 import { formatMoney } from '@/lib/format-money';
 import { remainingTone } from '@/lib/fund-balance-tone';

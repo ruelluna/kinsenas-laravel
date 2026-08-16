@@ -59,6 +59,7 @@ class HandleInertiaRequests extends Middleware
                     'isAuthor' => $user->isAuthor(),
                     'canManagePlatform' => $user->canManagePlatform(),
                     'canManageContent' => $user->canManageContent(),
+                    'canManageAllContent' => $user->canManageAllContent(),
                     'platformRole' => $user->platformRole()?->value,
                 ] : null,
             ],

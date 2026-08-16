@@ -1,4 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
+import ContentAdminTabs from '@/components/admin/content-admin-tabs';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import type { ContentPostSummary } from '@/types/content';
@@ -22,11 +23,14 @@ export default function AdminContentStatsIndex({ window, summary, topPosts }: Pr
     return (
         <>
             <Head title="Admin — Content stats" />
-            <Heading
-                variant="small"
-                title="Content stats"
-                description="Views and helpful reactions across Learn content."
-            />
+            <ContentAdminTabs active="stats" />
+            <div className="mt-4">
+                <Heading
+                    variant="small"
+                    title="Content stats"
+                    description="Views and helpful reactions across Learn content."
+                />
+            </div>
             <div className="mt-4 flex flex-wrap gap-2">
                 {[
                     { value: 'all', label: 'All time' },

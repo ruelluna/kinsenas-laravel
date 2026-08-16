@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { Link } from '@inertiajs/react';
+import { useState } from 'react';
 import { ALLOCATION_BORDER_CLASSES } from '@/components/marketing/landing-content';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

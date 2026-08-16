@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import ContentAdminTabs from '@/components/admin/content-admin-tabs';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import type { ContentSeriesAdmin } from '@/types/content';
@@ -11,7 +12,8 @@ export default function AdminContentSeriesIndex({ series }: Props) {
     return (
         <>
             <Head title="Admin — Content series" />
-            <div className="flex flex-wrap items-center justify-between gap-4">
+            <ContentAdminTabs active="series" />
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
                 <Heading
                     variant="small"
                     title="Content series"

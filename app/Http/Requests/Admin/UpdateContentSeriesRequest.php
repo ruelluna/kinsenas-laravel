@@ -11,7 +11,7 @@ class UpdateContentSeriesRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->canManageContent() ?? false;
+        return $this->user()?->canManagePlatform() ?? false;
     }
 
     /**

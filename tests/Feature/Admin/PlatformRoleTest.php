@@ -57,6 +57,14 @@ it('forbids author from accessing platform ops routes', function () {
         ->assertForbidden();
 });
 
+it('forbids author from accessing content stats', function () {
+    $author = User::factory()->author()->create();
+
+    $this->actingAs($author)
+        ->get(route('admin.content.stats'))
+        ->assertForbidden();
+});
+
 it('forbids regular users from admin routes', function () {
     $user = User::factory()->create();
 

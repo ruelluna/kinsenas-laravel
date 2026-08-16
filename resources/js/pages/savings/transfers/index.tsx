@@ -1,11 +1,11 @@
 import { Form, Head, usePage } from '@inertiajs/react';
-import { ResponsiveDataView } from '@/components/ui/responsive-data-view';
 import { Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import Heading from '@/components/heading';
 import AddTransferModal from '@/components/savings/add-transfer-modal';
 import FundBalanceGrid from '@/components/savings/fund-balance-grid';
 import { Button } from '@/components/ui/button';
+import { ResponsiveDataView } from '@/components/ui/responsive-data-view';
 import { useRegisterMobileNavAction } from '@/hooks/use-register-mobile-nav-action';
 import { formatMoney } from '@/lib/format-money';
 import type { SharedData } from '@/types';

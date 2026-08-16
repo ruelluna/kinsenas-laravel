@@ -1,5 +1,5 @@
-import { usePwaInstall } from '@/contexts/pwa-install-context';
 import { InstallAppMenuItem } from '@/components/pwa/install-app-menu-item';
+import { usePwaInstall } from '@/contexts/pwa-install-context';
 
 export function InstallAppSettingsSection() {
     const { canOfferInstall } = usePwaInstall();

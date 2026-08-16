@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import ContentAdminTabs from '@/components/admin/content-admin-tabs';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import type { ContentPostAdmin, PaginatedPosts } from '@/types/content';
@@ -13,7 +14,8 @@ export default function AdminContentPostsIndex({ posts }: Props) {
     return (
         <>
             <Head title="Admin — Content posts" />
-            <div className="flex flex-wrap items-center justify-between gap-4">
+            <ContentAdminTabs active="posts" />
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
                 <Heading
                     variant="small"
                     title="Content posts"
@@ -33,7 +35,7 @@ export default function AdminContentPostsIndex({ posts }: Props) {
                             <p className="font-medium">{post.title}</p>
                             <p className="text-sm text-muted-foreground">
                                 {post.slug} · {post.contentTypeLabel} · {post.publishScope} ·{' '}
-                                {post.status} · {post.helpfulCount} helpful
+                                {post.status} · {post.authorName} · {post.helpfulCount} helpful
                             </p>
                         </div>
                         <div className="flex gap-2">

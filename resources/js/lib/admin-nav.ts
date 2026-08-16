@@ -1,16 +1,18 @@
 import {
+    BarChart2,
     CreditCard,
-    GraduationCap,
+    FileText,
     History,
+    Layers,
     MessageSquare,
     QrCode,
     Shield,
     UserCog,
     Users,
 } from 'lucide-react';
-import type { NavItem } from '@/types';
+import type { NavGroup, NavItem } from '@/types';
 
-export const adminNavItems: NavItem[] = [
+export const adminOpsNavItems: NavItem[] = [
     { title: 'Subscribers', href: '/admin/subscribers', icon: Users },
     {
         title: 'Push test',
@@ -27,8 +29,6 @@ export const adminNavItems: NavItem[] = [
     { title: 'Payment QR', href: '/admin/payment-qr', icon: QrCode },
     { title: 'Users', href: '/admin/platform-users', icon: Shield },
     { title: 'Activity logs', href: '/admin/activity-logs', icon: History },
-    { title: 'Content', href: '/admin/content/posts', icon: GraduationCap },
-    { title: 'Content stats', href: '/admin/content/stats', icon: History },
     {
         title: 'Formula templates',
         href: '/admin/formula-templates',
@@ -39,4 +39,21 @@ export const adminNavItems: NavItem[] = [
         href: '/admin/savings-plan-guidance',
         icon: UserCog,
     },
+];
+
+export const contentNavItems: NavItem[] = [
+    { title: 'Posts', href: '/admin/content/posts', icon: FileText },
+    { title: 'Series', href: '/admin/content/series', icon: Layers },
+    { title: 'Stats', href: '/admin/content/stats', icon: BarChart2 },
+];
+
+export const adminNavGroups: NavGroup[] = [
+    { label: 'Admin', items: adminOpsNavItems },
+    { label: 'Content', items: contentNavItems },
+];
+
+/** @deprecated Prefer adminNavGroups for grouped sidebar rendering. */
+export const adminNavItems: NavItem[] = [
+    ...adminOpsNavItems,
+    ...contentNavItems,
 ];

@@ -1,15 +1,15 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import LearnMarketingShell from '@/components/learn/learn-marketing-shell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
+import type { SharedData } from '@/types';
 import type {
     ContentPostSummary,
     ContentSeriesSummary,
     PaginatedPosts,
 } from '@/types/content';
-import type { SharedData } from '@/types';
-import { usePage } from '@inertiajs/react';
 
 type Props = {
     hasFullAccess: boolean;

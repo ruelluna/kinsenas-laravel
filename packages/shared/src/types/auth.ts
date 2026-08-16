@@ -8,6 +8,7 @@ export type User = {
     isAuthor?: boolean;
     canManagePlatform?: boolean;
     canManageContent?: boolean;
+    canManageAllContent?: boolean;
     platformRole?: string;
     beta_enrolled_at?: string | null;
     beta_launch_discount_eligible?: boolean;
