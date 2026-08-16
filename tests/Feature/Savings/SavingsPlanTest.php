@@ -101,6 +101,10 @@ it('allows user to create savings plan from template', function () {
         'created_by_user_id' => $user->id,
     ]);
     $this->assertDatabaseCount('savings_categories', 7);
+    $this->assertDatabaseHas('savings_categories', [
+        'name' => 'Savings',
+        'percentage' => 20,
+    ]);
 });
 
 it('allows user to create a custom savings plan without template categories', function () {
