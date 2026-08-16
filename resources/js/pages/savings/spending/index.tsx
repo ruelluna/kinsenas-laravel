@@ -1,5 +1,4 @@
 import { Form, Head, usePage } from '@inertiajs/react';
-import { ResponsiveDataView } from '@/components/ui/responsive-data-view';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import Heading from '@/components/heading';
@@ -9,6 +8,7 @@ import FundBalanceGrid from '@/components/savings/fund-balance-grid';
 import RecordPaybackModal from '@/components/savings/record-payback-modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ResponsiveDataView } from '@/components/ui/responsive-data-view';
 import { useRegisterMobileNavAction } from '@/hooks/use-register-mobile-nav-action';
 import { formatMoney } from '@/lib/format-money';
 import type { SharedData } from '@/types';

@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="theme-color" content="#1E8B75">
         <meta name="description" content="Sweldo with a plan — payday allocation planner for Filipino households.">
         <meta name="apple-mobile-web-app-capable" content="yes">

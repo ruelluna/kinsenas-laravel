@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
 import {
-    useMobileNav,
-    type MobileNavAction,
+    useMobileNav
+    
 } from '@/contexts/mobile-nav-context';
+import type {MobileNavAction} from '@/contexts/mobile-nav-context';
 
 export function useRegisterMobileNavAction(
     action: MobileNavAction | null,

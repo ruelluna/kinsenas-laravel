@@ -110,10 +110,17 @@ export type AdminPlatformUser = {
     id: number;
     name: string;
     email: string;
+    role: string;
+    roleLabel: string;
     isPlatformAdmin: boolean;
     subscriptionStatus: string | null;
     subscriptionStatusLabel: string | null;
     deleteBlockReason: string | null;
+};
+
+export type PlatformRoleOption = {
+    value: string;
+    label: string;
 };
 
 export type FilterOption = {

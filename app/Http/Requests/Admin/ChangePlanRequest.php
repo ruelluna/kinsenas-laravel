@@ -9,7 +9,7 @@ class ChangePlanRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->isPlatformAdmin() ?? false;
+        return $this->user()?->canManagePlatform() ?? false;
     }
 
     /**

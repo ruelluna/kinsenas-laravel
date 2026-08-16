@@ -24,7 +24,7 @@ it('throws in testing when forbidden keys are supplied through the logger', func
         'Created team',
         properties: ['amount' => '100.00'],
     );
-})->throws(\InvalidArgumentException::class);
+})->throws(InvalidArgumentException::class);
 
 it('strips nested forbidden keys', function () {
     $sanitized = app(ActivityPropertySanitizer::class)->sanitize([

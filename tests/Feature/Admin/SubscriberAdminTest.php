@@ -14,7 +14,7 @@ beforeEach(function () {
 });
 
 it('lists subscribers for platform admin', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     User::factory()->create(['email' => 'member@example.com']);
 
     $response = $this->actingAs($admin)->get(route('admin.subscribers.index'));
@@ -23,7 +23,7 @@ it('lists subscribers for platform admin', function () {
 });
 
 it('extends a subscriber trial', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     $member = User::factory()->create(['email' => 'member@example.com']);
     $team = $member->personalTeam();
     $subscription = $team->subscription;
@@ -39,7 +39,7 @@ it('extends a subscriber trial', function () {
 });
 
 it('cancels a subscriber subscription', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     $member = User::factory()->create(['email' => 'member@example.com']);
     $team = $member->personalTeam();
 
@@ -53,7 +53,7 @@ it('cancels a subscriber subscription', function () {
 });
 
 it('manually activates a subscriber', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     $member = User::factory()->create(['email' => 'member@example.com']);
     $team = $member->personalTeam();
 
@@ -70,7 +70,7 @@ it('manually activates a subscriber', function () {
 });
 
 it('changes a subscriber plan', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     $member = User::factory()->create(['email' => 'member@example.com']);
     $team = $member->personalTeam();
 
@@ -89,7 +89,7 @@ it('changes a subscriber plan', function () {
 });
 
 it('filters subscribers by status', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     $member = User::factory()->create(['email' => 'member@example.com']);
     $member->personalTeam()->subscription->update(['status' => SubscriptionStatus::Cancelled]);
 

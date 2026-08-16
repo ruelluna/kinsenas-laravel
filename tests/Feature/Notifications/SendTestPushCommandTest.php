@@ -15,9 +15,8 @@ beforeEach(function () {
 it('allows platform admins to send a test push to themselves', function () {
     Notification::fake();
 
-    $admin = User::factory()->create([
+    $admin = User::factory()->platformAdmin()->create([
         'email' => 'admin@example.com',
-        'is_platform_admin' => true,
     ]);
 
     $this->actingAs($admin)
@@ -28,7 +27,7 @@ it('allows platform admins to send a test push to themselves', function () {
 });
 
 it('forbids non-admin users from sending test push', function () {
-    $member = User::factory()->create(['is_platform_admin' => false]);
+    $member = User::factory()->create();
 
     $this->actingAs($member)
         ->artisan('notifications:send-test-push')
@@ -38,7 +37,7 @@ it('forbids non-admin users from sending test push', function () {
 it('requires confirmation before sending to all subscribers', function () {
     Notification::fake();
 
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
 
     $this->actingAs($admin)
         ->artisan('notifications:send-test-push', ['--all' => true])

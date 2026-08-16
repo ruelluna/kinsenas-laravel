@@ -34,9 +34,9 @@ export default function FundUtilizationChart({
     return (
         <ChartCard
             title="Fund utilization"
-            description="How much of each fund bucket you have used."
+            description="How much of each fund bucket's spendable pool you have used."
             isEmpty={chartData.length === 0}
-            emptyMessage="Add income and record spending to see fund utilization."
+            emptyMessage="Add income or existing savings and record spending to see fund utilization."
             compact={compact}
             testId={testId}
         >

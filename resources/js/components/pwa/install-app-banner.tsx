@@ -1,7 +1,7 @@
 import { DismissButton } from '@/components/dismiss-button';
+import { pageContentPaddingX } from '@/components/page-content';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { pageContentPaddingX } from '@/components/page-content';
 import { usePwaInstall } from '@/contexts/pwa-install-context';
 import { cn } from '@/lib/utils';
 

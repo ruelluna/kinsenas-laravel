@@ -1,6 +1,12 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Learn\LearnIndexController;
+use App\Http\Controllers\Learn\LearnPodcastController;
+use App\Http\Controllers\Learn\LearnPostController;
+use App\Http\Controllers\Learn\LearnPostReactionController;
+use App\Http\Controllers\Learn\LearnSeriesController;
+use App\Http\Controllers\Learn\LearnSideHustleController;
 use App\Http\Controllers\Marketing\SurveyResponseController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PwaLaunchController;
@@ -15,6 +21,21 @@ Route::inertia('/survey', 'marketing/survey')->name('survey');
 Route::post('survey/responses', [SurveyResponseController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('survey.responses.store');
+
+Route::get('learn', LearnIndexController::class)->name('learn.index');
+Route::get('learn/side-hustles', [LearnSideHustleController::class, 'index'])->name('learn.side-hustles.index');
+Route::get('learn/side-hustles/{sideHustle}', [LearnSideHustleController::class, 'show'])->name('learn.side-hustles.show');
+Route::get('learn/podcasts', [LearnPodcastController::class, 'index'])->name('learn.podcasts.index');
+Route::get('learn/podcasts/{podcastShow}', [LearnPodcastController::class, 'show'])->name('learn.podcasts.show');
+Route::get('learn/podcasts/{podcastShow}/episodes/{podcastEpisode}', [LearnPodcastController::class, 'showEpisode'])->name('learn.podcasts.episodes.show');
+Route::get('learn/series/{series}', [LearnSeriesController::class, 'show'])->name('learn.series.show');
+Route::get('learn/posts/{post}', [LearnPostController::class, 'show'])->name('learn.posts.show');
+
+Route::middleware(['auth', 'verified', 'learn.member'])->group(function () {
+    Route::post('learn/posts/{post}/react', [LearnPostReactionController::class, 'store'])
+        ->middleware('throttle:30,1')
+        ->name('learn.posts.react');
+});
 
 Route::middleware(['auth'])->get('dashboard', function () {
     return redirect()->route('pwa.launch');
@@ -45,9 +66,20 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('invitations/{invitation}', [TeamInvitationController::class, 'decline'])->name('invitations.decline');
 });
 
-Route::middleware(['auth', 'verified', 'platform.admin'])
-    ->group(function () {
-        require __DIR__.'/admin.php';
-    });
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::prefix('admin')
+        ->name('admin.')
+        ->middleware('permission:admin.manage-platform')
+        ->group(function () {
+            require __DIR__.'/admin-ops.php';
+        });
+
+    Route::prefix('admin')
+        ->name('admin.')
+        ->middleware('permission:admin.manage-content')
+        ->group(function () {
+            require __DIR__.'/admin-content.php';
+        });
+});
 
 require __DIR__.'/settings.php';

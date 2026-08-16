@@ -68,6 +68,7 @@ export type SurveyLanguageContent = {
         emailRequired: string;
         emailInvalid: string;
         submitError: string;
+        learnLink: string;
     };
     thankYou: string;
     questions: SurveyQuestion[];

@@ -5,9 +5,10 @@ import {
     openMobileMoreSheet,
 } from '@/lib/mobile-more-sheet-bridge';
 import {
-    ONBOARDING_TOUR_MOBILE_STEPS,
-    type OnboardingTourMobileStep,
+    ONBOARDING_TOUR_MOBILE_STEPS
+    
 } from '@/lib/onboarding-tour/steps-mobile';
+import type {OnboardingTourMobileStep} from '@/lib/onboarding-tour/steps-mobile';
 import {
     stepMatchesPath,
     tourElementSelector,
