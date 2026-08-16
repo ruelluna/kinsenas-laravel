@@ -43,7 +43,9 @@ export function AdminSidebarNav({
             if (group.label === 'Content' && !canManagePlatform) {
                 return {
                     ...group,
-                    items: contentNavItems.filter((item) => item.title === 'Posts'),
+                    items: contentNavItems.filter((item) =>
+                        ['Posts', 'Side hustles'].includes(item.title),
+                    ),
                 };
             }
 

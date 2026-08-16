@@ -45,6 +45,19 @@ export default function ContentPostFormFields({
                 </div>
             )}
             <div className="grid gap-2">
+                <Label htmlFor="post_as">Post as (optional)</Label>
+                <Input
+                    id="post_as"
+                    name="post_as"
+                    placeholder="e.g. Maria Santos, CPA"
+                    defaultValue={post?.postAs ?? ''}
+                />
+                <p className="text-xs text-muted-foreground">
+                    Shown to members as &quot;By [Post as name]&quot;. Leave blank to use the
+                    author&apos;s name.
+                </p>
+            </div>
+            <div className="grid gap-2">
                 <Label htmlFor="title">Title</Label>
                 <Input id="title" name="title" defaultValue={post?.title ?? ''} required />
             </div>

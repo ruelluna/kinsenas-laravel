@@ -120,7 +120,7 @@ export default function LearnPostShow({
                     </div>
                     <h1 className="text-3xl font-semibold tracking-tight">{post.title}</h1>
                     <p className="text-sm text-muted-foreground">
-                        By {post.authorName}
+                        By {post.bylineName}
                         {post.readingTimeMinutes
                             ? ` · ${post.readingTimeMinutes} min read`
                             : ''}

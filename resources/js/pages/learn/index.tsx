@@ -51,6 +51,15 @@ export default function LearnIndex({
                     </p>
                 </div>
 
+                <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" size="sm" asChild>
+                        <Link href="/learn/side-hustles">Side hustles</Link>
+                    </Button>
+                    <Button variant="outline" size="sm" asChild>
+                        <Link href="/learn/podcasts">Podcasts</Link>
+                    </Button>
+                </div>
+
                 {hasFullAccess && (
                     <div className="flex flex-wrap gap-2">
                         {filters.map((item) => (

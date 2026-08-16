@@ -47,5 +47,6 @@ class DatabaseSeeder extends Seeder
         $admin->syncPlatformRole(PlatformRole::PlatformAdmin);
 
         $this->call(ContentSeeder::class);
+        $this->call(LearnLibrarySeeder::class);
     }
 }

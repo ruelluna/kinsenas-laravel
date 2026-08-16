@@ -3,50 +3,58 @@
 namespace App\Models;
 
 use App\Enums\ContentPostStatus;
-use App\Enums\ContentPostType;
 use App\Enums\ContentPublishScope;
-use Database\Factories\ContentPostFactory;
+use App\Enums\SideHustleCapitalTier;
+use App\Enums\SideHustleDifficulty;
+use Database\Factories\SideHustleFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class ContentPost extends Model
+class SideHustle extends Model
 {
-    /** @use HasFactory<ContentPostFactory> */
+    /** @use HasFactory<SideHustleFactory> */
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'content_series_id',
-        'episode_number',
+        'side_hustle_category_id',
         'title',
         'slug',
         'excerpt',
         'body',
-        'content_type',
+        'post_as',
+        'cover_image_url',
+        'difficulty',
+        'capital_tier',
+        'startup_capital_min',
+        'startup_capital_max',
+        'time_commitment_hours_min',
+        'time_commitment_hours_max',
+        'skills',
+        'equipment',
         'publish_scope',
         'status',
-        'video_embed_url',
-        'cover_image_url',
-        'author_id',
-        'post_as',
-        'metadata',
         'published_at',
-        'reading_time_minutes',
+        'sort_order',
     ];
 
     protected function casts(): array
     {
         return [
-            'content_type' => ContentPostType::class,
+            'difficulty' => SideHustleDifficulty::class,
+            'capital_tier' => SideHustleCapitalTier::class,
             'publish_scope' => ContentPublishScope::class,
             'status' => ContentPostStatus::class,
-            'metadata' => 'array',
+            'skills' => 'array',
+            'equipment' => 'array',
             'published_at' => 'datetime',
-            'episode_number' => 'integer',
-            'reading_time_minutes' => 'integer',
+            'startup_capital_min' => 'integer',
+            'startup_capital_max' => 'integer',
+            'time_commitment_hours_min' => 'integer',
+            'time_commitment_hours_max' => 'integer',
+            'sort_order' => 'integer',
         ];
     }
 
@@ -55,29 +63,14 @@ class ContentPost extends Model
         return 'slug';
     }
 
-    public function series(): BelongsTo
+    public function category(): BelongsTo
     {
-        return $this->belongsTo(ContentSeries::class, 'content_series_id');
-    }
-
-    public function author(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'author_id');
-    }
-
-    public function reactions(): HasMany
-    {
-        return $this->hasMany(ContentReaction::class);
-    }
-
-    public function engagementEvents(): HasMany
-    {
-        return $this->hasMany(ContentEngagementEvent::class);
+        return $this->belongsTo(SideHustleCategory::class, 'side_hustle_category_id');
     }
 
     /**
-     * @param  Builder<ContentPost>  $query
-     * @return Builder<ContentPost>
+     * @param  Builder<SideHustle>  $query
+     * @return Builder<SideHustle>
      */
     public function scopePublished(Builder $query): Builder
     {
@@ -85,8 +78,8 @@ class ContentPost extends Model
     }
 
     /**
-     * @param  Builder<ContentPost>  $query
-     * @return Builder<ContentPost>
+     * @param  Builder<SideHustle>  $query
+     * @return Builder<SideHustle>
      */
     public function scopePublicTeaser(Builder $query): Builder
     {
@@ -97,8 +90,8 @@ class ContentPost extends Model
     }
 
     /**
-     * @param  Builder<ContentPost>  $query
-     * @return Builder<ContentPost>
+     * @param  Builder<SideHustle>  $query
+     * @return Builder<SideHustle>
      */
     public function scopeMemberVisible(Builder $query): Builder
     {

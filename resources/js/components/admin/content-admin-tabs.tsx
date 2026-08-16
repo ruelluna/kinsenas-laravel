@@ -2,13 +2,20 @@ import { Link, usePage } from '@inertiajs/react';
 import { cn } from '@/lib/utils';
 import type { SharedData } from '@/types';
 
-type Tab = 'posts' | 'series' | 'stats';
+type Tab =
+    | 'posts'
+    | 'series'
+    | 'side-hustles'
+    | 'hustle-categories'
+    | 'podcasts'
+    | 'podcast-episodes'
+    | 'stats';
 
 type Props = {
     active: Tab;
 };
 
-const tabs: Array<{ key: Tab; label: string; href: string; testId: string }> = [
+const tabs: Array<{ key: Tab; label: string; href: string; testId: string; platformOnly?: boolean }> = [
     {
         key: 'posts',
         label: 'Posts',
@@ -20,12 +27,41 @@ const tabs: Array<{ key: Tab; label: string; href: string; testId: string }> = [
         label: 'Series',
         href: '/admin/content/series',
         testId: 'content-admin-tab-series',
+        platformOnly: true,
+    },
+    {
+        key: 'side-hustles',
+        label: 'Side hustles',
+        href: '/admin/content/side-hustles',
+        testId: 'content-admin-tab-side-hustles',
+    },
+    {
+        key: 'hustle-categories',
+        label: 'Categories',
+        href: '/admin/content/side-hustle-categories',
+        testId: 'content-admin-tab-hustle-categories',
+        platformOnly: true,
+    },
+    {
+        key: 'podcasts',
+        label: 'Podcasts',
+        href: '/admin/content/podcast-shows',
+        testId: 'content-admin-tab-podcasts',
+        platformOnly: true,
+    },
+    {
+        key: 'podcast-episodes',
+        label: 'Episodes',
+        href: '/admin/content/podcast-episodes',
+        testId: 'content-admin-tab-podcast-episodes',
+        platformOnly: true,
     },
     {
         key: 'stats',
         label: 'Stats',
         href: '/admin/content/stats',
         testId: 'content-admin-tab-stats',
+        platformOnly: true,
     },
 ];
 
@@ -35,7 +71,7 @@ export default function ContentAdminTabs({ active }: Props) {
     );
     const visibleTabs = canManageAllContent
         ? tabs
-        : tabs.filter((tab) => tab.key === 'posts');
+        : tabs.filter((tab) => !tab.platformOnly);
 
     return (
         <nav

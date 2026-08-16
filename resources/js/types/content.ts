@@ -25,6 +25,8 @@ export type ContentPostSummary = {
     series: ContentSeriesSummary | null;
     episodeNumber: number | null;
     authorName: string;
+    postAs: string | null;
+    bylineName: string;
 };
 
 export type ContentPostAdmin = ContentPostSummary & {

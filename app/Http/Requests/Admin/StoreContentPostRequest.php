@@ -38,6 +38,7 @@ class StoreContentPostRequest extends FormRequest
             'status' => ['required', Rule::enum(ContentPostStatus::class)],
             'video_embed_url' => ['nullable', 'string', 'max:2048', new VideoEmbedUrl],
             'cover_image_url' => ['nullable', 'url:http,https', 'max:2048'],
+            'post_as' => ['nullable', 'string', 'max:255'],
         ];
 
         if ($this->user()?->canManagePlatform()) {

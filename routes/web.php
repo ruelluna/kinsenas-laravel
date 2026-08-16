@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Learn\LearnIndexController;
+use App\Http\Controllers\Learn\LearnPodcastController;
 use App\Http\Controllers\Learn\LearnPostController;
 use App\Http\Controllers\Learn\LearnPostReactionController;
 use App\Http\Controllers\Learn\LearnSeriesController;
+use App\Http\Controllers\Learn\LearnSideHustleController;
 use App\Http\Controllers\Marketing\SurveyResponseController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PwaLaunchController;
@@ -21,6 +23,11 @@ Route::post('survey/responses', [SurveyResponseController::class, 'store'])
     ->name('survey.responses.store');
 
 Route::get('learn', LearnIndexController::class)->name('learn.index');
+Route::get('learn/side-hustles', [LearnSideHustleController::class, 'index'])->name('learn.side-hustles.index');
+Route::get('learn/side-hustles/{sideHustle}', [LearnSideHustleController::class, 'show'])->name('learn.side-hustles.show');
+Route::get('learn/podcasts', [LearnPodcastController::class, 'index'])->name('learn.podcasts.index');
+Route::get('learn/podcasts/{podcastShow}', [LearnPodcastController::class, 'show'])->name('learn.podcasts.show');
+Route::get('learn/podcasts/{podcastShow}/episodes/{podcastEpisode}', [LearnPodcastController::class, 'showEpisode'])->name('learn.podcasts.episodes.show');
 Route::get('learn/series/{series}', [LearnSeriesController::class, 'show'])->name('learn.series.show');
 Route::get('learn/posts/{post}', [LearnPostController::class, 'show'])->name('learn.posts.show');
 
