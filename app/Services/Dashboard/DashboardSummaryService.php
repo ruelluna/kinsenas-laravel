@@ -62,7 +62,7 @@ class DashboardSummaryService
             ? $this->balanceService->bankBalancesForTeam($team, $plan)
             : [];
 
-        $summary = $this->buildSummary($fundBalances, $bankBalances, $plan);
+        $summary = $this->buildSummary($fundBalances, $plan);
 
         $canTransfers = $this->subscriptionService->userHasFeature($user, SubscriptionFeature::Transfers);
         $canReports = $this->subscriptionService->userHasFeature($user, SubscriptionFeature::Reports);
@@ -130,26 +130,29 @@ class DashboardSummaryService
 
     /**
      * @param  list<array<string, mixed>>  $fundBalances
-     * @param  list<array<string, mixed>>  $bankBalances
      * @return array<string, mixed>
      */
-    private function buildSummary(array $fundBalances, array $bankBalances, ?SavingsPlan $plan): array
+    private function buildSummary(array $fundBalances, ?SavingsPlan $plan): array
     {
-        $totalRemaining = null;
-        $totalInBanks = null;
+        $defaultFundName = null;
+        $defaultFundRemaining = null;
+        $otherFundsRemaining = null;
         $lowBalanceFunds = [];
         $pendingTransferCount = 0;
         $pendingSpendCount = 0;
         $awaitingReimbursementCount = 0;
 
         if ($fundBalances !== []) {
-            $totalRemaining = '0.00';
+            $otherFundsRemaining = '0.00';
 
             foreach ($fundBalances as $balance) {
                 $remaining = $balance['remaining'] ?? null;
 
-                if ($remaining !== null) {
-                    $totalRemaining = bcadd($totalRemaining, $remaining, 2);
+                if ($balance['isDefault'] ?? false) {
+                    $defaultFundName = $balance['name'];
+                    $defaultFundRemaining = $remaining;
+                } elseif ($remaining !== null) {
+                    $otherFundsRemaining = bcadd($otherFundsRemaining, $remaining, 2);
                 }
 
                 $percentUsed = $balance['percentUsed'] ?? null;
@@ -161,14 +164,6 @@ class DashboardSummaryService
                         'percentUsed' => $percentUsed,
                     ];
                 }
-            }
-        }
-
-        if ($bankBalances !== []) {
-            $totalInBanks = '0.00';
-
-            foreach ($bankBalances as $bank) {
-                $totalInBanks = bcadd($totalInBanks, $bank['total'], 2);
             }
         }
 
@@ -202,8 +197,9 @@ class DashboardSummaryService
         $attentionCount = $pendingTransferCount + $pendingSpendCount + $awaitingReimbursementCount + count($lowBalanceFunds);
 
         return [
-            'totalRemaining' => $totalRemaining,
-            'totalInBanks' => $totalInBanks,
+            'defaultFundName' => $defaultFundName,
+            'defaultFundRemaining' => $defaultFundRemaining,
+            'otherFundsRemaining' => $otherFundsRemaining,
             'attentionCount' => $attentionCount,
             'pendingTransferCount' => $pendingTransferCount,
             'pendingSpendCount' => $pendingSpendCount,
