@@ -71,7 +71,7 @@ Follow [testing.mdc](./testing.mdc) — the authoritative testing standard.
 - Write **failing tests before** production code (RED → GREEN → REFACTOR).
 - Run **affected** tests during development: `php artisan test --compact tests/Feature/...` or `tests/Browser/...`.
 - If impact analysis found **conflicts**, confirm user decisions are recorded in the plan `## Decisions` section before implementing.
-- Before marking work complete, run the **full suite**: `php artisan test --compact` (or confirm CI will run `composer ci:check`).
+- Before marking work complete, run **in-scope tests** per [testing.mdc](./testing.mdc) (new tests + impact-matrix regression files). Do not run the full suite unless the user asks; CI runs `composer ci:check` on pull requests.
 
 ### In breakdowns and replies
 
@@ -285,7 +285,7 @@ Before finishing, confirm in the reply:
 - [ ] Breakdown file created or updated (or N/A — lightweight workflow)
 - [ ] Decisions table included when conflicts were resolved (or N/A)
 - [ ] TDD followed — failing tests before implementation (or N/A — lightweight)
-- [ ] Full suite green before complete (or suggested commands listed if user skipped running)
+- [ ] In-scope tests green before complete (or suggested commands listed if user skipped running)
 - [ ] Visual QA steps included (or N/A — no UI change)
 - [ ] Test commands suggested in breakdown (Feature + Browser when applicable)
 - [ ] Docs updated (or N/A — not requested / no user-facing guide needed)

@@ -150,6 +150,9 @@ export default function TransfersIndex({
                         showReceived
                         transferredLabel="Transferred out"
                         canDrawFromFunds={plan.canDrawFromFunds}
+                        fundDetailHref={(categoryId) =>
+                            `/${teamSlug}/savings/funds/${categoryId}`
+                        }
                         action={{
                             label: (balance) => `Transfer from ${balance.name}`,
                             onClick: openAddModal,
