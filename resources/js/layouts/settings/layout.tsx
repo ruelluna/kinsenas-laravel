@@ -45,7 +45,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
 
     const sidebarNavItems: NavItem[] = [
         ...baseSidebarNavItems,
-        ...(openBeta.isActive && openBeta.isApproved
+        ...(openBeta.isActive && openBeta.isParticipant
             ? [{ title: 'Feedback', href: '/settings/feedback', icon: null }]
             : []),
         {

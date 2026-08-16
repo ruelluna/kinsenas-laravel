@@ -13,6 +13,5 @@ enum NotificationKind: string
     case TeamInvitationAccepted = 'team_invitation_accepted';
     case PendingActionConfirmed = 'pending_action_confirmed';
     case IncomeReminder = 'income_reminder';
-    case BetaApproved = 'beta_approved';
     case TestPush = 'test_push';
 }

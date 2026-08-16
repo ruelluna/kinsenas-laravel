@@ -88,7 +88,7 @@ export function buildMemberNav(page: SharedData): MemberNavConfig {
                   href: `${savingsBase}/reports`,
                   icon: BookOpen,
               },
-              ...(openBeta.isActive && openBeta.isApproved
+              ...(openBeta.isActive && openBeta.isParticipant
                   ? [
                         {
                             title: 'Feedback',

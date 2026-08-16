@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Actions\Teams\CreateTeam;
-use App\Enums\BetaApplicationStatus;
 use App\Models\User;
 use App\Services\Vault\FinancialEncryptionService;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -62,27 +61,15 @@ class UserFactory extends Factory
         ]);
     }
 
-    public function betaParticipant(bool $discountEligible = false): static
+    public function betaParticipant(bool $discountEligible = true): static
     {
         return $this->state(fn (array $attributes) => [
             'beta_enrolled_at' => now(),
-            'beta_application_status' => BetaApplicationStatus::Approved,
-            'beta_approved_at' => now(),
             'beta_launch_discount_eligible' => $discountEligible,
         ]);
     }
 
-    public function betaPending(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'beta_enrolled_at' => now(),
-            'beta_application_status' => BetaApplicationStatus::Pending,
-            'beta_approved_at' => null,
-            'beta_launch_discount_eligible' => false,
-        ]);
-    }
-
-    public function betaApproved(bool $discountEligible = false): static
+    public function betaApproved(bool $discountEligible = true): static
     {
         return $this->betaParticipant($discountEligible);
     }

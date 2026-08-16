@@ -30,45 +30,9 @@ export type OpenBetaOffer = {
 export type OpenBetaInfo = {
     isActive: boolean;
     launchDiscountPercent: number;
-    applicationStatus: string | null;
-    applicationStatusLabel: string | null;
     isParticipant: boolean;
-    isApproved: boolean;
-    isPending: boolean;
     launchDiscountEligible: boolean;
-    appliedAt: string | null;
-    approvedAt: string | null;
-};
-
-export type AdminBetaApplication = {
-    id: number;
-    name: string;
-    email: string;
-    status: string;
-    statusLabel: string;
-    emailVerified: boolean;
-    appliedAt: string | null;
-    approvedAt: string | null;
-    approvedViaCode: boolean;
-    betaAccessCodeLabel: string | null;
-    sourceLabel: string;
-};
-
-export type AdminBetaAccessCode = {
-    id: string;
-    code: string;
-    label: string;
-    type: string;
-    typeLabel: string;
-    maxUses: number | null;
-    redemptionsCount: number;
-    remainingUses: number | null;
-    expiresAt: string | null;
-    isActive: boolean;
-    isRedeemable: boolean;
-    batchId: string | null;
-    batchName: string | null;
-    createdAt: string | null;
+    enrolledAt: string | null;
 };
 
 export type SharedSubscription = {

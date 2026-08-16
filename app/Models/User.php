@@ -3,15 +3,12 @@
 namespace App\Models;
 
 use App\Concerns\HasTeams;
-use App\Enums\BetaApplicationStatus;
-use App\Services\Billing\BetaApplicationService;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -36,10 +33,6 @@ use NotificationChannels\WebPush\HasPushSubscriptions;
  * @property int|null $current_team_id
  * @property bool $is_platform_admin
  * @property Carbon|null $beta_enrolled_at
- * @property BetaApplicationStatus|null $beta_application_status
- * @property Carbon|null $beta_approved_at
- * @property int|null $beta_approved_by
- * @property string|null $beta_access_code_id
  * @property bool $beta_launch_discount_eligible
  * @property bool $marketing_emails_opt_in
  * @property Carbon|null $marketing_emails_opted_in_at
@@ -50,7 +43,7 @@ use NotificationChannels\WebPush\HasPushSubscriptions;
  * @property-read Collection<int, Membership> $teamMemberships
  * @property-read Collection<int, Team> $teams
  */
-#[Fillable(['name', 'email', 'password', 'current_team_id', 'is_platform_admin', 'beta_enrolled_at', 'beta_application_status', 'beta_approved_at', 'beta_approved_by', 'beta_access_code_id', 'beta_launch_discount_eligible', 'marketing_emails_opt_in', 'marketing_emails_opted_in_at', 'payday_day_of_month'])]
+#[Fillable(['name', 'email', 'password', 'current_team_id', 'is_platform_admin', 'beta_enrolled_at', 'beta_launch_discount_eligible', 'marketing_emails_opt_in', 'marketing_emails_opted_in_at', 'payday_day_of_month'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
@@ -69,8 +62,6 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
             'password' => 'hashed',
             'is_platform_admin' => 'boolean',
             'beta_enrolled_at' => 'datetime',
-            'beta_application_status' => BetaApplicationStatus::class,
-            'beta_approved_at' => 'datetime',
             'beta_launch_discount_eligible' => 'boolean',
             'marketing_emails_opt_in' => 'boolean',
             'marketing_emails_opted_in_at' => 'datetime',
@@ -91,11 +82,6 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     public function betaFeedbacks(): HasMany
     {
         return $this->hasMany(BetaFeedback::class);
-    }
-
-    public function betaAccessCode(): BelongsTo
-    {
-        return $this->belongsTo(BetaAccessCode::class, 'beta_access_code_id');
     }
 
     public function notificationPreferences(): HasOne
@@ -124,8 +110,8 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return (bool) $this->is_platform_admin;
     }
 
-    public function hasApprovedBetaAccess(): bool
+    public function isBetaParticipant(): bool
     {
-        return app(BetaApplicationService::class)->hasAppAccess($this);
+        return $this->beta_enrolled_at !== null;
     }
 }

@@ -297,6 +297,9 @@ export default function SpendingIndex({
                         fundBalances={fundBalances}
                         variant="detailed"
                         canDrawFromFunds={plan.canDrawFromFunds}
+                        fundDetailHref={(categoryId) =>
+                            `/${teamSlug}/savings/funds/${categoryId}`
+                        }
                         onSpendFrom={openAddModal}
                     />
                 </div>

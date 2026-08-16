@@ -62,6 +62,20 @@ it('redirects spending index to plan chooser when no savings plan exists', funct
     $response->assertSessionHas('error');
 });
 
+it('redirects fund detail to plan chooser when no savings plan exists', function () {
+    $user = createUserWithoutSavingsPlan();
+
+    $response = $this->actingAs($user)->get(route('savings.funds.show', [
+        'current_team' => $user->currentTeam->slug,
+        'category' => '00000000-0000-7000-8000-000000000001',
+    ]));
+
+    $response->assertRedirect(route('savings.plan.show', [
+        'current_team' => $user->currentTeam->slug,
+    ]));
+    $response->assertSessionHas('error');
+});
+
 it('redirects reports to plan chooser when no savings plan exists', function () {
     $user = createUserWithoutSavingsPlan();
 

@@ -130,6 +130,9 @@ export default function Dashboard({
                             spendHref={quickLinks.spending}
                             canDrawFromFunds={plan?.canDrawFromFunds ?? false}
                             showAllocationPercent
+                            fundDetailHref={(categoryId) =>
+                                `/${page.props.currentTeam?.slug}/savings/funds/${categoryId}`
+                            }
                         />
                         <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
                             <Link

@@ -458,6 +458,9 @@ function SavingsPlanEditor({
                                 canDrawFromFunds={plan.canDrawFromFunds}
                                 limit={6}
                                 bordered
+                                fundDetailHref={(categoryId) =>
+                                    `/${teamSlug}/savings/funds/${categoryId}`
+                                }
                             />
                         )}
 

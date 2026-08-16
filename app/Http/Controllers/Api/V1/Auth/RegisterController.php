@@ -18,7 +18,6 @@ class RegisterController extends Controller
             'password' => ['required', 'string'],
             'password_confirmation' => ['required', 'string'],
             'marketing_emails_opt_in' => ['sometimes', 'boolean'],
-            'beta_code' => ['nullable', 'string', 'max:32'],
             'device_name' => ['nullable', 'string', 'max:255'],
         ]);
 

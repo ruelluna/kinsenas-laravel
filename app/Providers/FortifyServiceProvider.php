@@ -12,7 +12,6 @@ use App\Http\Responses\RegisterResponse;
 use App\Http\Responses\TwoFactorLoginResponse;
 use App\Http\Responses\VerifyEmailResponse;
 use App\Models\TeamInvitation;
-use App\Services\Billing\BetaAccessCodeService;
 use App\Services\Billing\BillingPlanPresenter;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -105,7 +104,6 @@ class FortifyServiceProvider extends ServiceProvider
             'teamInvitation' => $this->teamInvitation($request),
             'trialOffer' => BillingMode::isOpenBeta() ? null : app(BillingPlanPresenter::class)->trialOffer(),
             'openBetaOffer' => app(BillingPlanPresenter::class)->openBetaOffer(),
-            ...$this->betaAccessCodeContext($request),
         ]));
 
         Fortify::twoFactorChallengeView(fn () => Inertia::render('auth/two-factor-challenge'));
@@ -166,35 +164,6 @@ class FortifyServiceProvider extends ServiceProvider
         return [
             'code' => $invitation->code,
             'teamName' => $invitation->team->name,
-        ];
-    }
-
-    /**
-     * @return array{betaCode: string|null, betaCodeLabel: string|null}
-     */
-    private function betaAccessCodeContext(Request $request): array
-    {
-        if (! BillingMode::isOpenBeta()) {
-            return [
-                'betaCode' => null,
-                'betaCodeLabel' => null,
-            ];
-        }
-
-        $betaCode = $request->query('beta_code');
-
-        if (! is_string($betaCode) || trim($betaCode) === '') {
-            return [
-                'betaCode' => null,
-                'betaCodeLabel' => null,
-            ];
-        }
-
-        $accessCode = app(BetaAccessCodeService::class)->findRedeemable($betaCode);
-
-        return [
-            'betaCode' => trim($betaCode),
-            'betaCodeLabel' => $accessCode?->label,
         ];
     }
 }

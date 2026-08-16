@@ -105,12 +105,13 @@ it('already verified user visiting verification link is redirected without firin
     expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
 });
 
-it('open beta users land on beta pending after verifying email', function () {
+it('open beta users land on the dashboard after verifying email', function () {
     config(['billing.mode' => 'open_beta']);
 
-    $user = User::factory()->unverified()->betaPending()->create([
-        'email' => 'pending-verify@example.com',
+    $user = User::factory()->unverified()->betaParticipant()->create([
+        'email' => 'participant-verify@example.com',
     ]);
+    $team = $user->personalTeam();
 
     Event::fake();
 
@@ -124,5 +125,5 @@ it('open beta users land on beta pending after verifying email', function () {
 
     Event::assertDispatched(Verified::class);
     expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
-    $response->assertRedirect(route('beta.pending').'?verified=1');
+    $response->assertRedirect("/{$team->slug}/dashboard?verified=1");
 });

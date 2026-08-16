@@ -120,12 +120,12 @@ it('rejects feedback when not in open beta mode', function () {
     $response->assertForbidden();
 });
 
-it('blocks pending beta applicants from submitting feedback', function () {
-    $user = User::factory()->betaPending()->create(['email' => 'pending-feedback@example.com']);
+it('blocks non-participants from submitting feedback during open beta', function () {
+    $user = User::factory()->create(['email' => 'non-participant-feedback@example.com']);
 
     $response = $this->actingAs($user)->post(route('settings.feedback.store'), [
         'message' => 'Should not save.',
     ]);
 
-    $response->assertRedirect(route('beta.pending'));
+    $response->assertForbidden();
 });

@@ -13,7 +13,7 @@ beforeEach(function () {
     config(['billing.mode' => 'open_beta']);
 });
 
-it('adds and removes beta tags without sending tags on upsert', function () {
+it('adds beta tags without sending tags on upsert', function () {
     fakeGhlApi();
 
     $user = User::factory()->create([
@@ -21,7 +21,12 @@ it('adds and removes beta tags without sending tags on upsert', function () {
         'name' => 'Mutate User',
     ]);
 
-    app(GhlMarketingService::class)->syncApplicationEvent($user, 'application_approved');
+    app(GhlMarketingService::class)->syncUserTags(
+        $user,
+        ['kinsenas-beta'],
+        [],
+        ['event' => 'beta_enrolled'],
+    );
 
     Http::assertSent(function ($request) {
         return $request->method() === 'POST'
@@ -34,15 +39,7 @@ it('adds and removes beta tags without sending tags on upsert', function () {
 
         return $request->method() === 'POST'
             && str_ends_with($request->url(), '/contacts/ct_test_123/tags')
-            && $tags->contains('beta-approved');
-    });
-
-    Http::assertSent(function ($request) {
-        $tags = collect($request->data()['tags'] ?? []);
-
-        return $request->method() === 'DELETE'
-            && str_ends_with($request->url(), '/contacts/ct_test_123/tags')
-            && $tags->contains('beta-pending');
+            && $tags->contains('kinsenas-beta');
     });
 });
 
@@ -70,7 +67,12 @@ it('preserves survey and beta tags as separate add calls', function () {
         'name' => 'Both Tags',
     ]);
 
-    app(GhlMarketingService::class)->syncApplicationEvent($user, 'application_submitted');
+    app(GhlMarketingService::class)->syncUserTags(
+        $user,
+        ['kinsenas-beta'],
+        [],
+        ['event' => 'beta_enrolled'],
+    );
 
     $this->postJson(route('survey.responses.store'), [
         'language' => 'en',
@@ -100,7 +102,7 @@ it('preserves survey and beta tags as separate add calls', function () {
 
         $tags = collect($request->data()['tags'] ?? []);
 
-        return $tags->contains('beta-pending');
+        return $tags->contains('kinsenas-beta');
     });
 
     Http::assertSent(function ($request) {

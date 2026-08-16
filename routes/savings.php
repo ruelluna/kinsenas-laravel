@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Savings\BankController;
+use App\Http\Controllers\Savings\FundCategoryController;
 use App\Http\Controllers\Savings\FundSpendController;
 use App\Http\Controllers\Savings\FundTransferController;
 use App\Http\Controllers\Savings\IncomePeriodController;
@@ -31,6 +32,10 @@ Route::prefix('savings')
             Route::delete('recipients/{recipient}', [RecipientController::class, 'destroy'])->name('recipients.destroy');
 
             Route::middleware('savings.plan.required')->group(function () {
+                Route::get('funds/{category}', [FundCategoryController::class, 'show'])
+                    ->whereUuid('category')
+                    ->name('funds.show');
+
                 Route::get('income', [IncomePeriodController::class, 'index'])->name('income.index');
                 Route::get('income/{incomePeriod}', [IncomePeriodController::class, 'show'])->name('income.show');
                 Route::post('income', [IncomePeriodController::class, 'store'])->name('income.store');

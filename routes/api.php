@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Api\V1\Admin\BetaApplicationController;
 use App\Http\Controllers\Api\V1\Admin\PlanController;
 use App\Http\Controllers\Api\V1\Admin\PlatformUserController;
 use App\Http\Controllers\Api\V1\Admin\SubscriberController;
@@ -49,7 +48,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::post('invitations/{invitation}/decline', [TeamInvitationController::class, 'decline'])->name('invitations.decline');
     });
 
-    Route::middleware(['auth:sanctum', BindVaultKeyStore::class, 'verified', 'beta.approved'])->group(function () {
+    Route::middleware(['auth:sanctum', BindVaultKeyStore::class, 'verified'])->group(function () {
         Route::get('auth/me', MeController::class)->name('auth.me');
         Route::post('auth/logout', LogoutController::class)->name('auth.logout');
         Route::post('vault/unlock', VaultUnlockController::class)->name('vault.unlock');
@@ -161,7 +160,6 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 Route::get('subscribers', [SubscriberController::class, 'index'])->name('subscribers.index');
                 Route::get('subscribers/{team}', [SubscriberController::class, 'show'])->name('subscribers.show');
                 Route::get('plans', [PlanController::class, 'index'])->name('plans.index');
-                Route::get('beta-applications', [BetaApplicationController::class, 'index'])->name('beta-applications.index');
                 Route::get('platform-users', [PlatformUserController::class, 'index'])->name('platform-users.index');
             });
     });

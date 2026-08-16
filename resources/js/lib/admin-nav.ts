@@ -1,8 +1,6 @@
 import {
-    ClipboardList,
     CreditCard,
     History,
-    KeyRound,
     MessageSquare,
     QrCode,
     Shield,
@@ -20,16 +18,6 @@ export const adminNavItems: NavItem[] = [
     },
     { title: 'Plans', href: '/admin/plans', icon: CreditCard },
     { title: 'Payments', href: '/admin/payment-submissions', icon: QrCode },
-    {
-        title: 'Beta applications',
-        href: '/admin/beta-applications',
-        icon: ClipboardList,
-    },
-    {
-        title: 'Beta access codes',
-        href: '/admin/beta-access-codes',
-        icon: KeyRound,
-    },
     {
         title: 'Beta feedback',
         href: '/admin/beta-feedback',

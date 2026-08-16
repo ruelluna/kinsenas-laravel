@@ -12,7 +12,7 @@ export function OpenBetaBanner() {
         OPEN_BETA_BANNER_DISMISS_KEY,
     );
 
-    if (!openBeta.isActive || !openBeta.isApproved || dismissed) {
+    if (!openBeta.isActive || !openBeta.isParticipant || dismissed) {
         return null;
     }
 

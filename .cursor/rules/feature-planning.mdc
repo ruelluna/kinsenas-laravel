@@ -63,7 +63,7 @@ A complete plan should include, when applicable:
 4. **Frontend** — types, components, settings pages
 5. **Seeders & factories** — order, idempotency, demo scenario
 6. **Role / permission cleanup** — deprecations and hidden enums
-7. **Tests** — TDD order: failing Unit/Feature/Browser tests → implement → regression fixes → full suite green ([testing.mdc](./testing.mdc))
+7. **Tests** — TDD order: failing Unit/Feature/Browser tests → implement → regression fixes → scoped tests green ([testing.mdc](./testing.mdc))
 8. **Decisions** — retain/remove choices when conflicts were resolved (table format)
 9. **Out of scope** — explicit boundaries
 
