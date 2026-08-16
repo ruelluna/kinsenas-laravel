@@ -53,6 +53,8 @@ it('shows allocation percentage after fund bucket titles on the dashboard', func
     browserDismissOnboardingTour($page, $user->currentTeam->id);
 
     $page->assertPathContains('/dashboard')
+        ->assertSee('Everyday Fund')
+        ->assertSee('Other funds')
         ->assertSee('Everyday Fund · 70%')
         ->assertNoSmoke();
 });

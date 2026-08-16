@@ -32,8 +32,9 @@ export type DashboardLowBalanceFund = {
 };
 
 export type DashboardSummary = {
-    totalRemaining: string | null;
-    totalInBanks: string | null;
+    defaultFundName: string | null;
+    defaultFundRemaining: string | null;
+    otherFundsRemaining: string | null;
     attentionCount: number;
     pendingTransferCount: number;
     pendingSpendCount: number;

@@ -6,6 +6,7 @@ use App\Models\FundSpend;
 use App\Models\FundTransfer;
 use App\Models\Recipient;
 use App\Models\SavingsFormulaTemplate;
+use App\Models\SavingsPlan;
 use App\Models\Team;
 use App\Models\TeamInvitation;
 use App\Models\User;
@@ -217,12 +218,47 @@ it('dashboard summary includes fund totals after income is added', function () {
         ->where('setup.hasPlan', true)
         ->where('setup.canDrawFromFunds', true)
         ->where('plan.name', $plan->name)
-        ->where('summary.totalRemaining', '50000.00')
+        ->where('summary.defaultFundName', 'Everyday Fund')
+        ->where('summary.defaultFundRemaining', '35000.00')
+        ->where('summary.otherFundsRemaining', '15000.00')
         ->has('fundBalances', 3)
         ->where('fundBalances.0.name', 'Everyday Fund')
         ->where('fundBalances.0.allocationType', 'percentage')
         ->where('fundBalances.0.percentage', '70.00')
         ->where('fundBalances.0.remaining', '35000.00'),
+    );
+});
+
+it('dashboard summary uses first bucket as default when everyday fund is renamed', function () {
+    $user = User::factory()->create();
+    test()->unlockVaultFor($user);
+    $template = SavingsFormulaTemplate::query()->where('slug', 'abundant-formula')->firstOrFail();
+
+    $this->actingAs($user)->post(route('savings.plan.from-template', [
+        'current_team' => $user->currentTeam->slug,
+        'template' => $template->id,
+    ]));
+
+    $plan = SavingsPlan::query()->firstOrFail();
+    $dailyCategory = $plan->categories()->where('name', 'Everyday Fund')->firstOrFail();
+    $dailyCategory->update(['name' => 'Daily Spending']);
+
+    $this->actingAs($user)->post(route('savings.income.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'name' => 'January salary',
+        'amount' => '50000.00',
+        'period_start' => '2026-01-01',
+    ]);
+
+    $response = $this->actingAs($user)->get(dashboardRoute($user));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('dashboard')
+        ->where('summary.defaultFundName', 'Daily Spending')
+        ->where('summary.defaultFundRemaining', '35000.00')
+        ->where('summary.otherFundsRemaining', '15000.00'),
     );
 });
 
