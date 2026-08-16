@@ -2,6 +2,8 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import PendingActionsPanel from '@/components/dashboard/pending-actions-panel';
+import DashboardChartsSection from '@/components/dashboard/dashboard-charts-section';
+import LearnHighlightsCard from '@/components/dashboard/learn-highlights-card';
 import RecentActivityFeed from '@/components/dashboard/recent-activity-feed';
 import SetupChecklist from '@/components/dashboard/setup-checklist';
 import SummaryStatCards from '@/components/dashboard/summary-stat-cards';
@@ -28,9 +30,11 @@ export default function Dashboard({
     fundBalances,
     pendingActions,
     recentActivity,
+    dashboardGraphs,
     features,
     quickLinks,
     quickSpend,
+    learnHighlights = [],
 }: Props) {
     const [showInvitations, setShowInvitations] = useState(
         pendingInvitations.length > 0,
@@ -111,7 +115,16 @@ export default function Dashboard({
             <div className="flex flex-col gap-4 md:gap-6">
                 <SetupChecklist setup={setup} />
 
+                <LearnHighlightsCard posts={learnHighlights} />
+
                 <SummaryStatCards setup={setup} summary={summary} />
+
+                {showFinancialSections && dashboardGraphs && setup.hasSpending && (
+                    <DashboardChartsSection
+                        graphs={dashboardGraphs}
+                        reportsHref={quickLinks.reports}
+                    />
+                )}
 
                 {showFinancialSections && (
                     <>

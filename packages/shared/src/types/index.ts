@@ -47,6 +47,13 @@ export type {
     SavingsRecipient,
     RecipientTypeOption,
     ReportTotals,
+    FundGraphData,
+    DashboardGraphData,
+    FundUtilizationPoint,
+    SpendingByFundPoint,
+    SpendingOverTimePoint,
+    IncomeVsSpendingPoint,
+    TopRecipientPoint,
 } from './savings';
 export type {
     SubscriptionSummary,

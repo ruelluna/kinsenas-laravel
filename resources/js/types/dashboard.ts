@@ -1,4 +1,5 @@
-import type { FundBalance } from '@/types/savings';
+import type { ContentPostSummary } from '@/types/content';
+import type { DashboardGraphData, FundBalance } from '@/types/savings';
 
 export type DashboardSetupStep = {
     key: string;
@@ -107,7 +108,9 @@ export type DashboardPageProps = {
     bankBalances: DashboardBankBalance[];
     pendingActions: DashboardPendingActions;
     recentActivity: DashboardActivityItem[];
+    dashboardGraphs: DashboardGraphData | null;
     features: DashboardFeatures;
     quickLinks: DashboardQuickLinks;
     quickSpend: DashboardQuickSpend | null;
+    learnHighlights: ContentPostSummary[];
 };

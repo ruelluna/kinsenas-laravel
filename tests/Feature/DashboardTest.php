@@ -2,6 +2,7 @@
 
 use App\Enums\TeamRole;
 use App\Models\Bank;
+use App\Models\ContentPost;
 use App\Models\FundSpend;
 use App\Models\FundTransfer;
 use App\Models\Recipient;
@@ -377,6 +378,26 @@ it('dashboard setup marks bank step complete when team has a bank', function () 
     );
 });
 
+it('dashboard includes graph data when plan has spending', function () {
+    [$user, $plan, $everydayCategory] = createUserWithLockedIncome();
+
+    FundSpend::factory()->create([
+        'savings_plan_id' => $plan->id,
+        'category_id' => $everydayCategory->id,
+        'amount_encrypted' => '500.00',
+        'spent_on' => '2026-01-15',
+    ]);
+
+    $response = $this->actingAs($user)->get(dashboardRoute($user));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('dashboard')
+        ->has('dashboardGraphs.fund_utilization')
+        ->has('dashboardGraphs.spending_over_time')
+    );
+});
+
 it('dashboard recent activity includes fund additions', function () {
     [$user, $plan, $everydayCategory] = createUserWithLockedIncome();
 
@@ -396,5 +417,46 @@ it('dashboard recent activity includes fund additions', function () {
         ->where('recentActivity.0.type', 'fund_addition')
         ->where('recentActivity.0.amount', '2000.00')
         ->where('recentActivity.0.label', $everydayCategory->name),
+    );
+});
+
+it('dashboard includes recent learn highlights', function () {
+    $user = User::factory()->create();
+    $this->unlockVaultFor($user);
+
+    ContentPost::factory()->external()->create([
+        'title' => 'Payday reminder',
+        'slug' => 'payday-reminder',
+        'published_at' => now()->subDay(),
+    ]);
+    ContentPost::factory()->internal()->create([
+        'title' => 'Members guide',
+        'slug' => 'members-guide',
+        'published_at' => now(),
+    ]);
+
+    $response = $this->actingAs($user)->get(dashboardRoute($user));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('dashboard')
+        ->has('learnHighlights', 2)
+        ->where('learnHighlights.0.slug', 'members-guide')
+        ->where('learnHighlights.1.slug', 'payday-reminder'),
+    );
+});
+
+it('dashboard learn highlights are empty when no published posts exist', function () {
+    $user = User::factory()->create();
+    $this->unlockVaultFor($user);
+
+    ContentPost::factory()->draft()->external()->create(['slug' => 'draft-only']);
+
+    $response = $this->actingAs($user)->get(dashboardRoute($user));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('dashboard')
+        ->has('learnHighlights', 0),
     );
 });
