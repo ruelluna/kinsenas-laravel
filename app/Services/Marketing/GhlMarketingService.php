@@ -4,7 +4,6 @@ namespace App\Services\Marketing;
 
 use App\Models\SurveyResponse;
 use App\Models\User;
-use App\Support\Marketing\GhlTagCatalog;
 use App\Support\Survey\SurveyGhlTagBuilder;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -54,37 +53,6 @@ class GhlMarketingService
         ]);
 
         return false;
-    }
-
-    public function syncApplicationEvent(User $user, string $event): void
-    {
-        if (! $this->guardEnabled(['event' => $event, 'user_id' => $user->id])) {
-            return;
-        }
-
-        $tagMutation = GhlTagCatalog::betaEventTags($event);
-
-        if ($tagMutation === null) {
-            Log::warning('GHL beta sync skipped for unknown event', [
-                'event' => $event,
-                'user_id' => $user->id,
-            ]);
-
-            return;
-        }
-
-        [$tagsToAdd, $tagsToRemove] = $tagMutation;
-
-        $this->mutateTags(
-            email: $user->email,
-            name: $user->name,
-            tagsToAdd: $tagsToAdd,
-            tagsToRemove: $tagsToRemove,
-            context: [
-                'event' => $event,
-                'user_id' => $user->id,
-            ],
-        );
     }
 
     public function syncSurveyResponse(SurveyResponse $surveyResponse): void

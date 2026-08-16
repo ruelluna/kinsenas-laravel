@@ -289,3 +289,29 @@ export type ReportTotals = {
         bank_logo_url: string | null;
     }>;
 };
+
+export type FundCategoryAllocationRow = {
+    id: string;
+    amount: string | null;
+    periodId: string;
+    periodName: string;
+    periodStart: string;
+};
+
+export type FundAddedEntryRow = {
+    id: string;
+    amount: string | null;
+    addedOn: string;
+};
+
+export type FundCategoryTransferRow = FundTransfer & {
+    direction: 'in' | 'out';
+};
+
+export type FundCategoryOption = {
+    id: string;
+    name: string;
+    bankId: string | null;
+    bankName?: string | null;
+    bankLogoUrl?: string | null;
+};

@@ -17,6 +17,7 @@ type Props = {
     bordered?: boolean;
     showAllocationPercent?: boolean;
     className?: string;
+    fundDetailHref?: (categoryId: string) => string;
 };
 
 function toExistingFundTarget(balance: FundBalance): ExistingFundTarget {
@@ -37,6 +38,7 @@ export default function FundBalancesSection({
     bordered = false,
     showAllocationPercent = false,
     className,
+    fundDetailHref,
 }: Props) {
     const [fundModalOpen, setFundModalOpen] = useState(false);
     const [selectedTarget, setSelectedTarget] =
@@ -82,6 +84,7 @@ export default function FundBalancesSection({
                     limit={limit}
                     showAllocationPercent={showAllocationPercent}
                     onFund={handleFund}
+                    fundDetailHref={fundDetailHref}
                 />
             </div>
             <AddFundBalanceModal

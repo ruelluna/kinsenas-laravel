@@ -141,10 +141,10 @@ protected function isAccessible(User $user, ?string $path = null): bool
 
 ## Test Enforcement
 
-Follow [testing.mdc](./testing.mdc) in the repo for the full Kinsenas standard (impact analysis → conflict resolution → TDD → full suite green).
+Follow [testing.mdc](./testing.mdc) in the repo for the full Kinsenas standard (impact analysis → conflict resolution → TDD → scoped tests green).
 
 - Every behavior change must be programmatically tested — write failing tests first, then implement.
-- Run affected tests during RED/GREEN cycles; run the full suite before marking plan work complete.
+- Run affected tests during RED/GREEN cycles; before marking plan work complete, run all tests in scope for the task (not the full suite unless the user asks).
 - Use `php artisan test --compact` with a specific filename or `--filter=` during development.
 - Browser tests: `tests/Browser/` with `pestphp/pest-plugin-browser` — see [testing.mdc](./testing.mdc).
 
@@ -256,7 +256,7 @@ it('is true', function () {
 </code-snippet>
 
 ### Running Tests
-- Run affected tests during RED/GREEN cycles; run the full suite before marking work complete (`php artisan test --compact`).
+- Run affected tests during RED/GREEN cycles; before marking work complete, run in-scope tests per [testing.mdc](./testing.mdc) (new + impact-matrix regression — not the full suite unless the user asks).
 - To run all tests in a file: `php artisan test --compact tests/Feature/ExampleTest.php`.
 - To filter on a particular test name: `php artisan test --compact --filter=testName`.
 - List suggested commands in breakdowns when the user prefers not to run tests in-session.

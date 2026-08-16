@@ -28,7 +28,7 @@ export default function LandingOpenBetaBanner() {
                     href={register()}
                     className="shrink-0 text-sm font-semibold underline underline-offset-4 hover:text-primary-foreground/80"
                 >
-                    Apply for beta access
+                    Create beta account
                 </Link>
                 {/* @end-chisel-registration */}
             </div>

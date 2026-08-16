@@ -1,5 +1,5 @@
 ---
-description: Kinsenas testing standard — impact analysis, conflict resolution, TDD, Pest Feature/Unit/Browser, and full-suite green gate
+description: Kinsenas testing standard — impact analysis, conflict resolution, TDD, Pest Feature/Unit/Browser, and scoped-tests green gate
 alwaysApply: true
 ---
 
@@ -19,7 +19,7 @@ Every behavior change follows this sequence:
 4. **GREEN** — implement the minimum code until new tests pass.
 5. **REFACTOR** — clean up with tests still green.
 6. **Regression** — update or fix tests listed in the impact matrix.
-7. **Full suite green** — run the full test suite before marking plan work complete.
+7. **Scoped tests green** — run all tests **in scope for the current task** before marking plan work complete (see [Running tests](#running-tests)).
 
 ```mermaid
 flowchart TD
@@ -31,7 +31,7 @@ flowchart TD
     E --> F[GREEN — implement]
     F --> G[REFACTOR]
     G --> H[Fix regression tests]
-    H --> I[Full suite green]
+    H --> I[Scoped tests green]
 ```
 
 ## Conflict resolution
@@ -91,16 +91,25 @@ When impact analysis or implementation reveals **conflicting behavior, scope, te
 
 ### Running tests
 
+**In scope** for a task means:
+
+- New tests written for this change (Unit, Feature, Browser as applicable)
+- Existing tests listed in the impact matrix (regression)
+- Any sibling test files that share setup or behavior you touched (e.g. same controller, page, or service)
+
+Do **not** run the full suite during TDD unless the user explicitly asks. Run only what is in scope.
+
 | When | What to run |
 | ---- | ----------- |
-| During RED/GREEN cycles | Affected file or `--filter=` for the test being written |
-| Before marking plan work complete | **Full suite:** `php artisan test --compact` |
-| In breakdowns / handoff | List **suggested** commands for the user (Feature + Browser paths) |
+| During RED/GREEN cycles | The test file or `--filter=` for the test being written |
+| Before marking plan work complete | **All in-scope tests** — new + impact-matrix regression files (one command per file or directory, or `--filter=` when grouped) |
+| User asks for full suite | `php artisan test --compact` |
+| In breakdowns / handoff | List **suggested** in-scope commands (Feature + Browser paths) |
 | User explicitly asks not to run | Skip execution; still write tests and list suggested commands |
 
 Use `php artisan test --compact tests/Feature/ExampleTest.php` for a single file.
 
-**CI** runs `composer ci:check` (includes full Pest suite + Playwright) on pull requests.
+**CI** runs `composer ci:check` (full Pest suite + Playwright) on pull requests — that is the full-suite gate, not local TDD.
 
 ## Browser testing (Pest + Playwright)
 
@@ -143,7 +152,7 @@ Plans ([feature-plans.mdc](./feature-plans.mdc)) must include todos in this orde
 3. `failing-unit-tests` / `failing-feature-tests` / `failing-browser-tests` (as applicable)
 4. `implement`
 5. `update-regression-tests`
-6. `full-suite-green`
+6. `scoped-tests-green`
 
 Plans must include a `## Decisions` section when conflicts were resolved.
 
@@ -161,4 +170,4 @@ Document in the impact matrix as **N/A** with one-line rationale:
 - Cursor rules or agent config only
 - Dependency bumps with no app logic change
 
-Even for exceptions, run the full suite before merge if CI would catch regressions in touched areas.
+Even for exceptions, run in-scope tests when behavior could regress in touched areas; rely on CI for the full suite.

@@ -90,8 +90,6 @@ it('returns register context props', function () {
         'passwordRules',
         'teamInvitation',
         'openBetaOffer',
-        'betaCode',
-        'betaCodeLabel',
     ]);
 });
 

@@ -1,3 +1,4 @@
+import { Link } from '@inertiajs/react';
 import FundBankBadge from '@/components/savings/fund-bank-badge';
 import { Badge } from '@/components/ui/badge';
 import { categoryTitleWithAllocation } from '@/lib/category-allocation-label';
@@ -17,6 +18,8 @@ type Props = Pick<
     | 'deductionValue'
 > & {
     showAllocationPercent?: boolean;
+    detailHref?: string;
+    detailTestId?: string;
 };
 
 export default function FundCardHeader({
@@ -31,6 +34,8 @@ export default function FundCardHeader({
     deductionMode,
     deductionValue,
     showAllocationPercent = false,
+    detailHref,
+    detailTestId,
 }: Props) {
     const title = showAllocationPercent
         ? categoryTitleWithAllocation(name, {
@@ -44,7 +49,17 @@ export default function FundCardHeader({
     return (
         <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-                <p className="font-medium">{title}</p>
+                {detailHref ? (
+                    <Link
+                        href={detailHref}
+                        className="font-medium text-primary underline-offset-4 hover:underline"
+                        data-test={detailTestId ?? 'fund-card-title'}
+                    >
+                        {title}
+                    </Link>
+                ) : (
+                    <p className="font-medium">{title}</p>
+                )}
                 {hint && (
                     <p className="mt-0.5 text-xs text-muted-foreground">
                         {hint}

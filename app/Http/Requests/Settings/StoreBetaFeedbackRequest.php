@@ -12,7 +12,9 @@ class StoreBetaFeedbackRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return BillingMode::isOpenBeta() && $this->user() !== null;
+        return BillingMode::isOpenBeta()
+            && $this->user() !== null
+            && $this->user()->isBetaParticipant();
     }
 
     protected function prepareForValidation(): void

@@ -27,8 +27,6 @@ class NewUserRegistered extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $betaStatus = $this->user->beta_application_status?->label() ?? __('Not applicable');
-
         $message = (new MailMessage)
             ->subject(__('New :app signup: :name', [
                 'app' => config('app.name'),
@@ -38,7 +36,6 @@ class NewUserRegistered extends Notification implements ShouldQueue
             ->line(__('Name: :name', ['name' => $this->user->name]))
             ->line(__('Email: :email', ['email' => $this->user->email]))
             ->line(__('Signed up: :time', ['time' => $this->user->created_at?->toDayDateTimeString() ?? __('Unknown')]))
-            ->line(__('Beta application status: :status', ['status' => $betaStatus]))
             ->line(__('The recovery key was sent directly to the user; it is not included in this email.'));
 
         $cc = config('signup.admin_notify.cc');

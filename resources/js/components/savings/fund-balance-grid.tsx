@@ -23,6 +23,7 @@ type Props = {
     showAllocationPercent?: boolean;
     transferredLabel?: string;
     action?: FundAction;
+    fundDetailHref?: (categoryId: string) => string;
 };
 
 export default function FundBalanceGrid({
@@ -37,6 +38,7 @@ export default function FundBalanceGrid({
     showAllocationPercent = false,
     transferredLabel = 'Transferred',
     action,
+    fundDetailHref,
 }: Props) {
     const balances =
         limit !== undefined ? fundBalances.slice(0, limit) : fundBalances;
@@ -124,6 +126,8 @@ export default function FundBalanceGrid({
                         <FundCardHeader
                             {...balance}
                             showAllocationPercent={showAllocationPercent}
+                            detailHref={fundDetailHref?.(balance.categoryId)}
+                            detailTestId={`fund-card-title-${balance.categoryId}`}
                         />
                         <div className="mt-3 flex items-end justify-between gap-2">
                             <div>
@@ -160,6 +164,8 @@ export default function FundBalanceGrid({
                     <FundCardHeader
                         {...balance}
                         showAllocationPercent={showAllocationPercent}
+                        detailHref={fundDetailHref?.(balance.categoryId)}
+                        detailTestId={`fund-card-title-${balance.categoryId}`}
                     />
                     <dl className="mt-4 space-y-1 font-space text-sm">
                         {balance.openingBalance !== null &&

@@ -92,8 +92,8 @@ todos:
   - id: update-regression-tests
     content: "Fix tests listed in impact matrix"
     status: pending
-  - id: full-suite-green
-    content: "Run php artisan test --compact — all green"
+  - id: scoped-tests-green
+    content: "Run in-scope tests (new + impact-matrix regression) — all green"
     status: pending
 isProject: true
 ---

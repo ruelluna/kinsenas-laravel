@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\BetaApplicationStatus;
 use App\Enums\SubscriptionStatus;
 use App\Models\User;
 use Database\Seeders\BillingSeeder;
@@ -16,22 +15,20 @@ beforeEach(function () {
     config(['billing.mode' => 'open_beta']);
 });
 
-it('registration screen shows open beta application offer instead of trial offer', function () {
+it('registration screen shows open beta offer instead of trial offer', function () {
     $response = $this->get(route('register'));
 
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
         ->component('auth/register')
         ->where('trialOffer', null)
-        ->where('betaCode', null)
-        ->where('betaCodeLabel', null)
         ->has('openBetaOffer', fn (Assert $offer) => $offer
             ->where('launchDiscountPercent', 20),
         ),
     );
 });
 
-it('creates a pending beta application on registration', function () {
+it('enrolls beta participants on registration', function () {
     Queue::fake();
 
     $this->post(route('register.store'), [
@@ -44,7 +41,7 @@ it('creates a pending beta application on registration', function () {
     $user = User::where('email', 'open-beta@example.com')->firstOrFail();
 
     expect($user->beta_enrolled_at)->not->toBeNull()
-        ->and($user->beta_application_status)->toBe(BetaApplicationStatus::Pending)
+        ->and($user->beta_launch_discount_eligible)->toBeTrue()
         ->and($user->personalTeam()->subscription->status)->toBe(SubscriptionStatus::OpenBeta)
         ->and($user->marketing_emails_opt_in)->toBeFalse();
 });
@@ -66,28 +63,18 @@ it('stores marketing email opt-in on open beta registration', function () {
         ->and($user->marketing_emails_opted_in_at)->not->toBeNull();
 });
 
-it('redirects pending applicants to the beta pending page after login', function () {
-    $user = User::factory()->betaPending()->create(['email' => 'pending-verify@example.com']);
+it('redirects unverified beta participants to email verification after login', function () {
+    $user = User::factory()->unverified()->betaParticipant()->create(['email' => 'pending-verify@example.com']);
 
     $response = $this->post(route('login.store'), [
         'email' => 'pending-verify@example.com',
         'password' => 'password',
     ]);
 
-    $response->assertRedirect(route('beta.pending', absolute: false));
+    $response->assertRedirect(route('verification.notice', absolute: false));
 });
 
-it('grants launch discount eligibility after admin approval', function () {
-    $admin = User::factory()->create(['email' => 'admin@example.com', 'is_platform_admin' => true]);
-    $user = User::factory()->betaPending()->create(['email' => 'discount@example.com']);
-
-    $this->actingAs($admin)->post(route('admin.beta-applications.approve', $user));
-
-    expect($user->fresh()->beta_application_status)->toBe(BetaApplicationStatus::Approved)
-        ->and($user->fresh()->beta_launch_discount_eligible)->toBeTrue();
-});
-
-it('upserts a GHL contact when beta application is submitted', function () {
+it('upserts a GHL contact when a beta participant registers', function () {
     fakeGhlApi();
 
     $this->post(route('register.store'), [
@@ -118,8 +105,7 @@ it('upserts a GHL contact when beta application is submitted', function () {
 
         return $request->method() === 'POST'
             && str_ends_with($request->url(), '/contacts/ct_test_123/tags')
-            && $tags->contains('kinsenas-beta')
-            && $tags->contains('beta-pending');
+            && $tags->contains('kinsenas-beta');
     });
 
     Http::assertSent(function ($request) {
@@ -150,55 +136,4 @@ it('does not call GHL when enabled but PIT is missing', function () {
     ]);
 
     Http::assertNothingSent();
-});
-
-it('upserts a GHL contact with approved tags when admin approves', function () {
-    fakeGhlApi();
-
-    $admin = User::factory()->create(['email' => 'admin-ghl@example.com', 'is_platform_admin' => true]);
-    $applicant = User::factory()->betaPending()->create([
-        'name' => 'Approve Me',
-        'email' => 'approve-ghl@example.com',
-    ]);
-
-    $this->actingAs($admin)->post(route('admin.beta-applications.approve', $applicant));
-
-    Http::assertSent(function ($request) {
-        $data = $request->data();
-
-        return $request->method() === 'POST'
-            && $request->url() === 'https://services.leadconnectorhq.com/contacts/upsert'
-            && ($data['email'] ?? null) === 'approve-ghl@example.com'
-            && ! array_key_exists('tags', $data);
-    });
-
-    Http::assertSent(function ($request) {
-        $data = $request->data();
-        $tags = collect($data['tags'] ?? []);
-
-        return $request->method() === 'POST'
-            && str_ends_with($request->url(), '/contacts/ct_test_123/tags')
-            && $tags->contains('kinsenas-beta')
-            && $tags->contains('beta-approved');
-    });
-
-    Http::assertSent(function ($request) {
-        $data = $request->data();
-        $tags = collect($data['tags'] ?? []);
-
-        return $request->method() === 'DELETE'
-            && str_ends_with($request->url(), '/contacts/ct_test_123/tags')
-            && $tags->contains('beta-pending')
-            && $tags->contains('beta-rejected');
-    });
-});
-
-it('allows admin to approve a pending beta application', function () {
-    $admin = User::factory()->create(['email' => 'admin-approve@example.com', 'is_platform_admin' => true]);
-    $applicant = User::factory()->betaPending()->create(['email' => 'applicant@example.com']);
-
-    $response = $this->actingAs($admin)->post(route('admin.beta-applications.approve', $applicant));
-
-    $response->assertRedirect();
-    expect($applicant->fresh()->beta_application_status)->toBe(BetaApplicationStatus::Approved);
 });

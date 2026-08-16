@@ -19,8 +19,6 @@ type Props = {
     teamInvitation?: TeamInvitationContext | null;
     trialOffer?: TrialOffer | null;
     openBetaOffer?: OpenBetaOffer | null;
-    betaCode?: string | null;
-    betaCodeLabel?: string | null;
 };
 
 export default function Register({
@@ -28,8 +26,6 @@ export default function Register({
     teamInvitation,
     trialOffer,
     openBetaOffer,
-    betaCode,
-    betaCodeLabel,
 }: Props) {
     return (
         <>
@@ -52,34 +48,14 @@ export default function Register({
                         {openBetaOffer && (
                             <Alert variant="brand">
                                 <AlertTitle>
-                                    Apply for public beta access
+                                    Join the public beta
                                 </AlertTitle>
                                 <AlertDescription className="space-y-2">
                                     <p>
-                                        Create a real Kinsenas account and apply
-                                        for the public beta. After you verify
-                                        your email
-                                        {betaCodeLabel ? (
-                                            <>
-                                                {' '}
-                                                with your event code for{' '}
-                                                <span className="font-medium">
-                                                    {betaCodeLabel}
-                                                </span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                {' '}
-                                                and we approve your application
-                                            </>
-                                        )}
-                                        , you can use the core savings planner
-                                        at no cost.
-                                    </p>
-                                    <p>
-                                        Have an event code? Enter it below for
-                                        instant beta approval after email
-                                        verification.
+                                        Create a real Kinsenas account for the
+                                        public beta. After you verify your
+                                        email, you can use the core savings
+                                        planner at no cost.
                                     </p>
                                     <p>{BETA_FREE_MESSAGE}</p>
                                     <p className="text-muted-foreground">
@@ -189,31 +165,13 @@ export default function Register({
                                 />
                             </div>
 
-                            {openBetaOffer && (
-                                <div className="grid gap-2">
-                                    <Label htmlFor="beta_code">
-                                        Beta access code (optional)
-                                    </Label>
-                                    <Input
-                                        id="beta_code"
-                                        type="text"
-                                        tabIndex={5}
-                                        name="beta_code"
-                                        defaultValue={betaCode ?? ''}
-                                        placeholder="KINSENAS-MNL-2026"
-                                        autoComplete="off"
-                                    />
-                                    <InputError message={errors.beta_code} />
-                                </div>
-                            )}
-
                             <div className="flex items-start gap-3">
                                 <input
                                     type="checkbox"
                                     id="marketing_emails_opt_in"
                                     name="marketing_emails_opt_in"
                                     value="1"
-                                    tabIndex={6}
+                                    tabIndex={5}
                                     className="mt-1 size-4 shrink-0 rounded border border-input shadow-xs"
                                 />
                                 <div className="grid gap-1">
@@ -234,12 +192,12 @@ export default function Register({
                             <Button
                                 type="submit"
                                 className="mt-2 h-11 w-full rounded-xl font-bold hover:bg-glow"
-                                tabIndex={7}
+                                tabIndex={6}
                                 data-test="register-user-button"
                             >
                                 {processing && <Spinner />}
                                 {openBetaOffer
-                                    ? 'Apply for beta access'
+                                    ? 'Create beta account'
                                     : 'Create account'}
                             </Button>
                         </div>
@@ -258,7 +216,7 @@ export default function Register({
                                         : login()
                                 }
                                 data-test="team-invitation-login-link"
-                                tabIndex={8}
+                                tabIndex={7}
                             >
                                 Log in
                             </TextLink>
@@ -273,7 +231,7 @@ export default function Register({
 Register.layout = (props: Props) => ({
     title: 'Create an account',
     description: props.openBetaOffer
-        ? 'Apply for the free public beta — real accounts, core savings planner, pricing coming soon'
+        ? 'Join the free public beta — real accounts, core savings planner, pricing coming soon'
         : props.trialOffer
           ? `Start your ${props.trialOffer.trialDays}-day free trial on your personal finance workspace`
           : 'Enter your details below to create your account',

@@ -2,7 +2,6 @@
 
 namespace App\Http\Responses\Concerns;
 
-use App\Enums\BetaApplicationStatus;
 use App\Enums\BillingMode;
 use App\Models\Team;
 use App\Services\Billing\SubscriptionService;
@@ -17,17 +16,6 @@ trait RedirectsToCurrentTeam
 
         if ($user !== null && ! $user->hasVerifiedEmail()) {
             return route('verification.notice');
-        }
-
-        if ($user !== null && BillingMode::isOpenBeta() && ! $user->isPlatformAdmin()) {
-            if ($user->beta_application_status === BetaApplicationStatus::Rejected) {
-                return route('beta.rejected');
-            }
-
-            if ($user->beta_application_status === BetaApplicationStatus::Pending
-                || $user->beta_application_status === null) {
-                return route('beta.pending');
-            }
         }
 
         return $this->redirectPathForCurrentTeam($request, $redirect);
