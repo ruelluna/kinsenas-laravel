@@ -6,6 +6,7 @@ use Database\Seeders\BillingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\URL;
 use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
@@ -74,7 +75,7 @@ it('redirects unverified beta participants to email verification after login', f
     $response->assertRedirect(route('verification.notice', absolute: false));
 });
 
-it('upserts a GHL contact when a beta participant registers', function () {
+it('does not upsert a GHL contact when a beta participant registers before verifying email', function () {
     fakeGhlApi();
 
     $this->post(route('register.store'), [
@@ -83,6 +84,31 @@ it('upserts a GHL contact when a beta participant registers', function () {
         'password' => 'password',
         'password_confirmation' => 'password',
     ]);
+
+    Http::assertNothingSent();
+});
+
+it('upserts a GHL contact when a beta participant verifies email', function () {
+    fakeGhlApi();
+
+    $this->post(route('register.store'), [
+        'name' => 'Ghl Beta User',
+        'email' => 'ghl-beta@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ]);
+
+    $user = User::where('email', 'ghl-beta@example.com')->firstOrFail();
+
+    Http::assertNothingSent();
+
+    $verificationUrl = URL::temporarySignedRoute(
+        'verification.verify',
+        now()->addMinutes(60),
+        ['id' => $user->id, 'hash' => sha1($user->email)],
+    );
+
+    $this->actingAs($user)->get($verificationUrl);
 
     Http::assertSent(function ($request) {
         $data = $request->data();
@@ -105,17 +131,11 @@ it('upserts a GHL contact when a beta participant registers', function () {
 
         return $request->method() === 'POST'
             && str_ends_with($request->url(), '/contacts/ct_test_123/tags')
-            && $tags->contains('kinsenas-beta');
-    });
-
-    Http::assertSent(function ($request) {
-        $data = $request->data();
-        $tags = collect($data['tags'] ?? []);
-
-        return $request->method() === 'POST'
-            && str_ends_with($request->url(), '/contacts/ct_test_123/tags')
             && $tags->contains('kinsenas-user')
-            && $tags->contains('registered');
+            && $tags->contains('registered')
+            && $tags->contains('email-verified')
+            && $tags->contains('kinsenas-beta')
+            && $tags->contains('beta-launch-discount-eligible');
     });
 });
 

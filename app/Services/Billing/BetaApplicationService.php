@@ -4,15 +4,11 @@ namespace App\Services\Billing;
 
 use App\Enums\BillingMode;
 use App\Models\User;
-use App\Services\Marketing\GhlUserTagService;
-use App\Support\Marketing\GhlTagCatalog;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class BetaApplicationService
 {
-    public function __construct(private GhlUserTagService $ghlUserTagService) {}
-
     public function enroll(User $user): void
     {
         if (! BillingMode::isOpenBeta()) {
@@ -27,13 +23,6 @@ class BetaApplicationService
             'beta_enrolled_at' => now(),
             'beta_launch_discount_eligible' => true,
         ])->save();
-
-        $this->ghlUserTagService->dispatch(
-            $user,
-            [GhlTagCatalog::KINSENAS_BETA],
-            [],
-            ['event' => 'beta_enrolled'],
-        );
 
         Log::info('Beta participant enrolled', [
             'user_id' => $user->id,
