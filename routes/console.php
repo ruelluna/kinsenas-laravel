@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\UserActivityAction;
+use App\Models\ContentEngagementEvent;
 use App\Models\TeamInvitation;
 use App\Services\Audit\UserActivityLogger;
 use Illuminate\Support\Facades\Schedule;
@@ -36,3 +37,9 @@ Schedule::command('notifications:pending-actions-reminder')->daily();
 Schedule::command('notifications:low-fund-balance')->daily();
 Schedule::command('notifications:trial-ending-reminder')->daily();
 Schedule::command('notifications:income-reminder')->daily();
+
+Schedule::call(function () {
+    ContentEngagementEvent::query()
+        ->where('created_at', '<', now()->subDays(365))
+        ->delete();
+})->daily()->description('Prune old content engagement events');

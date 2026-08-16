@@ -126,6 +126,50 @@ export type ReportTotals = {
     }>;
 };
 
+export type FundUtilizationPoint = {
+    category_id: string;
+    name: string;
+    percent_used: number;
+    remaining: string;
+};
+
+export type SpendingByFundPoint = {
+    category_id: string;
+    name: string;
+    total: string;
+};
+
+export type SpendingOverTimePoint = {
+    period: string;
+    total: string;
+};
+
+export type IncomeVsSpendingPoint = {
+    period: string;
+    income: string;
+    spending: string;
+};
+
+export type TopRecipientPoint = {
+    recipient_id: string;
+    name: string;
+    total: string;
+};
+
+export type FundGraphData = {
+    range: { from: string | null; to: string | null };
+    fund_utilization: FundUtilizationPoint[];
+    spending_by_fund: SpendingByFundPoint[];
+    spending_over_time: SpendingOverTimePoint[];
+    income_vs_spending: IncomeVsSpendingPoint[];
+    top_recipients: TopRecipientPoint[];
+};
+
+export type DashboardGraphData = {
+    fund_utilization: FundUtilizationPoint[];
+    spending_over_time: SpendingOverTimePoint[];
+};
+
 export type FundBalance = {
     categoryId: string;
     name: string;

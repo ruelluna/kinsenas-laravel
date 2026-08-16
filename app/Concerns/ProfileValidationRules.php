@@ -18,6 +18,8 @@ trait ProfileValidationRules
         return [
             'name' => $this->nameRules(),
             'email' => $this->emailRules($userId),
+            'profile_photo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120'],
+            'remove_profile_photo' => ['sometimes', 'boolean'],
         ];
     }
 

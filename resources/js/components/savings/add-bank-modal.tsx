@@ -1,8 +1,7 @@
 import { Form, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import BankInstitutionPicker, {
-    type BankInstitutionSelection,
-} from '@/components/savings/bank-institution-picker';
+import BankInstitutionPicker from '@/components/savings/bank-institution-picker';
+import type {BankInstitutionSelection} from '@/components/savings/bank-institution-picker';
 import GoTymeAccountLabel from '@/components/savings/gotyme-account-label';
 import { Button } from '@/components/ui/button';
 import {

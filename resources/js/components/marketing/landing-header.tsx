@@ -16,6 +16,7 @@ const NAV_LINKS = [
     { href: '#loop', label: 'How it works' },
     { href: '#filipino-spending', label: 'For Filipinos' },
     { href: '#banks', label: 'Banks' },
+    { href: '/learn', label: 'Learn' },
     { href: '#security', label: 'Security' },
 ] as const;
 
@@ -41,15 +42,25 @@ export default function LandingHeader({
             </Link>
 
             <div className="hidden gap-8 text-sm font-medium text-muted-foreground md:flex">
-                {NAV_LINKS.map((link) => (
-                    <a
-                        key={link.href}
-                        href={link.href}
-                        className="transition-colors hover:text-glow"
-                    >
-                        {link.label}
-                    </a>
-                ))}
+                {NAV_LINKS.map((link) =>
+                    link.href.startsWith('/') ? (
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            className="transition-colors hover:text-glow"
+                        >
+                            {link.label}
+                        </Link>
+                    ) : (
+                        <a
+                            key={link.href}
+                            href={link.href}
+                            className="transition-colors hover:text-glow"
+                        >
+                            {link.label}
+                        </a>
+                    ),
+                )}
             </div>
 
             <div className="flex items-center gap-3">

@@ -5,14 +5,15 @@ import {
     useContext,
     useEffect,
     useMemo,
-    useState,
-    type ReactNode,
+    useState
+    
 } from 'react';
+import type {ReactNode} from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
     dismissBanner,
     isBannerDismissed,
 } from '@/lib/dismissible-banner';
-import { useIsMobile } from '@/hooks/use-mobile';
 import {
     getInstallGuideVariant,
     isAuthInstallPage,
@@ -21,10 +22,11 @@ import {
     isPwaInstalled,
     markPwaInstalled,
     PWA_INSTALL_DISMISS_KEY,
-    syncPwaInstalledFromBrowser,
-    type BeforeInstallPromptEvent,
-    type InstallGuideVariant,
+    syncPwaInstalledFromBrowser
+    
+    
 } from '@/lib/pwa-install';
+import type {BeforeInstallPromptEvent, InstallGuideVariant} from '@/lib/pwa-install';
 import type { SharedData } from '@/types';
 
 type PwaInstallContextValue = {

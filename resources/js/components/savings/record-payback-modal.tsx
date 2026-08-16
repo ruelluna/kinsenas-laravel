@@ -51,6 +51,7 @@ export default function RecordPaybackModal({
                 if (nextOpen) {
                     setAmount(defaultAmount);
                 }
+
                 onOpenChange(nextOpen);
             }}
         >

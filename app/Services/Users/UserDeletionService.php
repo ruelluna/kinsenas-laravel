@@ -2,6 +2,7 @@
 
 namespace App\Services\Users;
 
+use App\Enums\PlatformRole;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\Billing\SubscriptionService;
@@ -25,7 +26,7 @@ class UserDeletionService
         }
 
         if ($target->isPlatformAdmin()) {
-            $adminCount = User::query()->where('is_platform_admin', true)->count();
+            $adminCount = User::role(PlatformRole::PlatformAdmin->value)->count();
 
             if ($adminCount <= 1) {
                 return __('At least one platform admin must remain.');

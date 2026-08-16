@@ -1,4 +1,10 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
+import FundUtilizationChart from '@/components/charts/fund-utilization-chart';
+import IncomeVsSpendingChart from '@/components/charts/income-vs-spending-chart';
+import SpendingByFundChart from '@/components/charts/spending-by-fund-chart';
+import SpendingTrendChart from '@/components/charts/spending-trend-chart';
+import TopRecipientsChart from '@/components/charts/top-recipients-chart';
 import Heading from '@/components/heading';
 import {
     MobileMetricCard,
@@ -6,15 +12,41 @@ import {
 } from '@/components/mobile/mobile-metric-card';
 import { BankLogo } from '@/components/savings/bank-select';
 import FundBankBadge from '@/components/savings/fund-bank-badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { formatMoney } from '@/lib/format-money';
 import type { SharedData } from '@/types';
-import type { ReportTotals } from '@/types/savings';
+import type { FundGraphData, ReportTotals } from '@/types/savings';
 
-type Props = { totals: ReportTotals };
+type Props = {
+    totals: ReportTotals;
+    graphs: FundGraphData;
+};
 
-export default function SavingsReports({ totals }: Props) {
+export default function SavingsReports({ totals, graphs }: Props) {
     const { currentTeam } = usePage<SharedData>().props;
     const teamSlug = currentTeam?.slug ?? '';
+    const [from, setFrom] = useState(graphs.range.from ?? '');
+    const [to, setTo] = useState(graphs.range.to ?? '');
+
+    function applyDateRange() {
+        router.get(
+            `/${teamSlug}/savings/reports`,
+            {
+                from: from || undefined,
+                to: to || undefined,
+            },
+            { preserveState: true, preserveScroll: true },
+        );
+    }
+
+    function resetDateRange() {
+        router.get(`/${teamSlug}/savings/reports`, {}, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    }
 
     return (
         <>
@@ -25,7 +57,63 @@ export default function SavingsReports({ totals }: Props) {
                 description="Fund health and bank balances (decrypted in your session only)."
             />
 
-            <div className="mt-6">
+            <div
+                className="mt-6 flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-end"
+                data-test="reports-date-filter"
+            >
+                <div className="grid flex-1 gap-3 sm:grid-cols-2">
+                    <div className="space-y-2">
+                        <Label htmlFor="reports-from">From</Label>
+                        <Input
+                            id="reports-from"
+                            type="date"
+                            value={from}
+                            onChange={(event) => setFrom(event.target.value)}
+                            data-test="reports-date-from"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="reports-to">To</Label>
+                        <Input
+                            id="reports-to"
+                            type="date"
+                            value={to}
+                            onChange={(event) => setTo(event.target.value)}
+                            data-test="reports-date-to"
+                        />
+                    </div>
+                </div>
+                <div className="flex gap-2">
+                    <Button
+                        type="button"
+                        onClick={applyDateRange}
+                        data-test="reports-date-apply"
+                    >
+                        Apply
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={resetDateRange}
+                    >
+                        Reset
+                    </Button>
+                </div>
+            </div>
+
+            <div className="mt-6 grid gap-6">
+                <FundUtilizationChart data={graphs.fund_utilization} />
+                <div className="grid gap-6 xl:grid-cols-2">
+                    <SpendingTrendChart data={graphs.spending_over_time} />
+                    <IncomeVsSpendingChart data={graphs.income_vs_spending} />
+                </div>
+                <div className="grid gap-6 xl:grid-cols-2">
+                    <SpendingByFundChart data={graphs.spending_by_fund} />
+                    <TopRecipientsChart data={graphs.top_recipients} />
+                </div>
+            </div>
+
+            <div className="mt-8">
                 <h3 className="font-medium">Fund health</h3>
 
                 <div className="mt-3 md:hidden">

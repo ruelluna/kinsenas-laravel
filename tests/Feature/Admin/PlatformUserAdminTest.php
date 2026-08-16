@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\Teams\CreateTeam;
+use App\Enums\PlatformRole;
 use App\Enums\SubscriptionStatus;
 use App\Enums\TeamRole;
 use App\Models\User;
@@ -13,73 +14,74 @@ beforeEach(function () {
     $this->seed(BillingSeeder::class);
 });
 
-it('grants platform admin access to another user', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
-    $member = User::factory()->create(['email' => 'member@example.com', 'is_platform_admin' => false]);
+it('grants author role to another user', function () {
+    $admin = User::factory()->platformAdmin()->create();
+    $member = User::factory()->create(['email' => 'member@example.com']);
 
     $response = $this->actingAs($admin)->patch(route('admin.platform-users.update', $member), [
-        'is_platform_admin' => true,
+        'role' => PlatformRole::Author->value,
     ]);
 
     $response->assertRedirect();
 
-    expect($member->fresh()->is_platform_admin)->toBeTrue();
+    expect($member->fresh()->isAuthor())->toBeTrue();
 });
 
-it('revokes platform admin access from another user', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
-    $otherAdmin = User::factory()->create(['email' => 'other-admin@example.com', 'is_platform_admin' => true]);
+it('changes platform admin to user role', function () {
+    $admin = User::factory()->platformAdmin()->create();
+    $otherAdmin = User::factory()->platformAdmin()->create(['email' => 'other-admin@example.com']);
 
     $response = $this->actingAs($admin)->patch(route('admin.platform-users.update', $otherAdmin), [
-        'is_platform_admin' => false,
+        'role' => PlatformRole::User->value,
     ]);
 
     $response->assertRedirect();
 
-    expect($otherAdmin->fresh()->is_platform_admin)->toBeFalse();
+    expect($otherAdmin->fresh()->hasRole(PlatformRole::User->value))->toBeTrue()
+        ->and($otherAdmin->fresh()->isPlatformAdmin())->toBeFalse();
 });
 
-it('blocks revoking own platform admin access', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+it('blocks changing own platform role', function () {
+    $admin = User::factory()->platformAdmin()->create();
 
     $response = $this->actingAs($admin)->patch(route('admin.platform-users.update', $admin), [
-        'is_platform_admin' => false,
+        'role' => PlatformRole::User->value,
     ]);
 
-    $response->assertSessionHasErrors('is_platform_admin');
+    $response->assertSessionHasErrors('role');
 
-    expect($admin->fresh()->is_platform_admin)->toBeTrue();
+    expect($admin->fresh()->isPlatformAdmin())->toBeTrue();
 });
 
-it('allows revoking platform admin when another admin remains', function () {
-    User::query()->where('is_platform_admin', true)->update(['is_platform_admin' => false]);
+it('allows demoting platform admin when another admin remains', function () {
+    User::query()->each(fn (User $user) => $user->syncPlatformRole(PlatformRole::User));
 
-    $soleAdmin = User::factory()->create(['email' => 'sole-admin@example.com', 'is_platform_admin' => true]);
-    $actor = User::factory()->create(['email' => 'actor@example.com', 'is_platform_admin' => true]);
+    $soleAdmin = User::factory()->platformAdmin()->create(['email' => 'sole-admin@example.com']);
+    $actor = User::factory()->platformAdmin()->create(['email' => 'actor@example.com']);
 
     $response = $this->actingAs($actor)->patch(route('admin.platform-users.update', $soleAdmin), [
-        'is_platform_admin' => false,
+        'role' => PlatformRole::User->value,
     ]);
 
     $response->assertRedirect();
 
-    expect($soleAdmin->fresh()->is_platform_admin)->toBeFalse();
+    expect($soleAdmin->fresh()->isPlatformAdmin())->toBeFalse();
 });
 
-it('forbids non-admin from updating platform admin status', function () {
-    $member = User::factory()->create(['email' => 'member@example.com', 'is_platform_admin' => false]);
-    $target = User::factory()->create(['email' => 'target@example.com', 'is_platform_admin' => false]);
+it('forbids non-admin from updating platform roles', function () {
+    $member = User::factory()->create(['email' => 'member@example.com']);
+    $target = User::factory()->create(['email' => 'target@example.com']);
 
     $response = $this->actingAs($member)->patch(route('admin.platform-users.update', $target), [
-        'is_platform_admin' => true,
+        'role' => PlatformRole::Author->value,
     ]);
 
     $response->assertForbidden();
 });
 
 it('removes a user account as platform admin', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
-    $member = User::factory()->create(['email' => 'remove-me@example.com', 'is_platform_admin' => false]);
+    $admin = User::factory()->platformAdmin()->create();
+    $member = User::factory()->create(['email' => 'remove-me@example.com']);
     $memberId = $member->id;
     $personalTeamId = $member->personalTeam()->id;
 
@@ -94,7 +96,7 @@ it('removes a user account as platform admin', function () {
 });
 
 it('blocks deleting own account from admin', function () {
-    $admin = User::factory()->create(['email' => 'admin-self@example.com', 'is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create(['email' => 'admin-self@example.com']);
 
     $response = $this->actingAs($admin)->delete(route('admin.platform-users.destroy', $admin), [
         'email' => 'admin-self@example.com',
@@ -106,10 +108,10 @@ it('blocks deleting own account from admin', function () {
 });
 
 it('allows deleting platform admin when another admin remains', function () {
-    User::query()->where('is_platform_admin', true)->update(['is_platform_admin' => false]);
+    User::query()->each(fn (User $user) => $user->syncPlatformRole(PlatformRole::User));
 
-    $soleAdmin = User::factory()->create(['email' => 'sole-admin@example.com', 'is_platform_admin' => true]);
-    $actor = User::factory()->create(['email' => 'actor@example.com', 'is_platform_admin' => true]);
+    $soleAdmin = User::factory()->platformAdmin()->create(['email' => 'sole-admin@example.com']);
+    $actor = User::factory()->platformAdmin()->create(['email' => 'actor@example.com']);
 
     $response = $this->actingAs($actor)->delete(route('admin.platform-users.destroy', $soleAdmin), [
         'email' => 'sole-admin@example.com',
@@ -123,9 +125,9 @@ it('allows deleting platform admin when another admin remains', function () {
 it('blocks deleting a user who owns a shared team with other members', function () {
     config(['teams.allow_additional_owned_teams' => true]);
 
-    $admin = User::factory()->create(['is_platform_admin' => true]);
-    $owner = User::factory()->create(['email' => 'shared-owner@example.com', 'is_platform_admin' => false]);
-    $member = User::factory()->create(['email' => 'shared-member@example.com', 'is_platform_admin' => false]);
+    $admin = User::factory()->platformAdmin()->create();
+    $owner = User::factory()->create(['email' => 'shared-owner@example.com']);
+    $member = User::factory()->create(['email' => 'shared-member@example.com']);
 
     $sharedTeam = app(CreateTeam::class)->handle($owner, 'Shared Team', isPersonal: false);
     $sharedTeam->members()->attach($member, ['role' => TeamRole::Member->value]);
@@ -142,8 +144,8 @@ it('blocks deleting a user who owns a shared team with other members', function 
 it('cancels subscription when deleting sole owner of a shared team', function () {
     config(['teams.allow_additional_owned_teams' => true]);
 
-    $admin = User::factory()->create(['is_platform_admin' => true]);
-    $owner = User::factory()->create(['email' => 'solo-owner@example.com', 'is_platform_admin' => false]);
+    $admin = User::factory()->platformAdmin()->create();
+    $owner = User::factory()->create(['email' => 'solo-owner@example.com']);
 
     $sharedTeam = app(CreateTeam::class)->handle($owner, 'Solo Shared Team', isPersonal: false);
     $subscriptionId = $sharedTeam->subscription->id;
@@ -163,8 +165,8 @@ it('cancels subscription when deleting sole owner of a shared team', function ()
 });
 
 it('requires matching email confirmation to delete a user', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
-    $member = User::factory()->create(['email' => 'confirm@example.com', 'is_platform_admin' => false]);
+    $admin = User::factory()->platformAdmin()->create();
+    $member = User::factory()->create(['email' => 'confirm@example.com']);
 
     $response = $this->actingAs($admin)->delete(route('admin.platform-users.destroy', $member), [
         'email' => 'wrong@example.com',
@@ -176,8 +178,8 @@ it('requires matching email confirmation to delete a user', function () {
 });
 
 it('forbids non-admin from deleting users', function () {
-    $member = User::factory()->create(['email' => 'member@example.com', 'is_platform_admin' => false]);
-    $target = User::factory()->create(['email' => 'target@example.com', 'is_platform_admin' => false]);
+    $member = User::factory()->create(['email' => 'member@example.com']);
+    $target = User::factory()->create(['email' => 'target@example.com']);
 
     $response = $this->actingAs($member)->delete(route('admin.platform-users.destroy', $target), [
         'email' => 'target@example.com',

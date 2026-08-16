@@ -1,10 +1,11 @@
 import { createInertiaApp } from '@inertiajs/react';
 import AppProviders from '@/components/app-providers';
 import { initializeTheme } from '@/hooks/use-appearance';
-import { registerPwaServiceWorker } from '@/lib/register-pwa';
 import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
+import LearnPageLayout from '@/layouts/learn-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { registerPwaServiceWorker } from '@/lib/register-pwa';
 import 'driver.js/dist/driver.css';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Kinsenas';
@@ -19,7 +20,8 @@ createInertiaApp({
         switch (true) {
             case name === 'welcome':
             case name.startsWith('marketing/'):
-                return null;
+            case name.startsWith('learn/'):
+                return LearnPageLayout;
             case name.startsWith('auth/'):
                 return AuthLayout;
             case name.startsWith('settings/'):

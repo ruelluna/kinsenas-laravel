@@ -39,6 +39,7 @@ export function registerPwaServiceWorker(): void {
     // Pest browser tests serve the app on 127.0.0.1:<port>. Skip SW there so
     // precache fetches cannot race assertions on the in-process HTTP server.
     const host = window.location.hostname;
+
     if (host === '127.0.0.1' || host === 'localhost') {
         return;
     }

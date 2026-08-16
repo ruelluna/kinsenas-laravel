@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\PlatformRole;
 use App\Enums\UserActivityAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DeletePlatformUserRequest;
-use App\Http\Requests\Admin\UpdatePlatformAdminRequest;
+use App\Http\Requests\Admin\UpdatePlatformUserRoleRequest;
 use App\Models\User;
 use App\Services\Audit\UserActivityLogger;
 use App\Services\Users\UserDeletionService;
@@ -25,19 +26,30 @@ class AdminPlatformUserController extends Controller
     public function index(Request $request): Response
     {
         $search = $request->query('search');
-        $adminFilter = $request->query('admin');
+        $roleFilter = $request->query('role');
 
         $users = User::query()
-            ->with(['currentTeam.subscription'])
+            ->with(['currentTeam.subscription', 'roles'])
             ->when($search, function ($query, string $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%");
                 });
             })
-            ->when($adminFilter === 'yes', fn ($query) => $query->where('is_platform_admin', true))
-            ->when($adminFilter === 'no', fn ($query) => $query->where('is_platform_admin', false))
-            ->orderByDesc('is_platform_admin')
+            ->when(
+                filled($roleFilter),
+                fn ($query) => $query->role($roleFilter),
+            )
+            ->orderByRaw(
+                'CASE WHEN EXISTS (
+                    SELECT 1 FROM model_has_roles
+                    INNER JOIN roles ON roles.id = model_has_roles.role_id
+                    WHERE model_has_roles.model_id = users.id
+                    AND model_has_roles.model_type = ?
+                    AND roles.name = ?
+                ) THEN 0 ELSE 1 END',
+                [User::class, PlatformRole::PlatformAdmin->value],
+            )
             ->orderBy('name')
             ->paginate(20)
             ->withQueryString();
@@ -49,6 +61,8 @@ class AdminPlatformUserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'role' => $user->platformRole()?->value ?? PlatformRole::User->value,
+                'roleLabel' => $user->platformRole()?->label() ?? PlatformRole::User->label(),
                 'isPlatformAdmin' => $user->isPlatformAdmin(),
                 'subscriptionStatus' => $user->currentTeam?->subscription?->status->value,
                 'subscriptionStatusLabel' => $user->currentTeam?->subscription?->status?->label(),
@@ -56,56 +70,55 @@ class AdminPlatformUserController extends Controller
             ]),
             'filters' => [
                 'search' => $search,
-                'admin' => $adminFilter,
+                'role' => $roleFilter,
             ],
             'currentUserId' => $request->user()->id,
-            'platformAdminCount' => User::query()->where('is_platform_admin', true)->count(),
+            'platformAdminCount' => User::role(PlatformRole::PlatformAdmin->value)->count(),
+            'roleOptions' => PlatformRole::assignable(),
         ]);
     }
 
-    public function update(UpdatePlatformAdminRequest $request, User $user): RedirectResponse
+    public function update(UpdatePlatformUserRoleRequest $request, User $user): RedirectResponse
     {
-        $wantsAdmin = $request->boolean('is_platform_admin');
+        $role = PlatformRole::from($request->string('role')->toString());
         $actor = $request->user();
 
-        if (! $wantsAdmin && $user->is($actor)) {
+        if ($role !== PlatformRole::PlatformAdmin && $user->is($actor)) {
             throw ValidationException::withMessages([
-                'is_platform_admin' => __('You cannot revoke your own platform admin access.'),
+                'role' => __('You cannot change your own platform role.'),
             ]);
         }
 
-        if (! $wantsAdmin && $user->isPlatformAdmin()) {
-            $adminCount = User::query()->where('is_platform_admin', true)->count();
+        if ($user->isPlatformAdmin() && $role !== PlatformRole::PlatformAdmin) {
+            $adminCount = User::role(PlatformRole::PlatformAdmin->value)->count();
 
             if ($adminCount <= 1) {
                 throw ValidationException::withMessages([
-                    'is_platform_admin' => __('At least one platform admin must remain.'),
+                    'role' => __('At least one platform admin must remain.'),
                 ]);
             }
         }
 
-        $user->update(['is_platform_admin' => $wantsAdmin]);
+        $previousRole = $user->platformRole();
+        $user->syncPlatformRole($role);
 
         $this->activityLogger->log(
             UserActivityAction::AdminPlatformUserUpdated,
-            $wantsAdmin
-                ? 'Granted platform admin access to :properties.user_name'
-                : 'Revoked platform admin access from :properties.user_name',
+            'Changed platform role for :properties.user_name from :properties.previous_role to :properties.role',
             $actor,
             $user,
             [
                 'user_id' => $user->id,
                 'user_name' => $user->name,
                 'user_email' => $user->email,
-                'is_platform_admin' => $wantsAdmin,
+                'previous_role' => $previousRole?->value,
+                'role' => $role->value,
             ],
         );
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => $wantsAdmin
-                ? __('Platform admin access granted.')
-                : __('Platform admin access revoked.'),
+            'message' => __('Platform role updated.'),
         ]);
 
         return back();

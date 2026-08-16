@@ -1,8 +1,8 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { MobileHeaderBar } from '@/components/mobile/mobile-header-bar';
 import { NotificationBell } from '@/components/notifications/notification-bell';
-import { TeamSwitcher } from '@/components/team-switcher';
 import { pageContentPaddingX } from '@/components/page-content';
+import { TeamSwitcher } from '@/components/team-switcher';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';

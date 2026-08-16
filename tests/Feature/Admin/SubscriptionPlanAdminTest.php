@@ -13,7 +13,7 @@ beforeEach(function () {
 });
 
 it('allows platform admin to create a subscription plan', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
 
     $response = $this->actingAs($admin)->post(route('admin.plans.store'), [
         'name' => 'Pro',
@@ -38,7 +38,7 @@ it('allows platform admin to create a subscription plan', function () {
 });
 
 it('forbids non-admin from creating a subscription plan', function () {
-    $user = User::factory()->create(['is_platform_admin' => false]);
+    $user = User::factory()->create();
 
     $response = $this->actingAs($user)->post(route('admin.plans.store'), [
         'name' => 'Pro',
@@ -55,7 +55,7 @@ it('forbids non-admin from creating a subscription plan', function () {
 });
 
 it('allows platform admin to update a subscription plan', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     $plan = SubscriptionPlan::query()->where('slug', 'basic')->firstOrFail();
 
     $response = $this->actingAs($admin)->put(route('admin.plans.update', $plan), [

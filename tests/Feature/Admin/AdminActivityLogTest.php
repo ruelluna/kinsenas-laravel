@@ -22,7 +22,7 @@ it('forbids non platform admins from viewing activity logs', function () {
 });
 
 it('shows paginated activity logs for platform admins', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     $actor = User::factory()->create(['name' => 'Actor User']);
 
     app(UserActivityLogger::class)->log(

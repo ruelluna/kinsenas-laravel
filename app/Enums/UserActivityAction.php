@@ -35,6 +35,12 @@ enum UserActivityAction: string
     case BillingPaymentRejected = 'billing.payment_rejected';
     case AdminPlatformUserUpdated = 'admin.platform_user.updated';
     case AdminPlatformUserDeleted = 'admin.platform_user.deleted';
+    case ContentPostPublished = 'content.post.published';
+    case ContentPostUpdated = 'content.post.updated';
+    case ContentPostArchived = 'content.post.archived';
+    case ContentSeriesPublished = 'content.series.published';
+    case ContentSeriesUpdated = 'content.series.updated';
+    case ContentSeriesArchived = 'content.series.archived';
 
     public function label(): string
     {
@@ -70,6 +76,12 @@ enum UserActivityAction: string
             self::BillingPaymentRejected => 'Payment rejected',
             self::AdminPlatformUserUpdated => 'Platform user updated',
             self::AdminPlatformUserDeleted => 'Platform user deleted',
+            self::ContentPostPublished => 'Content post published',
+            self::ContentPostUpdated => 'Content post updated',
+            self::ContentPostArchived => 'Content post archived',
+            self::ContentSeriesPublished => 'Content series published',
+            self::ContentSeriesUpdated => 'Content series updated',
+            self::ContentSeriesArchived => 'Content series archived',
         };
     }
 }

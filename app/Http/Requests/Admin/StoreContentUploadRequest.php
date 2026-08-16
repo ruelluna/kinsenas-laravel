@@ -4,11 +4,11 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdatePlatformAdminRequest extends FormRequest
+class StoreContentUploadRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->isPlatformAdmin() ?? false;
+        return $this->user()?->canManageContent() ?? false;
     }
 
     /**
@@ -17,7 +17,7 @@ class UpdatePlatformAdminRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'is_platform_admin' => ['required', 'boolean'],
+            'image' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120'],
         ];
     }
 }

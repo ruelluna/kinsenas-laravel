@@ -1,6 +1,7 @@
 import {
     BookOpen,
     CreditCard,
+    GraduationCap,
     Landmark,
     LayoutGrid,
     MessageSquare,
@@ -10,8 +11,8 @@ import {
     Users,
     Wallet,
 } from 'lucide-react';
-import { dashboard } from '@/routes';
 import { toUrl } from '@/lib/utils';
+import { dashboard } from '@/routes';
 import type { NavItem, SharedData } from '@/types';
 
 export type MemberNavConfig = {
@@ -41,7 +42,13 @@ export function buildMemberNav(page: SharedData): MemberNavConfig {
         },
     ];
 
-    const allItems: NavItem[] = hasAccess
+    const learnItem: NavItem = {
+        title: 'Learn',
+        href: '/learn',
+        icon: GraduationCap,
+    };
+
+    const savingsItems: NavItem[] = hasAccess
         ? [
               {
                   title: 'Dashboard',
@@ -98,7 +105,11 @@ export function buildMemberNav(page: SharedData): MemberNavConfig {
                     ]
                   : []),
           ]
-        : billingNavItems;
+        : [];
+
+    const allItems: NavItem[] = hasAccess
+        ? [...savingsItems, learnItem]
+        : [...billingNavItems, learnItem];
 
     const bottomTabTitles = new Set(['Dashboard', 'Income', 'Spending']);
     const bottomTabs = allItems.filter((item) =>

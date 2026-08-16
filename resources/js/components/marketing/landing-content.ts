@@ -1,5 +1,5 @@
-import { formatMoney } from '@/lib/format-money';
 import { MARKETING_BANK_LOGOS } from '@/lib/brand';
+import { formatMoney } from '@/lib/format-money';
 
 export const SAMPLE_INCOME = 15000;
 

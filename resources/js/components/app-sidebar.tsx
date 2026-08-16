@@ -19,7 +19,11 @@ import type { SharedData } from '@/types';
 export function AppSidebar() {
     const page = usePage<SharedData>();
     const hasAccess = page.props.subscription?.hasAccess ?? true;
-    const isPlatformAdmin = Boolean(page.props.auth.user?.isPlatformAdmin);
+    const canManagePlatform = Boolean(
+        page.props.auth.user?.canManagePlatform,
+    );
+    const canManageContent = Boolean(page.props.auth.user?.canManageContent);
+    const showAdminNav = canManagePlatform || canManageContent;
     const { homeUrl, mainNavItems, billingNavItems } = buildMemberNav(
         page.props,
     );
@@ -45,7 +49,12 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={hasAccess ? mainNavItems : billingNavItems} />
-                {hasAccess && isPlatformAdmin && <AdminSidebarNav />}
+                {hasAccess && showAdminNav && (
+                    <AdminSidebarNav
+                        canManagePlatform={canManagePlatform}
+                        canManageContent={canManageContent}
+                    />
+                )}
             </SidebarContent>
 
             <SidebarFooter>

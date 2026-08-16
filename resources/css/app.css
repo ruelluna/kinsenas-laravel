@@ -326,3 +326,94 @@
         top: env(safe-area-inset-top, 0px);
     }
 }
+
+/* TipTap editor + rendered HTML content (Tailwind preflight resets lists/headings) */
+.tiptap,
+.rich-text-content {
+    outline: none;
+}
+
+.tiptap:focus {
+    outline: none;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+    color: var(--muted-foreground);
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+}
+
+.tiptap h2,
+.rich-text-content h2 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+}
+
+.tiptap h3,
+.rich-text-content h3 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    font-weight: 600;
+}
+
+.tiptap p,
+.rich-text-content p {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.tiptap ul,
+.rich-text-content ul {
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+    list-style-type: disc;
+    padding-inline-start: 1.5rem;
+}
+
+.tiptap ol,
+.rich-text-content ol {
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+    list-style-type: decimal;
+    padding-inline-start: 1.5rem;
+}
+
+.tiptap li,
+.rich-text-content li {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.tiptap blockquote,
+.rich-text-content blockquote {
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-inline-start-width: 4px;
+    border-color: var(--border);
+    padding-inline-start: 1rem;
+    font-style: italic;
+    color: var(--muted-foreground);
+}
+
+.tiptap a,
+.rich-text-content a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.tiptap img,
+.rich-text-content img {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    max-width: 100%;
+    border-radius: 0.375rem;
+}

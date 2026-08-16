@@ -13,8 +13,8 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { NotificationItem } from '@/types/notifications';
 import type { SharedData } from '@/types';
+import type { NotificationItem } from '@/types/notifications';
 
 export function NotificationBell() {
     const { notifications } = usePage<SharedData>().props;

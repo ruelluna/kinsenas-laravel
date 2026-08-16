@@ -1,9 +1,10 @@
 import type { DriveStep, Driver } from 'driver.js';
 import { driver } from 'driver.js';
 import {
-    ONBOARDING_TOUR_DESKTOP_STEPS,
-    type OnboardingTourStep,
+    ONBOARDING_TOUR_DESKTOP_STEPS
+    
 } from '@/lib/onboarding-tour/steps-desktop';
+import type {OnboardingTourStep} from '@/lib/onboarding-tour/steps-desktop';
 import {
     stepMatchesPath,
     tourElementSelector,

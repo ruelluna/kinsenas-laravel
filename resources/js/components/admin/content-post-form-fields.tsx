@@ -1,0 +1,158 @@
+import TiptapEditor from '@/components/admin/tiptap-editor';
+import CoverImageField from '@/components/admin/cover-image-field';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { selectClassName, textareaClassName } from '@/lib/form-field-classes';
+import type { ContentPostAdmin } from '@/types/content';
+
+type AuthorOption = {
+    id: number;
+    name: string;
+};
+
+type Props = {
+    post?: ContentPostAdmin;
+    seriesOptions: Array<{ id: string; title: string }>;
+    authorOptions?: AuthorOption[];
+    canAssignAuthor?: boolean;
+};
+
+export default function ContentPostFormFields({
+    post,
+    seriesOptions,
+    authorOptions = [],
+    canAssignAuthor = false,
+}: Props) {
+    return (
+        <>
+            {canAssignAuthor && (
+                <div className="grid gap-2">
+                    <Label htmlFor="author_id">Author</Label>
+                    <select
+                        id="author_id"
+                        name="author_id"
+                        className={selectClassName}
+                        defaultValue={post?.authorId ?? ''}
+                    >
+                        <option value="">Select author</option>
+                        {authorOptions.map((author) => (
+                            <option key={author.id} value={author.id}>
+                                {author.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
+            <div className="grid gap-2">
+                <Label htmlFor="post_as">Post as (optional)</Label>
+                <Input
+                    id="post_as"
+                    name="post_as"
+                    placeholder="e.g. Maria Santos, CPA"
+                    defaultValue={post?.postAs ?? ''}
+                />
+                <p className="text-xs text-muted-foreground">
+                    Shown to members as &quot;By [Post as name]&quot;. Leave blank to use the
+                    author&apos;s name.
+                </p>
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor="title">Title</Label>
+                <Input id="title" name="title" defaultValue={post?.title ?? ''} required />
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor="slug">Slug</Label>
+                <Input id="slug" name="slug" defaultValue={post?.slug ?? ''} required />
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor="content_series_id">Series (optional)</Label>
+                <select
+                    id="content_series_id"
+                    name="content_series_id"
+                    className={selectClassName}
+                    defaultValue={post?.contentSeriesId ?? ''}
+                >
+                    <option value="">Standalone post</option>
+                    {seriesOptions.map((series) => (
+                        <option key={series.id} value={series.id}>
+                            {series.title}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor="episode_number">Episode number</Label>
+                <Input
+                    id="episode_number"
+                    name="episode_number"
+                    type="number"
+                    min={1}
+                    defaultValue={post?.episodeNumber ?? ''}
+                />
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor="content_type">Content type</Label>
+                <select
+                    id="content_type"
+                    name="content_type"
+                    className={selectClassName}
+                    defaultValue={post?.contentType ?? 'article'}
+                >
+                    <option value="article">Article</option>
+                    <option value="reminder">Reminder</option>
+                    <option value="share">Share</option>
+                    <option value="episode">Episode</option>
+                </select>
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor="publish_scope">Publish scope</Label>
+                <select
+                    id="publish_scope"
+                    name="publish_scope"
+                    className={selectClassName}
+                    defaultValue={post?.publishScope ?? 'internal'}
+                >
+                    <option value="internal">Internal only</option>
+                    <option value="external">External only</option>
+                    <option value="both">Internal & external</option>
+                </select>
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor="status">Status</Label>
+                <select
+                    id="status"
+                    name="status"
+                    className={selectClassName}
+                    defaultValue={post?.status ?? 'draft'}
+                >
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                    <option value="archived">Archived</option>
+                </select>
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor="excerpt">Excerpt (required for external/both)</Label>
+                <textarea
+                    id="excerpt"
+                    name="excerpt"
+                    className={textareaClassName}
+                    defaultValue={post?.excerpt ?? ''}
+                />
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor="body">Body</Label>
+                <TiptapEditor defaultValue={post?.body ?? ''} required />
+            </div>
+            <CoverImageField defaultUrl={post?.coverImageUrl ?? null} />
+            <div className="grid gap-2">
+                <Label htmlFor="video_embed_url">Video embed URL</Label>
+                <Input
+                    id="video_embed_url"
+                    name="video_embed_url"
+                    type="url"
+                    defaultValue={post?.videoEmbedUrl ?? ''}
+                />
+            </div>
+        </>
+    );
+}

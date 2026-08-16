@@ -6,10 +6,10 @@ import { MobileBottomNav } from '@/components/mobile/mobile-bottom-nav';
 import { NavigationLoadingOverlay } from '@/components/navigation/navigation-loading-overlay';
 import OnboardingTourHost from '@/components/onboarding/onboarding-tour-host';
 import { OpenBetaBanner } from '@/components/open-beta-banner';
+import { PageContent } from '@/components/page-content';
 import { InstallAppBanner } from '@/components/pwa/install-app-banner';
 import { PwaInstallLayout } from '@/components/pwa/pwa-install-layout';
 import { PwaInstallSheetHost } from '@/components/pwa/pwa-install-sheet-host';
-import { PageContent } from '@/components/page-content';
 import { MobileNavProvider } from '@/contexts/mobile-nav-context';
 import type { AppLayoutProps } from '@/types';
 
