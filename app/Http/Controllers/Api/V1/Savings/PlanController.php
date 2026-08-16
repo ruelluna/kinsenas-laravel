@@ -48,7 +48,7 @@ class PlanController extends Controller
     public function update(SaveSavingsPlanRequest $request, Team $team): JsonResponse
     {
         $plan = $this->planForUpdate($request, $team);
-        $plan = $this->planService->updateCategories($plan, $request->validated('categories'));
+        $plan = $this->planService->updateCategories($plan, $request->validated('categories'), $request->user());
 
         if ($request->has('is_shared_with_team')) {
             $plan = $this->planService->updateShareSetting($plan, $request->boolean('is_shared_with_team'));
@@ -67,7 +67,7 @@ class PlanController extends Controller
         SavingsCategory $category,
     ): JsonResponse {
         $plan = $this->planForUpdate($request, $team);
-        $category = $this->planService->addOpeningBalance($plan, $category, $request->validated('amount'));
+        $category = $this->planService->addOpeningBalance($plan, $category, $request->validated('amount'), $request->user());
 
         return response()->json([
             'data' => [

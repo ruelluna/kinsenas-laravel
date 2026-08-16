@@ -1,13 +1,34 @@
 <?php
 
+use App\Enums\UserActivityAction;
 use App\Models\TeamInvitation;
+use App\Services\Audit\UserActivityLogger;
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::call(function () {
+    $logger = app(UserActivityLogger::class);
+
     TeamInvitation::query()
         ->whereNotNull('expires_at')
         ->where('expires_at', '<', now())
-        ->delete();
+        ->each(function (TeamInvitation $invitation) use ($logger): void {
+            $logger->log(
+                UserActivityAction::TeamInvitationExpired,
+                'Expired team invitation to :properties.email',
+                causer: null,
+                subject: $invitation,
+                properties: [
+                    'email' => $invitation->email,
+                    'role' => $invitation->role->value,
+                    'role_label' => $invitation->role->label(),
+                    'invitation_code' => $invitation->code,
+                    'source' => 'system',
+                ],
+                team: $invitation->team,
+            );
+
+            $invitation->delete();
+        });
 })->daily()->description('Delete expired team invitations');
 
 Schedule::command('billing:sync-subscription-status')->daily();

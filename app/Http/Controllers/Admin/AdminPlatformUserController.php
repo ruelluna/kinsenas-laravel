@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\UserActivityAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DeletePlatformUserRequest;
 use App\Http\Requests\Admin\UpdatePlatformAdminRequest;
 use App\Models\User;
+use App\Services\Audit\UserActivityLogger;
 use App\Services\Users\UserDeletionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,7 +17,10 @@ use Inertia\Response;
 
 class AdminPlatformUserController extends Controller
 {
-    public function __construct(private UserDeletionService $userDeletionService) {}
+    public function __construct(
+        private UserDeletionService $userDeletionService,
+        private UserActivityLogger $activityLogger,
+    ) {}
 
     public function index(Request $request): Response
     {
@@ -81,6 +86,21 @@ class AdminPlatformUserController extends Controller
 
         $user->update(['is_platform_admin' => $wantsAdmin]);
 
+        $this->activityLogger->log(
+            UserActivityAction::AdminPlatformUserUpdated,
+            $wantsAdmin
+                ? 'Granted platform admin access to :properties.user_name'
+                : 'Revoked platform admin access from :properties.user_name',
+            $actor,
+            $user,
+            [
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'user_email' => $user->email,
+                'is_platform_admin' => $wantsAdmin,
+            ],
+        );
+
         Inertia::flash('toast', [
             'type' => 'success',
             'message' => $wantsAdmin
@@ -93,7 +113,20 @@ class AdminPlatformUserController extends Controller
 
     public function destroy(DeletePlatformUserRequest $request, User $user): RedirectResponse
     {
-        $this->userDeletionService->delete($request->user(), $user);
+        $actor = $request->user();
+
+        $this->activityLogger->log(
+            UserActivityAction::AdminPlatformUserDeleted,
+            'Removed platform user :properties.user_name',
+            $actor,
+            properties: [
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'user_email' => $user->email,
+            ],
+        );
+
+        $this->userDeletionService->delete($actor, $user);
 
         Inertia::flash('toast', [
             'type' => 'success',

@@ -3,23 +3,33 @@
 namespace App\Http\Controllers\Teams;
 
 use App\Actions\Teams\CreateTeam;
+use App\Enums\TeamPermission;
 use App\Enums\TeamRole;
+use App\Enums\UserActivityAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Teams\DeleteTeamRequest;
 use App\Http\Requests\Teams\SaveTeamRequest;
 use App\Models\Membership;
 use App\Models\Team;
 use App\Models\User;
+use App\Services\Audit\UserActivityLogger;
 use App\Services\Billing\SubscriptionService;
+use App\Services\Teams\TeamSetupService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\Activitylog\Models\Activity;
 
 class TeamController extends Controller
 {
+    public function __construct(
+        private TeamSetupService $teamSetupService,
+        private UserActivityLogger $activityLogger,
+    ) {}
+
     /**
      * Display a listing of the user's teams.
      */
@@ -61,6 +71,15 @@ class TeamController extends Controller
 
         $team = $createTeam->handle($request->user(), $request->validated('name'));
 
+        $this->activityLogger->log(
+            UserActivityAction::TeamCreated,
+            'Created team :properties.team_name',
+            $request->user(),
+            $team,
+            ['team_name' => $team->name],
+            $team,
+        );
+
         if (! $subscriptionService->teamHasAccess($team)) {
             Inertia::flash('toast', [
                 'type' => 'info',
@@ -81,6 +100,8 @@ class TeamController extends Controller
     public function edit(Request $request, Team $team): Response
     {
         $user = $request->user();
+        $canInviteByRole = $user->hasTeamPermission($team, TeamPermission::CreateInvitation);
+        $canViewActivity = $canInviteByRole || $user->hasTeamPermission($team, TeamPermission::UpdateTeam);
 
         return Inertia::render('teams/edit', [
             'team' => [
@@ -113,8 +134,35 @@ class TeamController extends Controller
                     'created_at' => $invitation->created_at->toISOString(),
                 ]),
             'permissions' => $user->toTeamPermissions($team),
+            'canInviteByRole' => $canInviteByRole,
+            'inviteReadiness' => $this->teamSetupService->readinessForInvites($team, $user)->toArray(),
+            'teamActivity' => $canViewActivity
+                ? $this->recentTeamActivity($team)
+                : [],
             'availableRoles' => TeamRole::assignable(),
         ]);
+    }
+
+    /**
+     * @return list<array{id: int, description: string, event: string|null, causer_name: string|null, created_at: string}>
+     */
+    private function recentTeamActivity(Team $team): array
+    {
+        return Activity::query()
+            ->where('log_name', 'kinsenas')
+            ->where('properties->team_id', $team->id)
+            ->with('causer')
+            ->latest()
+            ->limit(20)
+            ->get()
+            ->map(fn ($activity) => [
+                'id' => $activity->id,
+                'description' => $activity->description,
+                'event' => $activity->event,
+                'causer_name' => $activity->causer?->name,
+                'created_at' => $activity->created_at?->toISOString() ?? now()->toISOString(),
+            ])
+            ->all();
     }
 
     /**
@@ -124,6 +172,8 @@ class TeamController extends Controller
     {
         Gate::authorize('update', $team);
 
+        $previousName = $team->name;
+
         $team = DB::transaction(function () use ($request, $team) {
             $team = Team::whereKey($team->id)->lockForUpdate()->firstOrFail();
 
@@ -131,6 +181,18 @@ class TeamController extends Controller
 
             return $team;
         });
+
+        $this->activityLogger->log(
+            UserActivityAction::TeamUpdated,
+            'Updated team name to :properties.team_name',
+            $request->user(),
+            $team,
+            [
+                'previous_name' => $previousName,
+                'team_name' => $team->name,
+            ],
+            $team,
+        );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Team updated.')]);
 
@@ -145,6 +207,15 @@ class TeamController extends Controller
         abort_unless($request->user()->belongsToTeam($team), 403);
 
         $request->user()->switchTeam($team);
+
+        $this->activityLogger->log(
+            UserActivityAction::TeamSwitched,
+            'Switched to team :properties.team_name',
+            $request->user(),
+            $team,
+            ['team_name' => $team->name],
+            $team,
+        );
 
         return back();
     }
@@ -161,6 +232,15 @@ class TeamController extends Controller
         $fallbackTeam = $user->isCurrentTeam($team)
             ? $user->fallbackTeam($team)
             : null;
+
+        $this->activityLogger->log(
+            UserActivityAction::TeamLeft,
+            'Left team :properties.team_name',
+            $user,
+            $team,
+            ['team_name' => $team->name],
+            $team,
+        );
 
         $team->memberships()
             ->where('user_id', $user->id)
@@ -194,6 +274,14 @@ class TeamController extends Controller
             $team->memberships()->delete();
             $team->delete();
         });
+
+        $this->activityLogger->log(
+            UserActivityAction::TeamDeleted,
+            'Deleted team :properties.team_name',
+            $user,
+            properties: ['team_name' => $team->name],
+            team: $team,
+        );
 
         if ($fallbackTeam) {
             $user->switchTeam($fallbackTeam);

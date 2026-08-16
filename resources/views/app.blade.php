@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-        <meta name="theme-color" content="#0D7377">
+        <meta name="theme-color" content="#1E8B75">
         <meta name="description" content="Sweldo with a plan — payday allocation planner for Filipino households.">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-title" content="Kinsenas">
@@ -12,28 +12,62 @@
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script>
             (function() {
-                const appearance = '{{ $appearance ?? "system" }}';
+                const cookieAppearance = '{{ $appearance ?? "system" }}';
+                const storedAppearance = localStorage.getItem('appearance');
+                const appearance = storedAppearance || cookieAppearance;
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const isDark = appearance === 'dark' || (appearance === 'system' && prefersDark);
 
-                if (appearance === 'system') {
-                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-                    if (prefersDark) {
-                        document.documentElement.classList.add('dark');
-                    }
-                }
+                document.documentElement.classList.toggle('dark', isDark);
+                document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
             })();
         </script>
 
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style>
             html {
-                background-color: oklch(1 0 0);
+                background-color: oklch(98.5% 0.008 165);
             }
 
             html.dark {
-                background-color: oklch(0.145 0 0);
+                background-color: oklch(16.3% 0.031 165.5);
             }
         </style>
+
+        @if (app()->runningUnitTests())
+            {{-- Prevent Driver.js onboarding tour from blocking Pest browser tests (no Vite rebuild required). --}}
+            <script>
+                (function () {
+                    const blockedKeys = new Set([
+                        'kinsenas.onboardingTour.active.v1',
+                        'kinsenas.onboardingTour.autoStart.v1',
+                    ]);
+
+                    const patchStorage = (storage) => {
+                        const originalSetItem = storage.setItem.bind(storage);
+
+                        storage.setItem = function (key, value) {
+                            if (blockedKeys.has(key)) {
+                                return;
+                            }
+
+                            if (typeof key === 'string' && key.startsWith('kinsenas.onboardingTour.v1.')) {
+                                return;
+                            }
+
+                            return originalSetItem(key, value);
+                        };
+                    };
+
+                    try {
+                        patchStorage(window.localStorage);
+                        patchStorage(window.sessionStorage);
+                    } catch (e) {
+                        // Ignore private mode / disabled storage.
+                    }
+                })();
+            </script>
+        @endif
 
         <link rel="icon" href="/kinsenas-square-logo.png" type="image/png">
         <link rel="manifest" href="/manifest.webmanifest">

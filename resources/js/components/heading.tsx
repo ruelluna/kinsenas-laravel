@@ -19,8 +19,8 @@ export default function Heading({
             <h2
                 className={cn(
                     variant === 'small'
-                        ? 'mb-0.5 text-base font-medium'
-                        : 'text-xl font-semibold tracking-tight',
+                        ? 'mb-0.5 text-base font-medium text-foreground'
+                        : 'font-space text-xl font-bold tracking-tight text-foreground',
                     shouldHideTitleOnMobile && 'max-md:sr-only',
                 )}
             >

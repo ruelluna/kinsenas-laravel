@@ -1,12 +1,12 @@
 import { useCallback } from 'react';
-import { useSidebar } from '@/components/ui/sidebar';
+import { useOptionalSidebar } from '@/components/ui/sidebar';
 
 export function useCloseMobileSidebar(): () => void {
-    const { isMobile, setOpenMobile } = useSidebar();
+    const sidebar = useOptionalSidebar();
 
     return useCallback(() => {
-        if (isMobile) {
-            setOpenMobile(false);
+        if (sidebar?.isMobile) {
+            sidebar.setOpenMobile(false);
         }
-    }, [isMobile, setOpenMobile]);
+    }, [sidebar]);
 }

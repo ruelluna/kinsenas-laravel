@@ -39,7 +39,7 @@ export default function SummaryStatCards({
                     setup.canDrawFromFunds || setup.hasOpeningBalances ? (
                         <Link
                             href={quickLinks.banks}
-                            className="text-primary underline-offset-4 hover:underline"
+                            className="text-primary underline-offset-4 transition-colors hover:text-glow hover:underline"
                         >
                             View banks
                         </Link>
@@ -74,6 +74,12 @@ function attentionDescription(summary: DashboardSummary): string {
         );
     }
 
+    if (summary.awaitingReimbursementCount > 0) {
+        parts.push(
+            `${summary.awaitingReimbursementCount} awaiting payback`,
+        );
+    }
+
     if (summary.lowBalanceFunds.length > 0) {
         parts.push(
             `${summary.lowBalanceFunds.length} low fund bucket${summary.lowBalanceFunds.length === 1 ? '' : 's'}`,
@@ -105,14 +111,14 @@ function StatCard({
             className={
                 tone === 'warning'
                     ? 'rounded-xl border border-warning/30 bg-warning/5 p-4'
-                    : 'rounded-xl border p-4'
+                    : 'rounded-xl border border-border bg-surface p-4'
             }
         >
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Icon className="size-4" />
                 {title}
             </div>
-            <p className="mt-2 text-xl font-semibold tracking-tight md:text-2xl">
+            <p className="mt-2 font-space text-xl font-semibold tracking-tight md:text-2xl">
                 {value}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">{description}</p>

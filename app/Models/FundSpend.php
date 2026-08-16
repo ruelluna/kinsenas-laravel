@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FundSpend extends Model
 {
@@ -23,6 +24,9 @@ class FundSpend extends Model
         'spent_on',
         'bank_id',
         'recipient_id',
+        'expects_reimbursement',
+        'expected_from_recipient_id',
+        'reimbursement_closed_at',
         'receipt_image_path',
         'status',
         'confirmed_at',
@@ -37,6 +41,8 @@ class FundSpend extends Model
             'status' => TransferStatus::class,
             'spent_on' => 'date',
             'confirmed_at' => 'datetime',
+            'expects_reimbursement' => 'boolean',
+            'reimbursement_closed_at' => 'datetime',
         ];
     }
 
@@ -58,6 +64,16 @@ class FundSpend extends Model
     public function recipient(): BelongsTo
     {
         return $this->belongsTo(Recipient::class);
+    }
+
+    public function expectedFromRecipient(): BelongsTo
+    {
+        return $this->belongsTo(Recipient::class, 'expected_from_recipient_id');
+    }
+
+    public function reimbursements(): HasMany
+    {
+        return $this->hasMany(FundSpendReimbursement::class);
     }
 
     public function confirmedBy(): BelongsTo

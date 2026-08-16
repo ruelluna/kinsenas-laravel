@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\Billing\BetaApplicationService;
 use App\Services\Marketing\GhlUserTagService;
 use App\Services\Vault\FinancialEncryptionService;
+use App\Services\Vault\SignupVaultNotificationService;
 use App\Services\Vault\VaultKeyManager;
 use App\Support\Marketing\GhlTagCatalog;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +26,7 @@ class CreateNewUser implements CreatesNewUsers
         private VaultKeyManager $vaultKeyManager,
         private BetaApplicationService $betaApplicationService,
         private GhlUserTagService $ghlUserTagService,
+        private SignupVaultNotificationService $signupVaultNotificationService,
     ) {
         //
     }
@@ -78,6 +80,7 @@ class CreateNewUser implements CreatesNewUsers
             );
 
             $result = $this->encryption->createUserVault($user, $input['password']);
+            $this->signupVaultNotificationService->dispatch($user, $result['recovery_key']);
             session(['registration.recovery_key' => $result['recovery_key']]);
 
             $dek = $this->encryption->unwrapDek(

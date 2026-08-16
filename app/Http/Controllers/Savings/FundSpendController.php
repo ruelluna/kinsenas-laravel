@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Savings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Savings\RecordFundSpendReimbursementRequest;
 use App\Http\Requests\Savings\SaveFundSpendRequest;
 use App\Http\Requests\Savings\UpdateFundSpendRequest;
 use App\Models\FundSpend;
@@ -10,6 +11,7 @@ use App\Models\SavingsCategory;
 use App\Models\Team;
 use App\Services\Marketing\ActivationGhlTagService;
 use App\Services\Savings\FundBalanceService;
+use App\Services\Savings\FundSpendReimbursementService;
 use App\Services\Savings\FundSpendService;
 use App\Services\Savings\FundTransferService;
 use App\Services\Savings\SavingsPlanService;
@@ -26,6 +28,7 @@ class FundSpendController extends Controller
         private FundBalanceService $balanceService,
         private FundSpendService $fundSpendService,
         private FundTransferService $fundTransferService,
+        private FundSpendReimbursementService $reimbursementService,
         private ActivationGhlTagService $activationGhlTagService,
     ) {}
 
@@ -87,6 +90,8 @@ class FundSpendController extends Controller
             $request->validated('recipient_id'),
             $request->user(),
             $receiptImagePath,
+            $request->boolean('expects_reimbursement'),
+            $request->validated('expected_from_recipient_id'),
         );
 
         $this->activationGhlTagService->syncFirstSpend($request->user(), $current_team);
@@ -116,6 +121,8 @@ class FundSpendController extends Controller
             $request->validated('recipient_id'),
             $receiptImagePath,
             $request->boolean('remove_receipt'),
+            $request->boolean('expects_reimbursement'),
+            $request->validated('expected_from_recipient_id'),
         );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Spending updated.')]);
@@ -147,11 +154,55 @@ class FundSpendController extends Controller
         return back();
     }
 
+    public function storeReimbursement(
+        RecordFundSpendReimbursementRequest $request,
+        Team $current_team,
+        FundSpend $fundSpend,
+    ): RedirectResponse {
+        $plan = $this->planService->forTeam($current_team, $request->user());
+        abort_if($fundSpend->savings_plan_id !== $plan->id, 404);
+
+        $bankId = $request->validated('bank_id');
+        if ($bankId !== null) {
+            abort_if(
+                ! $current_team->banks()->where('id', $bankId)->exists(),
+                404,
+            );
+        }
+
+        $this->reimbursementService->record(
+            $fundSpend,
+            $request->validated('amount'),
+            $request->validated('received_on'),
+            $bankId,
+            $request->validated('notes'),
+            $request->user(),
+        );
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Payback recorded.')]);
+
+        return back();
+    }
+
+    public function closeReimbursement(Request $request, Team $current_team, FundSpend $fundSpend): RedirectResponse
+    {
+        $plan = $this->planService->forTeam($current_team, $request->user());
+        abort_if($fundSpend->savings_plan_id !== $plan->id, 404);
+
+        $this->reimbursementService->closeExpectation($fundSpend);
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('No longer expecting payback for this spending.')]);
+
+        return back();
+    }
+
     /**
      * @return array<string, mixed>
      */
     private function spendPayload(FundSpend $spend): array
     {
+        $totals = $this->reimbursementService->totalsForSpend($spend);
+
         return [
             'id' => $spend->id,
             'amount' => $spend->amount_encrypted,
@@ -164,6 +215,19 @@ class FundSpendController extends Controller
             'categoryId' => $spend->category_id,
             'recipientId' => $spend->recipient_id,
             'receiptImageUrl' => $spend->receiptImageUrl(),
+            'expectsReimbursement' => $spend->expects_reimbursement,
+            'expectedFromRecipientId' => $spend->expected_from_recipient_id,
+            'expectedFromRecipientName' => $spend->expectedFromRecipient?->name,
+            'reimbursementStatus' => $totals['status']->value,
+            'reimbursedAmount' => $totals['received'],
+            'remainingOwed' => $totals['remaining'],
+            'reimbursements' => $spend->reimbursements->map(fn ($reimbursement) => [
+                'id' => $reimbursement->id,
+                'amount' => $reimbursement->amount_encrypted,
+                'receivedOn' => $reimbursement->received_on->toDateString(),
+                'bankName' => $reimbursement->bank?->name,
+                'notes' => $reimbursement->notes,
+            ])->values()->all(),
         ];
     }
 

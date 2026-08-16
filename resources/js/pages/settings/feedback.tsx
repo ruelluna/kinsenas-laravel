@@ -26,7 +26,7 @@ export default function FeedbackSettings({ categories }: Props) {
             />
 
             {page.props.flash?.toast?.type === 'success' && (
-                <p className="mt-4 text-sm font-medium text-green-600">
+                <p className="mt-4 text-sm font-medium text-success">
                     {page.props.flash.toast.message}
                 </p>
             )}

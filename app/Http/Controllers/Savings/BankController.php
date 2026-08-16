@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Savings;
 
+use App\Enums\UserActivityAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Savings\SaveBankRequest;
 use App\Models\Bank;
 use App\Models\BankInstitution;
 use App\Models\Team;
+use App\Services\Audit\UserActivityLogger;
 use App\Services\Marketing\BankGhlTagService;
 use App\Services\Savings\BankPayloadMapper;
 use App\Services\Savings\FundBalanceService;
@@ -22,6 +24,7 @@ class BankController extends Controller
         private SavingsPlanService $planService,
         private FundBalanceService $fundBalanceService,
         private BankGhlTagService $bankGhlTagService,
+        private UserActivityLogger $activityLogger,
     ) {}
 
     public function index(Request $request, Team $current_team): Response
@@ -82,6 +85,15 @@ class BankController extends Controller
             );
         }
 
+        $this->activityLogger->log(
+            UserActivityAction::SavingsBankCreated,
+            'Added bank :properties.bank_name',
+            $request->user(),
+            $bank,
+            ['bank_name' => $bank->name],
+            $current_team,
+        );
+
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Bank added.')]);
 
         return back();
@@ -97,6 +109,15 @@ class BankController extends Controller
             'is_active',
             'sort_order',
         ])->all());
+
+        $this->activityLogger->log(
+            UserActivityAction::SavingsBankUpdated,
+            'Updated bank :properties.bank_name',
+            $request->user(),
+            $bank,
+            ['bank_name' => $bank->name],
+            $current_team,
+        );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Bank updated.')]);
 

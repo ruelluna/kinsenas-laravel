@@ -109,12 +109,6 @@
             ],
             "@kinsenas/shared/*": [
                 "./packages/shared/src/*"
-            ],
-            "@kinsenas/ui": [
-                "./packages/ui/src/index.ts"
-            ],
-            "@kinsenas/ui/*": [
-                "./packages/ui/src/*"
             ]
         },
         "jsx": "react-jsx"
@@ -123,8 +117,6 @@
         "resources/js/**/*.ts",
         "resources/js/**/*.d.ts",
         "resources/js/**/*.tsx",
-        "packages/shared/src/**/*.ts",
-        "packages/ui/src/**/*.ts",
-        "packages/ui/src/**/*.tsx"
+        "packages/shared/src/**/*.ts"
     ]
 }

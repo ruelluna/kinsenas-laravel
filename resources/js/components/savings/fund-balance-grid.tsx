@@ -20,6 +20,7 @@ type Props = {
     onFund?: (categoryId: string) => void;
     limit?: number;
     showReceived?: boolean;
+    showAllocationPercent?: boolean;
     transferredLabel?: string;
     action?: FundAction;
 };
@@ -33,6 +34,7 @@ export default function FundBalanceGrid({
     onFund,
     limit,
     showReceived = false,
+    showAllocationPercent = false,
     transferredLabel = 'Transferred',
     action,
 }: Props) {
@@ -119,14 +121,17 @@ export default function FundBalanceGrid({
                         key={balance.categoryId}
                         className={`rounded-lg border p-4 ${balance.isDefault ? 'ring-2 ring-primary/20' : ''}`}
                     >
-                        <FundCardHeader {...balance} />
+                        <FundCardHeader
+                            {...balance}
+                            showAllocationPercent={showAllocationPercent}
+                        />
                         <div className="mt-3 flex items-end justify-between gap-2">
                             <div>
                                 <p className="text-xs text-muted-foreground">
                                     Remaining
                                 </p>
                                 <p
-                                    className={`text-lg font-semibold ${remainingTone(balance.percentUsed)}`}
+                                    className={`font-space text-lg font-semibold ${remainingTone(balance.percentUsed)}`}
                                 >
                                     {formatMoney(balance.remaining)}
                                 </p>
@@ -152,8 +157,11 @@ export default function FundBalanceGrid({
                     key={balance.categoryId}
                     className={`rounded-lg border p-4 ${balance.isDefault ? 'ring-2 ring-primary/20' : ''}`}
                 >
-                    <FundCardHeader {...balance} />
-                    <dl className="mt-4 space-y-1 text-sm">
+                    <FundCardHeader
+                        {...balance}
+                        showAllocationPercent={showAllocationPercent}
+                    />
+                    <dl className="mt-4 space-y-1 font-space text-sm">
                         {balance.openingBalance !== null &&
                             parseFloat(balance.openingBalance) > 0 && (
                                 <div className="flex justify-between gap-2">
@@ -193,6 +201,14 @@ export default function FundBalanceGrid({
                                 {formatMoney(balance.remaining)}
                             </dd>
                         </div>
+                        {balance.awaitingReimbursement !== null &&
+                            balance.awaitingReimbursement !== undefined &&
+                            parseFloat(balance.awaitingReimbursement) > 0 && (
+                                <p className="text-xs text-muted-foreground">
+                                    {formatMoney(balance.awaitingReimbursement)}{' '}
+                                    awaiting payback
+                                </p>
+                            )}
                     </dl>
                     {renderFundAction(balance)}
                     {renderSpendAction(balance)}

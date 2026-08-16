@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Enums\UserActivityAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileDeleteRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Services\Audit\UserActivityLogger;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +16,8 @@ use Inertia\Response;
 
 class ProfileController extends Controller
 {
+    public function __construct(private UserActivityLogger $activityLogger) {}
+
     /**
      * Show the user's profile settings page.
      */
@@ -37,6 +41,14 @@ class ProfileController extends Controller
         }
 
         $request->user()->save();
+
+        $this->activityLogger->log(
+            UserActivityAction::ProfileUpdated,
+            'Updated profile',
+            $request->user(),
+            $request->user(),
+            team: $request->user()->currentTeam,
+        );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Profile updated.')]);
 

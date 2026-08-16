@@ -76,6 +76,9 @@ class IncomePeriodController extends Controller
                 'categoryRemaining' => collect($balances)
                     ->mapWithKeys(fn (array $balance) => [$balance['categoryId'] => $balance['remaining']])
                     ->all(),
+                'categoryFundsAdded' => collect($balances)
+                    ->mapWithKeys(fn (array $balance) => [$balance['categoryId'] => $balance['openingBalance']])
+                    ->all(),
             ];
         }
 

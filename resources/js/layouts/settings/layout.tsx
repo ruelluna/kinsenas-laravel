@@ -77,9 +77,8 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                 className={cn(
                                     'shrink-0 justify-center lg:w-full lg:justify-start',
                                     {
-                                        'bg-muted': isCurrentOrParentUrl(
-                                            item.href,
-                                        ),
+                                        'bg-surface text-foreground shadow-xs':
+                                            isCurrentOrParentUrl(item.href),
                                     },
                                 )}
                             >

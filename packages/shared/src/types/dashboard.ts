@@ -37,6 +37,7 @@ export type DashboardSummary = {
     attentionCount: number;
     pendingTransferCount: number;
     pendingSpendCount: number;
+    awaitingReimbursementCount: number;
     lowBalanceFunds: DashboardLowBalanceFund[];
 };
 
@@ -54,7 +55,7 @@ export type DashboardBankBalance = {
 
 export type DashboardPendingAction = {
     id: string;
-    type: 'transfer' | 'spend';
+    type: 'transfer' | 'spend' | 'reimbursement';
     amount: string | null;
     description: string | null;
     date: string;
@@ -65,11 +66,12 @@ export type DashboardPendingAction = {
 export type DashboardPendingActions = {
     transfers: DashboardPendingAction[];
     spends: DashboardPendingAction[];
+    reimbursements: DashboardPendingAction[];
 };
 
 export type DashboardActivityItem = {
     id: string;
-    type: 'transfer' | 'spend';
+    type: 'transfer' | 'spend' | 'fund_addition';
     amount: string | null;
     description: string | null;
     date: string;

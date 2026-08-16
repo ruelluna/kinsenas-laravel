@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { ArrowRightLeft, ShoppingBag } from 'lucide-react';
+import { ArrowRightLeft, PiggyBank, ShoppingBag } from 'lucide-react';
 import { formatMoney } from '@/lib/format-money';
 import type {
     DashboardActivityItem,
@@ -36,18 +36,23 @@ export default function RecentActivityFeed({
                         >
                             {item.type === 'transfer' ? (
                                 <ArrowRightLeft className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                            ) : item.type === 'fund_addition' ? (
+                                <PiggyBank className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                             ) : (
                                 <ShoppingBag className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                             )}
                             <div>
                                 <p className="font-medium">
+                                    {item.type === 'fund_addition' ? '+' : ''}
                                     {formatMoney(item.amount)}
                                     {item.description
                                         ? ` · ${item.description}`
                                         : ''}
                                 </p>
                                 <p className="text-muted-foreground">
-                                    {item.label} · {item.date}
+                                    {item.type === 'fund_addition'
+                                        ? `Fund added · ${item.label} · ${item.date}`
+                                        : `${item.label} · ${item.date}`}
                                 </p>
                             </div>
                         </div>

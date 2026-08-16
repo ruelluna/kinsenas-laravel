@@ -49,7 +49,7 @@ export default function AdminNotificationsTestIndex({
             />
 
             {flash?.success && (
-                <p className="mt-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900 dark:border-green-900 dark:bg-green-950 dark:text-green-100">
+                <p className="mt-4 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
                     {flash.success}
                 </p>
             )}

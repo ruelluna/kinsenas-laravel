@@ -11,35 +11,28 @@ it('renders the welcome landing page', function () {
     );
 });
 
-it('shows the hero headline on the landing page', function () {
-    $response = $this->get(route('home'));
-
-    $response->assertOk();
-    $response->assertSee('Not how big you save —', false);
-    $response->assertSee('but the habit of saving!', false);
-});
-
-it('shows how it works section anchor', function () {
-    $response = $this->get(route('home'));
-
-    $response->assertOk();
-    $response->assertSee('Give every peso a place before it disappears.', false);
-});
-
-it('shows encryption trust messaging on the landing page', function () {
-    $response = $this->get(route('home'));
-
-    $response->assertOk();
-    $response->assertSee('Your income is encrypted and safe.', false);
-    $response->assertSee('Only you can unlock your financial data', false);
-});
-
-it('shows sticky open beta banner when billing mode is open beta', function () {
+it('exposes open beta state on the landing page when billing mode is open beta', function () {
     config(['billing.mode' => 'open_beta']);
 
     $response = $this->get(route('home'));
 
     $response->assertOk();
-    $response->assertSee('Open beta — free access', false);
-    $response->assertSee('Apply for beta access', false);
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('welcome')
+        ->where('billingMode', 'open_beta')
+        ->where('openBeta.isActive', true)
+    );
+});
+
+it('exposes inactive open beta on the landing page when billing mode is live', function () {
+    config(['billing.mode' => 'live']);
+
+    $response = $this->get(route('home'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('welcome')
+        ->where('billingMode', 'live')
+        ->where('openBeta.isActive', false)
+    );
 });

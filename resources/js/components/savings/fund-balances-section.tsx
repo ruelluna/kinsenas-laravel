@@ -15,6 +15,7 @@ type Props = {
     canDrawFromFunds?: boolean;
     limit?: number;
     bordered?: boolean;
+    showAllocationPercent?: boolean;
     className?: string;
 };
 
@@ -34,6 +35,7 @@ export default function FundBalancesSection({
     canDrawFromFunds = false,
     limit,
     bordered = false,
+    showAllocationPercent = false,
     className,
 }: Props) {
     const [fundModalOpen, setFundModalOpen] = useState(false);
@@ -78,6 +80,7 @@ export default function FundBalancesSection({
                     canDrawFromFunds={canDrawFromFunds}
                     spendHref={spendHref}
                     limit={limit}
+                    showAllocationPercent={showAllocationPercent}
                     onFund={handleFund}
                 />
             </div>

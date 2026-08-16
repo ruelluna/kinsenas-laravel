@@ -4,6 +4,7 @@ use App\Enums\TeamRole;
 use App\Models\Bank;
 use App\Models\FundSpend;
 use App\Models\FundTransfer;
+use App\Models\Recipient;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\Team;
 use App\Models\TeamInvitation;
@@ -219,6 +220,8 @@ it('dashboard summary includes fund totals after income is added', function () {
         ->where('summary.totalRemaining', '50000.00')
         ->has('fundBalances', 3)
         ->where('fundBalances.0.name', 'Everyday Fund')
+        ->where('fundBalances.0.allocationType', 'percentage')
+        ->where('fundBalances.0.percentage', '70.00')
         ->where('fundBalances.0.remaining', '35000.00'),
     );
 });
@@ -287,6 +290,39 @@ it('dashboard includes pending spend confirmations and recent activity', functio
     expect(FundTransfer::query()->count())->toBe(0);
 });
 
+it('dashboard includes awaiting reimbursement count', function () {
+    [$user, , $everydayCategory] = createUserWithLockedIncome();
+
+    $this->actingAs($user)->post(route('savings.recipients.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'type' => 'person',
+        'name' => 'Ana',
+    ]);
+
+    $payerId = Recipient::query()->firstOrFail()->id;
+
+    $this->actingAs($user)->post(route('savings.spending.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'category_id' => $everydayCategory->id,
+        'amount' => '1000.00',
+        'description' => 'Bill for Ana',
+        'spent_on' => '2026-01-15',
+        'expects_reimbursement' => true,
+        'expected_from_recipient_id' => $payerId,
+    ]);
+
+    $response = $this->actingAs($user)->get(dashboardRoute($user));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('dashboard')
+        ->where('summary.awaitingReimbursementCount', 1)
+        ->has('pendingActions.reimbursements', 1),
+    );
+});
+
 it('dashboard setup marks bank step complete when team has a bank', function () {
     [$user] = createUserWithLockedIncome();
 
@@ -302,5 +338,27 @@ it('dashboard setup marks bank step complete when team has a bank', function () 
         ->where('setup.hasBank', true)
         ->where('setup.steps.0.key', 'bank')
         ->where('setup.steps.0.complete', true),
+    );
+});
+
+it('dashboard recent activity includes fund additions', function () {
+    [$user, $plan, $everydayCategory] = createUserWithLockedIncome();
+
+    $this->actingAs($user)->patch(route('savings.plan.category.opening-balance', [
+        'current_team' => $user->currentTeam->slug,
+        'category' => $everydayCategory->id,
+    ]), [
+        'amount' => '2000.00',
+    ]);
+
+    $response = $this->actingAs($user)->get(dashboardRoute($user));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('dashboard')
+        ->has('recentActivity', 1)
+        ->where('recentActivity.0.type', 'fund_addition')
+        ->where('recentActivity.0.amount', '2000.00')
+        ->where('recentActivity.0.label', $everydayCategory->name),
     );
 });

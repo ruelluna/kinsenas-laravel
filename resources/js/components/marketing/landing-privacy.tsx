@@ -1,54 +1,31 @@
-import { Check, Lock, ShieldCheck } from 'lucide-react';
-import { ENCRYPTION_TRUST_POINTS } from '@/components/marketing/landing-content';
-import LandingSection from '@/components/marketing/landing-section';
+import { Lock } from 'lucide-react';
 
 export default function LandingPrivacy() {
     return (
-        <LandingSection id="privacy">
-            <div className="mx-auto grid max-w-4xl items-start gap-10 rounded-3xl border border-border/40 bg-muted/20 p-8 lg:grid-cols-[auto_1fr] lg:gap-12 lg:p-10">
-                <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary lg:size-16">
-                    <Lock className="size-6 lg:size-7" aria-hidden />
-                </div>
-                <div className="space-y-6">
-                    <div className="space-y-4">
-                        <div className="flex flex-wrap items-center gap-2">
-                            <ShieldCheck
-                                className="size-4 text-success"
-                                aria-hidden
-                            />
-                            <p className="text-sm font-medium text-success">
-                                Encrypted by default
-                            </p>
-                        </div>
-                        <h2 className="text-2xl font-semibold tracking-tight text-balance text-foreground lg:text-3xl">
-                            Your income stays yours — even from us.
-                        </h2>
-                        <p className="text-base leading-relaxed text-pretty text-muted-foreground lg:text-lg">
-                            Kinsenas is built so your payday amounts are private
-                            and protected. We encrypt your financial data so
-                            nobody on our team can browse your income, savings
-                            splits, or transfers — only you can, when you unlock
-                            your vault.
-                        </p>
+        <section id="security" className="mx-auto max-w-7xl px-6 py-24">
+            <div className="flex flex-col items-center gap-12 rounded-[3rem] bg-primary p-12 text-primary-foreground md:flex-row md:p-20">
+                <div className="flex-1">
+                    <h2 className="mb-6 font-space text-4xl font-bold md:text-5xl">
+                        Your numbers are for your eyes only.
+                    </h2>
+                    <p className="mb-8 max-w-lg text-lg font-medium opacity-80">
+                        Unlike other apps, Kinsenas encrypts your data on your
+                        device. We never see your income, your bank names, or
+                        your spending. It’s all sealed in your private vault.
+                    </p>
+                    <div className="flex flex-wrap gap-4">
+                        <span className="rounded-full border border-midnight/10 bg-midnight/10 px-4 py-2 text-xs font-bold">
+                            Client-side encryption
+                        </span>
+                        <span className="rounded-full border border-midnight/10 bg-midnight/10 px-4 py-2 text-xs font-bold">
+                            Recovery key on signup
+                        </span>
                     </div>
-                    <ul className="space-y-3">
-                        {ENCRYPTION_TRUST_POINTS.map((point) => (
-                            <li
-                                key={point}
-                                className="flex items-start gap-3 text-sm leading-relaxed text-foreground"
-                            >
-                                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-success/15">
-                                    <Check
-                                        className="size-3 text-success"
-                                        aria-hidden
-                                    />
-                                </span>
-                                {point}
-                            </li>
-                        ))}
-                    </ul>
+                </div>
+                <div className="grid aspect-square w-full place-items-center rounded-3xl border border-midnight/10 bg-midnight/5 md:w-1/3">
+                    <Lock className="h-16 w-16" strokeWidth={1.5} />
                 </div>
             </div>
-        </LandingSection>
+        </section>
     );
 }

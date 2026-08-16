@@ -74,7 +74,14 @@ function EditSpendingForm({
     const [description, setDescription] = useState(spend.description ?? '');
     const [spentOn, setSpentOn] = useState(spend.spentOn);
     const [recipientId, setRecipientId] = useState(spend.recipientId ?? '');
+    const [expectsReimbursement, setExpectsReimbursement] = useState(
+        spend.expectsReimbursement ?? false,
+    );
+    const [expectedFromRecipientId, setExpectedFromRecipientId] = useState(
+        spend.expectedFromRecipientId ?? '',
+    );
     const [removeReceipt, setRemoveReceipt] = useState(false);
+    const hasReimbursements = (spend.reimbursements?.length ?? 0) > 0;
 
     const selectedBalance = useMemo(
         () =>
@@ -202,6 +209,62 @@ function EditSpendingForm({
 
                     {removeReceipt && (
                         <input type="hidden" name="remove_receipt" value="1" />
+                    )}
+
+                    <label className="flex items-start gap-2 text-sm">
+                        <input
+                            type="checkbox"
+                            name="expects_reimbursement"
+                            value="1"
+                            checked={expectsReimbursement}
+                            disabled={hasReimbursements}
+                            onChange={(event) =>
+                                setExpectsReimbursement(event.target.checked)
+                            }
+                            className="mt-0.5"
+                        />
+                        <span>
+                            <span className="font-medium">
+                                Expecting payback
+                            </span>
+                            {hasReimbursements && (
+                                <span className="mt-0.5 block text-muted-foreground">
+                                    Cannot turn off after paybacks were recorded.
+                                </span>
+                            )}
+                        </span>
+                    </label>
+                    <InputError message={errors.expects_reimbursement} />
+
+                    {expectsReimbursement && (
+                        <div className="grid gap-2">
+                            <Label htmlFor="edit_expected_from_recipient_id">
+                                Who will pay you back?
+                            </Label>
+                            <select
+                                id="edit_expected_from_recipient_id"
+                                name="expected_from_recipient_id"
+                                className="h-9 rounded-md border border-input px-3 text-sm"
+                                value={expectedFromRecipientId}
+                                onChange={(event) =>
+                                    setExpectedFromRecipientId(event.target.value)
+                                }
+                                required
+                            >
+                                <option value="">Select person</option>
+                                {recipients.map((recipient) => (
+                                    <option
+                                        key={recipient.id}
+                                        value={recipient.id}
+                                    >
+                                        {recipient.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <InputError
+                                message={errors.expected_from_recipient_id}
+                            />
+                        </div>
                     )}
 
                     <div className="grid gap-2">

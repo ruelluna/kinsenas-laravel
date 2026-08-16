@@ -6,13 +6,17 @@ use App\Models\TeamInvitation;
 use App\Models\User;
 use App\Notifications\Teams\TeamInvitation as TeamInvitationNotification;
 use Database\Seeders\BillingSeeder;
+use Database\Seeders\SavingsFormulaTemplateSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->seed(BillingSeeder::class);
+    $this->seed([
+        BillingSeeder::class,
+        SavingsFormulaTemplateSeeder::class,
+    ]);
 });
 
 it('stores a database notification for registered invitees', function () {
@@ -22,6 +26,7 @@ it('stores a database notification for registered invitees', function () {
     $invitedUser = User::factory()->create(['email' => 'invited@example.com']);
     $team = Team::factory()->create();
     $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
+    prepareTeamForInvites($owner, $team);
 
     $this->actingAs($owner)
         ->post(route('teams.invitations.store', $team), [

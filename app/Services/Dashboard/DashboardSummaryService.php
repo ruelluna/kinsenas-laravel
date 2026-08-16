@@ -2,8 +2,10 @@
 
 namespace App\Services\Dashboard;
 
+use App\Enums\ReimbursementStatus;
 use App\Enums\SubscriptionFeature;
 use App\Enums\TransferStatus;
+use App\Models\FundAddedEntry;
 use App\Models\FundSpend;
 use App\Models\FundTransfer;
 use App\Models\SavingsPlan;
@@ -11,9 +13,11 @@ use App\Models\Team;
 use App\Models\User;
 use App\Services\Billing\SubscriptionService;
 use App\Services\Savings\FundBalanceService;
+use App\Services\Savings\FundSpendReimbursementService;
 use App\Services\Savings\FundSpendService;
 use App\Services\Savings\FundTransferService;
 use App\Services\Savings\SavingsPlanService;
+use App\Services\Teams\TeamSetupService;
 
 class DashboardSummaryService
 {
@@ -22,7 +26,9 @@ class DashboardSummaryService
         private FundBalanceService $balanceService,
         private FundSpendService $fundSpendService,
         private FundTransferService $fundTransferService,
+        private FundSpendReimbursementService $reimbursementService,
         private SubscriptionService $subscriptionService,
+        private TeamSetupService $teamSetupService,
     ) {}
 
     /**
@@ -44,32 +50,7 @@ class DashboardSummaryService
             ->where('status', TransferStatus::Confirmed)
             ->exists();
 
-        $steps = [
-            [
-                'key' => 'bank',
-                'label' => 'Add your banks',
-                'complete' => $hasBank,
-                'href' => "{$savingsBase}/banks",
-            ],
-            [
-                'key' => 'plan',
-                'label' => 'Choose a savings plan',
-                'complete' => $hasPlan,
-                'href' => "{$savingsBase}/plan",
-            ],
-            [
-                'key' => 'income',
-                'label' => 'Add income',
-                'complete' => $hasIncome,
-                'href' => "{$savingsBase}/income",
-            ],
-            [
-                'key' => 'spending',
-                'label' => 'Record spending',
-                'complete' => $hasSpending,
-                'href' => "{$savingsBase}/spending",
-            ],
-        ];
+        $steps = $this->teamSetupService->dashboardSetupSteps($team, $user, $hasSpending);
 
         $setupComplete = collect($steps)->every(fn (array $step) => $step['complete']);
 
@@ -88,7 +69,7 @@ class DashboardSummaryService
 
         $pendingActions = $plan !== null
             ? $this->pendingActions($plan, $teamSlug, $canTransfers)
-            : ['transfers' => [], 'spends' => []];
+            : ['transfers' => [], 'spends' => [], 'reimbursements' => []];
 
         $recentActivity = $plan !== null
             ? $this->recentActivity($plan)
@@ -159,6 +140,7 @@ class DashboardSummaryService
         $lowBalanceFunds = [];
         $pendingTransferCount = 0;
         $pendingSpendCount = 0;
+        $awaitingReimbursementCount = 0;
 
         if ($fundBalances !== []) {
             $totalRemaining = '0.00';
@@ -201,9 +183,23 @@ class DashboardSummaryService
                 ->where('status', TransferStatus::Pending)
                 ->whereNotNull('bank_id')
                 ->count();
+
+            $awaitingReimbursementCount = FundSpend::query()
+                ->where('savings_plan_id', $plan->id)
+                ->where('expects_reimbursement', true)
+                ->whereNull('reimbursement_closed_at')
+                ->where('status', TransferStatus::Confirmed)
+                ->with('reimbursements')
+                ->get()
+                ->filter(function (FundSpend $spend) {
+                    $status = $this->reimbursementService->totalsForSpend($spend)['status'];
+
+                    return in_array($status, [ReimbursementStatus::Awaiting, ReimbursementStatus::Partial], true);
+                })
+                ->count();
         }
 
-        $attentionCount = $pendingTransferCount + $pendingSpendCount + count($lowBalanceFunds);
+        $attentionCount = $pendingTransferCount + $pendingSpendCount + $awaitingReimbursementCount + count($lowBalanceFunds);
 
         return [
             'totalRemaining' => $totalRemaining,
@@ -211,12 +207,13 @@ class DashboardSummaryService
             'attentionCount' => $attentionCount,
             'pendingTransferCount' => $pendingTransferCount,
             'pendingSpendCount' => $pendingSpendCount,
+            'awaitingReimbursementCount' => $awaitingReimbursementCount,
             'lowBalanceFunds' => $lowBalanceFunds,
         ];
     }
 
     /**
-     * @return array{transfers: list<array<string, mixed>>, spends: list<array<string, mixed>>}
+     * @return array{transfers: list<array<string, mixed>>, spends: list<array<string, mixed>>, reimbursements: list<array<string, mixed>>}
      */
     private function pendingActions(SavingsPlan $plan, string $teamSlug, bool $canTransfers): array
     {
@@ -263,9 +260,44 @@ class DashboardSummaryService
             ->values()
             ->all();
 
+        $reimbursements = FundSpend::query()
+            ->where('savings_plan_id', $plan->id)
+            ->where('expects_reimbursement', true)
+            ->whereNull('reimbursement_closed_at')
+            ->where('status', TransferStatus::Confirmed)
+            ->with(['category', 'expectedFromRecipient', 'reimbursements'])
+            ->latest('spent_on')
+            ->latest()
+            ->limit(10)
+            ->get()
+            ->filter(function (FundSpend $spend) {
+                $status = $this->reimbursementService->totalsForSpend($spend)['status'];
+
+                return in_array($status, [ReimbursementStatus::Awaiting, ReimbursementStatus::Partial], true);
+            })
+            ->map(function (FundSpend $spend) use ($teamSlug) {
+                $totals = $this->reimbursementService->totalsForSpend($spend);
+
+                return [
+                    'id' => $spend->id,
+                    'type' => 'reimbursement',
+                    'amount' => $totals['remaining'],
+                    'description' => $spend->description,
+                    'date' => $spend->spent_on->toDateString(),
+                    'label' => trim(
+                        ($spend->category?->name ?? '')
+                        .($spend->expectedFromRecipient?->name ? " · from {$spend->expectedFromRecipient->name}" : ''),
+                    ),
+                    'confirmHref' => "/{$teamSlug}/savings/spending",
+                ];
+            })
+            ->values()
+            ->all();
+
         return [
             'transfers' => $transfers,
             'spends' => $spends,
+            'reimbursements' => $reimbursements,
         ];
     }
 
@@ -300,8 +332,25 @@ class DashboardSummaryService
                 'label' => trim(($transfer->fromCategory?->name ?? '').' → '.($transfer->toCategory?->name ?? '')),
             ]);
 
+        $fundAdditions = FundAddedEntry::query()
+            ->where('savings_plan_id', $plan->id)
+            ->with('category')
+            ->latest('added_on')
+            ->latest()
+            ->limit(20)
+            ->get()
+            ->map(fn (FundAddedEntry $entry) => [
+                'id' => "fund-addition-{$entry->id}",
+                'type' => 'fund_addition',
+                'amount' => $entry->amount_encrypted,
+                'description' => null,
+                'date' => $entry->added_on->toDateString(),
+                'label' => $entry->category?->name ?? $entry->category_name,
+            ]);
+
         return $spends
             ->concat($transfers)
+            ->concat($fundAdditions)
             ->sortByDesc('date')
             ->take($limit)
             ->values()

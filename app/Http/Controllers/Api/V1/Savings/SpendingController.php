@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Savings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Savings\RecordFundSpendReimbursementRequest;
 use App\Http\Requests\Savings\SaveFundSpendRequest;
 use App\Http\Requests\Savings\UpdateFundSpendRequest;
 use App\Http\Resources\FundSpendResource;
@@ -10,6 +11,7 @@ use App\Models\FundSpend;
 use App\Models\SavingsCategory;
 use App\Models\Team;
 use App\Services\Marketing\ActivationGhlTagService;
+use App\Services\Savings\FundSpendReimbursementService;
 use App\Services\Savings\FundSpendService;
 use App\Services\Savings\FundTransferService;
 use App\Services\Savings\SavingsPlanService;
@@ -23,6 +25,7 @@ class SpendingController extends Controller
         private SavingsPlanService $planService,
         private FundSpendService $fundSpendService,
         private FundTransferService $fundTransferService,
+        private FundSpendReimbursementService $reimbursementService,
         private ActivationGhlTagService $activationGhlTagService,
     ) {}
 
@@ -63,10 +66,12 @@ class SpendingController extends Controller
             $request->validated('recipient_id'),
             $request->user(),
             $request->file('receipt_image')?->store('spending-receipts', 'public'),
+            $request->boolean('expects_reimbursement'),
+            $request->validated('expected_from_recipient_id'),
         );
         $this->activationGhlTagService->syncFirstSpend($request->user(), $team);
 
-        return response()->json(['data' => new FundSpendResource($spend->load(['bank', 'recipient', 'category']))], 201);
+        return response()->json(['data' => new FundSpendResource($spend->load(['bank', 'recipient', 'category', 'expectedFromRecipient', 'reimbursements.bank']))], 201);
     }
 
     public function update(UpdateFundSpendRequest $request, Team $team, FundSpend $fundSpend): JsonResponse
@@ -86,6 +91,8 @@ class SpendingController extends Controller
             $request->validated('recipient_id'),
             $request->file('receipt_image')?->store('spending-receipts', 'public'),
             $request->boolean('remove_receipt'),
+            $request->boolean('expects_reimbursement'),
+            $request->validated('expected_from_recipient_id'),
         );
 
         return response()->json(['data' => new FundSpendResource($spend)]);
@@ -109,6 +116,45 @@ class SpendingController extends Controller
         return response()->json(['data' => new FundSpendResource(
             $this->fundSpendService->confirm($fundSpend, $request->user()),
         )]);
+    }
+
+    public function storeReimbursement(
+        RecordFundSpendReimbursementRequest $request,
+        Team $team,
+        FundSpend $fundSpend,
+    ): JsonResponse {
+        $plan = $this->planService->forTeam($team, $request->user());
+        abort_if($fundSpend->savings_plan_id !== $plan->id, 404);
+
+        $bankId = $request->validated('bank_id');
+        if ($bankId !== null) {
+            abort_if(! $team->banks()->where('id', $bankId)->exists(), 404);
+        }
+
+        $this->reimbursementService->record(
+            $fundSpend,
+            $request->validated('amount'),
+            $request->validated('received_on'),
+            $bankId,
+            $request->validated('notes'),
+            $request->user(),
+        );
+
+        return response()->json([
+            'data' => new FundSpendResource($fundSpend->fresh(['bank', 'recipient', 'category', 'expectedFromRecipient', 'reimbursements.bank'])),
+        ]);
+    }
+
+    public function closeReimbursement(Request $request, Team $team, FundSpend $fundSpend): JsonResponse
+    {
+        $plan = $this->planService->forTeam($team, $request->user());
+        abort_if($fundSpend->savings_plan_id !== $plan->id, 404);
+
+        return response()->json([
+            'data' => new FundSpendResource(
+                $this->reimbursementService->closeExpectation($fundSpend),
+            ),
+        ]);
     }
 
     private function assertCategoryBelongsToPlan(string $planId, string $categoryId): void

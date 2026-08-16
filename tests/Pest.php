@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\SubscriptionStatus;
+use App\Models\Bank;
 use App\Models\IncomePeriod;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\SavingsPlan;
@@ -8,6 +9,9 @@ use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\Team;
 use App\Models\User;
+use App\Services\Vault\FinancialEncryptionService;
+use App\Services\Vault\VaultKeyManager;
+use Illuminate\Foundation\Vite;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Laravel\Fortify\Features;
@@ -16,6 +20,23 @@ use Tests\TestCase;
 uses(TestCase::class)->in('Feature');
 uses(TestCase::class)->in('Unit');
 uses(TestCase::class)->in('Browser');
+
+/*
+|--------------------------------------------------------------------------
+| Browser assets
+|--------------------------------------------------------------------------
+|
+| Browser tests always use the Vite build manifest. A stale or IPv6-only
+| public/hot file (common when `npm run dev` wrote [::1]) leaves Inertia
+| pages as an empty #app shell under Playwright.
+|
+| Run `npm run build` before browser tests when frontend assets change.
+|
+*/
+uses()->beforeEach(function (): void {
+    app(Vite::class)
+        ->useHotFile(base_path('tests/.vite-hot-disabled'));
+})->in('Browser');
 
 /*
 |--------------------------------------------------------------------------
@@ -51,6 +72,43 @@ function grantTeamSubscriptionAccess(Team $team): Subscription
             'current_period_ends_at' => now()->addMonth(),
         ],
     );
+}
+
+function prepareTeamForInvites(User $user, Team $team): void
+{
+    grantTeamSubscriptionAccess($team);
+
+    Bank::factory()->create([
+        'team_id' => $team->id,
+    ]);
+
+    unlockVaultForUser($user);
+
+    $plan = SavingsPlan::factory()->create([
+        'team_id' => $team->id,
+        'created_by_user_id' => $user->id,
+        'is_shared_with_team' => true,
+    ]);
+
+    IncomePeriod::query()->create([
+        'plan_id' => $plan->id,
+        'name' => 'Setup income',
+        'amount_encrypted' => '50000.00',
+        'period_start' => now()->startOfMonth()->toDateString(),
+    ]);
+}
+
+function unlockVaultForUser(User $user, string $password = 'password'): void
+{
+    $vault = $user->vault;
+
+    if ($vault === null) {
+        app(FinancialEncryptionService::class)->createUserVault($user, $password);
+        $vault = $user->fresh()->vault;
+    }
+
+    $dek = app(FinancialEncryptionService::class)->unlockWithPassword($vault, $password);
+    app(VaultKeyManager::class)->storeUserDek($dek);
 }
 
 function fakeGhlApi(string $contactId = 'ct_test_123'): void
@@ -119,4 +177,55 @@ function createUserWithLockedIncome(string $amount = '50000.00'): array
     $everydayCategory = $plan->categories()->where('name', 'Everyday Fund')->firstOrFail();
 
     return [$user, $plan, $everydayCategory, $period];
+}
+
+function browserUnlockVaultIfNeeded(mixed $page): mixed
+{
+    if (str_contains($page->url(), '/vault/unlock')) {
+        $page->fill('password', 'password')
+            ->press('Unlock');
+    }
+
+    return $page;
+}
+
+function browserDismissOnboardingTour(mixed $page, string $teamId): mixed
+{
+    $teamIdJson = json_encode($teamId);
+
+    $page->script("(function () {
+        const teamId = {$teamIdJson};
+
+        try {
+            localStorage.setItem(
+                'kinsenas.onboardingTour.v1.' + teamId,
+                JSON.stringify({ completedAt: new Date().toISOString() }),
+            );
+            sessionStorage.removeItem('kinsenas.onboardingTour.active.v1');
+            sessionStorage.removeItem('kinsenas.onboardingTour.autoStart.v1');
+        } catch (e) {}
+
+        document.querySelector('.driver-popover-close-btn')?.click();
+        document.querySelectorAll('.driver-overlay, .driver-popover').forEach((element) => {
+            element.remove();
+        });
+        document.body.classList.remove('driver-active', 'driver-no-scroll', 'driver-fade');
+    })();");
+
+    return $page;
+}
+
+function browserLogin(mixed $page, $user): mixed
+{
+    $page->fill('email', $user->email)
+        ->fill('password', 'password')
+        ->click('@login-button');
+
+    browserUnlockVaultIfNeeded($page);
+
+    if (str_contains($page->url(), '/dashboard')) {
+        browserDismissOnboardingTour($page, $user->currentTeam->id);
+    }
+
+    return $page;
 }

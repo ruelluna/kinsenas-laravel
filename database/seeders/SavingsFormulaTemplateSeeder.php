@@ -32,8 +32,8 @@ class SavingsFormulaTemplateSeeder extends Seeder
         $trc = SavingsFormulaTemplate::query()->updateOrCreate(
             ['slug' => 'trc-savings'],
             [
-                'name' => 'TRC — Truly Rich Club',
-                'description' => 'TRC stands for Truly Rich Club — a seven-bucket payday split that assigns every peso a job before you spend.',
+                'name' => '7 Buckets',
+                'description' => 'A seven-bucket payday split that assigns every peso a job before you spend.',
                 'best_for' => 'Kinsenas recommends this formula if you want maximum savings: 50% for everyday life, 20% for long-term freedom (Emancipation), and the rest for tithe, emergencies, growth, and guilt-free enjoyment.',
                 'video_embed_url' => null,
                 'is_system' => true,

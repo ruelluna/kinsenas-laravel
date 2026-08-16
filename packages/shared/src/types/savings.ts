@@ -139,10 +139,30 @@ export type FundBalance = {
     openingBalance: string | null;
     canFund: boolean;
     percentUsed: number | null;
+    allocationType: CategoryAllocationType;
+    percentage: string | null;
+    deductionMode?: DeductionMode | null;
+    deductionValue?: string | null;
     bankId: string | null;
     bankDisplayName: string | null;
     bankLogoUrl: string | null;
+    awaitingReimbursement?: string | null;
 };
+
+export type FundSpendReimbursement = {
+    id: string;
+    amount: string | null;
+    receivedOn: string;
+    bankName: string | null;
+    notes: string | null;
+};
+
+export type ReimbursementStatus =
+    | 'none'
+    | 'awaiting'
+    | 'partial'
+    | 'resolved'
+    | 'closed';
 
 export type FundSpend = {
     id: string;
@@ -153,7 +173,16 @@ export type FundSpend = {
     categoryName: string | null;
     categoryId: string;
     bankName: string | null;
+    recipientId?: string | null;
+    recipientName?: string | null;
     receiptUrl: string | null;
+    expectsReimbursement?: boolean;
+    expectedFromRecipientId?: string | null;
+    expectedFromRecipientName?: string | null;
+    reimbursementStatus?: ReimbursementStatus;
+    reimbursedAmount?: string | null;
+    remainingOwed?: string | null;
+    reimbursements?: FundSpendReimbursement[];
 };
 
 export type FundTransfer = {

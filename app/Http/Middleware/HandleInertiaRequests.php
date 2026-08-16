@@ -49,6 +49,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'appearance' => $request->cookie('appearance') ?? 'system',
             'billingMode' => config('billing.mode'),
             'openBeta' => fn () => $betaApplicationService->sharedProps($user),
             'auth' => [
@@ -74,6 +75,7 @@ class HandleInertiaRequests extends Middleware
             'webPush' => fn () => [
                 'vapidPublicKey' => config('webpush.vapid.public_key'),
             ],
+            'onboardingTourEnabled' => fn () => ! app()->runningUnitTests(),
         ];
     }
 

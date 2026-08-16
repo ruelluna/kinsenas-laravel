@@ -13,22 +13,16 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { buildMemberNav } from '@/lib/member-nav';
 import type { SharedData } from '@/types';
 
 export function AppSidebar() {
-    const isMobile = useIsMobile();
     const page = usePage<SharedData>();
-    const hasAccess = (page.props.subscription?.hasAccess ?? true);
+    const hasAccess = page.props.subscription?.hasAccess ?? true;
     const isPlatformAdmin = Boolean(page.props.auth.user?.isPlatformAdmin);
     const { homeUrl, mainNavItems, billingNavItems } = buildMemberNav(
         page.props,
     );
-
-    if (isMobile) {
-        return null;
-    }
 
     return (
         <Sidebar collapsible="icon" variant="inset">

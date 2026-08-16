@@ -1,4 +1,4 @@
-import { Form, Head, router } from '@inertiajs/react';
+import { Form, Head, Link, router } from '@inertiajs/react';
 import { ChevronDown, Mail, UserPlus, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import CancelInvitationModal from '@/components/cancel-invitation-modal';
@@ -30,7 +30,9 @@ import { update as updateMember } from '@/routes/teams/members';
 import type {
     RoleOption,
     Team,
+    TeamActivityEntry,
     TeamInvitation,
+    TeamInviteReadiness,
     TeamMember,
     TeamPermissions,
 } from '@/types';
@@ -40,6 +42,9 @@ type Props = {
     members: TeamMember[];
     invitations: TeamInvitation[];
     permissions: TeamPermissions;
+    canInviteByRole: boolean;
+    inviteReadiness: TeamInviteReadiness;
+    teamActivity: TeamActivityEntry[];
     availableRoles: RoleOption[];
 };
 
@@ -48,6 +53,9 @@ export default function TeamEdit({
     members,
     invitations,
     permissions,
+    canInviteByRole,
+    inviteReadiness,
+    teamActivity,
     availableRoles,
 }: Props) {
     const getInitials = useInitials();
@@ -150,19 +158,60 @@ export default function TeamEdit({
                             variant="small"
                             title="Team members"
                             description={
-                                permissions.canCreateInvitation
+                                canInviteByRole
                                     ? 'Manage who belongs to this team'
                                     : ''
                             }
                         />
 
-                        {permissions.canCreateInvitation ? (
-                            <Button
-                                data-test="invite-member-button"
-                                onClick={() => setInviteDialogOpen(true)}
-                            >
-                                <UserPlus /> Invite member
-                            </Button>
+                        {canInviteByRole ? (
+                            inviteReadiness.ready ? (
+                                <Button
+                                    data-test="invite-member-button"
+                                    onClick={() => setInviteDialogOpen(true)}
+                                >
+                                    <UserPlus /> Invite member
+                                </Button>
+                            ) : (
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <span
+                                                data-test="invite-setup-blocked"
+                                                className="inline-flex"
+                                            >
+                                                <Button disabled>
+                                                    <UserPlus /> Invite member
+                                                </Button>
+                                            </span>
+                                        </TooltipTrigger>
+                                        <TooltipContent className="max-w-xs">
+                                            <p className="font-medium">
+                                                Complete setup before inviting
+                                            </p>
+                                            <ul className="mt-2 list-disc ps-4 text-sm">
+                                                {inviteReadiness.steps
+                                                    .filter(
+                                                        (step) =>
+                                                            !step.complete,
+                                                    )
+                                                    .map((step) => (
+                                                        <li key={step.key}>
+                                                            <Link
+                                                                href={
+                                                                    step.href
+                                                                }
+                                                                className="underline"
+                                                            >
+                                                                {step.label}
+                                                            </Link>
+                                                        </li>
+                                                    ))}
+                                            </ul>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            )
                         ) : null}
                     </div>
 
@@ -320,6 +369,35 @@ export default function TeamEdit({
                     </div>
                 ) : null}
 
+                {teamActivity.length > 0 ? (
+                    <div className="space-y-6">
+                        <Heading
+                            variant="small"
+                            title="Recent activity"
+                            description="Who did what on this team"
+                        />
+                        <div className="space-y-3">
+                            {teamActivity.map((entry) => (
+                                <div
+                                    key={entry.id}
+                                    className="rounded-lg border p-4 text-sm"
+                                    data-test="team-activity-row"
+                                >
+                                    <div className="font-medium">
+                                        {entry.description}
+                                    </div>
+                                    <div className="mt-1 text-muted-foreground">
+                                        {entry.causer_name ?? 'System'} ·{' '}
+                                        {new Date(
+                                            entry.created_at,
+                                        ).toLocaleString()}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ) : null}
+
                 {permissions.canDeleteTeam && !team.isPersonal ? (
                     <div className="space-y-6">
                         <Heading
@@ -328,7 +406,7 @@ export default function TeamEdit({
                             description="Permanently delete your team"
                         />
                         <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
-                            <div className="relative space-y-0.5 text-red-600 dark:text-red-100">
+                            <div className="relative space-y-0.5 text-destructive">
                                 <p className="font-medium">Warning</p>
                                 <p className="text-sm">
                                     Please proceed with caution, this cannot be
@@ -347,7 +425,7 @@ export default function TeamEdit({
                 ) : null}
             </div>
 
-            {permissions.canCreateInvitation ? (
+            {canInviteByRole && inviteReadiness.ready ? (
                 <InviteMemberModal
                     team={team}
                     availableRoles={availableRoles}

@@ -17,14 +17,14 @@ import type { SharedData } from '@/types';
  */
 export default function OnboardingTourHost() {
     const page = usePage<SharedData>();
-    const { currentTeam, subscription } = page.props;
+    const { currentTeam, subscription, onboardingTourEnabled } = page.props;
     const teamId = currentTeam?.id;
     const teamSlug = currentTeam?.slug;
     const hasAccess = subscription?.hasAccess ?? true;
     const bootstrapping = useRef(false);
 
     useEffect(() => {
-        if (!teamId || !teamSlug || !hasAccess) {
+        if (!onboardingTourEnabled || !teamId || !teamSlug || !hasAccess) {
             return;
         }
 
@@ -77,7 +77,7 @@ export default function OnboardingTourHost() {
         }
 
         return undefined;
-    }, [teamId, teamSlug, hasAccess, page.url]);
+    }, [onboardingTourEnabled, teamId, teamSlug, hasAccess, page.url]);
 
     return null;
 }

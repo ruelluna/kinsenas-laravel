@@ -51,10 +51,14 @@ export default function Dashboard({
     }, [setup.hasPlan]);
 
     useEffect(() => {
+        if (!page.props.onboardingTourEnabled) {
+            return;
+        }
+
         if (teamId && !setup.complete) {
             requestOnboardingTourAutoStart(teamId);
         }
-    }, [teamId, setup.complete]);
+    }, [page.props.onboardingTourEnabled, teamId, setup.complete]);
 
     const mobileNavAction = useMemo(
         () =>
@@ -125,6 +129,7 @@ export default function Dashboard({
                             fundBalances={fundBalances}
                             spendHref={quickLinks.spending}
                             canDrawFromFunds={plan?.canDrawFromFunds ?? false}
+                            showAllocationPercent
                         />
                         <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
                             <Link

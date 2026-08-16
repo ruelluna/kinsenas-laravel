@@ -51,6 +51,10 @@ function useSidebar() {
   return context
 }
 
+function useOptionalSidebar() {
+  return React.useContext(SidebarContext)
+}
+
 function SidebarProvider({
   defaultOpen = true,
   open: openProp,
@@ -502,7 +506,9 @@ function SidebarMenuButton({
   tooltip?: string | React.ComponentProps<typeof TooltipContent>
 } & VariantProps<typeof sidebarMenuButtonVariants>) {
   const Comp = asChild ? Slot : "button"
-  const { isMobile, state } = useSidebar()
+  const sidebar = useOptionalSidebar()
+  const isMobile = sidebar?.isMobile ?? false
+  const state = sidebar?.state ?? "expanded"
 
   const button = (
     <Comp
@@ -715,5 +721,6 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
+  useOptionalSidebar,
   useSidebar,
 }
