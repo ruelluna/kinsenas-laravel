@@ -13,6 +13,16 @@ beforeEach(function () {
     config(['billing.mode' => 'open_beta']);
 });
 
+it('does not sync user tags to GHL when email is unverified', function () {
+    fakeGhlApi();
+
+    $user = User::factory()->unverified()->create(['email' => 'unverified@example.com']);
+
+    app(GhlMarketingService::class)->syncUserTags($user, ['registered'], [], ['event' => 'registered']);
+
+    Http::assertNothingSent();
+});
+
 it('adds beta tags without sending tags on upsert', function () {
     fakeGhlApi();
 
