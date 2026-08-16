@@ -7,14 +7,15 @@ import { isHtmlContent } from '@/lib/content-format';
 const HtmlContentBody = lazy(() => import('@/components/content/html-content-body'));
 
 type Props = {
-    content: string;
+    content?: string | null;
     className?: string;
 };
 
-export default function ContentBody({ content, className }: Props) {
+export default function ContentBody({ content = '', className }: Props) {
+    const safeContent = content ?? '';
     const proseClassName = `rich-text-content max-w-none ${className ?? ''}`;
 
-    if (isHtmlContent(content)) {
+    if (isHtmlContent(safeContent)) {
         return (
             <Suspense
                 fallback={
@@ -23,7 +24,7 @@ export default function ContentBody({ content, className }: Props) {
                     </div>
                 }
             >
-                <HtmlContentBody content={content} className={proseClassName} />
+                <HtmlContentBody content={safeContent} className={proseClassName} />
             </Suspense>
         );
     }
@@ -31,7 +32,7 @@ export default function ContentBody({ content, className }: Props) {
     return (
         <div className={proseClassName}>
             <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
-                {content}
+                {safeContent}
             </ReactMarkdown>
         </div>
     );

@@ -1,7 +1,9 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Link, useHttp, usePage } from '@inertiajs/react';
 import { ThumbsUp } from 'lucide-react';
 import { useState } from 'react';
 import ContentBody from '@/components/content/content-body';
+import ContentByline from '@/components/content/content-byline';
+import LearnPageHead from '@/components/learn/learn-page-head';
 import LearnMarketingShell from '@/components/learn/learn-marketing-shell';
 import VideoEmbed from '@/components/savings/video-embed';
 import { Badge } from '@/components/ui/badge';
@@ -46,61 +48,32 @@ export default function LearnPostShow({
         : '/';
     const [helpfulCount, setHelpfulCount] = useState(initialHelpfulCount);
     const [hasReacted, setHasReacted] = useState(initialHasReacted);
-    const [reacting, setReacting] = useState(false);
+    const { post: submitReaction, processing: reacting } = useHttp<{
+        reacted: boolean;
+        count: number;
+    }>();
 
     async function toggleHelpful() {
         if (!hasFullAccess || reacting) {
             return;
         }
 
-        setReacting(true);
-
         try {
-            const response = await fetch(`/learn/posts/${post.slug}/react`, {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'X-CSRF-TOKEN':
-                        document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')
-                            ?.content ?? '',
-                },
-                credentials: 'same-origin',
-            });
-
-            if (!response.ok) {
-                return;
-            }
-
-            const data = (await response.json()) as { reacted: boolean; count: number };
+            const data = await submitReaction(`/learn/posts/${post.slug}/react`, {});
             setHasReacted(data.reacted);
             setHelpfulCount(data.count);
-        } finally {
-            setReacting(false);
+        } catch {
+            // Ignore — user can retry.
         }
     }
 
     const content = (
         <>
-            <Head title={post.title}>
-                {post.excerpt && (
-                    <meta head-key="description" name="description" content={post.excerpt} />
-                )}
-                {openGraph && (
-                    <>
-                        <meta head-key="og:title" property="og:title" content={openGraph.title} />
-                        <meta
-                            head-key="og:description"
-                            property="og:description"
-                            content={openGraph.description}
-                        />
-                        <meta head-key="og:url" property="og:url" content={openGraph.url} />
-                        <meta head-key="og:type" property="og:type" content="article" />
-                        {openGraph.image && (
-                            <meta head-key="og:image" property="og:image" content={openGraph.image} />
-                        )}
-                    </>
-                )}
-            </Head>
+            <LearnPageHead
+                title={post.title}
+                description={post.excerpt}
+                openGraph={openGraph}
+            />
             <article className="space-y-6">
                 {isPreview && (
                     <Badge variant="outline">Admin preview — not published view</Badge>
@@ -119,13 +92,24 @@ export default function LearnPostShow({
                         )}
                     </div>
                     <h1 className="text-3xl font-semibold tracking-tight">{post.title}</h1>
-                    <p className="text-sm text-muted-foreground">
-                        By {post.bylineName}
-                        {post.readingTimeMinutes
-                            ? ` · ${post.readingTimeMinutes} min read`
-                            : ''}
-                    </p>
+                    <ContentByline
+                        name={post.bylineName}
+                        avatarUrl={post.bylineAvatarUrl}
+                    />
+                    {post.readingTimeMinutes ? (
+                        <p className="text-sm text-muted-foreground">
+                            {post.readingTimeMinutes} min read
+                        </p>
+                    ) : null}
                 </div>
+
+                {post.coverImageUrl ? (
+                    <img
+                        src={post.coverImageUrl}
+                        alt=""
+                        className="aspect-[2/1] w-full max-w-3xl rounded-lg border object-cover"
+                    />
+                ) : null}
 
                 {showFullBody ? (
                     <>

@@ -5,9 +5,7 @@ import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
-const textareaClassName =
-    'border-input min-h-24 w-full rounded-md border px-3 py-2 text-sm shadow-xs outline-none';
+import { selectClassName, textareaClassName } from '@/lib/form-field-classes';
 
 type Props = {
     showOptions: Array<{ id: string; title: string }>;
@@ -29,7 +27,7 @@ export default function AdminPodcastEpisodeCreate({ showOptions }: Props) {
                     <select
                         id="podcast_show_id"
                         name="podcast_show_id"
-                        className={textareaClassName}
+                        className={selectClassName}
                         required
                     >
                         <option value="">Select show</option>
@@ -77,7 +75,7 @@ export default function AdminPodcastEpisodeCreate({ showOptions }: Props) {
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="publish_scope">Publish scope</Label>
-                    <select id="publish_scope" name="publish_scope" className={textareaClassName} defaultValue="internal">
+                    <select id="publish_scope" name="publish_scope" className={selectClassName} defaultValue="internal">
                         <option value="internal">Internal only</option>
                         <option value="external">External only</option>
                         <option value="both">Internal & external</option>
@@ -85,7 +83,7 @@ export default function AdminPodcastEpisodeCreate({ showOptions }: Props) {
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="status">Status</Label>
-                    <select id="status" name="status" className={textareaClassName} defaultValue="draft">
+                    <select id="status" name="status" className={selectClassName} defaultValue="draft">
                         <option value="draft">Draft</option>
                         <option value="published">Published</option>
                         <option value="archived">Archived</option>

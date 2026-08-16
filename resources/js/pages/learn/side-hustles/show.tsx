@@ -1,6 +1,7 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import ContentBody from '@/components/content/content-body';
 import ContentByline from '@/components/content/content-byline';
+import LearnPageHead from '@/components/learn/learn-page-head';
 import LearnMarketingShell from '@/components/learn/learn-marketing-shell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -29,26 +30,16 @@ export default function LearnSideHustleShow({
 }: Props) {
     const content = (
         <>
-            <Head title={hustle.title}>
-                {openGraph && (
-                    <>
-                        <meta head-key="og:title" property="og:title" content={openGraph.title} />
-                        <meta
-                            head-key="og:description"
-                            property="og:description"
-                            content={openGraph.description}
-                        />
-                        <meta head-key="og:url" property="og:url" content={openGraph.url} />
-                        {openGraph.image && (
-                            <meta head-key="og:image" property="og:image" content={openGraph.image} />
-                        )}
-                    </>
-                )}
-            </Head>
+            <LearnPageHead
+                title={hustle.title}
+                description={hustle.excerpt}
+                openGraph={openGraph}
+                ogType="website"
+            />
             <div className="space-y-8">
                 <div className="space-y-3">
                     <Button variant="ghost" size="sm" asChild>
-                        <Link href="/learn/side-hustles">← Side hustles</Link>
+                        <Link href="/learn?filter=side-hustles">← Side hustles</Link>
                     </Button>
                     <div className="flex flex-wrap gap-2">
                         {hustle.category && (
@@ -106,7 +97,7 @@ export default function LearnSideHustleShow({
                 </dl>
 
                 {showFullBody && hustle.body ? (
-                    <ContentBody body={hustle.body} />
+                    <ContentBody content={hustle.body ?? ''} />
                 ) : (
                     <div className="rounded-lg border border-dashed p-6 text-center">
                         <p className="text-muted-foreground">

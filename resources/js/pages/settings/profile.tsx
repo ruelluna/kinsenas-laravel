@@ -4,6 +4,7 @@ import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileCo
 import DeleteUser from '@/components/delete-user';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import ProfilePhotoField from '@/components/settings/profile-photo-field';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,11 +35,12 @@ export default function Profile({
                 <Heading
                     variant="small"
                     title="Profile"
-                    description="Update your name and email address"
+                    description="Update your profile photo, name, and email address"
                 />
 
                 <Form
                     {...ProfileController.update.form()}
+                    encType="multipart/form-data"
                     options={{
                         preserveScroll: true,
                     }}
@@ -46,6 +48,9 @@ export default function Profile({
                 >
                     {({ processing, errors }) => (
                         <>
+                            <ProfilePhotoField currentPhotoUrl={auth.user.avatar} />
+
+                            <InputError message={errors.profile_photo} />
                             <div className="grid gap-2">
                                 <Label htmlFor="name">Name</Label>
 

@@ -55,6 +55,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $user ? [
                     ...$user->toArray(),
+                    'avatar' => $user->profilePhotoUrl(),
                     'isPlatformAdmin' => $user->isPlatformAdmin(),
                     'isAuthor' => $user->isAuthor(),
                     'canManagePlatform' => $user->canManagePlatform(),

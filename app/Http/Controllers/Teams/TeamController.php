@@ -118,7 +118,7 @@ class TeamController extends Controller
                     'id' => $member->id,
                     'name' => $member->name,
                     'email' => $member->email,
-                    'avatar' => $member->avatar ?? null,
+                    'avatar' => $member->profilePhotoUrl(),
                     'role' => $membership->role->value,
                     'role_label' => $membership->role->label(),
                 ];

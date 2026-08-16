@@ -30,6 +30,7 @@ class ContentPresenter
             'postAs' => $post->post_as,
             'bylineName' => ContentByline::forPost($post->post_as, $post->author),
             'authorName' => ContentByline::forPost($post->post_as, $post->author),
+            'bylineAvatarUrl' => ContentByline::authorAvatarUrl($post->author),
         ];
 
         if ($includeBody) {

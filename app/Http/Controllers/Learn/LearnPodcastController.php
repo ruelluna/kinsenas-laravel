@@ -8,6 +8,7 @@ use App\Models\PodcastEpisode;
 use App\Models\PodcastShow;
 use App\Services\Content\LearnAccessService;
 use App\Support\Content\LearnLibraryPresenter;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,22 +17,9 @@ class LearnPodcastController extends Controller
 {
     public function __construct(private LearnAccessService $learnAccessService) {}
 
-    public function index(Request $request): Response
+    public function index(Request $request): RedirectResponse
     {
-        $hasFullAccess = $this->learnAccessService->userHasFullLearnAccess($request->user());
-
-        $shows = PodcastShow::query()
-            ->published()
-            ->orderBy('sort_order')
-            ->orderBy('title')
-            ->get()
-            ->map(fn (PodcastShow $show) => LearnLibraryPresenter::podcastShowSummary($show));
-
-        return Inertia::render('learn/podcasts/index', [
-            'hasFullAccess' => $hasFullAccess,
-            'isAuthenticated' => $request->user() !== null,
-            'shows' => $shows,
-        ]);
+        return redirect()->route('learn.index', ['filter' => 'podcasts']);
     }
 
     public function show(Request $request, PodcastShow $podcastShow): Response

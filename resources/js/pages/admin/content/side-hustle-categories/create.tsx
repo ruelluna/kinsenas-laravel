@@ -4,9 +4,7 @@ import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
-const textareaClassName =
-    'border-input min-h-24 w-full rounded-md border px-3 py-2 text-sm shadow-xs outline-none';
+import { selectClassName, textareaClassName } from '@/lib/form-field-classes';
 
 export default function AdminSideHustleCategoryCreate() {
     return (
@@ -33,7 +31,7 @@ export default function AdminSideHustleCategoryCreate() {
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="status">Status</Label>
-                    <select id="status" name="status" className={textareaClassName} defaultValue="draft">
+                    <select id="status" name="status" className={selectClassName} defaultValue="draft">
                         <option value="draft">Draft</option>
                         <option value="published">Published</option>
                         <option value="archived">Archived</option>

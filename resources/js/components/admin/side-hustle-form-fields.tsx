@@ -1,10 +1,8 @@
 import TiptapEditor from '@/components/admin/tiptap-editor';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { selectClassName, textareaClassName } from '@/lib/form-field-classes';
 import type { SideHustleAdmin } from '@/types/learn-library';
-
-const textareaClassName =
-    'border-input min-h-24 w-full rounded-md border px-3 py-2 text-sm shadow-xs outline-none';
 
 type Props = {
     hustle?: SideHustleAdmin;
@@ -19,7 +17,7 @@ export default function SideHustleFormFields({ hustle, categoryOptions }: Props)
                 <select
                     id="side_hustle_category_id"
                     name="side_hustle_category_id"
-                    className={textareaClassName}
+                    className={selectClassName}
                     defaultValue={hustle?.sideHustleCategoryId ?? ''}
                     required
                 >
@@ -79,7 +77,7 @@ export default function SideHustleFormFields({ hustle, categoryOptions }: Props)
                     <select
                         id="difficulty"
                         name="difficulty"
-                        className={textareaClassName}
+                        className={selectClassName}
                         defaultValue={hustle?.difficulty ?? 'beginner'}
                     >
                         <option value="beginner">Beginner</option>
@@ -92,7 +90,7 @@ export default function SideHustleFormFields({ hustle, categoryOptions }: Props)
                     <select
                         id="capital_tier"
                         name="capital_tier"
-                        className={textareaClassName}
+                        className={selectClassName}
                         defaultValue={hustle?.capitalTier ?? 'low'}
                     >
                         <option value="low">Low capital</option>
@@ -168,7 +166,7 @@ export default function SideHustleFormFields({ hustle, categoryOptions }: Props)
                 <select
                     id="publish_scope"
                     name="publish_scope"
-                    className={textareaClassName}
+                    className={selectClassName}
                     defaultValue={hustle?.publishScope ?? 'internal'}
                 >
                     <option value="internal">Internal only</option>
@@ -181,7 +179,7 @@ export default function SideHustleFormFields({ hustle, categoryOptions }: Props)
                 <select
                     id="status"
                     name="status"
-                    className={textareaClassName}
+                    className={selectClassName}
                     defaultValue={hustle?.status ?? 'draft'}
                 >
                     <option value="draft">Draft</option>

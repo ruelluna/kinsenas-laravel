@@ -1,6 +1,7 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import ContentBody from '@/components/content/content-body';
 import ContentByline from '@/components/content/content-byline';
+import LearnPageHead from '@/components/learn/learn-page-head';
 import LearnMarketingShell from '@/components/learn/learn-marketing-shell';
 import { Button } from '@/components/ui/button';
 import type { PodcastEpisodeSummary } from '@/types/learn-library';
@@ -29,22 +30,7 @@ export default function LearnPodcastEpisodeShow({
 
     const content = (
         <>
-            <Head title={episode.title}>
-                {openGraph && (
-                    <>
-                        <meta head-key="og:title" property="og:title" content={openGraph.title} />
-                        <meta
-                            head-key="og:description"
-                            property="og:description"
-                            content={openGraph.description}
-                        />
-                        <meta head-key="og:url" property="og:url" content={openGraph.url} />
-                        {openGraph.image && (
-                            <meta head-key="og:image" property="og:image" content={openGraph.image} />
-                        )}
-                    </>
-                )}
-            </Head>
+            <LearnPageHead title={episode.title} description={episode.excerpt} openGraph={openGraph} />
             <div className="space-y-8">
                 <div className="space-y-3">
                     {showSlug && (
@@ -76,7 +62,7 @@ export default function LearnPodcastEpisodeShow({
                 )}
 
                 {showFullBody && episode.showNotes ? (
-                    <ContentBody body={episode.showNotes} />
+                    <ContentBody content={episode.showNotes ?? ''} />
                 ) : (
                     <div className="rounded-lg border border-dashed p-6 text-center">
                         <p className="text-muted-foreground">

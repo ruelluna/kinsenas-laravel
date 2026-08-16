@@ -25,9 +25,10 @@ it('shows published side hustles to subscribed members with full body', function
     ]);
 
     $this->actingAs($user)
-        ->get(route('learn.side-hustles.index'))
+        ->get(route('learn.index', ['filter' => 'side-hustles']))
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
+            ->component('learn/index')
             ->where('hasFullAccess', true)
             ->has('hustles.data', 1));
 
@@ -52,7 +53,7 @@ it('shows external teaser only to guests', function () {
         'side_hustle_category_id' => $category->id,
     ]);
 
-    $this->get(route('learn.side-hustles.index'))
+    $this->get(route('learn.index', ['filter' => 'side-hustles']))
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page->has('hustles.data', 1));
 
@@ -79,7 +80,7 @@ it('filters side hustles by category slug', function () {
         'side_hustle_category_id' => $online->id,
     ]);
 
-    $this->get(route('learn.side-hustles.index', ['category' => 'food']))
+    $this->get(route('learn.index', ['filter' => 'side-hustles', 'category' => 'food']))
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
             ->where('activeCategory', 'food')

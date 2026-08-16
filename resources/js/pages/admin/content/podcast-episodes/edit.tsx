@@ -5,10 +5,8 @@ import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { selectClassName, textareaClassName } from '@/lib/form-field-classes';
 import type { PodcastEpisodeAdmin } from '@/types/learn-library';
-
-const textareaClassName =
-    'border-input min-h-24 w-full rounded-md border px-3 py-2 text-sm shadow-xs outline-none';
 
 type Props = {
     episode: PodcastEpisodeAdmin;
@@ -31,7 +29,7 @@ export default function AdminPodcastEpisodeEdit({ episode, showOptions }: Props)
                     <select
                         id="podcast_show_id"
                         name="podcast_show_id"
-                        className={textareaClassName}
+                        className={selectClassName}
                         defaultValue={episode.podcastShowId}
                         required
                     >
@@ -110,7 +108,7 @@ export default function AdminPodcastEpisodeEdit({ episode, showOptions }: Props)
                     <select
                         id="publish_scope"
                         name="publish_scope"
-                        className={textareaClassName}
+                        className={selectClassName}
                         defaultValue={episode.publishScope}
                     >
                         <option value="internal">Internal only</option>
@@ -120,7 +118,7 @@ export default function AdminPodcastEpisodeEdit({ episode, showOptions }: Props)
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="status">Status</Label>
-                    <select id="status" name="status" className={textareaClassName} defaultValue={episode.status}>
+                    <select id="status" name="status" className={selectClassName} defaultValue={episode.status}>
                         <option value="draft">Draft</option>
                         <option value="published">Published</option>
                         <option value="archived">Archived</option>

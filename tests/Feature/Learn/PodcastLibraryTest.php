@@ -16,9 +16,10 @@ it('lists published podcast shows', function () {
     PodcastShow::factory()->create(['title' => 'Sweldo Stories', 'slug' => 'sweldo-stories']);
     PodcastShow::factory()->draft()->create(['slug' => 'draft-show']);
 
-    $this->get(route('learn.podcasts.index'))
+    $this->get(route('learn.index', ['filter' => 'podcasts']))
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
+            ->component('learn/index')
             ->has('shows', 1)
             ->where('shows.0.slug', 'sweldo-stories'));
 });

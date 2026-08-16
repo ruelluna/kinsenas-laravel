@@ -1,10 +1,9 @@
 import TiptapEditor from '@/components/admin/tiptap-editor';
+import CoverImageField from '@/components/admin/cover-image-field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { selectClassName, textareaClassName } from '@/lib/form-field-classes';
 import type { ContentPostAdmin } from '@/types/content';
-
-const textareaClassName =
-    'border-input min-h-24 w-full rounded-md border px-3 py-2 text-sm shadow-xs outline-none';
 
 type AuthorOption = {
     id: number;
@@ -32,7 +31,7 @@ export default function ContentPostFormFields({
                     <select
                         id="author_id"
                         name="author_id"
-                        className={textareaClassName}
+                        className={selectClassName}
                         defaultValue={post?.authorId ?? ''}
                     >
                         <option value="">Select author</option>
@@ -70,7 +69,7 @@ export default function ContentPostFormFields({
                 <select
                     id="content_series_id"
                     name="content_series_id"
-                    className={textareaClassName}
+                    className={selectClassName}
                     defaultValue={post?.contentSeriesId ?? ''}
                 >
                     <option value="">Standalone post</option>
@@ -96,7 +95,7 @@ export default function ContentPostFormFields({
                 <select
                     id="content_type"
                     name="content_type"
-                    className={textareaClassName}
+                    className={selectClassName}
                     defaultValue={post?.contentType ?? 'article'}
                 >
                     <option value="article">Article</option>
@@ -110,7 +109,7 @@ export default function ContentPostFormFields({
                 <select
                     id="publish_scope"
                     name="publish_scope"
-                    className={textareaClassName}
+                    className={selectClassName}
                     defaultValue={post?.publishScope ?? 'internal'}
                 >
                     <option value="internal">Internal only</option>
@@ -123,7 +122,7 @@ export default function ContentPostFormFields({
                 <select
                     id="status"
                     name="status"
-                    className={textareaClassName}
+                    className={selectClassName}
                     defaultValue={post?.status ?? 'draft'}
                 >
                     <option value="draft">Draft</option>
@@ -144,15 +143,7 @@ export default function ContentPostFormFields({
                 <Label htmlFor="body">Body</Label>
                 <TiptapEditor defaultValue={post?.body ?? ''} required />
             </div>
-            <div className="grid gap-2">
-                <Label htmlFor="cover_image_url">Cover image URL</Label>
-                <Input
-                    id="cover_image_url"
-                    name="cover_image_url"
-                    type="url"
-                    defaultValue={post?.coverImageUrl ?? ''}
-                />
-            </div>
+            <CoverImageField defaultUrl={post?.coverImageUrl ?? null} />
             <div className="grid gap-2">
                 <Label htmlFor="video_embed_url">Video embed URL</Label>
                 <Input

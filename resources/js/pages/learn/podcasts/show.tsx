@@ -22,7 +22,7 @@ export default function LearnPodcastShow({
             <div className="space-y-8">
                 <div className="space-y-3">
                     <Button variant="ghost" size="sm" asChild>
-                        <Link href="/learn/podcasts">← Podcasts</Link>
+                        <Link href="/learn?filter=podcasts">← Podcasts</Link>
                     </Button>
                     <h1 className="text-3xl font-semibold tracking-tight">{show.title}</h1>
                     {show.description && (

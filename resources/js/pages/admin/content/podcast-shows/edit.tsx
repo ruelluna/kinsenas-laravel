@@ -4,10 +4,8 @@ import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { selectClassName, textareaClassName } from '@/lib/form-field-classes';
 import type { PodcastShowAdmin } from '@/types/learn-library';
-
-const textareaClassName =
-    'border-input min-h-24 w-full rounded-md border px-3 py-2 text-sm shadow-xs outline-none';
 
 type Props = {
     show: PodcastShowAdmin;
@@ -52,7 +50,7 @@ export default function AdminPodcastShowEdit({ show }: Props) {
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="status">Status</Label>
-                    <select id="status" name="status" className={textareaClassName} defaultValue={show.status}>
+                    <select id="status" name="status" className={selectClassName} defaultValue={show.status}>
                         <option value="draft">Draft</option>
                         <option value="published">Published</option>
                         <option value="archived">Archived</option>

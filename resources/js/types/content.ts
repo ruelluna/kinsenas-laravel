@@ -27,6 +27,7 @@ export type ContentPostSummary = {
     authorName: string;
     postAs: string | null;
     bylineName: string;
+    bylineAvatarUrl: string | null;
 };
 
 export type ContentPostAdmin = ContentPostSummary & {

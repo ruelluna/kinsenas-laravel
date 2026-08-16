@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, type MouseEvent, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
+import { uploadContentImage } from '@/lib/content-image-upload';
 import { cn } from '@/lib/utils';
 
 type Props = {
@@ -26,30 +27,6 @@ type Props = {
     uploadUrl?: string;
     className?: string;
 };
-
-async function uploadContentImage(file: File, uploadUrl: string): Promise<string> {
-    const formData = new FormData();
-    formData.append('image', file);
-
-    const response = await fetch(uploadUrl, {
-        method: 'POST',
-        headers: {
-            Accept: 'application/json',
-            'X-CSRF-TOKEN':
-                document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '',
-        },
-        credentials: 'same-origin',
-        body: formData,
-    });
-
-    if (!response.ok) {
-        throw new Error('Image upload failed.');
-    }
-
-    const data = (await response.json()) as { url: string };
-
-    return data.url;
-}
 
 function insertUploadedImage(editor: Editor, url: string): void {
     editor.chain().focus().setImage({ src: url }).run();
