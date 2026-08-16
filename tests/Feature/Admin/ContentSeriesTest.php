@@ -12,7 +12,7 @@ beforeEach(function () {
 });
 
 it('allows platform admin to create and update series', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
 
     $this->actingAs($admin)
         ->post(route('admin.content.series.store'), [
@@ -40,7 +40,7 @@ it('allows platform admin to create and update series', function () {
 });
 
 it('forbids non admin from managing series', function () {
-    $user = User::factory()->create(['is_platform_admin' => false]);
+    $user = User::factory()->create();
 
     $this->actingAs($user)
         ->get(route('admin.content.series.index'))
@@ -48,7 +48,7 @@ it('forbids non admin from managing series', function () {
 });
 
 it('lists series for platform admin', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     ContentSeries::factory()->create(['title' => 'Listed series']);
 
     $this->actingAs($admin)

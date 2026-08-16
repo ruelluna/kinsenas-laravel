@@ -16,7 +16,7 @@ class LearnAccessService
             return false;
         }
 
-        if ($user->isPlatformAdmin()) {
+        if ($user->isPlatformAdmin() || $user->isAuthor()) {
             return true;
         }
 

@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { ChevronRight, LogOut, Settings } from 'lucide-react';
+import { InstallAppMenuItem } from '@/components/pwa/install-app-menu-item';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,8 +12,7 @@ import {
 } from '@/components/ui/sheet';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
-import { InstallAppMenuItem } from '@/components/pwa/install-app-menu-item';
-import { adminNavItems } from '@/lib/admin-nav';
+import { adminNavGroups } from '@/lib/admin-nav';
 import { buildMemberNav } from '@/lib/member-nav';
 import { cn } from '@/lib/utils';
 import { logout } from '@/routes';
@@ -86,36 +86,41 @@ export function MobileMoreSheet({ open, onOpenChange }: Props) {
                 </nav>
 
                 {hasAccess && isPlatformAdmin && (
-                    <div className="mt-4 border-t pt-4">
-                        <p className="mb-2 px-3 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                            Admin
-                        </p>
-                        <div className="flex flex-col gap-1">
-                            {adminNavItems.map((item) => (
-                                <Button
-                                    key={item.title}
-                                    variant="ghost"
-                                    className={cn(
-                                        'h-11 justify-start gap-3 px-3',
-                                        {
-                                            'bg-muted': isCurrentOrParentUrl(
-                                                item.href,
-                                            ),
-                                        },
-                                    )}
-                                    asChild
-                                    onClick={() => onOpenChange(false)}
-                                >
-                                    <Link href={item.href} prefetch>
-                                        {item.icon && (
-                                            <item.icon className="size-5 shrink-0" />
-                                        )}
-                                        {item.title}
-                                    </Link>
-                                </Button>
-                            ))}
-                        </div>
-                    </div>
+                    <>
+                        {adminNavGroups.map((group) => (
+                            <div key={group.label} className="mt-4 border-t pt-4">
+                                <p className="mb-2 px-3 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                                    {group.label}
+                                </p>
+                                <div className="flex flex-col gap-1">
+                                    {group.items.map((item) => (
+                                        <Button
+                                            key={item.title}
+                                            variant="ghost"
+                                            className={cn(
+                                                'h-11 justify-start gap-3 px-3',
+                                                {
+                                                    'bg-muted':
+                                                        isCurrentOrParentUrl(
+                                                            item.href,
+                                                        ),
+                                                },
+                                            )}
+                                            asChild
+                                            onClick={() => onOpenChange(false)}
+                                        >
+                                            <Link href={item.href} prefetch>
+                                                {item.icon && (
+                                                    <item.icon className="size-5 shrink-0" />
+                                                )}
+                                                {item.title}
+                                            </Link>
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </>
                 )}
 
                 <MobileAccountSection

@@ -16,6 +16,9 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -33,6 +36,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'subscribed.feature' => EnsureSubscriptionFeature::class,
             'savings.plan.required' => EnsureSavingsPlan::class,
             'platform.admin' => EnsurePlatformAdmin::class,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+            'role_or_permission' => RoleOrPermissionMiddleware::class,
             'learn.member' => EnsureLearnMemberAccess::class,
             'api.team' => EnsureApiTeamScope::class,
         ]);

@@ -20,7 +20,7 @@ beforeEach(function () {
 it('auto-approves registration when a valid shared beta access code is provided', function () {
     Queue::fake();
 
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     $accessCode = BetaAccessCode::factory()->create([
         'code' => 'KINSENAS-MNL-2026',
         'label' => 'Manila Finance Expo 2026',
@@ -72,7 +72,7 @@ it('rejects registration when the beta access code is invalid', function () {
 });
 
 it('rejects registration when the beta access code is expired', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
 
     BetaAccessCode::factory()->expired()->create([
         'code' => 'KINSENAS-OLD-2026',
@@ -89,7 +89,7 @@ it('rejects registration when the beta access code is expired', function () {
 });
 
 it('rejects registration when a single-use beta access code has already been redeemed', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
 
     BetaAccessCode::factory()->singleUse()->maxedOut()->create([
         'code' => 'USED-CODE-1234',
@@ -106,7 +106,7 @@ it('rejects registration when a single-use beta access code has already been red
 });
 
 it('prefills beta access code context from the register query string', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
 
     BetaAccessCode::factory()->create([
         'code' => 'KINSENAS-QR-2026',
@@ -137,7 +137,7 @@ it('blocks dashboard access for code-approved users until email is verified', fu
 });
 
 it('allows platform admins to create shared beta access codes', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
 
     $response = $this->actingAs($admin)->post(route('admin.beta-access-codes.store'), [
         'code' => 'KINSENAS-ADMIN-2026',
@@ -155,7 +155,7 @@ it('allows platform admins to create shared beta access codes', function () {
 });
 
 it('allows platform admins to generate single-use beta access code batches', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
 
     $response = $this->actingAs($admin)->post(route('admin.beta-access-codes.batches.store'), [
         'name' => 'Card batch 1',
@@ -171,7 +171,7 @@ it('allows platform admins to generate single-use beta access code batches', fun
 });
 
 it('exports a beta access code batch as csv', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     $batch = BetaAccessCodeBatch::factory()->create([
         'created_by' => $admin->id,
         'quantity' => 2,

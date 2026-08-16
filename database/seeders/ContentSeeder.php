@@ -6,6 +6,7 @@ use App\Enums\ContentPostStatus;
 use App\Enums\ContentPostType;
 use App\Enums\ContentPublishScope;
 use App\Enums\ContentSeriesStatus;
+use App\Enums\PlatformRole;
 use App\Models\ContentPost;
 use App\Models\ContentSeries;
 use App\Models\User;
@@ -15,8 +16,9 @@ class ContentSeeder extends Seeder
 {
     public function run(): void
     {
-        $author = User::query()->where('is_platform_admin', true)->first()
-            ?? User::factory()->create(['is_platform_admin' => true, 'email' => 'content-admin@kinsenas.test']);
+        $author = User::role(PlatformRole::PlatformAdmin->value)->first()
+            ?? User::role(PlatformRole::Author->value)->first()
+            ?? User::factory()->author()->create(['email' => 'content-admin@kinsenas.test']);
 
         $series = ContentSeries::query()->firstOrCreate(
             ['slug' => 'payday-basics'],
@@ -35,21 +37,21 @@ class ContentSeeder extends Seeder
                 'title' => 'Why lock your income?',
                 'slug' => 'why-lock-your-income',
                 'excerpt' => 'Locking income tells Kinsenas your paycheck is real — so fund balances stay honest.',
-                'body' => "## Why lock?\n\nWhen you record income, Kinsenas splits it across your funds. **Locking** confirms you are ready to act on that split.\n\n- Plan stays stable for the pay period\n- Reports reflect what you committed to\n- Transfers align with your formula",
+                'body' => '<h2>Why lock?</h2><p>When you record income, Kinsenas splits it across your funds. <strong>Locking</strong> confirms you are ready to act on that split.</p><ul><li>Plan stays stable for the pay period</li><li>Reports reflect what you committed to</li><li>Transfers align with your formula</li></ul>',
             ],
             [
                 'episode_number' => 2,
                 'title' => 'Move money to your banks',
                 'slug' => 'move-money-to-banks',
                 'excerpt' => 'After locking, transfer each fund slice to the bank you assigned — Kinsenas tracks what you planned.',
-                'body' => "## Transfers match your plan\n\nUse the **Transfers** screen to move from each fund to its bank account.\n\n1. Open Transfers\n2. Pick source fund and destination bank\n3. Confirm when done in your banking app",
+                'body' => '<h2>Transfers match your plan</h2><p>Use the <strong>Transfers</strong> screen to move from each fund to its bank account.</p><ol><li>Open Transfers</li><li>Pick source fund and destination bank</li><li>Confirm when done in your banking app</li></ol>',
             ],
             [
                 'episode_number' => 3,
                 'title' => 'Review fund health',
                 'slug' => 'review-fund-health',
                 'excerpt' => 'A quick payday ritual: check low balances and log your first spend.',
-                'body' => "## Stay on track\n\nBefore the next sweldo, glance at **Dashboard** and **Reports**.\n\n- Funds above 90% used need attention\n- Log spending as you go — do not wait until month end",
+                'body' => '<h2>Stay on track</h2><p>Before the next sweldo, glance at <strong>Dashboard</strong> and <strong>Reports</strong>.</p><ul><li>Funds above 90% used need attention</li><li>Log spending as you go — do not wait until month end</li></ul>',
             ],
         ];
 
@@ -74,7 +76,7 @@ class ContentSeeder extends Seeder
             [
                 'title' => 'Log your first spend',
                 'excerpt' => 'After transferring, record one real purchase — it keeps Everyday Fund honest.',
-                'body' => "Pick the **smallest real expense** after payday and log it under Spending.\n\nThat single entry builds the habit of matching your plan to real life.",
+                'body' => '<p>Pick the <strong>smallest real expense</strong> after payday and log it under Spending.</p><p>That single entry builds the habit of matching your plan to real life.</p>',
                 'content_type' => ContentPostType::Reminder,
                 'publish_scope' => ContentPublishScope::Internal,
                 'status' => ContentPostStatus::Published,
@@ -89,7 +91,7 @@ class ContentSeeder extends Seeder
             [
                 'title' => 'Set aside family support early',
                 'excerpt' => 'If you send padala, move that fund slice first — before everyday spending creeps in.',
-                'body' => "Many Filipino planners reserve a **Family Support** fund.\n\nTransfer it on payday, not at month end when the account is already thin.",
+                'body' => '<p>Many Filipino planners reserve a <strong>Family Support</strong> fund.</p><p>Transfer it on payday, not at month end when the account is already thin.</p>',
                 'content_type' => ContentPostType::Reminder,
                 'publish_scope' => ContentPublishScope::External,
                 'status' => ContentPostStatus::Published,

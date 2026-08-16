@@ -20,7 +20,7 @@ beforeEach(function () {
 });
 
 it('platform admin can update page guidance', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
 
     $response = $this->actingAs($admin)->put(route('admin.savings-plan-guidance.update'), [
         'chooser_intro' => 'Pick the formula that fits your goals.',
@@ -39,7 +39,7 @@ it('platform admin can update page guidance', function () {
 });
 
 it('non admin cannot update page guidance', function () {
-    $user = User::factory()->create(['is_platform_admin' => false]);
+    $user = User::factory()->create();
 
     $response = $this->actingAs($user)->put(route('admin.savings-plan-guidance.update'), [
         'chooser_intro' => 'Blocked',
@@ -49,7 +49,7 @@ it('non admin cannot update page guidance', function () {
 });
 
 it('invalid video url is rejected', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
 
     $response = $this->actingAs($admin)->put(route('admin.savings-plan-guidance.update'), [
         'chooser_video_url' => 'https://evil.example.com/video',
@@ -59,7 +59,7 @@ it('invalid video url is rejected', function () {
 });
 
 it('platform admin can update formula template guidance', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     $template = SavingsFormulaTemplate::query()->where('slug', 'trc-savings')->firstOrFail();
     $category = $template->categories()->firstOrFail();
 

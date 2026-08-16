@@ -17,7 +17,7 @@ beforeEach(function () {
 });
 
 it('approves a pending payment submission and activates subscription', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     $member = User::factory()->create(['email' => 'member@example.com']);
     $team = $member->personalTeam();
 
@@ -42,7 +42,7 @@ it('approves a pending payment submission and activates subscription', function 
 });
 
 it('rejects a pending payment submission with notes', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     $member = User::factory()->create(['email' => 'member@example.com']);
     $team = $member->personalTeam();
 
@@ -70,7 +70,7 @@ it('rejects a pending payment submission with notes', function () {
 });
 
 it('blocks approving a non-pending submission', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     $member = User::factory()->create(['email' => 'member@example.com']);
     $team = $member->personalTeam();
 
@@ -92,7 +92,7 @@ it('blocks approving a non-pending submission', function () {
 });
 
 it('includes proof image url in payment submissions index props', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     $member = User::factory()->create(['email' => 'member@example.com']);
     $team = $member->personalTeam();
 

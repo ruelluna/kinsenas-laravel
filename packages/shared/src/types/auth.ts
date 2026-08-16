@@ -5,6 +5,10 @@ export type User = {
     avatar?: string;
     email_verified_at: string | null;
     isPlatformAdmin?: boolean;
+    isAuthor?: boolean;
+    canManagePlatform?: boolean;
+    canManageContent?: boolean;
+    platformRole?: string;
     beta_enrolled_at?: string | null;
     beta_launch_discount_eligible?: boolean;
     two_factor_enabled?: boolean;

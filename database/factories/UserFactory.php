@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Actions\Teams\CreateTeam;
+use App\Enums\PlatformRole;
 use App\Models\User;
 use App\Services\Vault\FinancialEncryptionService;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -84,5 +85,19 @@ class UserFactory extends Factory
             'two_factor_recovery_codes' => encrypt(json_encode(['recovery-code-1'])),
             'two_factor_confirmed_at' => now(),
         ]);
+    }
+
+    public function platformAdmin(): static
+    {
+        return $this->afterCreating(function (User $user): void {
+            $user->syncPlatformRole(PlatformRole::PlatformAdmin);
+        });
+    }
+
+    public function author(): static
+    {
+        return $this->afterCreating(function (User $user): void {
+            $user->syncPlatformRole(PlatformRole::Author);
+        });
     }
 }

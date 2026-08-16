@@ -5,7 +5,10 @@ import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { AdminPlatformUser } from '@/types/billing';
+import type {
+    AdminPlatformUser,
+    PlatformRoleOption,
+} from '@/types/billing';
 
 type PaginatedUsers = {
     data: AdminPlatformUser[];
@@ -16,10 +19,11 @@ type Props = {
     users: PaginatedUsers;
     filters: {
         search?: string | null;
-        admin?: string | null;
+        role?: string | null;
     };
     currentUserId: number;
     platformAdminCount: number;
+    roleOptions: PlatformRoleOption[];
 };
 
 export default function AdminPlatformUsersIndex({
@@ -27,6 +31,7 @@ export default function AdminPlatformUsersIndex({
     filters,
     currentUserId,
     platformAdminCount,
+    roleOptions,
 }: Props) {
     const [userToDelete, setUserToDelete] = useState<AdminPlatformUser | null>(
         null,
@@ -38,7 +43,7 @@ export default function AdminPlatformUsersIndex({
             <Heading
                 variant="small"
                 title="Users"
-                description={`Manage platform admins and remove user accounts. ${platformAdminCount} platform admin(s).`}
+                description={`Manage platform roles and remove user accounts. ${platformAdminCount} platform admin(s).`}
             />
 
             <Form
@@ -56,16 +61,19 @@ export default function AdminPlatformUsersIndex({
                     />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="admin">Admin filter</Label>
+                    <Label htmlFor="role">Role filter</Label>
                     <select
-                        id="admin"
-                        name="admin"
-                        defaultValue={filters.admin ?? ''}
+                        id="role"
+                        name="role"
+                        defaultValue={filters.role ?? ''}
                         className="h-9 rounded-md border border-input px-3 text-sm"
                     >
-                        <option value="">All users</option>
-                        <option value="yes">Platform admins only</option>
-                        <option value="no">Non-admins only</option>
+                        <option value="">All roles</option>
+                        {roleOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
+                            </option>
+                        ))}
                     </select>
                 </div>
                 <div className="flex items-end">
@@ -101,6 +109,9 @@ export default function AdminPlatformUsersIndex({
                                         {user.email}
                                     </p>
                                     <p className="mt-1 text-muted-foreground">
+                                        Role: {user.roleLabel}
+                                    </p>
+                                    <p className="text-muted-foreground">
                                         Subscription:{' '}
                                         {user.subscriptionStatusLabel ?? 'None'}
                                     </p>
@@ -116,27 +127,24 @@ export default function AdminPlatformUsersIndex({
                                             name="_method"
                                             value="patch"
                                         />
-                                        <input
-                                            type="hidden"
-                                            name="is_platform_admin"
-                                            value={
-                                                user.isPlatformAdmin ? '0' : '1'
-                                            }
-                                        />
-                                        <Button
-                                            type="submit"
-                                            size="sm"
-                                            variant={
-                                                user.isPlatformAdmin
-                                                    ? 'outline'
-                                                    : 'default'
-                                            }
+                                        <select
+                                            name="role"
+                                            defaultValue={user.role}
                                             disabled={isSelf || isLastAdmin}
+                                            className="h-8 rounded-md border border-input px-2 text-sm"
+                                            onChange={(event) => {
+                                                event.currentTarget.form?.requestSubmit();
+                                            }}
                                         >
-                                            {user.isPlatformAdmin
-                                                ? 'Revoke admin'
-                                                : 'Grant admin'}
-                                        </Button>
+                                            {roleOptions.map((option) => (
+                                                <option
+                                                    key={option.value}
+                                                    value={option.value}
+                                                >
+                                                    {option.label}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </Form>
                                     <Button
                                         type="button"
@@ -154,7 +162,7 @@ export default function AdminPlatformUsersIndex({
                                 user.isPlatformAdmin && (
                                     <p className="mt-2 text-xs text-muted-foreground">
                                         {isSelf
-                                            ? 'You cannot revoke your own platform admin access.'
+                                            ? 'You cannot change your own platform role.'
                                             : 'At least one platform admin must remain.'}
                                     </p>
                                 )}

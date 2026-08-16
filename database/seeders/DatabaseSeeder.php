@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\PlatformRole;
 use App\Models\SavingsFormulaTemplate;
 use App\Models\User;
 use App\Services\Savings\SavingsPlanService;
@@ -19,6 +20,7 @@ class DatabaseSeeder extends Seeder
             SavingsPlanPageGuidanceSeeder::class,
             BillingSeeder::class,
             PhilippineBankSeeder::class,
+            RolePermissionSeeder::class,
         ]);
 
         // $user = User::factory()->create([
@@ -37,12 +39,12 @@ class DatabaseSeeder extends Seeder
         //     );
         // }
 
-        User::factory()->create([
+        $admin = User::factory()->create([
             'name' => 'Platform Admin',
             'email' => 'admin@example.com',
-            'is_platform_admin' => true,
             'email_verified_at' => now(),
         ]);
+        $admin->syncPlatformRole(PlatformRole::PlatformAdmin);
 
         $this->call(ContentSeeder::class);
     }

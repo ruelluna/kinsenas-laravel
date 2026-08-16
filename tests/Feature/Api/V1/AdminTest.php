@@ -25,7 +25,7 @@ it('forbids admin routes for non platform admins', function () {
 });
 
 it('allows admin routes for platform admins', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     Sanctum::actingAs($admin);
 
     $response = $this->getJson('/api/v1/admin/subscribers');
@@ -35,7 +35,7 @@ it('allows admin routes for platform admins', function () {
 });
 
 it('lists platform users for admins', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     Sanctum::actingAs($admin);
 
     $response = $this->getJson('/api/v1/admin/platform-users');

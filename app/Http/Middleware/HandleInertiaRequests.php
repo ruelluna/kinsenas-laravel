@@ -56,6 +56,10 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user ? [
                     ...$user->toArray(),
                     'isPlatformAdmin' => $user->isPlatformAdmin(),
+                    'isAuthor' => $user->isAuthor(),
+                    'canManagePlatform' => $user->canManagePlatform(),
+                    'canManageContent' => $user->canManageContent(),
+                    'platformRole' => $user->platformRole()?->value,
                 ] : null,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',

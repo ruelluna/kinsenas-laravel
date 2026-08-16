@@ -59,9 +59,20 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('invitations/{invitation}', [TeamInvitationController::class, 'decline'])->name('invitations.decline');
 });
 
-Route::middleware(['auth', 'verified', 'platform.admin'])
-    ->group(function () {
-        require __DIR__.'/admin.php';
-    });
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::prefix('admin')
+        ->name('admin.')
+        ->middleware('permission:admin.manage-platform')
+        ->group(function () {
+            require __DIR__.'/admin-ops.php';
+        });
+
+    Route::prefix('admin')
+        ->name('admin.')
+        ->middleware('permission:admin.manage-content')
+        ->group(function () {
+            require __DIR__.'/admin-content.php';
+        });
+});
 
 require __DIR__.'/settings.php';

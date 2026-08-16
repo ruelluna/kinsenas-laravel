@@ -88,7 +88,7 @@ it('stores beta feedback from approved verified users', function () {
 });
 
 it('shows submitted feedback in the admin inbox', function () {
-    $admin = User::factory()->create(['email' => 'admin@example.com', 'is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create(['email' => 'admin@example.com']);
     $user = User::factory()->betaApproved()->create(['email' => 'member@example.com']);
 
     BetaFeedback::factory()->create([

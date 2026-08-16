@@ -15,7 +15,7 @@ beforeEach(function () {
 });
 
 it('grants platform admins access regardless of subscription', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     $admin->personalTeam()->subscription->update([
         'status' => SubscriptionStatus::Cancelled,
     ]);

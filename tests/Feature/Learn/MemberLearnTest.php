@@ -81,7 +81,7 @@ it('orders series episodes by episode number', function () {
 });
 
 it('allows platform admin full learn access without subscription', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     app(SubscriptionService::class)->requirePaidSubscription($admin->currentTeam);
 
     ContentPost::factory()->internal()->create([

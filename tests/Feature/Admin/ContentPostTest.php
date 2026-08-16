@@ -13,7 +13,7 @@ beforeEach(function () {
 });
 
 it('allows platform admin to create posts with excerpt validation', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
 
     $this->actingAs($admin)
         ->post(route('admin.content.posts.store'), [
@@ -42,7 +42,7 @@ it('allows platform admin to create posts with excerpt validation', function () 
 });
 
 it('forces episode type when series is selected', function () {
-    $admin = User::factory()->create(['is_platform_admin' => true]);
+    $admin = User::factory()->platformAdmin()->create();
     $series = ContentSeries::factory()->create();
 
     $this->actingAs($admin)
@@ -63,9 +63,46 @@ it('forces episode type when series is selected', function () {
 });
 
 it('forbids non admin from managing posts', function () {
-    $user = User::factory()->create(['is_platform_admin' => false]);
+    $user = User::factory()->create();
 
     $this->actingAs($user)
         ->get(route('admin.content.posts.index'))
         ->assertForbidden();
+});
+
+it('accepts html body when creating and updating posts', function () {
+    $admin = User::factory()->platformAdmin()->create();
+    $htmlBody = '<p>Intro</p><h2>Section</h2><p>Details with <strong>emphasis</strong>.</p><img src="/storage/content/images/example.png" alt="Chart">';
+
+    $this->actingAs($admin)
+        ->post(route('admin.content.posts.store'), [
+            'title' => 'HTML article',
+            'slug' => 'html-article',
+            'excerpt' => 'Teaser text',
+            'body' => $htmlBody,
+            'content_type' => 'article',
+            'publish_scope' => 'both',
+            'status' => 'published',
+        ])
+        ->assertRedirect();
+
+    $post = ContentPost::query()->where('slug', 'html-article')->first();
+    expect($post)->not->toBeNull()
+        ->and($post->body)->toBe($htmlBody);
+
+    $updatedBody = '<p>Updated intro</p>';
+
+    $this->actingAs($admin)
+        ->put(route('admin.content.posts.update', $post), [
+            'title' => 'HTML article',
+            'slug' => 'html-article',
+            'excerpt' => 'Teaser text',
+            'body' => $updatedBody,
+            'content_type' => 'article',
+            'publish_scope' => 'both',
+            'status' => 'published',
+        ])
+        ->assertRedirect();
+
+    expect($post->fresh()->body)->toBe($updatedBody);
 });
