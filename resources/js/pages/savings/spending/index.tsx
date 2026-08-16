@@ -187,6 +187,9 @@ export default function SpendingIndex({
                             type="button"
                             size="sm"
                             variant="outline"
+                            data-test={
+                                withTestId ? 'edit-spending-button' : undefined
+                            }
                             onClick={() => openEditModal(spend)}
                         >
                             <Pencil className="size-4" />

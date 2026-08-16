@@ -34,7 +34,7 @@ class SavingsFormulaTemplateSeeder extends Seeder
             [
                 'name' => '7 Buckets',
                 'description' => 'A seven-bucket payday split that assigns every peso a job before you spend.',
-                'best_for' => 'Kinsenas recommends this formula if you want maximum savings: 50% for everyday life, 20% for long-term freedom (Emancipation), and the rest for tithe, emergencies, growth, and guilt-free enjoyment.',
+                'best_for' => 'Kinsenas recommends this formula if you want maximum savings: 50% for everyday life, 20% for long-term freedom (Savings), and the rest for tithe, emergencies, growth, and guilt-free enjoyment.',
                 'video_embed_url' => null,
                 'is_system' => true,
             ],
@@ -47,7 +47,7 @@ class SavingsFormulaTemplateSeeder extends Seeder
                 ['Enjoyment', 5, 'Fun and recreation without guilt.'],
                 ['Empower Fund', 5, 'Investing in tools or opportunities that increase your earning power.'],
                 ['Emergency Fund', 5, 'Unexpected expenses and financial shocks.'],
-                ['Emancipation Fund', 20, 'Building toward financial independence and larger future goals.'],
+                ['Savings', 20, 'Long-term savings and goals — building toward financial independence.'],
                 ['Everyday Fund', 50, 'Regular living expenses for the month.'],
             ]);
         }

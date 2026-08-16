@@ -36,6 +36,8 @@ it('records spending with expecting payback and shows resolved after payback', f
         $template->name,
     );
 
+    $plan->update(['allow_editing_spends' => true]);
+
     app(IncomeCalculationService::class)->create(
         $plan,
         $user,
@@ -66,6 +68,10 @@ it('records spending with expecting payback and shows resolved after payback', f
         ->assertSee('Recent activity')
         ->click('@add-spending-button')
         ->assertSee('Record spending')
+        ->assertScript(
+            'document.querySelector("[data-test=\\"spending-fund-select\\"]").selectedOptions[0].textContent.trim()',
+            'Everyday Fund — ₱35,000.00 remaining',
+        )
         ->fill('@spending-amount', '1000')
         ->fill('@spending-description', 'Bill for Ana')
         ->click('@expects-reimbursement')
@@ -74,6 +80,13 @@ it('records spending with expecting payback and shows resolved after payback', f
         ->click('@record-spending-submit')
         ->assertDontSee('Record spending')
         ->assertSee('Bill for Ana')
+        ->click('@edit-spending-button')
+        ->assertSee('Edit spending')
+        ->assertScript(
+            'document.querySelector("[data-test=\\"edit-spending-fund-select\\"]").selectedOptions[0].textContent.trim()',
+            'Everyday Fund — ₱34,000.00 remaining',
+        )
+        ->click('@edit-spending-cancel')
         ->assertSee('payback from Ana')
         ->assertVisible('@reimbursement-badge-awaiting')
         ->click('@record-payback-button')
