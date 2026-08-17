@@ -46,6 +46,8 @@ class UpdateContentPostRequest extends FormRequest
             'video_embed_url' => ['nullable', 'string', 'max:2048', new VideoEmbedUrl],
             'cover_image_url' => ['nullable', 'url:http,https', 'max:2048'],
             'post_as' => ['nullable', 'string', 'max:255'],
+            'category_ids' => ['nullable', 'array'],
+            'category_ids.*' => ['uuid', Rule::exists('content_post_categories', 'id')],
         ];
 
         if ($this->user()?->canManagePlatform()) {

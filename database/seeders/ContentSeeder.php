@@ -8,6 +8,7 @@ use App\Enums\ContentPublishScope;
 use App\Enums\ContentSeriesStatus;
 use App\Enums\PlatformRole;
 use App\Models\ContentPost;
+use App\Models\ContentPostCategory;
 use App\Models\ContentSeries;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -100,5 +101,34 @@ class ContentSeeder extends Seeder
                 'reading_time_minutes' => 1,
             ],
         );
+
+        $paydayIncome = ContentPostCategory::query()->where('slug', 'payday-income')->first();
+        $usingKinsenas = ContentPostCategory::query()->where('slug', 'using-kinsenas')->first();
+        $spendingBudget = ContentPostCategory::query()->where('slug', 'spending-budget')->first();
+        $familyFinances = ContentPostCategory::query()->where('slug', 'family-finances')->first();
+        $savingFunds = ContentPostCategory::query()->where('slug', 'saving-funds')->first();
+
+        if ($paydayIncome && $usingKinsenas) {
+            foreach (['why-lock-your-income', 'move-money-to-banks', 'review-fund-health'] as $slug) {
+                ContentPost::query()->where('slug', $slug)->first()?->categories()->sync([
+                    $paydayIncome->id,
+                    $usingKinsenas->id,
+                ]);
+            }
+        }
+
+        if ($spendingBudget && $usingKinsenas) {
+            ContentPost::query()->where('slug', 'payday-reminder-log-first-spend')->first()?->categories()->sync([
+                $spendingBudget->id,
+                $usingKinsenas->id,
+            ]);
+        }
+
+        if ($familyFinances && $savingFunds) {
+            ContentPost::query()->where('slug', 'payday-reminder-family-support')->first()?->categories()->sync([
+                $familyFinances->id,
+                $savingFunds->id,
+            ]);
+        }
     }
 }

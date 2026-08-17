@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import LearnEmptyState from '@/components/learn/learn-empty-state';
 import LearnMarketingShell from '@/components/learn/learn-marketing-shell';
 import { Button } from '@/components/ui/button';
 import type { PodcastEpisodeSummary, PodcastShowSummary } from '@/types/learn-library';
@@ -30,32 +31,36 @@ export default function LearnPodcastShow({
                     )}
                 </div>
 
-                <ul className="space-y-3">
-                    {episodes.map((episode) => (
-                        <li key={episode.id}>
-                            <Link
-                                href={`/learn/podcasts/${show.slug}/episodes/${episode.slug}`}
-                                className="block rounded-lg border p-4 transition hover:border-primary/40"
-                            >
-                                <p className="text-sm text-muted-foreground">
-                                    Episode {episode.episodeNumber}
-                                    {episode.durationMinutes
-                                        ? ` · ${episode.durationMinutes} min`
-                                        : ''}
-                                </p>
-                                <p className="mt-1 font-medium">{episode.title}</p>
-                                {episode.excerpt && (
-                                    <p className="mt-2 text-sm text-muted-foreground">
-                                        {episode.excerpt}
+                {episodes.length === 0 ? (
+                    <LearnEmptyState
+                        title="No episodes yet"
+                        description="New episodes will show up here when they are published."
+                        testId="learn-empty-podcast-episodes"
+                    />
+                ) : (
+                    <ul className="space-y-3">
+                        {episodes.map((episode) => (
+                            <li key={episode.id}>
+                                <Link
+                                    href={`/learn/podcasts/${show.slug}/episodes/${episode.slug}`}
+                                    className="block rounded-lg border p-4 transition hover:border-primary/40"
+                                >
+                                    <p className="text-sm text-muted-foreground">
+                                        Episode {episode.episodeNumber}
+                                        {episode.durationMinutes
+                                            ? ` · ${episode.durationMinutes} min`
+                                            : ''}
                                     </p>
-                                )}
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
-
-                {episodes.length === 0 && (
-                    <p className="text-sm text-muted-foreground">No episodes available yet.</p>
+                                    <p className="mt-1 font-medium">{episode.title}</p>
+                                    {episode.excerpt && (
+                                        <p className="mt-2 text-sm text-muted-foreground">
+                                            {episode.excerpt}
+                                        </p>
+                                    )}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
                 )}
             </div>
         </>

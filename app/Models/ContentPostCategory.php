@@ -3,16 +3,16 @@
 namespace App\Models;
 
 use App\Enums\ContentPostStatus;
-use Database\Factories\CommunityCategoryFactory;
+use Database\Factories\ContentPostCategoryFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class CommunityCategory extends Model
+class ContentPostCategory extends Model
 {
-    /** @use HasFactory<CommunityCategoryFactory> */
+    /** @use HasFactory<ContentPostCategoryFactory> */
     use HasFactory, HasUuids;
 
     protected $fillable = [
@@ -38,12 +38,12 @@ class CommunityCategory extends Model
 
     public function posts(): BelongsToMany
     {
-        return $this->belongsToMany(CommunityPost::class, 'community_post_category');
+        return $this->belongsToMany(ContentPost::class, 'content_post_category');
     }
 
     /**
-     * @param  Builder<CommunityCategory>  $query
-     * @return Builder<CommunityCategory>
+     * @param  Builder<ContentPostCategory>  $query
+     * @return Builder<ContentPostCategory>
      */
     public function scopePublished(Builder $query): Builder
     {

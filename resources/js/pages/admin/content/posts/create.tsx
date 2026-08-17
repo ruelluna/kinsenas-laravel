@@ -10,12 +10,14 @@ type AuthorOption = {
 
 type Props = {
     seriesOptions: Array<{ id: string; title: string }>;
+    categoryOptions: Array<{ id: string; name: string }>;
     authorOptions: AuthorOption[];
     canAssignAuthor: boolean;
 };
 
 export default function AdminContentPostsCreate({
     seriesOptions,
+    categoryOptions,
     authorOptions,
     canAssignAuthor,
 }: Props) {
@@ -26,6 +28,7 @@ export default function AdminContentPostsCreate({
             <Form action="/admin/content/posts" method="post" className="mt-6 max-w-3xl space-y-4">
                 <ContentPostFormFields
                     seriesOptions={seriesOptions}
+                    categoryOptions={categoryOptions}
                     authorOptions={authorOptions}
                     canAssignAuthor={canAssignAuthor}
                 />

@@ -18,7 +18,8 @@ class StoreCommunityPostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'community_category_id' => ['required', 'uuid', Rule::exists('community_categories', 'id')],
+            'category_ids' => ['required', 'array', 'min:1'],
+            'category_ids.*' => ['uuid', Rule::exists('community_categories', 'id')],
             'title' => ['required', 'string', 'max:255'],
             'excerpt' => ['nullable', 'string', 'max:5000'],
             'body' => ['required', 'string'],

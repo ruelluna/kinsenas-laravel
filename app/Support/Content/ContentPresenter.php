@@ -3,6 +3,7 @@
 namespace App\Support\Content;
 
 use App\Models\ContentPost;
+use App\Models\ContentPostCategory;
 use App\Models\ContentSeries;
 
 class ContentPresenter
@@ -31,6 +32,9 @@ class ContentPresenter
             'bylineName' => ContentByline::forPost($post->post_as, $post->author),
             'authorName' => ContentByline::forPost($post->post_as, $post->author),
             'bylineAvatarUrl' => ContentByline::authorAvatarUrl($post->author),
+            'categories' => $post->relationLoaded('categories')
+                ? $post->categories->map(fn (ContentPostCategory $category) => self::postCategorySummary($category))->values()->all()
+                : [],
         ];
 
         if ($includeBody) {
@@ -65,6 +69,32 @@ class ContentPresenter
             ...self::postSummary($post, includeBody: true),
             'contentSeriesId' => $post->content_series_id,
             'authorId' => $post->author_id,
+            'categoryIds' => $post->relationLoaded('categories')
+                ? $post->categories->pluck('id')->all()
+                : [],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function postCategorySummary(ContentPostCategory $category): array
+    {
+        return [
+            'id' => $category->id,
+            'name' => $category->name,
+            'slug' => $category->slug,
+            'description' => $category->description,
+            'status' => $category->status->value,
+            'sortOrder' => $category->sort_order,
+        ];
+    }
+
+    public static function postCategoryAdmin(ContentPostCategory $category): array
+    {
+        return [
+            ...self::postCategorySummary($category),
+            'postsCount' => $category->posts_count ?? $category->posts()->count(),
         ];
     }
 

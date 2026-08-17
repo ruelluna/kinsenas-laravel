@@ -1,10 +1,10 @@
 import { Form, Head, Link } from '@inertiajs/react';
+import CategoryCheckboxGroup from '@/components/admin/category-checkbox-group';
 import CoverImageField from '@/components/admin/cover-image-field';
 import TiptapEditor from '@/components/admin/tiptap-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { selectClassName } from '@/lib/form-field-classes';
 
 type Category = {
     id: string;
@@ -27,22 +27,7 @@ export default function LearnCommunityCreate({ categories }: Props) {
                     </p>
                 </div>
                 <Form action="/learn/community" method="post" className="space-y-4">
-                    <div className="grid gap-2">
-                        <Label htmlFor="community_category_id">Category</Label>
-                        <select
-                            id="community_category_id"
-                            name="community_category_id"
-                            className={selectClassName}
-                            required
-                        >
-                            <option value="">Select category</option>
-                            {categories.map((category) => (
-                                <option key={category.id} value={category.id}>
-                                    {category.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    <CategoryCheckboxGroup categories={categories} />
                     <div className="grid gap-2">
                         <Label htmlFor="title">Title</Label>
                         <Input id="title" name="title" required />

@@ -13,7 +13,7 @@ type Post = {
     rejectionReason: string | null;
     authorName: string;
     authorAvatarUrl: string | null;
-    category: { name: string } | null;
+    categories: Array<{ id: string; name: string }>;
     coverImageUrl: string | null;
 };
 
@@ -31,7 +31,13 @@ export default function LearnCommunityShow({ post, canReport }: Props) {
                 <Link href="/learn/community" className="text-sm text-muted-foreground hover:text-foreground">
                     ← Community
                 </Link>
-                {post.category && <Badge variant="secondary">{post.category.name}</Badge>}
+                <div className="flex flex-wrap gap-2">
+                    {post.categories.map((category) => (
+                        <Badge key={category.id} variant="secondary">
+                            {category.name}
+                        </Badge>
+                    ))}
+                </div>
                 <h1 className="text-3xl font-semibold tracking-tight">{post.title}</h1>
                 <ContentByline name={post.authorName} avatarUrl={post.authorAvatarUrl} />
                 {post.status !== 'published' && (

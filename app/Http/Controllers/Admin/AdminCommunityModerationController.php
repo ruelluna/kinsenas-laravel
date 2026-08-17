@@ -17,7 +17,7 @@ class AdminCommunityModerationController extends Controller
     public function index(): Response
     {
         $posts = CommunityPost::query()
-            ->with(['category', 'author'])
+            ->with(['categories', 'author'])
             ->pending()
             ->orderBy('created_at')
             ->paginate(20)
@@ -27,7 +27,7 @@ class AdminCommunityModerationController extends Controller
                 'slug' => $post->slug,
                 'excerpt' => $post->excerpt,
                 'authorName' => $post->author?->name,
-                'categoryName' => $post->category?->name,
+                'categoryNames' => $post->categories->pluck('name')->join(', '),
                 'createdAt' => $post->created_at?->toIso8601String(),
             ]);
 

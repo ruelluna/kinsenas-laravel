@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import LearnEmptyState from '@/components/learn/learn-empty-state';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { PaginatedLibrary } from '@/types/learn-library';
@@ -30,18 +31,33 @@ export default function LearnCommunityMine({ hasFullAccess, posts }: Props) {
                     )}
                 </div>
                 <div className="grid gap-4">
-                    {posts.data.map((post) => (
-                        <Link
-                            key={post.id}
-                            href={`/learn/community/${post.slug}`}
-                            className="block rounded-lg border p-4"
-                        >
-                            <div className="flex items-center gap-2">
-                                <span className="font-medium">{post.title}</span>
-                                <Badge variant="outline">{post.statusLabel}</Badge>
-                            </div>
-                        </Link>
-                    ))}
+                    {posts.data.length === 0 ? (
+                        <LearnEmptyState
+                            title="You have not shared a story yet"
+                            description="Submit a story for review — it will appear here while pending and after approval."
+                            action={
+                                hasFullAccess ? (
+                                    <Button asChild>
+                                        <Link href="/learn/community/create">Share your story</Link>
+                                    </Button>
+                                ) : undefined
+                            }
+                            testId="learn-empty-community-mine"
+                        />
+                    ) : (
+                        posts.data.map((post) => (
+                            <Link
+                                key={post.id}
+                                href={`/learn/community/${post.slug}`}
+                                className="block rounded-lg border p-4"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium">{post.title}</span>
+                                    <Badge variant="outline">{post.statusLabel}</Badge>
+                                </div>
+                            </Link>
+                        ))
+                    )}
                 </div>
             </div>
         </>

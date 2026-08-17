@@ -21,7 +21,7 @@ it('allows subscribed members to submit a community post for review', function (
 
     $this->actingAs($member)
         ->post(route('learn.community.store'), [
-            'community_category_id' => $category->id,
+            'category_ids' => [$category->id],
             'title' => 'My payday win',
             'excerpt' => 'How I saved my 13th month pay.',
             'body' => '<p>I split it across funds.</p>',
@@ -41,7 +41,7 @@ it('forbids unsubscribed members from submitting community posts', function () {
 
     $this->actingAs($member)
         ->post(route('learn.community.store'), [
-            'community_category_id' => $category->id,
+            'category_ids' => [$category->id],
             'title' => 'Blocked story',
             'body' => '<p>Nope</p>',
         ])

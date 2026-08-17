@@ -13,35 +13,56 @@ class CommunitySeeder extends Seeder
 {
     public function run(): void
     {
-        $paydayWins = CommunityCategory::query()->firstOrCreate(
-            ['slug' => 'payday-wins'],
+        $categories = [
             [
+                'slug' => 'payday-wins',
                 'name' => 'Payday wins',
                 'description' => 'Stories about saving, splitting, or stretching a paycheck.',
-                'status' => ContentPostStatus::Published,
                 'sort_order' => 1,
             ],
-        );
-
-        $sideHustleStories = CommunityCategory::query()->firstOrCreate(
-            ['slug' => 'side-hustle-stories'],
             [
+                'slug' => 'side-hustle-stories',
                 'name' => 'Side hustle stories',
                 'description' => 'How members started and grew extra income streams.',
-                'status' => ContentPostStatus::Published,
                 'sort_order' => 2,
             ],
-        );
-
-        CommunityCategory::query()->firstOrCreate(
-            ['slug' => 'tips'],
             [
-                'name' => 'Tips',
-                'description' => 'Quick tips and lessons learned from the community.',
-                'status' => ContentPostStatus::Published,
+                'slug' => 'saving-milestones',
+                'name' => 'Saving milestones',
+                'description' => 'First emergency fund, paid-off debt, and other money milestones.',
                 'sort_order' => 3,
             ],
-        );
+            [
+                'slug' => 'tips-lessons',
+                'name' => 'Tips & lessons',
+                'description' => 'Quick tips and lessons learned from real life.',
+                'sort_order' => 4,
+            ],
+            [
+                'slug' => 'family-household',
+                'name' => 'Family & household',
+                'description' => 'Padala, shared bills, and household money decisions.',
+                'sort_order' => 5,
+            ],
+            [
+                'slug' => 'questions-advice',
+                'name' => 'Questions & advice',
+                'description' => 'Ask the community or share what worked for you.',
+                'sort_order' => 6,
+            ],
+        ];
+
+        $seededCategories = [];
+
+        foreach ($categories as $category) {
+            $seededCategories[$category['slug']] = CommunityCategory::query()->firstOrCreate(
+                ['slug' => $category['slug']],
+                [
+                    ...$category,
+                    'status' => ContentPostStatus::Published,
+                ],
+            );
+        }
 
         $author = User::query()->firstOrCreate(
             ['email' => 'community-member@kinsenas.test'],
@@ -52,10 +73,9 @@ class CommunitySeeder extends Seeder
             ],
         );
 
-        CommunityPost::query()->updateOrCreate(
+        $savedBonus = CommunityPost::query()->updateOrCreate(
             ['slug' => 'saved-half-my-bonus'],
             [
-                'community_category_id' => $paydayWins->id,
                 'user_id' => $author->id,
                 'title' => 'Saved half my bonus',
                 'excerpt' => 'Split my 13th month pay across emergency and travel funds.',
@@ -64,11 +84,14 @@ class CommunitySeeder extends Seeder
                 'published_at' => now()->subDays(3),
             ],
         );
+        $savedBonus->categories()->sync([
+            $seededCategories['payday-wins']->id,
+            $seededCategories['saving-milestones']->id,
+        ]);
 
-        CommunityPost::query()->updateOrCreate(
+        $baking = CommunityPost::query()->updateOrCreate(
             ['slug' => 'weekend-baking-orders'],
             [
-                'community_category_id' => $sideHustleStories->id,
                 'user_id' => $author->id,
                 'title' => 'Weekend baking orders',
                 'excerpt' => 'Started with three neighbors and now take prepaid orders every Saturday.',
@@ -77,11 +100,14 @@ class CommunitySeeder extends Seeder
                 'published_at' => now()->subDay(),
             ],
         );
+        $baking->categories()->sync([
+            $seededCategories['side-hustle-stories']->id,
+            $seededCategories['tips-lessons']->id,
+        ]);
 
-        CommunityPost::query()->updateOrCreate(
+        $pending = CommunityPost::query()->updateOrCreate(
             ['slug' => 'pending-review-story'],
             [
-                'community_category_id' => $paydayWins->id,
                 'user_id' => $author->id,
                 'title' => 'Pending review story',
                 'excerpt' => 'Waiting for moderator approval.',
@@ -90,5 +116,6 @@ class CommunitySeeder extends Seeder
                 'published_at' => null,
             ],
         );
+        $pending->categories()->sync([$seededCategories['payday-wins']->id]);
     }
 }

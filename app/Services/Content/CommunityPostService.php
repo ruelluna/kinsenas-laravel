@@ -15,12 +15,19 @@ class CommunityPostService
      */
     public function create(User $author, array $data): CommunityPost
     {
-        return CommunityPost::query()->create([
+        $categoryIds = $data['category_ids'] ?? [];
+        unset($data['category_ids']);
+
+        $post = CommunityPost::query()->create([
             ...$data,
             'user_id' => $author->id,
             'slug' => $this->uniqueSlug($data['title']),
             'status' => CommunityPostStatus::Pending,
         ]);
+
+        $post->categories()->sync($categoryIds);
+
+        return $post->fresh(['categories', 'author']);
     }
 
     /**
@@ -38,7 +45,7 @@ class CommunityPostService
 
         $post->update($data);
 
-        return $post->fresh(['category', 'author']);
+        return $post->fresh(['categories', 'author']);
     }
 
     public function withdraw(CommunityPost $post, User $author): CommunityPost

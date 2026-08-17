@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { usePage } from '@inertiajs/react';
 import LearnMarketingShell from '@/components/learn/learn-marketing-shell';
+import LearnEmptyState from '@/components/learn/learn-empty-state';
 import LearnNavTabs, {
     type LearnFilter,
     pillActive,
@@ -115,25 +116,33 @@ export default function LearnIndex({
                     </div>
                 )}
 
-                {showSeries && series.length > 0 && (
+                {showSeries && (series.length > 0 || activeFilter === 'series') && (
                     <section className="space-y-3">
                         <h2 className="text-lg font-medium">Series</h2>
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            {series.map((item) => (
-                                <Link
-                                    key={item.id}
-                                    href={`/learn/series/${item.slug}`}
-                                    className="rounded-lg border p-4 transition hover:border-primary/40"
-                                >
-                                    <p className="font-medium">{item.title}</p>
-                                    {item.description && (
-                                        <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-                                            {item.description}
-                                        </p>
-                                    )}
-                                </Link>
-                            ))}
-                        </div>
+                        {series.length === 0 ? (
+                            <LearnEmptyState
+                                title="No series yet"
+                                description="Multi-part guides will appear here when published."
+                                testId="learn-empty-series"
+                            />
+                        ) : (
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                {series.map((item) => (
+                                    <Link
+                                        key={item.id}
+                                        href={`/learn/series/${item.slug}`}
+                                        className="rounded-lg border p-4 transition hover:border-primary/40"
+                                    >
+                                        <p className="font-medium">{item.title}</p>
+                                        {item.description && (
+                                            <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
+                                                {item.description}
+                                            </p>
+                                        )}
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
                     </section>
                 )}
 
@@ -142,33 +151,45 @@ export default function LearnIndex({
                         <h2 className="text-lg font-medium">
                             {hasFullAccess ? 'Latest' : 'Free previews'}
                         </h2>
-                        <div className="grid gap-4">
-                            {posts.data.map((post) => (
-                                <Link
-                                    key={post.id}
-                                    href={`/learn/posts/${post.slug}`}
-                                    className="block rounded-lg border p-4 transition hover:border-primary/40"
-                                >
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        <Badge variant="secondary">{post.contentTypeLabel}</Badge>
-                                        {post.series && (
-                                            <span className="text-xs text-muted-foreground">
-                                                {post.series.title}
-                                                {post.episodeNumber
-                                                    ? ` · Ep ${post.episodeNumber}`
-                                                    : ''}
-                                            </span>
+                        {posts.data.length === 0 ? (
+                            <LearnEmptyState
+                                title="No posts yet"
+                                description={
+                                    hasFullAccess
+                                        ? 'Articles and reminders will show up here as they are published.'
+                                        : 'Check back soon for free previews from Kinsenas.'
+                                }
+                                testId="learn-empty-posts"
+                            />
+                        ) : (
+                            <div className="grid gap-4">
+                                {posts.data.map((post) => (
+                                    <Link
+                                        key={post.id}
+                                        href={`/learn/posts/${post.slug}`}
+                                        className="block rounded-lg border p-4 transition hover:border-primary/40"
+                                    >
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <Badge variant="secondary">{post.contentTypeLabel}</Badge>
+                                            {post.series && (
+                                                <span className="text-xs text-muted-foreground">
+                                                    {post.series.title}
+                                                    {post.episodeNumber
+                                                        ? ` · Ep ${post.episodeNumber}`
+                                                        : ''}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="mt-2 font-medium">{post.title}</p>
+                                        {post.excerpt && (
+                                            <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
+                                                {post.excerpt}
+                                            </p>
                                         )}
-                                    </div>
-                                    <p className="mt-2 font-medium">{post.title}</p>
-                                    {post.excerpt && (
-                                        <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-                                            {post.excerpt}
-                                        </p>
-                                    )}
-                                </Link>
-                            ))}
-                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
                     </section>
                 )}
 
@@ -214,35 +235,47 @@ export default function LearnIndex({
                 {showHustleLibrary && hustles && (
                     <section className="space-y-3">
                         <h2 className="text-lg font-medium">Side hustle library</h2>
-                        <div className="grid gap-4 sm:grid-cols-2">
-                            {hustles.data.map((hustle) => (
-                                <Link
-                                    key={hustle.id}
-                                    href={`/learn/side-hustles/${hustle.slug}`}
-                                    className="rounded-lg border p-4 transition hover:border-primary/40"
-                                >
-                                    <div className="flex flex-wrap gap-2">
-                                        {hustle.category && (
-                                            <Badge variant="secondary">{hustle.category.name}</Badge>
+                        {hustles.data.length === 0 ? (
+                            <LearnEmptyState
+                                title="No side hustles yet"
+                                description={
+                                    activeCategory
+                                        ? 'Nothing in this category yet. Try another filter or check back later.'
+                                        : 'Income ideas and starter guides will appear here when published.'
+                                }
+                                testId="learn-empty-side-hustles"
+                            />
+                        ) : (
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                {hustles.data.map((hustle) => (
+                                    <Link
+                                        key={hustle.id}
+                                        href={`/learn/side-hustles/${hustle.slug}`}
+                                        className="rounded-lg border p-4 transition hover:border-primary/40"
+                                    >
+                                        <div className="flex flex-wrap gap-2">
+                                            {hustle.category && (
+                                                <Badge variant="secondary">{hustle.category.name}</Badge>
+                                            )}
+                                            <Badge variant="outline">{hustle.difficultyLabel}</Badge>
+                                            <Badge variant="outline">{hustle.capitalTierLabel}</Badge>
+                                        </div>
+                                        <h3 className="mt-3 text-lg font-medium">{hustle.title}</h3>
+                                        {hustle.excerpt && (
+                                            <p className="mt-2 text-sm text-muted-foreground">
+                                                {hustle.excerpt}
+                                            </p>
                                         )}
-                                        <Badge variant="outline">{hustle.difficultyLabel}</Badge>
-                                        <Badge variant="outline">{hustle.capitalTierLabel}</Badge>
-                                    </div>
-                                    <h3 className="mt-3 text-lg font-medium">{hustle.title}</h3>
-                                    {hustle.excerpt && (
-                                        <p className="mt-2 text-sm text-muted-foreground">
-                                            {hustle.excerpt}
-                                        </p>
-                                    )}
-                                    {(hustle.startupCapitalMin || hustle.startupCapitalMax) && (
-                                        <p className="mt-3 text-sm">
-                                            Startup: {formatMoney(hustle.startupCapitalMin)} –{' '}
-                                            {formatMoney(hustle.startupCapitalMax)}
-                                        </p>
-                                    )}
-                                </Link>
-                            ))}
-                        </div>
+                                        {(hustle.startupCapitalMin || hustle.startupCapitalMax) && (
+                                            <p className="mt-3 text-sm">
+                                                Startup: {formatMoney(hustle.startupCapitalMin)} –{' '}
+                                                {formatMoney(hustle.startupCapitalMax)}
+                                            </p>
+                                        )}
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
                         {!hasFullAccess && (
                             <p className="text-sm text-muted-foreground">
                                 {isAuthenticated
@@ -253,11 +286,12 @@ export default function LearnIndex({
                     </section>
                 )}
 
-                {(activeFilter === 'all' || showPodcastLibrary) && shows.length > 0 && (
+                {(activeFilter === 'all' || showPodcastLibrary) &&
+                    (shows.length > 0 || showPodcastLibrary) && (
                     <section className="space-y-3">
                         <div className="flex items-center justify-between gap-4">
                             <h2 className="text-lg font-medium">Podcasts</h2>
-                            {activeFilter === 'all' && (
+                            {activeFilter === 'all' && shows.length > 0 && (
                                 <button
                                     type="button"
                                     className="text-sm text-muted-foreground hover:text-foreground"
@@ -269,23 +303,31 @@ export default function LearnIndex({
                                 </button>
                             )}
                         </div>
-                        <div className="grid gap-4 sm:grid-cols-2">
-                            {shows.map((show) => (
-                                <Link
-                                    key={show.id}
-                                    href={`/learn/podcasts/${show.slug}`}
-                                    className="rounded-lg border p-4 transition hover:border-primary/40"
-                                >
-                                    <h3 className="text-lg font-medium">{show.title}</h3>
-                                    {show.description && (
-                                        <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-                                            {show.description}
-                                        </p>
-                                    )}
-                                </Link>
-                            ))}
-                        </div>
-                        {showPodcastLibrary && !hasFullAccess && (
+                        {shows.length === 0 ? (
+                            <LearnEmptyState
+                                title="No podcasts yet"
+                                description="Shows and episodes will appear here when published."
+                                testId="learn-empty-podcasts"
+                            />
+                        ) : (
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                {shows.map((show) => (
+                                    <Link
+                                        key={show.id}
+                                        href={`/learn/podcasts/${show.slug}`}
+                                        className="rounded-lg border p-4 transition hover:border-primary/40"
+                                    >
+                                        <h3 className="text-lg font-medium">{show.title}</h3>
+                                        {show.description && (
+                                            <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                                                {show.description}
+                                            </p>
+                                        )}
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                        {showPodcastLibrary && !hasFullAccess && shows.length > 0 && (
                             <p className="text-sm text-muted-foreground">
                                 Some episodes may require a subscription for full show notes.
                             </p>

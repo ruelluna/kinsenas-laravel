@@ -54,17 +54,14 @@ it('filters community feed by category slug', function () {
     $member = User::factory()->create();
     grantTeamSubscriptionAccess($member->currentTeam);
 
-    $food = CommunityCategory::factory()->create(['slug' => 'wins']);
+    $wins = CommunityCategory::factory()->create(['slug' => 'wins']);
     $tips = CommunityCategory::factory()->create(['slug' => 'tips']);
 
-    CommunityPost::factory()->published()->create([
-        'community_category_id' => $food->id,
-        'slug' => 'food-story',
-    ]);
-    CommunityPost::factory()->published()->create([
-        'community_category_id' => $tips->id,
-        'slug' => 'tip-story',
-    ]);
+    $foodStory = CommunityPost::factory()->published()->create(['slug' => 'food-story']);
+    $foodStory->categories()->attach($wins->id);
+
+    $tipStory = CommunityPost::factory()->published()->create(['slug' => 'tip-story']);
+    $tipStory->categories()->attach($tips->id);
 
     $this->actingAs($member)
         ->get(route('learn.community.index', ['category' => 'wins']))

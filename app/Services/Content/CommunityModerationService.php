@@ -21,7 +21,7 @@ class CommunityModerationService
             'rejection_reason' => null,
         ]);
 
-        return $post->fresh(['category', 'author']);
+        return $post->fresh(['categories', 'author']);
     }
 
     public function reject(CommunityPost $post, User $moderator, string $reason): CommunityPost
@@ -36,7 +36,7 @@ class CommunityModerationService
             'published_at' => null,
         ]);
 
-        return $post->fresh(['category', 'author']);
+        return $post->fresh(['categories', 'author']);
     }
 
     private function ensureCanModerate(CommunityPost $post, User $moderator): void

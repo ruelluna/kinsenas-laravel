@@ -51,7 +51,9 @@ class CommunityPresenter
             'createdAt' => $post->created_at?->toIso8601String(),
             'authorName' => $author?->name ?? 'Member',
             'authorAvatarUrl' => UserProfilePhoto::url($author),
-            'category' => $post->category ? self::categorySummary($post->category) : null,
+            'categories' => $post->relationLoaded('categories')
+                ? $post->categories->map(fn (CommunityCategory $category) => self::categorySummary($category))->values()->all()
+                : [],
             'isOwnPost' => false,
         ];
 

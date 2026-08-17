@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CommunityPost extends Model
@@ -17,7 +18,6 @@ class CommunityPost extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'community_category_id',
         'user_id',
         'title',
         'slug',
@@ -45,9 +45,9 @@ class CommunityPost extends Model
         return 'slug';
     }
 
-    public function category(): BelongsTo
+    public function categories(): BelongsToMany
     {
-        return $this->belongsTo(CommunityCategory::class, 'community_category_id');
+        return $this->belongsToMany(CommunityCategory::class, 'community_post_category');
     }
 
     public function author(): BelongsTo

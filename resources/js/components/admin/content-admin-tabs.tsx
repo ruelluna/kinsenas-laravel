@@ -4,6 +4,7 @@ import type { SharedData } from '@/types';
 
 type Tab =
     | 'posts'
+    | 'post-categories'
     | 'series'
     | 'side-hustles'
     | 'hustle-categories'
@@ -24,6 +25,13 @@ const tabs: Array<{ key: Tab; label: string; href: string; testId: string; platf
         label: 'Posts',
         href: '/admin/content/posts',
         testId: 'content-admin-tab-posts',
+    },
+    {
+        key: 'post-categories',
+        label: 'Post categories',
+        href: '/admin/content/post-categories',
+        testId: 'content-admin-tab-post-categories',
+        platformOnly: true,
     },
     {
         key: 'series',

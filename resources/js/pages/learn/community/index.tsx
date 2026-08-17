@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import LearnEmptyState from '@/components/learn/learn-empty-state';
 import LearnNavTabs from '@/components/learn/learn-nav-tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,7 @@ type Post = {
     statusLabel: string;
     authorName: string;
     authorAvatarUrl: string | null;
-    category: Category | null;
+    categories: Category[];
 };
 
 type Props = {
@@ -57,27 +58,48 @@ export default function LearnCommunityIndex({
                 <LearnNavTabs filter="community" hasFullAccess={hasFullAccess} />
 
                 <div className="grid gap-4">
-                    {posts.data.map((post) => (
-                        <Link
-                            key={post.id}
-                            href={`/learn/community/${post.slug}`}
-                            className="block rounded-lg border p-4 transition hover:border-primary/40"
-                        >
-                            <div className="flex flex-wrap gap-2">
-                                {post.category && (
-                                    <Badge variant="secondary">{post.category.name}</Badge>
+                    {posts.data.length === 0 ? (
+                        <LearnEmptyState
+                            title="No community stories yet"
+                            description={
+                                hasFullAccess
+                                    ? 'Be the first to share a payday win, side hustle story, or tip.'
+                                    : 'Subscribe to read and share stories from other members.'
+                            }
+                            action={
+                                hasFullAccess ? (
+                                    <Button asChild>
+                                        <Link href="/learn/community/create">Share your story</Link>
+                                    </Button>
+                                ) : undefined
+                            }
+                            testId="learn-empty-community"
+                        />
+                    ) : (
+                        posts.data.map((post) => (
+                            <Link
+                                key={post.id}
+                                href={`/learn/community/${post.slug}`}
+                                className="block rounded-lg border p-4 transition hover:border-primary/40"
+                            >
+                                <div className="flex flex-wrap gap-2">
+                                    {post.categories.map((category) => (
+                                        <Badge key={category.id} variant="secondary">
+                                            {category.name}
+                                        </Badge>
+                                    ))}
+                                </div>
+                                <h2 className="mt-2 font-medium">{post.title}</h2>
+                                {post.excerpt && (
+                                    <p className="mt-1 text-sm text-muted-foreground">{post.excerpt}</p>
                                 )}
-                            </div>
-                            <h2 className="mt-2 font-medium">{post.title}</h2>
-                            {post.excerpt && (
-                                <p className="mt-1 text-sm text-muted-foreground">{post.excerpt}</p>
-                            )}
-                            <p className="mt-2 text-xs text-muted-foreground">By {post.authorName}</p>
-                        </Link>
-                    ))}
+                                <p className="mt-2 text-xs text-muted-foreground">By {post.authorName}</p>
+                            </Link>
+                        ))
+                    )}
                 </div>
 
-                {!hasFullAccess && (
+                {!hasFullAccess && posts.data.length > 0 && (
                     <p className="text-sm text-muted-foreground">
                         Subscribe to read and share community stories.
                     </p>

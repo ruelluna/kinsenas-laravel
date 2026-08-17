@@ -10,7 +10,7 @@ type PendingPost = {
     title: string;
     slug: string;
     authorName: string | null;
-    categoryName: string | null;
+    categoryNames: string | null;
 };
 
 type Props = {
@@ -28,7 +28,7 @@ export default function AdminCommunityPostsPending({ posts }: Props) {
                     <div key={post.id} className="rounded-lg border p-4">
                         <p className="font-medium">{post.title}</p>
                         <p className="text-sm text-muted-foreground">
-                            {post.authorName} · {post.categoryName}
+                            {post.authorName} · {post.categoryNames}
                         </p>
                         <div className="mt-3 flex flex-wrap gap-2">
                             <Form

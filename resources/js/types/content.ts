@@ -28,11 +28,13 @@ export type ContentPostSummary = {
     postAs: string | null;
     bylineName: string;
     bylineAvatarUrl: string | null;
+    categories: Array<{ id: string; name: string; slug: string }>;
 };
 
 export type ContentPostAdmin = ContentPostSummary & {
     contentSeriesId: string | null;
     authorId: number | null;
+    categoryIds: string[];
 };
 
 export type ContentSeriesAdmin = ContentSeriesSummary & {

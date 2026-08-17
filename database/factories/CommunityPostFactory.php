@@ -21,7 +21,6 @@ class CommunityPostFactory extends Factory
         $title = fake()->sentence(4);
 
         return [
-            'community_category_id' => CommunityCategory::factory(),
             'user_id' => User::factory(),
             'title' => $title,
             'slug' => Str::slug($title).'-'.fake()->unique()->numerify('###'),
@@ -34,6 +33,15 @@ class CommunityPostFactory extends Factory
             'moderated_by' => null,
             'moderated_at' => null,
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (CommunityPost $post): void {
+            if ($post->categories()->count() === 0) {
+                $post->categories()->attach(CommunityCategory::factory()->create());
+            }
+        });
     }
 
     public function published(): static

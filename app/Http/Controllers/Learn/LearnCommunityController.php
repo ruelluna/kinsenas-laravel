@@ -42,12 +42,12 @@ class LearnCommunityController extends Controller
 
         $posts = $hasFullAccess
             ? CommunityPost::query()
-                ->with(['category', 'author'])
+                ->with(['categories', 'author'])
                 ->published()
                 ->when(
                     filled($categorySlug),
                     fn ($query) => $query->whereHas(
-                        'category',
+                        'categories',
                         fn ($categoryQuery) => $categoryQuery->where('slug', $categorySlug)->published(),
                     ),
                 )
@@ -73,7 +73,7 @@ class LearnCommunityController extends Controller
         abort_if($user === null, 403);
 
         $posts = CommunityPost::query()
-            ->with(['category', 'author'])
+            ->with(['categories', 'author'])
             ->where('user_id', $user->id)
             ->orderByDesc('created_at')
             ->paginate(12)
@@ -136,7 +136,7 @@ class LearnCommunityController extends Controller
             abort(404);
         }
 
-        $communityPost->load(['category', 'author']);
+        $communityPost->load(['categories', 'author']);
 
         $summary = CommunityPresenter::postSummary($communityPost, includeBody: true);
         $summary['isOwnPost'] = $isOwner;

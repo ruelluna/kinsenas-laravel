@@ -1,3 +1,4 @@
+import CategoryCheckboxGroup from '@/components/admin/category-checkbox-group';
 import TiptapEditor from '@/components/admin/tiptap-editor';
 import CoverImageField from '@/components/admin/cover-image-field';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,7 @@ type AuthorOption = {
 type Props = {
     post?: ContentPostAdmin;
     seriesOptions: Array<{ id: string; title: string }>;
+    categoryOptions?: Array<{ id: string; name: string }>;
     authorOptions?: AuthorOption[];
     canAssignAuthor?: boolean;
 };
@@ -20,6 +22,7 @@ type Props = {
 export default function ContentPostFormFields({
     post,
     seriesOptions,
+    categoryOptions = [],
     authorOptions = [],
     canAssignAuthor = false,
 }: Props) {
@@ -64,6 +67,12 @@ export default function ContentPostFormFields({
                 <Label htmlFor="slug">Slug</Label>
                 <Input id="slug" name="slug" defaultValue={post?.slug ?? ''} required />
             </div>
+            {categoryOptions.length > 0 && (
+                <CategoryCheckboxGroup
+                    categories={categoryOptions}
+                    selectedIds={post?.categoryIds ?? []}
+                />
+            )}
             <div className="grid gap-2">
                 <Label htmlFor="content_series_id">Series (optional)</Label>
                 <select

@@ -20,7 +20,6 @@ return new class extends Migration
 
         Schema::create('community_posts', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('community_category_id')->constrained('community_categories')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('title');
             $table->string('slug')->unique();
@@ -36,7 +35,6 @@ return new class extends Migration
 
             $table->index(['status', 'published_at']);
             $table->index(['user_id', 'status']);
-            $table->index('community_category_id');
         });
 
         Schema::create('community_post_reports', function (Blueprint $table) {

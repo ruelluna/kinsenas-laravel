@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreContentPostRequest;
 use App\Http\Requests\Admin\UpdateContentPostRequest;
 use App\Models\ContentPost;
+use App\Models\ContentPostCategory;
 use App\Models\ContentSeries;
 use App\Models\User;
 use App\Services\Content\ContentEngagementService;
@@ -28,7 +29,7 @@ class AdminContentPostController extends Controller
         $user = auth()->user();
 
         $posts = ContentPost::query()
-            ->with(['series', 'author'])
+            ->with(['series', 'author', 'categories'])
             ->when(
                 $user !== null && ! $user->canManagePlatform(),
                 fn ($query) => $query->where('author_id', $user->id),
@@ -53,6 +54,7 @@ class AdminContentPostController extends Controller
 
         return Inertia::render('admin/content/posts/create', [
             'seriesOptions' => $this->seriesOptions(),
+            'categoryOptions' => $this->categoryOptions(),
             'authorOptions' => $this->authorOptions(),
             'canAssignAuthor' => $user?->canManagePlatform() ?? false,
         ]);
@@ -74,8 +76,9 @@ class AdminContentPostController extends Controller
         $user = auth()->user();
 
         return Inertia::render('admin/content/posts/edit', [
-            'post' => ContentPresenter::postAdmin($post->load(['series', 'author'])),
+            'post' => ContentPresenter::postAdmin($post->load(['series', 'author', 'categories'])),
             'seriesOptions' => $this->seriesOptions(),
+            'categoryOptions' => $this->categoryOptions(),
             'authorOptions' => $this->authorOptions(),
             'canAssignAuthor' => $user?->canManagePlatform() ?? false,
         ]);
@@ -112,6 +115,23 @@ class AdminContentPostController extends Controller
             ->map(fn (ContentSeries $series) => [
                 'id' => $series->id,
                 'title' => $series->title,
+            ])
+            ->all();
+    }
+
+    /**
+     * @return list<array{id: string, name: string}>
+     */
+    private function categoryOptions(): array
+    {
+        return ContentPostCategory::query()
+            ->published()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (ContentPostCategory $category) => [
+                'id' => $category->id,
+                'name' => $category->name,
             ])
             ->all();
     }

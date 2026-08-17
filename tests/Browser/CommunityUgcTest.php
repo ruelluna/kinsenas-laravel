@@ -22,10 +22,10 @@ it('approves a pending community post from the admin queue', function () {
 
     $post = CommunityPost::factory()->pending()->create([
         'user_id' => $author->id,
-        'community_category_id' => $category->id,
         'title' => 'Browser moderation story',
         'slug' => 'browser-moderation-story',
     ]);
+    $post->categories()->sync([$category->id]);
 
     $page = visit('/login');
     browserLogin($page, $admin);

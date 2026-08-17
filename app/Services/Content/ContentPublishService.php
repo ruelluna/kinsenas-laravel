@@ -23,15 +23,19 @@ class ContentPublishService
      */
     public function createPost(array $attributes, User $author): ContentPost
     {
+        $categoryIds = $attributes['category_ids'] ?? [];
+        unset($attributes['category_ids']);
+
         $attributes = $this->preparePostAttributes($attributes, $author);
 
         $post = ContentPost::query()->create($attributes);
+        $post->categories()->sync($categoryIds);
 
         if ($post->status === ContentPostStatus::Published) {
             $this->logPostPublished($post, $author);
         }
 
-        return $post;
+        return $post->load('categories');
     }
 
     /**
@@ -40,10 +44,18 @@ class ContentPublishService
     public function updatePost(ContentPost $post, array $attributes, User $author): ContentPost
     {
         $wasPublished = $post->status === ContentPostStatus::Published;
+        $categoryIds = $attributes['category_ids'] ?? null;
+        unset($attributes['category_ids']);
+
         $attributes = $this->preparePostAttributes($attributes, $author, $post);
 
         $post->update($attributes);
-        $post->refresh();
+
+        if ($categoryIds !== null) {
+            $post->categories()->sync($categoryIds);
+        }
+
+        $post->refresh()->load('categories');
 
         if (! $wasPublished && $post->status === ContentPostStatus::Published) {
             $this->logPostPublished($post, $author);
