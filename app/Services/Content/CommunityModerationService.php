@@ -39,6 +39,26 @@ class CommunityModerationService
         return $post->fresh(['categories', 'author']);
     }
 
+    public function remove(CommunityPost $post, User $admin): CommunityPost
+    {
+        if (! $admin->canManagePlatform()) {
+            throw new InvalidArgumentException('Only platform admins can remove community posts.');
+        }
+
+        if (! in_array($post->status, [CommunityPostStatus::Pending, CommunityPostStatus::Published], true)) {
+            throw new InvalidArgumentException('This post cannot be removed.');
+        }
+
+        $post->update([
+            'status' => CommunityPostStatus::Withdrawn,
+            'published_at' => null,
+            'moderated_by' => $admin->id,
+            'moderated_at' => now(),
+        ]);
+
+        return $post->fresh(['categories', 'author']);
+    }
+
     private function ensureCanModerate(CommunityPost $post, User $moderator): void
     {
         if ($post->status !== CommunityPostStatus::Pending) {

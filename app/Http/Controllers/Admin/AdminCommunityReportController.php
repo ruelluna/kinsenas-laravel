@@ -7,34 +7,14 @@ use App\Models\CommunityPostReport;
 use App\Services\Content\CommunityReportService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class AdminCommunityReportController extends Controller
 {
     public function __construct(private CommunityReportService $reportService) {}
 
-    public function index(): Response
+    public function index(): RedirectResponse
     {
-        $reports = CommunityPostReport::query()
-            ->with(['post', 'reporter'])
-            ->where('status', 'open')
-            ->orderByDesc('created_at')
-            ->paginate(20)
-            ->through(fn (CommunityPostReport $report) => [
-                'id' => $report->id,
-                'reason' => $report->reason->value,
-                'reasonLabel' => $report->reason->label(),
-                'details' => $report->details,
-                'postTitle' => $report->post?->title,
-                'postSlug' => $report->post?->slug,
-                'reporterName' => $report->reporter?->name,
-                'createdAt' => $report->created_at?->toIso8601String(),
-            ]);
-
-        return Inertia::render('admin/content/community-reports/index', [
-            'reports' => $reports,
-        ]);
+        return redirect()->route('admin.content.community.settings');
     }
 
     public function dismiss(Request $request, CommunityPostReport $communityPostReport): RedirectResponse

@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import ContentAdminTabs from '@/components/admin/content-admin-tabs';
+import { AdminEditLink } from '@/components/admin/admin-list-actions';
+import ContentEntityTabs from '@/components/admin/content-entity-tabs';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import type { PaginatedLibrary, SideHustleAdmin } from '@/types/learn-library';
@@ -12,7 +13,7 @@ export default function AdminSideHustlesIndex({ hustles }: Props) {
     return (
         <>
             <Head title="Admin — Side hustles" />
-            <ContentAdminTabs active="side-hustles" />
+            <ContentEntityTabs entity="side-hustles" section="list" />
             <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
                 <Heading
                     variant="small"
@@ -36,11 +37,7 @@ export default function AdminSideHustlesIndex({ hustles }: Props) {
                                 {hustle.capitalTierLabel} · {hustle.status}
                             </p>
                         </div>
-                        <Button variant="outline" asChild>
-                            <Link href={`/admin/content/side-hustles/${hustle.slug}/edit`}>
-                                Edit
-                            </Link>
-                        </Button>
+                        <AdminEditLink href={`/admin/content/side-hustles/${hustle.slug}/edit`} />
                     </li>
                 ))}
             </ul>

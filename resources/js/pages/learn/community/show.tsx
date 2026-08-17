@@ -1,7 +1,13 @@
 import { Form, Head, Link } from '@inertiajs/react';
+import { useState } from 'react';
 import ContentBody from '@/components/content/content-body';
 import ContentByline from '@/components/content/content-byline';
 import { Badge } from '@/components/ui/badge';
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 
 type Post = {
     title: string;
@@ -24,6 +30,8 @@ type Props = {
 };
 
 export default function LearnCommunityShow({ post, canReport }: Props) {
+    const [reportOpen, setReportOpen] = useState(false);
+
     return (
         <>
             <Head title={post.title} />
@@ -55,37 +63,50 @@ export default function LearnCommunityShow({ post, canReport }: Props) {
                 )}
                 {post.body && <ContentBody content={post.body} />}
                 {canReport && (
-                    <Form
-                        action={`/learn/community/${post.slug}/report`}
-                        method="post"
-                        className="border-t pt-6 space-y-3"
-                    >
-                        <p className="text-sm font-medium">Report this post</p>
-                        <select
-                            name="reason"
-                            className="rounded-md border border-input px-3 py-2 text-sm"
-                            required
-                            data-test="community-report-reason"
+                    <Collapsible open={reportOpen} onOpenChange={setReportOpen}>
+                        <CollapsibleTrigger
+                            className="text-xs text-muted-foreground hover:text-foreground"
+                            data-test="community-report-toggle"
                         >
-                            <option value="">Select a reason</option>
-                            <option value="spam">Spam</option>
-                            <option value="harassment">Harassment or abuse</option>
-                            <option value="misinformation">Misinformation</option>
-                            <option value="other">Other</option>
-                        </select>
-                        <textarea
-                            name="details"
-                            placeholder="Optional details"
-                            className="min-h-20 w-full rounded-md border border-input px-3 py-2 text-sm"
-                        />
-                        <button
-                            type="submit"
-                            className="text-sm text-muted-foreground underline hover:text-foreground"
-                            data-test="community-report-button"
-                        >
-                            Submit report
-                        </button>
-                    </Form>
+                            Report this post
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-3 space-y-3 rounded-lg border border-dashed p-4">
+                            <p className="text-sm text-muted-foreground">
+                                Flag content that breaks community guidelines. Reports are reviewed by
+                                admins.
+                            </p>
+                            <Form
+                                action={`/learn/community/${post.slug}/report`}
+                                method="post"
+                                className="space-y-3"
+                            >
+                                <select
+                                    name="reason"
+                                    className="w-full rounded-md border border-input px-3 py-2 text-sm"
+                                    required
+                                    data-test="community-report-reason"
+                                >
+                                    <option value="">Select a reason</option>
+                                    <option value="spam">Spam</option>
+                                    <option value="harassment">Harassment or abuse</option>
+                                    <option value="misinformation">Misinformation</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <textarea
+                                    name="details"
+                                    placeholder="Optional details"
+                                    className="min-h-20 w-full rounded-md border border-input px-3 py-2 text-sm"
+                                />
+                                <button
+                                    type="submit"
+                                    className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
+                                    data-test="community-report-button"
+                                >
+                                    Submit report
+                                </button>
+                            </Form>
+                        </CollapsibleContent>
+                    </Collapsible>
                 )}
             </article>
         </>

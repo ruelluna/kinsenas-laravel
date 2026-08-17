@@ -83,6 +83,17 @@ class CommunityPost extends Model
         return $query->where('status', CommunityPostStatus::Pending);
     }
 
+    /**
+     * Posts visible on the admin community list (excludes withdrawn/removals).
+     *
+     * @param  Builder<CommunityPost>  $query
+     * @return Builder<CommunityPost>
+     */
+    public function scopeListedInAdmin(Builder $query): Builder
+    {
+        return $query->where('status', '!=', CommunityPostStatus::Withdrawn);
+    }
+
     public function isOwnedBy(User $user): bool
     {
         return $this->user_id === $user->id;

@@ -43,6 +43,6 @@ it('forbids author from managing podcast shows', function () {
     $author = User::factory()->author()->create();
 
     $this->actingAs($author)
-        ->get(route('admin.content.podcast-shows.index'))
+        ->get(route('admin.content.podcasts.index'))
         ->assertForbidden();
 });

@@ -11,6 +11,7 @@ type Tab =
     | 'podcasts'
     | 'podcast-episodes'
     | 'community-categories'
+    | 'community-posts'
     | 'community-moderation'
     | 'community-reports'
     | 'stats';
@@ -75,8 +76,15 @@ const tabs: Array<{ key: Tab; label: string; href: string; testId: string; platf
         platformOnly: true,
     },
     {
+        key: 'community-posts',
+        label: 'Community posts',
+        href: '/admin/content/community-posts',
+        testId: 'content-admin-tab-community-posts',
+        platformOnly: true,
+    },
+    {
         key: 'community-moderation',
-        label: 'Community',
+        label: 'Moderation queue',
         href: '/admin/content/community-posts/pending',
         testId: 'content-admin-tab-community-moderation',
         platformOnly: true,

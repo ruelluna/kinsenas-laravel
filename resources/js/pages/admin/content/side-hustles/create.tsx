@@ -1,5 +1,5 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import ContentAdminTabs from '@/components/admin/content-admin-tabs';
+import ContentEntityTabs from '@/components/admin/content-entity-tabs';
 import SideHustleFormFields from '@/components/admin/side-hustle-form-fields';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ export default function AdminSideHustleCreate({ categoryOptions }: Props) {
     return (
         <>
             <Head title="Admin — New side hustle" />
-            <ContentAdminTabs active="side-hustles" />
+            <ContentEntityTabs entity="side-hustles" section="list" />
             <Heading variant="small" title="New side hustle" />
             <Form
                 action="/admin/content/side-hustles"

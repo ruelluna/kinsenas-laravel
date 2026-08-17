@@ -1,5 +1,5 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import ContentAdminTabs from '@/components/admin/content-admin-tabs';
+import ContentEntityTabs from '@/components/admin/content-entity-tabs';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,7 @@ export default function AdminPodcastShowCreate() {
     return (
         <>
             <Head title="Admin — New podcast show" />
-            <ContentAdminTabs active="podcasts" />
+            <ContentEntityTabs entity="podcasts" section="list" />
             <Heading variant="small" title="New podcast show" />
             <Form action="/admin/content/podcast-shows" method="post" className="mt-6 max-w-2xl space-y-4">
                 <div className="grid gap-2">

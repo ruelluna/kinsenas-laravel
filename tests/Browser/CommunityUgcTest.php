@@ -30,7 +30,7 @@ it('approves a pending community post from the admin queue', function () {
     $page = visit('/login');
     browserLogin($page, $admin);
 
-    $page = visit('/admin/content/community-posts/pending');
+    $page = visit('/admin/content/community/settings#moderation');
 
     $page->assertSee('Browser moderation story')
         ->click('@community-approve-button')

@@ -104,6 +104,20 @@ class AdminContentPostController extends Controller
         return to_route('admin.content.posts.index');
     }
 
+    public function settings(): Response
+    {
+        $categories = ContentPostCategory::query()
+            ->withCount('posts')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get()
+            ->map(fn (ContentPostCategory $category) => ContentPresenter::postCategoryAdmin($category));
+
+        return Inertia::render('admin/content/posts/settings', [
+            'categories' => $categories,
+        ]);
+    }
+
     /**
      * @return list<array{id: string, title: string}>
      */

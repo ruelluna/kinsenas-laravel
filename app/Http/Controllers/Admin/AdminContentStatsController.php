@@ -28,7 +28,7 @@ class AdminContentStatsController extends Controller
             'reactions' => $row['reactions'],
         ]);
 
-        return Inertia::render('admin/content/stats/index', [
+        return Inertia::render('admin/content/posts/stats', [
             'window' => $request->string('window')->toString() ?: 'all',
             'summary' => $this->statsService->summary($days),
             'topPosts' => $topPosts,

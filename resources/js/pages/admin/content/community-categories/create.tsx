@@ -1,5 +1,5 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import ContentAdminTabs from '@/components/admin/content-admin-tabs';
+import ContentEntityTabs from '@/components/admin/content-entity-tabs';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,7 @@ export default function AdminCommunityCategoryCreate() {
     return (
         <>
             <Head title="Admin — New community category" />
-            <ContentAdminTabs active="community-categories" />
+            <ContentEntityTabs entity="community" section="settings" />
             <Heading variant="small" title="New community category" />
             <Form
                 action="/admin/content/community-categories"
@@ -43,7 +43,7 @@ export default function AdminCommunityCategoryCreate() {
                 <div className="flex gap-2">
                     <Button type="submit">Create category</Button>
                     <Button variant="outline" asChild>
-                        <Link href="/admin/content/community-categories">Cancel</Link>
+                        <Link href="/admin/content/community/settings">Cancel</Link>
                     </Button>
                 </div>
             </Form>

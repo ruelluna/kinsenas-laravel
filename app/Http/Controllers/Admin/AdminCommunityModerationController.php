@@ -7,33 +7,14 @@ use App\Models\CommunityPost;
 use App\Services\Content\CommunityModerationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class AdminCommunityModerationController extends Controller
 {
     public function __construct(private CommunityModerationService $moderationService) {}
 
-    public function index(): Response
+    public function index(): RedirectResponse
     {
-        $posts = CommunityPost::query()
-            ->with(['categories', 'author'])
-            ->pending()
-            ->orderBy('created_at')
-            ->paginate(20)
-            ->through(fn (CommunityPost $post) => [
-                'id' => $post->id,
-                'title' => $post->title,
-                'slug' => $post->slug,
-                'excerpt' => $post->excerpt,
-                'authorName' => $post->author?->name,
-                'categoryNames' => $post->categories->pluck('name')->join(', '),
-                'createdAt' => $post->created_at?->toIso8601String(),
-            ]);
-
-        return Inertia::render('admin/content/community-posts/pending', [
-            'posts' => $posts,
-        ]);
+        return redirect()->route('admin.content.community.settings');
     }
 
     public function approve(Request $request, CommunityPost $communityPost): RedirectResponse

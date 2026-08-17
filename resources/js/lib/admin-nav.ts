@@ -1,15 +1,12 @@
 import {
-    BarChart2,
     Briefcase,
     CreditCard,
     FileText,
-    FolderTree,
     History,
     Layers,
     MessageSquare,
     Mic,
     QrCode,
-    Radio,
     Shield,
     UserCog,
     Users,
@@ -48,15 +45,9 @@ export const adminOpsNavItems: NavItem[] = [
 export const contentNavItems: NavItem[] = [
     { title: 'Posts', href: '/admin/content/posts', icon: FileText },
     { title: 'Series', href: '/admin/content/series', icon: Layers },
+    { title: 'Podcasts', href: '/admin/content/podcasts', icon: Mic },
     { title: 'Side hustles', href: '/admin/content/side-hustles', icon: Briefcase },
-    {
-        title: 'Hustle categories',
-        href: '/admin/content/side-hustle-categories',
-        icon: FolderTree,
-    },
-    { title: 'Podcasts', href: '/admin/content/podcast-shows', icon: Mic },
-    { title: 'Podcast episodes', href: '/admin/content/podcast-episodes', icon: Radio },
-    { title: 'Stats', href: '/admin/content/stats', icon: BarChart2 },
+    { title: 'Community', href: '/admin/content/community', icon: MessageSquare },
 ];
 
 export const adminNavGroups: NavGroup[] = [

@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\UpdateSideHustleRequest;
 use App\Models\SideHustle;
 use App\Models\SideHustleCategory;
 use App\Services\Content\LearnLibraryPublishService;
+use App\Services\Content\SideHustleStatsService;
 use App\Support\Content\LearnLibraryPresenter;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -71,6 +72,30 @@ class AdminSideHustleController extends Controller
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Side hustle deleted.')]);
 
         return to_route('admin.content.side-hustles.index');
+    }
+
+    public function settings(): Response
+    {
+        $categories = SideHustleCategory::query()
+            ->withCount('sideHustles')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get()
+            ->map(fn (SideHustleCategory $category) => LearnLibraryPresenter::categoryAdmin($category));
+
+        return Inertia::render('admin/content/side-hustles/settings', [
+            'categories' => $categories,
+        ]);
+    }
+
+    public function stats(): Response
+    {
+        $statsService = app(SideHustleStatsService::class);
+
+        return Inertia::render('admin/content/side-hustles/stats', [
+            'summary' => $statsService->summary(),
+            'byCategory' => $statsService->byCategory(),
+        ]);
     }
 
     /**

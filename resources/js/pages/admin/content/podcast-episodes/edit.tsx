@@ -1,5 +1,5 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import ContentAdminTabs from '@/components/admin/content-admin-tabs';
+import ContentEntityTabs from '@/components/admin/content-entity-tabs';
 import TiptapEditor from '@/components/admin/tiptap-editor';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ export default function AdminPodcastEpisodeEdit({ episode, showOptions }: Props)
     return (
         <>
             <Head title={`Admin — ${episode.title}`} />
-            <ContentAdminTabs active="podcast-episodes" />
+            <ContentEntityTabs entity="podcasts" section="list" />
             <Heading variant="small" title={episode.title} />
             <Form
                 action={`/admin/content/podcast-episodes/${episode.slug}`}
@@ -127,7 +127,15 @@ export default function AdminPodcastEpisodeEdit({ episode, showOptions }: Props)
                 <div className="flex gap-2">
                     <Button type="submit">Save episode</Button>
                     <Button variant="outline" asChild>
-                        <Link href="/admin/content/podcast-episodes">Back</Link>
+                        <Link
+                            href={
+                                episode.show
+                                    ? `/admin/content/podcast-shows/${episode.show.slug}/edit`
+                                    : '/admin/content/podcasts'
+                            }
+                        >
+                            Back
+                        </Link>
                     </Button>
                 </div>
             </Form>

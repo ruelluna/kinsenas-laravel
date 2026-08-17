@@ -1,21 +1,23 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import ContentAdminTabs from '@/components/admin/content-admin-tabs';
+import { AdminEditLink } from '@/components/admin/admin-list-actions';
+import ContentEntityTabs from '@/components/admin/content-entity-tabs';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { selectClassName, textareaClassName } from '@/lib/form-field-classes';
-import type { PodcastShowAdmin } from '@/types/learn-library';
+import type { PodcastEpisodeAdmin, PodcastShowAdmin } from '@/types/learn-library';
 
 type Props = {
     show: PodcastShowAdmin;
+    episodes: PodcastEpisodeAdmin[];
 };
 
-export default function AdminPodcastShowEdit({ show }: Props) {
+export default function AdminPodcastShowEdit({ show, episodes }: Props) {
     return (
         <>
             <Head title={`Admin — ${show.title}`} />
-            <ContentAdminTabs active="podcasts" />
+            <ContentEntityTabs entity="podcasts" section="list" />
             <Heading variant="small" title={show.title} />
             <Form
                 action={`/admin/content/podcast-shows/${show.slug}`}
@@ -63,10 +65,44 @@ export default function AdminPodcastShowEdit({ show }: Props) {
                 <div className="flex gap-2">
                     <Button type="submit">Save show</Button>
                     <Button variant="outline" asChild>
-                        <Link href="/admin/content/podcast-shows">Back</Link>
+                        <Link href="/admin/content/podcasts">Back</Link>
                     </Button>
                 </div>
             </Form>
+
+            <section className="mt-10 max-w-2xl">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                    <h2 className="text-lg font-medium">Episodes</h2>
+                    <Button asChild size="sm">
+                        <Link href={`/admin/content/podcasts/${show.slug}/episodes/create`}>
+                            Add episode
+                        </Link>
+                    </Button>
+                </div>
+                <ul className="mt-4 space-y-3">
+                    {episodes.length === 0 && (
+                        <li className="text-sm text-muted-foreground">No episodes yet.</li>
+                    )}
+                    {episodes.map((episode) => (
+                        <li
+                            key={episode.id}
+                            className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4"
+                        >
+                            <div>
+                                <p className="font-medium">
+                                    #{episode.episodeNumber} · {episode.title}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    {episode.slug} · {episode.status}
+                                </p>
+                            </div>
+                            <AdminEditLink
+                                href={`/admin/content/podcast-episodes/${episode.slug}/edit`}
+                            />
+                        </li>
+                    ))}
+                </ul>
+            </section>
         </>
     );
 }

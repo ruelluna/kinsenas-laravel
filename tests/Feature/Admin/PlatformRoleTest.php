@@ -61,7 +61,7 @@ it('forbids author from accessing content stats', function () {
     $author = User::factory()->author()->create();
 
     $this->actingAs($author)
-        ->get(route('admin.content.stats'))
+        ->get(route('admin.content.posts.stats'))
         ->assertForbidden();
 });
 

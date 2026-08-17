@@ -1,5 +1,5 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import ContentAdminTabs from '@/components/admin/content-admin-tabs';
+import ContentEntityTabs from '@/components/admin/content-entity-tabs';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,7 @@ export default function AdminSideHustleCategoryCreate() {
     return (
         <>
             <Head title="Admin — New hustle category" />
-            <ContentAdminTabs active="hustle-categories" />
+            <ContentEntityTabs entity="side-hustles" section="settings" />
             <Heading variant="small" title="New hustle category" />
             <Form
                 action="/admin/content/side-hustle-categories"
@@ -44,7 +44,7 @@ export default function AdminSideHustleCategoryCreate() {
                 <div className="flex gap-2">
                     <Button type="submit">Create category</Button>
                     <Button variant="outline" asChild>
-                        <Link href="/admin/content/side-hustle-categories">Cancel</Link>
+                        <Link href="/admin/content/side-hustles/settings">Cancel</Link>
                     </Button>
                 </div>
             </Form>

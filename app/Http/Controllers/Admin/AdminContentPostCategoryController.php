@@ -16,18 +16,9 @@ class AdminContentPostCategoryController extends Controller
 {
     public function __construct(private ContentPostCategoryPublishService $publishService) {}
 
-    public function index(): Response
+    public function index(): RedirectResponse
     {
-        $categories = ContentPostCategory::query()
-            ->withCount('posts')
-            ->orderBy('sort_order')
-            ->orderBy('name')
-            ->get()
-            ->map(fn (ContentPostCategory $category) => ContentPresenter::postCategoryAdmin($category));
-
-        return Inertia::render('admin/content/post-categories/index', [
-            'categories' => $categories,
-        ]);
+        return redirect()->route('admin.content.posts.settings');
     }
 
     public function create(): Response
@@ -66,6 +57,6 @@ class AdminContentPostCategoryController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Category deleted.')]);
 
-        return to_route('admin.content.post-categories.index');
+        return to_route('admin.content.posts.settings');
     }
 }

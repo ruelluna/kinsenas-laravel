@@ -42,16 +42,16 @@ it('allows platform admin to reject a pending community post', function () {
         ->and($post->fresh()->rejection_reason)->toBe('Does not meet guidelines');
 });
 
-it('lists pending posts in the moderation queue', function () {
+it('lists pending posts in the community settings moderation section', function () {
     $admin = User::factory()->platformAdmin()->create();
     CommunityPost::factory()->pending()->create(['title' => 'Awaiting review']);
     CommunityPost::factory()->published()->create();
 
     $this->actingAs($admin)
-        ->get(route('admin.content.community-posts.pending'))
+        ->get(route('admin.content.community.settings'))
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
-            ->component('admin/content/community-posts/pending')
-            ->has('posts.data', 1)
-            ->where('posts.data.0.title', 'Awaiting review'));
+            ->component('admin/content/community/settings')
+            ->has('pendingPosts', 1)
+            ->where('pendingPosts.0.title', 'Awaiting review'));
 });

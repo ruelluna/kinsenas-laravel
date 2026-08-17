@@ -47,14 +47,14 @@ it('forbids author from managing side hustle categories', function () {
         ->assertForbidden();
 });
 
-it('lists categories for platform admin', function () {
+it('lists categories for platform admin in side hustles settings', function () {
     $admin = User::factory()->platformAdmin()->create();
     SideHustleCategory::factory()->create(['name' => 'Online work']);
 
     $this->actingAs($admin)
-        ->get(route('admin.content.side-hustle-categories.index'))
+        ->get(route('admin.content.side-hustles.settings'))
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
-            ->component('admin/content/side-hustle-categories/index')
+            ->component('admin/content/side-hustles/settings')
             ->has('categories', 1));
 });

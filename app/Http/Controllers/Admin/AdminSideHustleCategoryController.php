@@ -16,18 +16,9 @@ class AdminSideHustleCategoryController extends Controller
 {
     public function __construct(private LearnLibraryPublishService $publishService) {}
 
-    public function index(): Response
+    public function index(): RedirectResponse
     {
-        $categories = SideHustleCategory::query()
-            ->withCount('sideHustles')
-            ->orderBy('sort_order')
-            ->orderBy('name')
-            ->get()
-            ->map(fn (SideHustleCategory $category) => LearnLibraryPresenter::categoryAdmin($category));
-
-        return Inertia::render('admin/content/side-hustle-categories/index', [
-            'categories' => $categories,
-        ]);
+        return redirect()->route('admin.content.side-hustles.settings');
     }
 
     public function create(): Response
@@ -66,6 +57,6 @@ class AdminSideHustleCategoryController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Category deleted.')]);
 
-        return to_route('admin.content.side-hustle-categories.index');
+        return to_route('admin.content.side-hustles.settings');
     }
 }

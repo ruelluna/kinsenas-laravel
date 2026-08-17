@@ -17,27 +17,32 @@ class AdminPodcastEpisodeController extends Controller
 {
     public function __construct(private LearnLibraryPublishService $publishService) {}
 
-    public function index(): Response
+    public function index(): RedirectResponse
     {
-        $episodes = PodcastEpisode::query()
-            ->with('show')
-            ->orderByDesc('published_at')
-            ->paginate(25)
-            ->through(fn (PodcastEpisode $episode) => LearnLibraryPresenter::podcastEpisodeAdmin($episode));
-
-        return Inertia::render('admin/content/podcast-episodes/index', [
-            'episodes' => $episodes,
-        ]);
+        return redirect()->route('admin.content.podcasts.index');
     }
 
-    public function create(): Response
+    public function create(): Response|RedirectResponse
+    {
+        return redirect()->route('admin.content.podcasts.index');
+    }
+
+    public function createForShow(PodcastShow $podcastShow): Response
     {
         return Inertia::render('admin/content/podcast-episodes/create', [
             'showOptions' => $this->showOptions(),
+            'selectedShowId' => $podcastShow->id,
+            'parentShow' => LearnLibraryPresenter::podcastShowAdmin($podcastShow),
+            'storeUrl' => route('admin.content.podcasts.episodes.store', $podcastShow),
         ]);
     }
 
     public function store(StorePodcastEpisodeRequest $request): RedirectResponse
+    {
+        return redirect()->route('admin.content.podcasts.index');
+    }
+
+    public function storeForShow(StorePodcastEpisodeRequest $request, PodcastShow $podcastShow): RedirectResponse
     {
         $episode = $this->publishService->createPodcastEpisode($request->validated());
 
@@ -69,7 +74,7 @@ class AdminPodcastEpisodeController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Podcast episode deleted.')]);
 
-        return to_route('admin.content.podcast-episodes.index');
+        return to_route('admin.content.podcast-shows.edit', $podcastEpisode->load('show')->show);
     }
 
     /**

@@ -1,5 +1,5 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import ContentAdminTabs from '@/components/admin/content-admin-tabs';
+import ContentEntityTabs from '@/components/admin/content-entity-tabs';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,7 @@ export default function AdminPostCategoryCreate() {
     return (
         <>
             <Head title="Admin — New post category" />
-            <ContentAdminTabs active="post-categories" />
+            <ContentEntityTabs entity="posts" section="settings" />
             <Heading variant="small" title="New post category" />
             <Form
                 action="/admin/content/post-categories"
@@ -43,7 +43,7 @@ export default function AdminPostCategoryCreate() {
                 <div className="flex gap-2">
                     <Button type="submit">Create category</Button>
                     <Button variant="outline" asChild>
-                        <Link href="/admin/content/post-categories">Cancel</Link>
+                        <Link href="/admin/content/posts/settings">Cancel</Link>
                     </Button>
                 </div>
             </Form>

@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import ContentAdminTabs from '@/components/admin/content-admin-tabs';
+import { AdminEditLink } from '@/components/admin/admin-list-actions';
+import ContentEntityTabs from '@/components/admin/content-entity-tabs';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import type { PodcastShowAdmin } from '@/types/learn-library';
@@ -11,13 +12,13 @@ type Props = {
 export default function AdminPodcastShowsIndex({ shows }: Props) {
     return (
         <>
-            <Head title="Admin — Podcast shows" />
-            <ContentAdminTabs active="podcasts" />
+            <Head title="Admin — Podcasts" />
+            <ContentEntityTabs entity="podcasts" section="list" />
             <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
                 <Heading
                     variant="small"
-                    title="Podcast shows"
-                    description="Manage podcast feeds separately from Learn posts."
+                    title="Podcasts"
+                    description="Manage podcast shows and their episodes."
                 />
                 <Button asChild>
                     <Link href="/admin/content/podcast-shows/create">New show</Link>
@@ -35,9 +36,7 @@ export default function AdminPodcastShowsIndex({ shows }: Props) {
                                 {show.slug} · {show.episodesCount} episodes · {show.status}
                             </p>
                         </div>
-                        <Button variant="outline" asChild>
-                            <Link href={`/admin/content/podcast-shows/${show.slug}/edit`}>Edit</Link>
-                        </Button>
+                        <AdminEditLink href={`/admin/content/podcast-shows/${show.slug}/edit`} />
                     </li>
                 ))}
             </ul>

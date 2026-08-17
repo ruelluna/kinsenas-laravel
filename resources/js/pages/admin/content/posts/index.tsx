@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import ContentAdminTabs from '@/components/admin/content-admin-tabs';
+import { AdminRowActions } from '@/components/admin/admin-list-actions';
+import ContentEntityTabs from '@/components/admin/content-entity-tabs';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import type { ContentPostAdmin, PaginatedPosts } from '@/types/content';
@@ -14,7 +15,7 @@ export default function AdminContentPostsIndex({ posts }: Props) {
     return (
         <>
             <Head title="Admin — Content posts" />
-            <ContentAdminTabs active="posts" />
+            <ContentEntityTabs entity="posts" section="list" />
             <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
                 <Heading
                     variant="small"
@@ -38,14 +39,12 @@ export default function AdminContentPostsIndex({ posts }: Props) {
                                 {post.status} · {post.authorName} · {post.helpfulCount} helpful
                             </p>
                         </div>
-                        <div className="flex gap-2">
-                            <Button variant="outline" asChild>
-                                <Link href={`/admin/content/posts/${post.slug}/preview`}>Preview</Link>
-                            </Button>
-                            <Button variant="outline" asChild>
-                                <Link href={`/admin/content/posts/${post.slug}/edit`}>Edit</Link>
-                            </Button>
-                        </div>
+                        <AdminRowActions
+                            previewHref={`/admin/content/posts/${post.slug}/preview`}
+                            editHref={`/admin/content/posts/${post.slug}/edit`}
+                            deleteAction={`/admin/content/posts/${post.slug}`}
+                            deleteTestId="content-post-delete-button"
+                        />
                     </li>
                 ))}
             </ul>

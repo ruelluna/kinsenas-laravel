@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StorePodcastShowRequest;
 use App\Http\Requests\Admin\UpdatePodcastShowRequest;
+use App\Models\PodcastEpisode;
 use App\Models\PodcastShow;
 use App\Services\Content\LearnLibraryPublishService;
+use App\Services\Content\PodcastStatsService;
 use App\Support\Content\LearnLibraryPresenter;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -46,8 +48,14 @@ class AdminPodcastShowController extends Controller
 
     public function edit(PodcastShow $podcastShow): Response
     {
+        $episodes = $podcastShow->episodes()
+            ->orderBy('episode_number')
+            ->get()
+            ->map(fn (PodcastEpisode $episode) => LearnLibraryPresenter::podcastEpisodeAdmin($episode));
+
         return Inertia::render('admin/content/podcast-shows/edit', [
             'show' => LearnLibraryPresenter::podcastShowAdmin($podcastShow->loadCount('episodes')),
+            'episodes' => $episodes,
         ]);
     }
 
@@ -66,6 +74,20 @@ class AdminPodcastShowController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Podcast show deleted.')]);
 
-        return to_route('admin.content.podcast-shows.index');
+        return to_route('admin.content.podcasts.index');
+    }
+
+    public function settings(): Response
+    {
+        return Inertia::render('admin/content/podcasts/settings');
+    }
+
+    public function stats(): Response
+    {
+        $statsService = app(PodcastStatsService::class);
+
+        return Inertia::render('admin/content/podcasts/stats', [
+            'summary' => $statsService->summary(),
+        ]);
     }
 }

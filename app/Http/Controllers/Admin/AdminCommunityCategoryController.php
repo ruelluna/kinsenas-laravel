@@ -16,18 +16,9 @@ class AdminCommunityCategoryController extends Controller
 {
     public function __construct(private CommunityPublishService $publishService) {}
 
-    public function index(): Response
+    public function index(): RedirectResponse
     {
-        $categories = CommunityCategory::query()
-            ->withCount('posts')
-            ->orderBy('sort_order')
-            ->orderBy('name')
-            ->get()
-            ->map(fn (CommunityCategory $category) => CommunityPresenter::categoryAdmin($category));
-
-        return Inertia::render('admin/content/community-categories/index', [
-            'categories' => $categories,
-        ]);
+        return redirect()->route('admin.content.community.settings');
     }
 
     public function create(): Response
@@ -66,6 +57,6 @@ class AdminCommunityCategoryController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Category deleted.')]);
 
-        return to_route('admin.content.community-categories.index');
+        return to_route('admin.content.community.settings');
     }
 }

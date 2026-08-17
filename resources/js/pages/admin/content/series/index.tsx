@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import ContentAdminTabs from '@/components/admin/content-admin-tabs';
+import { AdminEditLink } from '@/components/admin/admin-list-actions';
+import ContentEntityTabs from '@/components/admin/content-entity-tabs';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import type { ContentSeriesAdmin } from '@/types/content';
@@ -12,7 +13,7 @@ export default function AdminContentSeriesIndex({ series }: Props) {
     return (
         <>
             <Head title="Admin — Content series" />
-            <ContentAdminTabs active="series" />
+            <ContentEntityTabs entity="series" section="list" />
             <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
                 <Heading
                     variant="small"
@@ -35,9 +36,7 @@ export default function AdminContentSeriesIndex({ series }: Props) {
                                 {item.slug} · {item.postsCount} posts · {item.status}
                             </p>
                         </div>
-                        <Button variant="outline" asChild>
-                            <Link href={`/admin/content/series/${item.slug}/edit`}>Edit</Link>
-                        </Button>
+                        <AdminEditLink href={`/admin/content/series/${item.slug}/edit`} />
                     </li>
                 ))}
             </ul>

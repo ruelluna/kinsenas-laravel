@@ -14,6 +14,17 @@ class StorePodcastEpisodeRequest extends FormRequest
         return $this->user()?->canManagePlatform() ?? false;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $show = $this->route('podcastShow');
+
+        if ($show !== null) {
+            $this->merge([
+                'podcast_show_id' => $show->id,
+            ]);
+        }
+    }
+
     /**
      * @return array<string, mixed>
      */

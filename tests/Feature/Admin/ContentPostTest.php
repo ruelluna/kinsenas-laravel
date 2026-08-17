@@ -214,3 +214,35 @@ it('accepts html body when creating and updating posts', function () {
 
     expect($post->fresh()->body)->toBe($updatedBody);
 });
+
+it('allows platform admin to delete a content post', function () {
+    $admin = User::factory()->platformAdmin()->create();
+    $post = ContentPost::factory()->create(['slug' => 'delete-me']);
+
+    $this->actingAs($admin)
+        ->delete(route('admin.content.posts.destroy', $post))
+        ->assertRedirect(route('admin.content.posts.index'));
+
+    expect(ContentPost::query()->where('slug', 'delete-me')->exists())->toBeFalse();
+});
+
+it('allows author to delete their own post', function () {
+    $author = User::factory()->author()->create();
+    $post = ContentPost::factory()->create(['author_id' => $author->id, 'slug' => 'author-delete']);
+
+    $this->actingAs($author)
+        ->delete(route('admin.content.posts.destroy', $post))
+        ->assertRedirect(route('admin.content.posts.index'));
+
+    expect(ContentPost::query()->where('slug', 'author-delete')->exists())->toBeFalse();
+});
+
+it('forbids author from deleting another authors post', function () {
+    $author = User::factory()->author()->create();
+    $otherAuthor = User::factory()->author()->create(['email' => 'other-author@example.com']);
+    $post = ContentPost::factory()->create(['author_id' => $otherAuthor->id]);
+
+    $this->actingAs($author)
+        ->delete(route('admin.content.posts.destroy', $post))
+        ->assertForbidden();
+});

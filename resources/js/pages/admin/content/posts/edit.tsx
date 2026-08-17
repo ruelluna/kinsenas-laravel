@@ -1,4 +1,5 @@
 import { Form, Head, Link } from '@inertiajs/react';
+import { AdminInfoLink } from '@/components/admin/admin-list-actions';
 import ContentPostFormFields from '@/components/admin/content-post-form-fields';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
@@ -46,9 +47,7 @@ export default function AdminContentPostsEdit({
                 />
                 <div className="flex gap-2">
                     <Button type="submit">Save post</Button>
-                    <Button variant="outline" asChild>
-                        <Link href={`/admin/content/posts/${post.slug}/preview`}>Preview</Link>
-                    </Button>
+                    <AdminInfoLink href={`/admin/content/posts/${post.slug}/preview`} size="default" />
                     <Button variant="outline" asChild>
                         <Link href="/admin/content/posts">Back</Link>
                     </Button>

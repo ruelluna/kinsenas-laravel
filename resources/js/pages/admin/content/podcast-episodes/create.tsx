@@ -1,43 +1,59 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import ContentAdminTabs from '@/components/admin/content-admin-tabs';
+import ContentEntityTabs from '@/components/admin/content-entity-tabs';
 import TiptapEditor from '@/components/admin/tiptap-editor';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { selectClassName, textareaClassName } from '@/lib/form-field-classes';
+import type { PodcastShowAdmin } from '@/types/learn-library';
 
 type Props = {
     showOptions: Array<{ id: string; title: string }>;
+    selectedShowId?: string;
+    parentShow?: PodcastShowAdmin;
+    storeUrl?: string;
 };
 
-export default function AdminPodcastEpisodeCreate({ showOptions }: Props) {
+export default function AdminPodcastEpisodeCreate({
+    showOptions,
+    selectedShowId,
+    parentShow,
+    storeUrl,
+}: Props) {
+    const formAction = storeUrl ?? '/admin/content/podcast-episodes';
+    const cancelHref = parentShow
+        ? `/admin/content/podcast-shows/${parentShow.slug}/edit`
+        : '/admin/content/podcasts';
+
     return (
         <>
             <Head title="Admin — New podcast episode" />
-            <ContentAdminTabs active="podcast-episodes" />
-            <Heading variant="small" title="New podcast episode" />
-            <Form
-                action="/admin/content/podcast-episodes"
-                method="post"
-                className="mt-6 max-w-3xl space-y-4"
-            >
-                <div className="grid gap-2">
-                    <Label htmlFor="podcast_show_id">Show</Label>
-                    <select
-                        id="podcast_show_id"
-                        name="podcast_show_id"
-                        className={selectClassName}
-                        required
-                    >
-                        <option value="">Select show</option>
-                        {showOptions.map((show) => (
-                            <option key={show.id} value={show.id}>
-                                {show.title}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+            <ContentEntityTabs entity="podcasts" section="list" />
+            <Heading
+                variant="small"
+                title={parentShow ? `New episode — ${parentShow.title}` : 'New podcast episode'}
+            />
+            <Form action={formAction} method="post" className="mt-6 max-w-3xl space-y-4">
+                {!storeUrl && (
+                    <div className="grid gap-2">
+                        <Label htmlFor="podcast_show_id">Show</Label>
+                        <select
+                            id="podcast_show_id"
+                            name="podcast_show_id"
+                            className={selectClassName}
+                            required
+                            defaultValue={selectedShowId ?? ''}
+                        >
+                            <option value="">Select show</option>
+                            {showOptions.map((show) => (
+                                <option key={show.id} value={show.id}>
+                                    {show.title}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
                 <div className="grid gap-2">
                     <Label htmlFor="episode_number">Episode number</Label>
                     <Input id="episode_number" name="episode_number" type="number" min={1} required />
@@ -92,7 +108,7 @@ export default function AdminPodcastEpisodeCreate({ showOptions }: Props) {
                 <div className="flex gap-2">
                     <Button type="submit">Create episode</Button>
                     <Button variant="outline" asChild>
-                        <Link href="/admin/content/podcast-episodes">Cancel</Link>
+                        <Link href={cancelHref}>Cancel</Link>
                     </Button>
                 </div>
             </Form>
