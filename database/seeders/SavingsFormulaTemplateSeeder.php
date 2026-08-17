@@ -10,14 +10,17 @@ class SavingsFormulaTemplateSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call(SimplePlanSeeder::class);
+
         $abundant = SavingsFormulaTemplate::query()->updateOrCreate(
             ['slug' => 'abundant-formula'],
             [
-                'name' => 'The Abundant Formula Savings',
+                'name' => 'The Abundant Formula',
                 'description' => 'Everyday Fund 70%, Savings 20%, Tithe 10%',
                 'best_for' => 'Best for members who want a simple three-bucket split with most income for daily needs.',
                 'video_embed_url' => null,
                 'is_system' => true,
+                'sort_order' => 1,
             ],
         );
 
@@ -37,6 +40,7 @@ class SavingsFormulaTemplateSeeder extends Seeder
                 'best_for' => 'Kinsenas recommends this formula if you want maximum savings: 50% for everyday life, 20% for long-term freedom (Savings), and the rest for tithe, emergencies, growth, and guilt-free enjoyment.',
                 'video_embed_url' => null,
                 'is_system' => true,
+                'sort_order' => 2,
             ],
         );
 

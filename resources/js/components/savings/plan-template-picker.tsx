@@ -81,7 +81,7 @@ function CustomPlanCard({ teamSlug }: { teamSlug: string }) {
                 <span className="font-medium">Best for: </span>
                 <span className="text-muted-foreground">
                     Members who already know how they want to divide income, or
-                    want a layout that does not match Abundant or 7 Buckets.
+                    want a layout that does not match The Simple Plan, Abundant, or 7 Buckets.
                 </span>
             </p>
 

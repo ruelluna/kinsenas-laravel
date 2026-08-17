@@ -20,12 +20,14 @@ class SavingsFormulaTemplate extends Model
         'best_for',
         'video_embed_url',
         'is_system',
+        'sort_order',
     ];
 
     protected function casts(): array
     {
         return [
             'is_system' => 'boolean',
+            'sort_order' => 'integer',
         ];
     }
 

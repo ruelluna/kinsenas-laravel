@@ -15,6 +15,7 @@ class AdminSavingsFormulaTemplateController extends Controller
     public function index(): Response
     {
         $templates = SavingsFormulaTemplate::query()
+            ->orderBy('sort_order')
             ->orderBy('name')
             ->get(['id', 'name', 'slug', 'description']);
 

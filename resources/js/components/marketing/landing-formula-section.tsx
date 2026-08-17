@@ -12,7 +12,7 @@ export default function LandingFormulaSection() {
                 </p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {FORMULA_CARDS.map((card) => (
                     <div
                         key={card.title}

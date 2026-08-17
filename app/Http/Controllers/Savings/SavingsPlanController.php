@@ -31,7 +31,7 @@ class SavingsPlanController extends Controller
     {
         $user = $request->user();
         $plan = $this->planService->forTeam($current_team, $user);
-        $templates = SavingsFormulaTemplate::query()->with('categories')->orderBy('name')->get();
+        $templates = SavingsFormulaTemplate::query()->with('categories')->orderBy('sort_order')->orderBy('name')->get();
         $pageGuidance = SavingsPlanPageGuidance::instance();
 
         $teamBanks = $current_team->banks()

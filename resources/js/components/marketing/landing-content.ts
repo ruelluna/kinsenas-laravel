@@ -185,7 +185,7 @@ export const LOOP_STEPS = [
         number: 1,
         title: 'Choose formula',
         description:
-            'Select The Abundant Formula, 7 Buckets, or create a custom bucket system.',
+            'Select The Simple Plan, The Abundant Formula, 7 Buckets, or create a custom bucket system.',
         badgeClass: 'bg-primary text-primary-foreground',
     },
     {
@@ -205,6 +205,17 @@ export const LOOP_STEPS = [
 ] as const;
 
 export const FORMULA_CARDS = [
+    {
+        title: 'The Simple Plan',
+        description: 'No, not the pop-punk band.',
+        hoverBorder: 'hover:border-primary/40',
+        hoverTitle: 'group-hover:text-primary',
+        badgeClass: 'bg-primary/15 text-primary',
+        lines: [
+            { label: 'Everyday Fund', pct: '80%' },
+            { label: 'Savings', pct: '20%' },
+        ],
+    },
     {
         title: 'The Abundant Formula',
         description:
