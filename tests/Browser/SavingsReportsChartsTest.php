@@ -74,5 +74,8 @@ it('renders savings report charts without javascript errors', function () {
         ->assertPresent('[data-test="reports-date-filter"]')
         ->assertPresent('[data-test="fund-utilization-chart"]')
         ->assertPresent('[data-test="spending-trend-chart"]')
+        ->assertSee('Everyday Fund')
+        ->assertSee('Savings')
+        ->assertSee('Tithe')
         ->assertNoSmoke();
 });

@@ -84,6 +84,36 @@ it('builds fund utilization from current balances', function () {
         ->and($everydayUtil['remaining'])->toBe('25000.00');
 });
 
+it('includes every fund bucket in fund utilization', function () {
+    $user = User::factory()->create();
+    test()->unlockVaultFor($user);
+
+    $template = SavingsFormulaTemplate::query()->where('slug', 'trc-savings')->firstOrFail();
+
+    test()->actingAs($user)->post(route('savings.plan.from-template', [
+        'current_team' => $user->currentTeam->slug,
+        'template' => $template->id,
+    ]));
+
+    test()->actingAs($user)->post(route('savings.income.store', [
+        'current_team' => $user->currentTeam->slug,
+    ]), [
+        'name' => 'January salary',
+        'amount' => '50000.00',
+        'period_start' => '2026-01-01',
+    ]);
+
+    $plan = SavingsPlan::query()->with('categories')->firstOrFail();
+    $service = app(FundGraphService::class);
+    $data = $service->graphDataForPlan($plan);
+
+    $expectedNames = $plan->categories->sortBy('sort_order')->pluck('name')->values()->all();
+    $utilizationNames = collect($data['fund_utilization'])->pluck('name')->values()->all();
+
+    expect($utilizationNames)->toBe($expectedNames)
+        ->and($data['fund_utilization'])->toHaveCount(7);
+});
+
 it('groups confirmed spends by fund bucket within date range', function () {
     $user = User::factory()->create();
     $plan = setupPlanWithIncome($user);

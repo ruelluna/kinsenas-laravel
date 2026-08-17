@@ -21,15 +21,40 @@ type Props = {
     testId?: string;
 };
 
+function chartHeightForRows(rowCount: number, compact: boolean): number {
+    const rowHeight = compact ? 32 : 40;
+    const minHeight = compact ? 224 : 288;
+
+    return Math.max(minHeight, rowCount * rowHeight + 24);
+}
+
+function yAxisWidthForLabels(
+    labels: string[],
+    compact: boolean,
+): number {
+    const longestLabel = labels.reduce(
+        (max, label) => Math.max(max, label.length),
+        0,
+    );
+
+    return Math.min(180, Math.max(compact ? 100 : 120, longestLabel * 7.5));
+}
+
 export default function FundUtilizationChart({
     data,
     compact = false,
     testId = 'fund-utilization-chart',
 }: Props) {
     const chartData = data.map((row) => ({
+        categoryId: row.category_id,
         name: row.name,
         percentUsed: row.percent_used,
     }));
+    const chartHeight = chartHeightForRows(chartData.length, compact);
+    const yAxisWidth = yAxisWidthForLabels(
+        chartData.map((row) => row.name),
+        compact,
+    );
 
     return (
         <ChartCard
@@ -40,12 +65,12 @@ export default function FundUtilizationChart({
             compact={compact}
             testId={testId}
         >
-            <div className={compact ? 'h-56' : 'h-72'}>
+            <div style={{ height: chartHeight }}>
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                         data={chartData}
                         layout="vertical"
-                        margin={{ top: 4, right: 12, left: 8, bottom: 4 }}
+                        margin={{ top: 4, right: 12, left: 4, bottom: 4 }}
                     >
                         <CartesianGrid
                             stroke={CHART_COLORS.grid}
@@ -61,7 +86,8 @@ export default function FundUtilizationChart({
                         <YAxis
                             type="category"
                             dataKey="name"
-                            width={compact ? 96 : 120}
+                            width={yAxisWidth}
+                            interval={0}
                             stroke={CHART_COLORS.muted}
                             fontSize={12}
                         />
@@ -76,7 +102,7 @@ export default function FundUtilizationChart({
                         <Bar dataKey="percentUsed" radius={[0, 4, 4, 0]}>
                             {chartData.map((entry) => (
                                 <Cell
-                                    key={entry.name}
+                                    key={entry.categoryId}
                                     fill={utilizationBarColor(entry.percentUsed)}
                                 />
                             ))}
