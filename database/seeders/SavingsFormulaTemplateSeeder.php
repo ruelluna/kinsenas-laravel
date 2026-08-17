@@ -45,7 +45,7 @@ class SavingsFormulaTemplateSeeder extends Seeder
                 ['Tithe', 10, 'Giving or faith-based allocation.'],
                 ['Educational', 5, 'Courses, books, and skills that help you grow.'],
                 ['Enjoyment', 5, 'Fun and recreation without guilt.'],
-                ['Empower Fund', 5, 'Investing in tools or opportunities that increase your earning power.'],
+                ['Utility', 5, 'Repairs, maintenance, and household utilities.'],
                 ['Emergency Fund', 5, 'Unexpected expenses and financial shocks.'],
                 ['Savings', 20, 'Long-term savings and goals — building toward financial independence.'],
                 ['Everyday Fund', 50, 'Regular living expenses for the month.'],

@@ -1,6 +1,9 @@
 <?php
 
 use App\Enums\PlatformPermission;
+use App\Http\Controllers\Admin\AdminCommunityCategoryController;
+use App\Http\Controllers\Admin\AdminCommunityModerationController;
+use App\Http\Controllers\Admin\AdminCommunityReportController;
 use App\Http\Controllers\Admin\AdminContentPostController;
 use App\Http\Controllers\Admin\AdminContentSeriesController;
 use App\Http\Controllers\Admin\AdminContentStatsController;
@@ -21,6 +24,13 @@ Route::middleware('permission:'.PlatformPermission::ManageContent->value)->group
 
 Route::middleware('permission:'.PlatformPermission::ManagePlatform->value)->group(function (): void {
     Route::get('content/stats', AdminContentStatsController::class)->name('content.stats');
+    Route::get('content/community-posts/pending', [AdminCommunityModerationController::class, 'index'])->name('content.community-posts.pending');
+    Route::post('content/community-posts/{communityPost}/approve', [AdminCommunityModerationController::class, 'approve'])->name('content.community-posts.approve');
+    Route::post('content/community-posts/{communityPost}/reject', [AdminCommunityModerationController::class, 'reject'])->name('content.community-posts.reject');
+    Route::get('content/community-reports', [AdminCommunityReportController::class, 'index'])->name('content.community-reports.index');
+    Route::post('content/community-reports/{communityPostReport}/dismiss', [AdminCommunityReportController::class, 'dismiss'])->name('content.community-reports.dismiss');
+    Route::post('content/community-reports/{communityPostReport}/resolve', [AdminCommunityReportController::class, 'resolve'])->name('content.community-reports.resolve');
+    Route::resource('content/community-categories', AdminCommunityCategoryController::class)->names('content.community-categories')->except(['show']);
     Route::resource('content/series', AdminContentSeriesController::class)->names('content.series')->except(['show']);
     Route::resource('content/side-hustle-categories', AdminSideHustleCategoryController::class)->names('content.side-hustle-categories')->except(['show']);
     Route::resource('content/podcast-shows', AdminPodcastShowController::class)->names('content.podcast-shows')->except(['show']);

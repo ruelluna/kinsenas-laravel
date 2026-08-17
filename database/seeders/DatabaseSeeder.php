@@ -48,5 +48,6 @@ class DatabaseSeeder extends Seeder
 
         $this->call(ContentSeeder::class);
         $this->call(LearnLibrarySeeder::class);
+        $this->call(CommunitySeeder::class);
     }
 }

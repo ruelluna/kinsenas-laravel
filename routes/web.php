@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Learn\LearnCommunityController;
 use App\Http\Controllers\Learn\LearnIndexController;
 use App\Http\Controllers\Learn\LearnPodcastController;
 use App\Http\Controllers\Learn\LearnPostController;
@@ -30,6 +31,17 @@ Route::get('learn/podcasts/{podcastShow}', [LearnPodcastController::class, 'show
 Route::get('learn/podcasts/{podcastShow}/episodes/{podcastEpisode}', [LearnPodcastController::class, 'showEpisode'])->name('learn.podcasts.episodes.show');
 Route::get('learn/series/{series}', [LearnSeriesController::class, 'show'])->name('learn.series.show');
 Route::get('learn/posts/{post}', [LearnPostController::class, 'show'])->name('learn.posts.show');
+
+Route::middleware(['auth', 'verified'])->prefix('learn/community')->name('learn.community.')->group(function (): void {
+    Route::get('/', [LearnCommunityController::class, 'index'])->name('index');
+    Route::get('mine', [LearnCommunityController::class, 'mine'])->name('mine');
+    Route::get('create', [LearnCommunityController::class, 'create'])->middleware('learn.member')->name('create');
+    Route::post('/', [LearnCommunityController::class, 'store'])->middleware(['learn.member', 'throttle:5,60'])->name('store');
+    Route::get('{communityPost}', [LearnCommunityController::class, 'show'])->name('show');
+    Route::post('{communityPost}/report', [LearnCommunityController::class, 'report'])
+        ->middleware(['learn.member', 'throttle:10,1440'])
+        ->name('report');
+});
 
 Route::middleware(['auth', 'verified', 'learn.member'])->group(function () {
     Route::post('learn/posts/{post}/react', [LearnPostReactionController::class, 'store'])

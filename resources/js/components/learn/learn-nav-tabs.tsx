@@ -7,7 +7,8 @@ export type LearnFilter =
     | 'reminders'
     | 'articles'
     | 'side-hustles'
-    | 'podcasts';
+    | 'podcasts'
+    | 'community';
 
 const pillBase =
     'rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
@@ -23,6 +24,7 @@ const memberTabs: Array<{ value: LearnFilter; label: string }> = [
     { value: 'articles', label: 'Articles' },
     { value: 'side-hustles', label: 'Side hustles' },
     { value: 'podcasts', label: 'Podcasts' },
+    { value: 'community', label: 'Community' },
 ];
 
 const guestTabs: Array<{ value: LearnFilter; label: string }> = [
@@ -56,13 +58,18 @@ export default function LearnNavTabs({ filter, hasFullAccess }: Props) {
                             filter === tab.value ? pillActive : pillInactive,
                         )}
                         aria-current={filter === tab.value ? 'true' : undefined}
-                        onClick={() =>
+                        onClick={() => {
+                            if (tab.value === 'community') {
+                                router.get('/learn/community', {}, { preserveState: true });
+                                return;
+                            }
+
                             router.get(
                                 '/learn',
                                 tab.value === 'all' ? {} : { filter: tab.value },
                                 { preserveState: true },
-                            )
-                        }
+                            );
+                        }}
                     >
                         {tab.label}
                     </button>

@@ -890,7 +890,7 @@ class FundBalanceService
     {
         return match ($name) {
             'Everyday Fund' => __('Daily expenses'),
-            'Empower Fund' => __('Invest in yourself — repairs, skills, tools'),
+            'Utility' => __('Repairs, maintenance, and utilities'),
             'Emergency Fund' => __('True emergencies only'),
             default => null,
         };

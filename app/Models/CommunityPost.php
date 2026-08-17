@@ -1,0 +1,90 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\CommunityPostStatus;
+use Database\Factories\CommunityPostFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class CommunityPost extends Model
+{
+    /** @use HasFactory<CommunityPostFactory> */
+    use HasFactory, HasUuids;
+
+    protected $fillable = [
+        'community_category_id',
+        'user_id',
+        'title',
+        'slug',
+        'excerpt',
+        'body',
+        'cover_image_url',
+        'status',
+        'rejection_reason',
+        'published_at',
+        'moderated_by',
+        'moderated_at',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'status' => CommunityPostStatus::class,
+            'published_at' => 'datetime',
+            'moderated_at' => 'datetime',
+        ];
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(CommunityCategory::class, 'community_category_id');
+    }
+
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function moderator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'moderated_by');
+    }
+
+    public function reports(): HasMany
+    {
+        return $this->hasMany(CommunityPostReport::class);
+    }
+
+    /**
+     * @param  Builder<CommunityPost>  $query
+     * @return Builder<CommunityPost>
+     */
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where('status', CommunityPostStatus::Published);
+    }
+
+    /**
+     * @param  Builder<CommunityPost>  $query
+     * @return Builder<CommunityPost>
+     */
+    public function scopePending(Builder $query): Builder
+    {
+        return $query->where('status', CommunityPostStatus::Pending);
+    }
+
+    public function isOwnedBy(User $user): bool
+    {
+        return $this->user_id === $user->id;
+    }
+}

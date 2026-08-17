@@ -45,9 +45,9 @@ function createFundCategoryShowFixture(string $amount = '50000.00'): array
 
     $plan = SavingsPlan::query()->with('categories')->firstOrFail();
     $everydayCategory = $plan->categories->firstWhere('name', 'Everyday Fund');
-    $empowerCategory = $plan->categories->firstWhere('name', 'Empower Fund');
+    $utilityCategory = $plan->categories->firstWhere('name', 'Utility');
 
-    return [$user, $plan, $everydayCategory, $empowerCategory];
+    return [$user, $plan, $everydayCategory, $utilityCategory];
 }
 
 it('redirects to plan chooser when no savings plan exists', function () {
@@ -141,28 +141,28 @@ it('shows fund category detail with balances matching FundBalanceService', funct
 });
 
 it('includes incoming and outgoing transfers for the category', function () {
-    [$user, $plan, $everydayCategory, $empowerCategory] = createFundCategoryShowFixture('50000.00');
+    [$user, $plan, $everydayCategory, $utilityCategory] = createFundCategoryShowFixture('50000.00');
     $bank = Bank::factory()->create(['team_id' => $user->currentTeam->id]);
 
     FundTransfer::factory()->confirmed()->create([
         'savings_plan_id' => $plan->id,
         'from_category_id' => $everydayCategory->id,
-        'to_category_id' => $empowerCategory->id,
+        'to_category_id' => $utilityCategory->id,
         'from_bank_id' => $bank->id,
         'to_bank_id' => $bank->id,
         'amount_encrypted' => '3000.00',
-        'description' => 'To empower',
+        'description' => 'To utility',
         'transferred_on' => '2026-02-12',
     ]);
 
     FundTransfer::factory()->confirmed()->create([
         'savings_plan_id' => $plan->id,
-        'from_category_id' => $empowerCategory->id,
+        'from_category_id' => $utilityCategory->id,
         'to_category_id' => $everydayCategory->id,
         'from_bank_id' => $bank->id,
         'to_bank_id' => $bank->id,
         'amount_encrypted' => '1000.00',
-        'description' => 'From empower',
+        'description' => 'From utility',
         'transferred_on' => '2026-02-13',
     ]);
 

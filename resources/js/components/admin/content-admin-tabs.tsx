@@ -9,6 +9,9 @@ type Tab =
     | 'hustle-categories'
     | 'podcasts'
     | 'podcast-episodes'
+    | 'community-categories'
+    | 'community-moderation'
+    | 'community-reports'
     | 'stats';
 
 type Props = {
@@ -54,6 +57,27 @@ const tabs: Array<{ key: Tab; label: string; href: string; testId: string; platf
         label: 'Episodes',
         href: '/admin/content/podcast-episodes',
         testId: 'content-admin-tab-podcast-episodes',
+        platformOnly: true,
+    },
+    {
+        key: 'community-categories',
+        label: 'Community categories',
+        href: '/admin/content/community-categories',
+        testId: 'content-admin-tab-community-categories',
+        platformOnly: true,
+    },
+    {
+        key: 'community-moderation',
+        label: 'Community',
+        href: '/admin/content/community-posts/pending',
+        testId: 'content-admin-tab-community-moderation',
+        platformOnly: true,
+    },
+    {
+        key: 'community-reports',
+        label: 'Reports',
+        href: '/admin/content/community-reports',
+        testId: 'content-admin-tab-community-reports',
         platformOnly: true,
     },
     {

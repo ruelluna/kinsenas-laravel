@@ -52,16 +52,16 @@ it('calculates running balances across locked income', function () {
     $balances = $service->balancesForPlan($plan);
 
     $everyday = collect($balances)->firstWhere('name', 'Everyday Fund');
-    $empower = collect($balances)->firstWhere('name', 'Empower Fund');
+    $utility = collect($balances)->firstWhere('name', 'Utility');
 
     expect($everyday['allocated'])->toBe('50000.00')
         ->and($everyday['remaining'])->toBe('50000.00')
         ->and($everyday['isDefault'])->toBeTrue()
-        ->and($empower['allocated'])->toBe('5000.00')
+        ->and($utility['allocated'])->toBe('5000.00')
         ->and($everyday['allocationType'])->toBe('percentage')
         ->and($everyday['percentage'])->toBe('50.00')
-        ->and($empower['allocationType'])->toBe('percentage')
-        ->and($empower['percentage'])->toBe('5.00');
+        ->and($utility['allocationType'])->toBe('percentage')
+        ->and($utility['percentage'])->toBe('5.00');
 });
 
 it('aggregates spending across multiple income periods', function () {
@@ -105,7 +105,7 @@ it('subtracts confirmed transfers from remaining balance', function () {
     FundTransfer::factory()->confirmed()->create([
         'savings_plan_id' => $plan->id,
         'from_category_id' => $everydayCategory->id,
-        'to_category_id' => $plan->categories->firstWhere('name', 'Empower Fund')->id,
+        'to_category_id' => $plan->categories->firstWhere('name', 'Utility')->id,
         'from_bank_id' => $bank->id,
         'to_bank_id' => $bank->id,
         'amount_encrypted' => '4000.00',
@@ -124,11 +124,11 @@ it('includes assigned categories in bank balance breakdown before any activity',
     $user = User::factory()->create();
     $plan = setupLockedPlan($user, '50000.00');
     $everydayCategory = $plan->categories->firstWhere('name', 'Everyday Fund');
-    $empowerCategory = $plan->categories->firstWhere('name', 'Empower Fund');
+    $utilityCategory = $plan->categories->firstWhere('name', 'Utility');
     $bank = Bank::factory()->create(['team_id' => $user->currentTeam->id]);
 
     $everydayCategory->update(['bank_id' => $bank->id]);
-    $empowerCategory->update(['bank_id' => $bank->id]);
+    $utilityCategory->update(['bank_id' => $bank->id]);
 
     $service = app(FundBalanceService::class);
     $bankBalances = $service->bankBalancesForTeam($user->currentTeam, $plan->fresh('categories'));
@@ -139,7 +139,7 @@ it('includes assigned categories in bank balance breakdown before any activity',
         ->and($bankBalance['total'])->toBe('27500.00')
         ->and($bankBalance['byCategory'])->toHaveCount(2)
         ->and(collect($bankBalance['byCategory'])->pluck('categoryName')->all())->toBe([
-            'Empower Fund',
+            'Utility',
             'Everyday Fund',
         ])
         ->and(collect($bankBalance['byCategory'])->pluck('total')->all())->toBe([
@@ -176,7 +176,7 @@ it('includes bank metadata on fund balances when a category is assigned', functi
     $user = User::factory()->create();
     $plan = setupLockedPlan($user, '50000.00');
     $everydayCategory = $plan->categories->firstWhere('name', 'Everyday Fund');
-    $empowerCategory = $plan->categories->firstWhere('name', 'Empower Fund');
+    $utilityCategory = $plan->categories->firstWhere('name', 'Utility');
     $bank = Bank::factory()->create([
         'team_id' => $user->currentTeam->id,
         'name' => 'BPI',
@@ -188,14 +188,14 @@ it('includes bank metadata on fund balances when a category is assigned', functi
     $service = app(FundBalanceService::class);
     $balances = $service->balancesForPlan($plan->fresh('categories'));
     $everyday = collect($balances)->firstWhere('name', 'Everyday Fund');
-    $empower = collect($balances)->firstWhere('name', 'Empower Fund');
+    $utility = collect($balances)->firstWhere('name', 'Utility');
 
     expect($everyday['bankId'])->toBe($bank->id)
         ->and($everyday['bankDisplayName'])->toBe('BPI — Payroll')
         ->and($everyday['bankLogoUrl'])->toBeNull()
-        ->and($empower['bankId'])->toBeNull()
-        ->and($empower['bankDisplayName'])->toBeNull()
-        ->and($empower['bankLogoUrl'])->toBeNull();
+        ->and($utility['bankId'])->toBeNull()
+        ->and($utility['bankDisplayName'])->toBeNull()
+        ->and($utility['bankLogoUrl'])->toBeNull();
 });
 
 it('includes bank metadata on report fund health rows', function () {
@@ -353,7 +353,7 @@ it('does not inflate percent used for transfer-only activity', function () {
     FundTransfer::factory()->confirmed()->create([
         'savings_plan_id' => $plan->id,
         'from_category_id' => $everydayCategory->id,
-        'to_category_id' => $plan->categories->firstWhere('name', 'Empower Fund')->id,
+        'to_category_id' => $plan->categories->firstWhere('name', 'Utility')->id,
         'from_bank_id' => $bank->id,
         'to_bank_id' => $bank->id,
         'amount_encrypted' => '4000.00',

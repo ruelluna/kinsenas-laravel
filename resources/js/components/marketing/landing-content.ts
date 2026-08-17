@@ -185,7 +185,7 @@ export const LOOP_STEPS = [
         number: 1,
         title: 'Choose formula',
         description:
-            'Select 70/20/10, 7 Buckets, or create a custom bucket system.',
+            'Select The Abundant Formula, 7 Buckets, or create a custom bucket system.',
         badgeClass: 'bg-primary text-primary-foreground',
     },
     {
@@ -206,16 +206,16 @@ export const LOOP_STEPS = [
 
 export const FORMULA_CARDS = [
     {
-        title: 'Abundant 70/20/10',
+        title: 'The Abundant Formula',
         description:
             'A simple, powerful split for those prioritizing wealth building and debt freedom.',
         hoverBorder: 'hover:border-gold/40',
         hoverTitle: 'group-hover:text-gold',
         badgeClass: 'bg-gold/15 text-gold',
         lines: [
-            { label: 'Living Expenses', pct: '70%' },
+            { label: 'Everyday Fund', pct: '70%' },
             { label: 'Savings', pct: '20%' },
-            { label: 'Giving', pct: '10%' },
+            { label: 'Tithe', pct: '10%' },
         ],
     },
     {
@@ -226,9 +226,13 @@ export const FORMULA_CARDS = [
         hoverTitle: 'group-hover:text-teal',
         badgeClass: 'bg-teal/15 text-teal',
         lines: [
-            { label: 'Tithe & Charity', pct: '10%' },
-            { label: 'Education', pct: '20%' },
-            { label: 'Emergency', pct: '10%' },
+            { label: 'Tithe', pct: '10%' },
+            { label: 'Educational', pct: '5%' },
+            { label: 'Enjoyment', pct: '5%' },
+            { label: 'Utility', pct: '5%' },
+            { label: 'Emergency Fund', pct: '5%' },
+            { label: 'Savings', pct: '20%' },
+            { label: 'Everyday Fund', pct: '50%' },
         ],
     },
 ] as const;
