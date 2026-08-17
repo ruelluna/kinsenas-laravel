@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Actions\Teams\CreateTeam;
+use App\Enums\BankSpaceRole;
 use App\Enums\SubscriptionStatus;
 use App\Enums\TransferStatus;
 use App\Models\Bank;
@@ -64,11 +66,18 @@ class DemoAccountSeeder extends Seeder
             return $user;
         }
 
-        return User::factory()->create([
+        $user = User::query()->create([
             'name' => 'Demo Member',
             'email' => self::DEMO_EMAIL,
             'email_verified_at' => now(),
+            'password' => 'password',
+            'marketing_emails_opt_in' => false,
         ]);
+
+        app(CreateTeam::class)->handle($user, isPersonal: true);
+        app(FinancialEncryptionService::class)->createUserVault($user, 'password');
+
+        return $user->fresh();
     }
 
     private function ensureActiveSubscription(Team $team): void
@@ -129,23 +138,23 @@ class DemoAccountSeeder extends Seeder
 
     private function assignBanksToCategories(SavingsPlan $plan, Team $team): void
     {
-        $payrollBank = Bank::factory()
-            ->mainSpace()
-            ->create([
-                'team_id' => $team->id,
-                'name' => 'BDO',
-                'account_label' => 'Payroll',
-                'sort_order' => 0,
-            ]);
+        $payrollBank = Bank::query()->create([
+            'team_id' => $team->id,
+            'name' => 'BDO',
+            'account_label' => 'Payroll',
+            'space_role' => BankSpaceRole::Main,
+            'is_active' => true,
+            'sort_order' => 0,
+        ]);
 
-        $goSaveBank = Bank::factory()
-            ->savingsSpace('Emergency & Savings')
-            ->create([
-                'team_id' => $team->id,
-                'name' => 'BDO',
-                'account_label' => 'GoSave',
-                'sort_order' => 1,
-            ]);
+        $goSaveBank = Bank::query()->create([
+            'team_id' => $team->id,
+            'name' => 'BDO',
+            'account_label' => 'GoSave',
+            'space_role' => BankSpaceRole::SavingsSpace,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
 
         $categoriesByName = $plan->categories->keyBy('name');
         $assignments = DemoAccountHistory::categoryBankAssignments();
