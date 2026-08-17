@@ -89,6 +89,10 @@ export type AdminSubscriber = {
         currentPeriodEndsAt: string | null;
         hasAccess: boolean;
     } | null;
+    financeActivityScore: number;
+    financeActivityTier: string;
+    financeActivityTierLabel: string;
+    lastFinanceActivityAt: string | null;
     createdAt: string;
 };
 
@@ -115,6 +119,10 @@ export type AdminPlatformUser = {
     isPlatformAdmin: boolean;
     subscriptionStatus: string | null;
     subscriptionStatusLabel: string | null;
+    financeActivityScore: number;
+    financeActivityTier: string;
+    financeActivityTierLabel: string;
+    lastFinanceActivityAt: string | null;
     deleteBlockReason: string | null;
 };
 

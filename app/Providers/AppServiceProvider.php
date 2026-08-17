@@ -5,6 +5,14 @@ namespace App\Providers;
 use App\Contracts\Vault\VaultKeyStore;
 use App\Listeners\ClearVaultOnLogout;
 use App\Listeners\LogWebPushNotificationFailed;
+use App\Models\Bank;
+use App\Models\FundAddedEntry;
+use App\Models\FundSpend;
+use App\Models\FundTransfer;
+use App\Models\IncomePeriod;
+use App\Models\SavingsPlan;
+use App\Models\UserVault;
+use App\Observers\FinanceActivityScoreObserver;
 use App\Services\Vault\SessionVaultKeyStore;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Logout;
@@ -33,6 +41,16 @@ class AppServiceProvider extends ServiceProvider
     {
         Event::listen(Logout::class, ClearVaultOnLogout::class);
         Event::listen(NotificationFailed::class, LogWebPushNotificationFailed::class);
+
+        $financeActivityObserver = FinanceActivityScoreObserver::class;
+
+        Bank::observe($financeActivityObserver);
+        SavingsPlan::observe($financeActivityObserver);
+        IncomePeriod::observe($financeActivityObserver);
+        FundSpend::observe($financeActivityObserver);
+        FundTransfer::observe($financeActivityObserver);
+        FundAddedEntry::observe($financeActivityObserver);
+        UserVault::observe($financeActivityObserver);
 
         $this->configureDefaults();
     }

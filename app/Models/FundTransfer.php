@@ -65,6 +65,11 @@ class FundTransfer extends Model
         return $this->belongsTo(Bank::class, 'to_bank_id');
     }
 
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_user_id');
+    }
+
     public function confirmedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'confirmed_by_user_id');

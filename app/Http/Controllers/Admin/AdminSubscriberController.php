@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\BillingInterval;
+use App\Enums\FinanceActivityTier;
 use App\Enums\SubscriptionStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ActivateSubscriptionRequest;
@@ -25,6 +26,8 @@ class AdminSubscriberController extends Controller
     {
         $status = $request->query('status');
         $search = $request->query('search');
+        $activityTier = $request->query('activity_tier');
+        $minScore = $request->query('min_score');
 
         $teams = Team::query()
             ->with(['subscription.plan'])
@@ -38,6 +41,15 @@ class AdminSubscriberController extends Controller
             ->when($status && $status !== 'none', function ($query) use ($status) {
                 $query->whereHas('subscription', fn ($q) => $q->where('status', $status));
             })
+            ->when(
+                filled($activityTier),
+                fn ($query) => $query->where('finance_activity_tier', $activityTier),
+            )
+            ->when(
+                filled($minScore) && is_numeric($minScore),
+                fn ($query) => $query->where('finance_activity_score', '>=', (int) $minScore),
+            )
+            ->orderByDesc('finance_activity_score')
             ->orderByDesc('created_at')
             ->paginate(20)
             ->withQueryString();
@@ -47,6 +59,8 @@ class AdminSubscriberController extends Controller
             'filters' => [
                 'status' => $status,
                 'search' => $search,
+                'activity_tier' => $activityTier,
+                'min_score' => $minScore,
             ],
             'statusOptions' => [
                 ['value' => '', 'label' => 'All'],
@@ -57,6 +71,7 @@ class AdminSubscriberController extends Controller
                 ['value' => SubscriptionStatus::Cancelled->value, 'label' => 'Cancelled'],
                 ['value' => 'none', 'label' => 'No subscription'],
             ],
+            'activityTierOptions' => FinanceActivityTier::filterOptions(),
         ]);
     }
 
@@ -182,6 +197,10 @@ class AdminSubscriberController extends Controller
                 'currentPeriodEndsAt' => $subscription->current_period_ends_at?->toISOString(),
                 'hasAccess' => $this->subscriptionService->teamHasAccess($team),
             ] : null,
+            'financeActivityScore' => $team->finance_activity_score,
+            'financeActivityTier' => $team->finance_activity_tier?->value ?? FinanceActivityTier::Inactive->value,
+            'financeActivityTierLabel' => $team->finance_activity_tier?->label() ?? FinanceActivityTier::Inactive->label(),
+            'lastFinanceActivityAt' => $team->last_finance_activity_at?->toISOString(),
             'createdAt' => $team->created_at->toISOString(),
         ];
     }

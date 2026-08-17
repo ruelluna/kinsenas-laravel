@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\FinanceActivityTier;
 use App\Enums\PlatformRole;
 use App\Enums\UserActivityAction;
 use App\Http\Controllers\Controller;
@@ -27,6 +28,8 @@ class AdminPlatformUserController extends Controller
     {
         $search = $request->query('search');
         $roleFilter = $request->query('role');
+        $activityTier = $request->query('activity_tier');
+        $minScore = $request->query('min_score');
 
         $users = User::query()
             ->with(['currentTeam.subscription', 'roles'])
@@ -40,6 +43,14 @@ class AdminPlatformUserController extends Controller
                 filled($roleFilter),
                 fn ($query) => $query->role($roleFilter),
             )
+            ->when(
+                filled($activityTier),
+                fn ($query) => $query->where('finance_activity_tier', $activityTier),
+            )
+            ->when(
+                filled($minScore) && is_numeric($minScore),
+                fn ($query) => $query->where('finance_activity_score', '>=', (int) $minScore),
+            )
             ->orderByRaw(
                 'CASE WHEN EXISTS (
                     SELECT 1 FROM model_has_roles
@@ -50,6 +61,7 @@ class AdminPlatformUserController extends Controller
                 ) THEN 0 ELSE 1 END',
                 [User::class, PlatformRole::PlatformAdmin->value],
             )
+            ->orderByDesc('finance_activity_score')
             ->orderBy('name')
             ->paginate(20)
             ->withQueryString();
@@ -66,15 +78,22 @@ class AdminPlatformUserController extends Controller
                 'isPlatformAdmin' => $user->isPlatformAdmin(),
                 'subscriptionStatus' => $user->currentTeam?->subscription?->status->value,
                 'subscriptionStatusLabel' => $user->currentTeam?->subscription?->status?->label(),
+                'financeActivityScore' => $user->finance_activity_score,
+                'financeActivityTier' => $user->finance_activity_tier?->value ?? FinanceActivityTier::Inactive->value,
+                'financeActivityTierLabel' => $user->finance_activity_tier?->label() ?? FinanceActivityTier::Inactive->label(),
+                'lastFinanceActivityAt' => $user->last_finance_activity_at?->toISOString(),
                 'deleteBlockReason' => $this->userDeletionService->deleteBlockReason($actor, $user),
             ]),
             'filters' => [
                 'search' => $search,
                 'role' => $roleFilter,
+                'activity_tier' => $activityTier,
+                'min_score' => $minScore,
             ],
             'currentUserId' => $request->user()->id,
             'platformAdminCount' => User::role(PlatformRole::PlatformAdmin->value)->count(),
             'roleOptions' => PlatformRole::assignable(),
+            'activityTierOptions' => FinanceActivityTier::filterOptions(),
         ]);
     }
 

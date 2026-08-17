@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\GeneratesUniqueTeamSlugs;
+use App\Enums\FinanceActivityTier;
 use App\Enums\TeamRole;
 use Database\Factories\TeamFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -32,6 +33,15 @@ class Team extends Model
 {
     /** @use HasFactory<TeamFactory> */
     use GeneratesUniqueTeamSlugs, HasFactory, SoftDeletes;
+
+    protected function casts(): array
+    {
+        return [
+            'is_personal' => 'boolean',
+            'finance_activity_tier' => FinanceActivityTier::class,
+            'last_finance_activity_at' => 'datetime',
+        ];
+    }
 
     /**
      * Bootstrap the model and its traits.
@@ -124,18 +134,6 @@ class Team extends Model
     public function paymentSubmissions(): HasMany
     {
         return $this->hasMany(PaymentSubmission::class);
-    }
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'is_personal' => 'boolean',
-        ];
     }
 
     /**

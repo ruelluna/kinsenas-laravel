@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type {
     AdminPlatformUser,
+    FilterOption,
     PlatformRoleOption,
 } from '@/types/billing';
 
@@ -20,10 +21,13 @@ type Props = {
     filters: {
         search?: string | null;
         role?: string | null;
+        activity_tier?: string | null;
+        min_score?: string | null;
     };
     currentUserId: number;
     platformAdminCount: number;
     roleOptions: PlatformRoleOption[];
+    activityTierOptions: FilterOption[];
 };
 
 export default function AdminPlatformUsersIndex({
@@ -32,6 +36,7 @@ export default function AdminPlatformUsersIndex({
     currentUserId,
     platformAdminCount,
     roleOptions,
+    activityTierOptions,
 }: Props) {
     const [userToDelete, setUserToDelete] = useState<AdminPlatformUser | null>(
         null,
@@ -76,6 +81,33 @@ export default function AdminPlatformUsersIndex({
                         ))}
                     </select>
                 </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="activity_tier">Activity tier</Label>
+                    <select
+                        id="activity_tier"
+                        name="activity_tier"
+                        defaultValue={filters.activity_tier ?? ''}
+                        className="h-9 rounded-md border border-input px-3 text-sm"
+                    >
+                        {activityTierOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="min_score">Min score</Label>
+                    <Input
+                        id="min_score"
+                        name="min_score"
+                        type="number"
+                        min={0}
+                        max={100}
+                        defaultValue={filters.min_score ?? ''}
+                        placeholder="0–100"
+                    />
+                </div>
                 <div className="flex items-end">
                     <Button type="submit" variant="outline">
                         Filter
@@ -114,6 +146,11 @@ export default function AdminPlatformUsersIndex({
                                     <p className="text-muted-foreground">
                                         Subscription:{' '}
                                         {user.subscriptionStatusLabel ?? 'None'}
+                                    </p>
+                                    <p className="text-muted-foreground">
+                                        Finance activity:{' '}
+                                        {user.financeActivityScore}% ·{' '}
+                                        {user.financeActivityTierLabel}
                                     </p>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-2">

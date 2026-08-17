@@ -15,14 +15,18 @@ type Props = {
     filters: {
         status?: string | null;
         search?: string | null;
+        activity_tier?: string | null;
+        min_score?: string | null;
     };
     statusOptions: FilterOption[];
+    activityTierOptions: FilterOption[];
 };
 
 export default function AdminSubscribersIndex({
     subscribers,
     filters,
     statusOptions,
+    activityTierOptions,
 }: Props) {
     return (
         <>
@@ -62,6 +66,33 @@ export default function AdminSubscribersIndex({
                         ))}
                     </select>
                 </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="activity_tier">Activity tier</Label>
+                    <select
+                        id="activity_tier"
+                        name="activity_tier"
+                        defaultValue={filters.activity_tier ?? ''}
+                        className="h-9 rounded-md border border-input px-3 text-sm"
+                    >
+                        {activityTierOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="min_score">Min score</Label>
+                    <Input
+                        id="min_score"
+                        name="min_score"
+                        type="number"
+                        min={0}
+                        max={100}
+                        defaultValue={filters.min_score ?? ''}
+                        placeholder="0–100"
+                    />
+                </div>
                 <div className="flex items-end">
                     <Button type="submit" variant="outline">
                         Filter
@@ -96,6 +127,11 @@ export default function AdminSubscribersIndex({
                                     {subscriber.isPersonal
                                         ? ' · Personal workspace'
                                         : ''}
+                                </p>
+                                <p className="text-muted-foreground">
+                                    Finance activity:{' '}
+                                    {subscriber.financeActivityScore}% ·{' '}
+                                    {subscriber.financeActivityTierLabel}
                                 </p>
                             </div>
                             <Button variant="outline" size="sm" asChild>

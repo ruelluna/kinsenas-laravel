@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\HasTeams;
+use App\Enums\FinanceActivityTier;
 use App\Enums\PlatformPermission;
 use App\Enums\PlatformRole;
 use App\Support\UserProfilePhoto;
@@ -70,6 +71,8 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
             'marketing_emails_opt_in' => 'boolean',
             'marketing_emails_opted_in_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
+            'finance_activity_tier' => FinanceActivityTier::class,
+            'last_finance_activity_at' => 'datetime',
         ];
     }
 

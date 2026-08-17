@@ -3,9 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\PlatformRole;
-use App\Models\SavingsFormulaTemplate;
 use App\Models\User;
-use App\Services\Savings\SavingsPlanService;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -23,22 +21,6 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
         ]);
 
-        // $user = User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
-        // $template = SavingsFormulaTemplate::query()->where('slug', 'trc-savings')->first();
-
-        // if ($template !== null) {
-        //     app(SavingsPlanService::class)->cloneFromTemplate(
-        //         $user->currentTeam,
-        //         $user,
-        //         $template,
-        //         'My TRC Plan',
-        //     );
-        // }
-
         $admin = User::factory()->create([
             'name' => 'Platform Admin',
             'email' => 'admin@example.com',
@@ -50,5 +32,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ContentSeeder::class);
         $this->call(LearnLibrarySeeder::class);
         $this->call(CommunitySeeder::class);
+        $this->call(DemoAccountSeeder::class);
     }
 }
